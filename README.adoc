@@ -1,0 +1,112 @@
+== spring-cloud-dataflow-acceptance-tests Spike Project
+
+This project starts a basic Spring Cloud Data Flow environment and then launches
+acceptance tests against the Spring Cloud Data Flow Server Local. The acceptance
+tests evaluate how the local server handles a stream's
+full lifecycle as well as various Spring Cloud Stream App Starters.
+
+== How To Run it
+
+=== How to run out the box
+To execute a test that will pull down the latest 1.1.0-BUILD-SNAPSHOT, start
+a Rabbit instance and a Spring Cloud Data Flow Server Local instance execute
+the following: `./startAcceptanceTests.sh -ke`.  The -ke kills the Rabbit Docker
+container as well as the Spring Cloud Data Flow Server after the test completes.
+
+NOTE: You will need docker-compose installed to run acceptance tests on your local machine
+
+=== How to execute an acceptance test and leave the SCDF and Rabbit instances up
+
+Execute the following: `./startAcceptanceTests.sh`
+
+Once you are finished using the Rabbit and SCDF instances you may shut them down
+by executing the `./startAcceptanceTests.sh -n`
+
+=== How to test against a running system (just run the acceptance tests themselves)
+In a scenario where you already have a Spring Cloud Data Flow Server Local and
+Rabbit instance running and want to use them, execute the following:
+`./startAcceptanceTests.sh -s -d`.  This execution will skip the download of the
+SCDF server jar and not start the rabbit nor SCDF-Server-Local instances,
+but will run all the acceptance tests.
+
+=== How to run a single test
+In a scenario where you are writing a test and you just want to run that one
+acceptance test, execute the following:
+
+```
+export ACCEPTANCE_TEST_OPTS="-DSERVER_URL=http://localhost -DSERVER_PORT=9393 -DAPP_LOG_DIR=/Users/glennrenfro/project/spring-cloud-dataflow-acceptance-tests/dataflowlib -Dtest=TickTockTests"
+./startAcceptanceTests.sh -s -d
+```
+
+This will skip the download of the SCDF server jar and not start the rabbit nor
+SCDF-Server-Local instances and run only the TickTockTests acceptance test.
+
+=== Use an existing rabbit instance
+In a scenario where you already have a Rabbit instance running but want to bring
+up an instance of Spring Cloud Data Flow Server Local and execute acceptance
+tests, execute the following:
+`./startAcceptanceTests.sh -sb`.
+
+=== Get Help
+Execute `./startAcceptanceTests.sh --help` and the following will be displayed:
+
+```
+GLOBAL:
+-a  |--applogdir - define the location where stream & task logs will be written
+-b  |--binder - define the binder to use for the test (i.e. RABBIT, KAFKA)
+-j  |--jarurl - which jar to use? Defaults to 1.1.0.BUILD-SNAPSHOT
+-h  |--healthhost - what is your health host? where is docker? defaults to localhost
+-l  |--numberoflines - how many lines of logs of your app do you want to print? Defaults to 1000
+-ke |--killattheend - should kill all the running apps at the end of execution? Defaults to "no"
+-n  |--killnow - should not run all the logic but only kill the running apps? Defaults to "no"
+-s  |--skipdownloading - should skip downloading the Data Flow Jar. Defaults to "no"
+-sb |--skipbinder - should skip starting rabbit docker instance. Defaults to "no"
+-d  |--skipdeployment - should skip deployment of apps? Defaults to "no"
+```
+
+== Project Structure
+
+The project is comprised of 3 primary components:
+
+* `src/` contains the acceptance tests
+* `startAcceptanceTests.sh` creates the test environment and executes the
+acceptance tests
+* `start-peripherals-RABBIT` starts a rabbit docker container that will be used
+ as the binder for a acceptance tests run.
+
+== Acceptance Tests
+All stream acceptance tests inherit from the a common AbstractStreamTests class,
+that offers utility methods for testing as well as handles the creation of
+Stream objects so that upon failures a log can be dumped for each of the
+applications in the stream.
+The current tests that have been written are the:
+
+* TickTockTests creates a TickTock stream and evaluates that it is deployed and
+working.
+* HttpSourceTests tests the http source in a stream.
+* TapTests that includes tests for topics as well as stream taps.
+
+== What's Next -> Stories:
+
+* While hooks have been added to support Kafka.  These need to be flushed out
+including adding a start-peripherals-KAFKA.sh script for starting a Kafka
+Docker Container.
+* Need to add support for processors to the Stream Acceptance Tests
+* Need to add support for task Acceptance Tests
+* Need to abstract out the local centric portions startAcceptanceTests and
+have them as a platform that is supported like CF, K8's etc.
+* Add support for pulling in files that are written by sinks and conversely put
+files for sources.
+* Rename serverURL to serverHost
+* Support for MySQL local deployment for JDBC and Task based Acceptance tests
+* Add Support for running CF acceptance tests on PCF/PCF-Dev
+* Create Repository for SCDF Acceptance Tests
+* Create CI Environment for running local acceptance tests
+* Add option to specify which test to run like GEMFIRE, or HADOOP instead of the
+ACCEPTANCE_TESTS options currently specified.  That way we can use the AssumeTrue
+for the test and use the name to specify the start-peripherals-* we need to kick
+off for the test.
+* Use Multi-Job for Jenkins for the tests.  And each acceptance test gets its own
+run. i.e. CORE-Tests, HADOOP-Tests, GEMFIRE-Tests... etc
+* Replace waitMillis with a waitUtility like what is specified in brewery.
+
