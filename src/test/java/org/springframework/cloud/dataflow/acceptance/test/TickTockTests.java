@@ -19,8 +19,6 @@ package org.springframework.cloud.dataflow.acceptance.test;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
-
 /**
  * @author Glenn Renfro
  */
@@ -34,8 +32,7 @@ public class TickTockTests extends AbstractStreamTests {
 		stream.setSource("time");
 		stream.setDefinition(stream.getSource() + " | " +stream.getSink());
 		deployStream(stream);
-		String result = getLog(stream.getSink());
-		assertTrue(result.contains("Started LogSinkRabbitApplication"));
-		assertTrue(result.contains("] log.sink"));
+		waitForLogEntry(5000, stream.getSink(), "Started LogSinkRabbitApplication");
+		waitForLogEntry(5000, stream.getSink(), "] log.sink");
 	}
 }

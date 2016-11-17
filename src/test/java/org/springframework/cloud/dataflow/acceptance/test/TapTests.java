@@ -2,8 +2,6 @@ package org.springframework.cloud.dataflow.acceptance.test;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
-
 /**
  * @author Glenn Renfro
  */
@@ -21,9 +19,8 @@ public class TapTests extends AbstractStreamTests{
 		timeStream.setDefinition(timeStream.getSource() + " > :destination1");
 		deployStream(timeStream);
 
-		String result = getLog(logStream.getSink());
-		assertTrue(result.contains("Started LogSinkRabbitApplication"));
-		assertTrue(result.contains("] log.sink"));
+		waitForLogEntry(5000, logStream.getSink(), "Started LogSinkRabbitApplication");
+		waitForLogEntry(5000, logStream.getSink(), "] log.sink");
 	}
 
 	@Test
@@ -39,8 +36,7 @@ public class TapTests extends AbstractStreamTests{
 		tapStream.setDefinition(" :taptock.time > " +tapStream.getSink());
 		deployStream(tapStream);
 
-		String result = getLog(tapStream.getSink());
-		assertTrue(result.contains("Started LogSinkRabbitApplication"));
-		assertTrue(result.contains("] log.sink"));
+		waitForLogEntry(5000, tapStream.getSink(), "Started LogSinkRabbitApplication");
+		waitForLogEntry(5000, tapStream.getSink(), "] log.sink");
 	}
 }

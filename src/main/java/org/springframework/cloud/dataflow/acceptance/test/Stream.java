@@ -17,6 +17,10 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.cloud.dataflow.acceptance.test.Application;
 import org.springframework.util.Assert;
 
@@ -35,6 +39,8 @@ public class Stream {
 
 	private Application sink;
 
+	private Map<String, Application> processors;
+
 	private String definition;
 
 	private String appLogDir;
@@ -50,6 +56,7 @@ public class Stream {
 		Assert.hasText(appLogDir, "appLogDir must not be empty nor null");
 		this.streamName = streamName;
 		this.appLogDir = appLogDir;
+		this.processors = new HashMap<>();
 	}
 
 	/**
@@ -112,5 +119,27 @@ public class Stream {
 	 */
 	public String getStreamName() {
 		return streamName;
+	}
+
+	/**
+	 * Add processor and its properties to a list of processors.  The
+	 * default log location will be added to the processor app properties.
+	 * @param processorName the key to retrieve the processor Name.
+	 * @param definition the registered app name and its properties for the
+	 * processor.
+	 */
+	public void addProcessor(String processorName, String definition) {
+		int processorCount = processors.size();
+		String log = String.format("%s/%s-%s-%d.txt", appLogDir,
+				streamName, "processor", processorCount);
+		Application processor = new Application(0, log, definition);
+		this.processors.put(processorName, processor);
+	}
+
+	/**
+	 * Retrieve a unmodifiable list of the available processors.
+	 */
+	public Map<String, Application> getProcessors() {
+		return Collections.unmodifiableMap(processors);
 	}
 }

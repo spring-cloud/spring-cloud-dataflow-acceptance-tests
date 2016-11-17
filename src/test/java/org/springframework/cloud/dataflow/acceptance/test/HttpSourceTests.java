@@ -19,8 +19,6 @@ package org.springframework.cloud.dataflow.acceptance.test;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
-
 /**
  * @author Glenn Renfro
  */
@@ -37,8 +35,6 @@ public class HttpSourceTests extends AbstractStreamTests {
 		deployStream(stream);
 
 		httpPostData(stream.getSource(), 9000, "1341241234");
-		waitForMillis(2000);
-		String result = getLog(stream.getSink());
-		assertTrue(result.contains("1341241234"));
+		waitForLogEntry(5000, stream.getSink(), "1341241234");
 	}
 }

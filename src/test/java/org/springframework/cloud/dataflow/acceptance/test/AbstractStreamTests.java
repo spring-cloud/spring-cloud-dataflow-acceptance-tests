@@ -22,6 +22,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -61,8 +62,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	@Value("${deploy_pause_retries:25}")
 	protected int deployPauseRetries;
 
-	@Value("${SERVER_URL:http://localhost}")
-	protected String serverUrl;
+	@Value("${SERVER_HOST:http://localhost}")
+	protected String serverHost;
 
 	@Value("${SERVER_PORT:9393}")
 	protected int serverPort;
@@ -109,6 +110,15 @@ public abstract class AbstractStreamTests implements InitializingBean {
 						logger.warn("Failed to get log for sink because: ", exception);
 					}
 				}
+				for (String key : stream.getProcessors().keySet()) {
+					logger.warn(">>>>>>>> Dumping Processor Log <<<<<<<<<");
+					try {
+						logger.warn(getLog(stream.getProcessors().get(key)));
+					}
+					catch (Exception exception) {
+						logger.warn("Failed to get log for processor because: ", exception);
+					}
+				}
 				if (stream.getSource() != null) {
 					logger.warn(">>>>>>>> Dumping Source Log <<<<<<<<<");
 					try {
@@ -142,7 +152,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		if (restTemplate == null) {
 			try {
 				DataFlowTemplate dataFlowOperationsTemplate =
-						new DataFlowTemplate(new URI(serverUrl + ":" + serverPort));
+						new DataFlowTemplate(new URI(serverHost + ":" + serverPort));
 				streamOperations = dataFlowOperationsTemplate.streamOperations();
 				appRegistryOperations =
 						dataFlowOperationsTemplate.appRegistryOperations();
@@ -153,7 +163,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			restTemplate = new RestTemplate();
 
 			if (platformType.equals(LOCAL_PLATFORM)) {
-				hostHelper = new LocalHostHelper(serverUrl);
+				hostHelper = new LocalHostHelper(serverHost);
 			}
 		}
 	}
@@ -177,6 +187,11 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			stream.getSource().setHost(
 					hostHelper.hostForApplication(stream.getStreamName(),
 							stream.getSource().getDefinition()));
+		}
+		for(Application processor : stream.getProcessors().values()) {
+			processor.setHost(
+					hostHelper.hostForApplication(stream.getStreamName(),
+							processor.getDefinition()));
 		}
 		if(stream.getSink() != null) {
 			stream.getSink().setHost(
@@ -296,6 +311,32 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		restTemplate.postForObject(
 				String.format("%s:%d", app.getHost(), port),
 				message, String.class);
+	}
+
+	/**
+	 * Waits the specified period of time for an entry to appear in the log of
+	 * the specified app.
+	 * @param waitTime the time in seconds to wait for an entry to appear in the
+	 * log.
+	 * @param app the app that is being monitored for a specific entry in its log.
+	 * @param entry the value being monitored for in the log.
+	 * @return
+	 */
+	protected boolean waitForLogEntry(int waitTime, Application app,
+			String entry) {
+		long timeout = System.currentTimeMillis() + (waitTime * 1000);
+		boolean exists = false;
+		while (!exists && System.currentTimeMillis() < timeout) {
+			try {
+				Thread.sleep(500);
+			}
+			catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new IllegalStateException(e.getMessage(), e);
+			}
+			exists = getLog(app).contains(entry);
+		}
+		return exists;
 	}
 
 }
