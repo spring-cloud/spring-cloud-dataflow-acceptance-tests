@@ -77,7 +77,7 @@ function start_scdf_apps() {
 }
 
 function kill_and_log() {
-    kill -9 $(cat "$1"/target/app.pid) && echo "Killed $1" || echo "Can't find $1 in running processes"
+    kill -9 $(cat "$1"/app.pid) && echo "Killed $1" || echo "Can't find $1 in running processes"
     pkill -f "$1" && echo "Killed $1 via pkill" ||  echo "Can't find $1 in running processes (tried with pkill)"
 }
 
@@ -93,11 +93,14 @@ function kill_app_with_port() {
 # Kills all started aps
 function kill_all_apps() {
     echo `pwd`
-    kill_and_log "dataflowlib/spring-cloud-dataflow-server-local"
+    kill_and_log "dataflowlib"
     kill_all_apps_with_port
     if [[ -z "${KILL_NOW_APPS}" ]] ; then
         docker kill $(docker ps -q) || echo "No running docker containers are left"
         docker stop `docker ps -a -q --filter="image=spotify/kafka"` || echo "No docker with Kafka was running - won't stop anything"
+        if [[ -f ./local-scripts/stop-peripherals-${WHAT_TO_TEST}.sh ]] ; then
+            . ./local-scripts/stop-peripherals-${WHAT_TO_TEST}.sh || echo "Failed to stop ${WHAT_TO_TEST} peripherals"
+        fi
      fi
     return 0
 }
@@ -122,7 +125,6 @@ USAGE:
 You can use the following options:
 
 GLOBAL:
--a  |--applogdir - define the location where stream & task logs will be written
 -b  |--binder - define the binder to use for the test (i.e. RABBIT, KAFKA)
 -j  |--jarurl - which jar to use? Defaults to 1.1.0.BUILD-SNAPSHOT
 -h  |--healthhost - what is your host you are running SCDF? where is docker? defaults to localhost
@@ -132,6 +134,7 @@ GLOBAL:
 -s  |--skipdownloading - should skip downloading the Data Flow Jar. Defaults to "no"
 -sb |--skipbinder - should skip starting rabbit docker instance. Defaults to "no"
 -d  |--skipdeployment - should skip deployment of apps? Defaults to "no"
+-t  |--whattotest - define what you want to test (i.e. CORE, TAP, TICKTOCK, TIMESTAMP, TRANSFORM, HTTPSOURCE)
 
 EOF
 }
@@ -165,8 +168,8 @@ while [[ $# > 0 ]]
 do
 key="$1"
 case ${key} in
-    -a|--applogdir)
-    APP_LOG_DIR="$2"
+    -t|--whattotest)
+    WHAT_TO_TEST="$2"
     shift # past argument
     ;;
     -b|--binder)
@@ -216,17 +219,15 @@ case ${key} in
 esac
 shift # past argument or value
 done
-
-[[ -z "${APP_LOG_DIR}" ]] && APP_LOG_DIR=$CURRENT_DIR/dataflowlib
+[[ -z "${WHAT_TO_TEST}" ]] && WHAT_TO_TEST=CORE
 [[ -z "${BINDER}" ]] && BINDER=RABBIT
-[[ -z "${JAR_URL}" ]] && JAR_URL=https://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-local/1.1.0.BUILD-SNAPSHOT/spring-cloud-dataflow-server-local-1.1.0.BUILD-SNAPSHOT.jar
+[[ -z "${JAR_URL}" ]] && JAR_URL=https://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-local/1.1.1.BUILD-SNAPSHOT/spring-cloud-dataflow-server-local-1.1.1.BUILD-SNAPSHOT.jar
 [[ -z "${HEALTH_HOST}" ]] && HEALTH_HOST="${DEFAULT_HEALTH_HOST}"
 [[ -z "${NUMBER_OF_LINES_TO_LOG}" ]] && NUMBER_OF_LINES_TO_LOG="${DEFAULT_NUMBER_OF_LINES_TO_LOG}"
 
 HEALTH_PORTS=('9393')
 HEALTH_ENDPOINTS="$( printf "http://${LOCALHOST}:%s/management/health " "${HEALTH_PORTS[@]}" )"
-echo "*************"${APP_LOG_DIR}
-ACCEPTANCE_TEST_OPTS="${ACCEPTANCE_TEST_OPTS:--DSERVER_HOST=http://${HEALTH_HOST} -DSERVER_PORT=9393 -DAPP_LOG_DIR=${APP_LOG_DIR}}"
+ACCEPTANCE_TEST_OPTS="${ACCEPTANCE_TEST_OPTS:--DSERVER_URI=http://${HEALTH_HOST}:9393 -DWHAT_TO_TEST=${WHAT_TO_TEST}}"
 
 cat <<EOF
 
@@ -297,13 +298,21 @@ fi
 
 # ======================================= Deploying apps locally  =======================================
 
+BINDER_INITIALIZATION_FAILED="yes"
 INITIALIZATION_FAILED="yes"
 if [[ -z "${SKIP_DEPLOYMENT}" ]] ; then
-    . ./start-peripherals-${BINDER}.sh && INITIALIZATION_FAILED="no"
+    if [[ -f ./local-scripts/start-peripherals-${WHAT_TO_TEST}.sh ]] ; then
+        . ./local-scripts/start-peripherals-${WHAT_TO_TEST}.sh && INITIALIZATION_FAILED="no"
+    else
+        INITIALIZATION_FAILED="no"
+    fi
+    . ./local-scripts/start-peripherals-${BINDER}.sh && BINDER_INITIALIZATION_FAILED="no"
+
 else
+  BINDER_INITIALIZATION_FAILED="no"
   INITIALIZATION_FAILED="no"
 fi
-if [[ "${INITIALIZATION_FAILED}" == "yes" ]] ; then
+if [[ "${BINDER_INITIALIZATION_FAILED}" == "yes" && "${INITIALIZATION_FAILED}" == "yes" ]] ; then
     echo -e "\n\nFailed to initialize the apps!"
     print_logs
     kill_all_apps_if_switch_on

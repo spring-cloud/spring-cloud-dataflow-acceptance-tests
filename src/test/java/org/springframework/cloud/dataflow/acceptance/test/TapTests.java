@@ -1,42 +1,54 @@
 package org.springframework.cloud.dataflow.acceptance.test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 
 /**
+ * Executes acceptance tests for the for obtaining messages from a tap and
+ * a destination.
  * @author Glenn Renfro
  */
 public class TapTests extends AbstractStreamTests{
 
 	@Test
 	public void testDestination() {
-		Stream logStream = getStream("destination1");
+		Stream logStream = getStream("DESTINATION1");
 		logStream.setSink("log");
-		logStream.setDefinition(":destination1 " + " > " +logStream.getSink());
+		logStream.setDefinition(":DESTINATION1 " + " > " +logStream.getSink());
 		deployStream(logStream);
 
-		Stream timeStream = getStream("destination2");
+		Stream timeStream = getStream("DESTINATION2");
 		timeStream.setSource("time");
-		timeStream.setDefinition(timeStream.getSource() + " > :destination1");
+		timeStream.setDefinition(timeStream.getSource() + " > :DESTINATION1");
 		deployStream(timeStream);
 
-		waitForLogEntry(5000, logStream.getSink(), "Started LogSinkRabbitApplication");
-		waitForLogEntry(5000, logStream.getSink(), "] log.sink");
+		waitForLogEntry(logStream.getSink(), "Started LogSinkRabbitApplication");
+		waitForLogEntry(logStream.getSink(), "] log.sink");
 	}
 
 	@Test
 	public void tapTests() {
-		Stream stream = getStream("taptock");
+		Stream stream = getStream("TAPTOCK");
 		stream.setSink("log");
 		stream.setSource("time");
 		stream.setDefinition(stream.getSource() + " | " +stream.getSink());
 		deployStream(stream);
 
-		Stream tapStream = getStream("tapStream");
+		Stream tapStream = getStream("TAPSTREAM");
 		tapStream.setSink("log");
-		tapStream.setDefinition(" :taptock.time > " +tapStream.getSink());
+		tapStream.setDefinition(" :TAPTOCK.time > " +tapStream.getSink());
 		deployStream(tapStream);
 
-		waitForLogEntry(5000, tapStream.getSink(), "Started LogSinkRabbitApplication");
-		waitForLogEntry(5000, tapStream.getSink(), "] log.sink");
+		waitForLogEntry(tapStream.getSink(), "Started LogSinkRabbitApplication");
+		waitForLogEntry(tapStream.getSink(), "] log.sink");
+	}
+
+	@Override
+	public List<StreamTestTypes> getTarget() {
+		List<StreamTestTypes> types = new ArrayList<>();
+		types.add(StreamTestTypes.TAP);
+		return types;
 	}
 }

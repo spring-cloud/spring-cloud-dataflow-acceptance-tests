@@ -18,16 +18,14 @@
 package org.springframework.cloud.dataflow.acceptance.test;
 
 /**
- * Methods that help retrieve app host information for a specific platform.
+ * Methods that help retrieve app uri information for a specific platform.
  * @author Glenn Renfro
  */
-public interface HostHelper {
+public interface UriHelper {
 
 	/**
-	 * Retrieve the host for the application specified.
-	 * @param streamName the name of the stream to use for identifying host for app.
-	 * @param appDefinition used to extract the app name from the beginning of
-	 * the definition.
+	 * Identifies and sets the uri for each app in a stream.
+	 * @param stream the stream to augment.
 	 */
-	public String hostForApplication(String streamName, String appDefinition);
+	public void setUrisForStream(Stream stream);
 }

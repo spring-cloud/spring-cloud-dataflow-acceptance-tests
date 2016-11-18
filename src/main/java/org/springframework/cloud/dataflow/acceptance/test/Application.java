@@ -31,26 +31,18 @@ import org.springframework.util.SocketUtils;
  */
 public class Application {
 
-	protected String host;
-	protected int port;
+	protected String uri;
 	protected String logLocation;
 	protected String definition;
 
 	/**
 	 * Initializes the application instance.
-	 * @param port - the port to use for this application.  If 0 a random
-	 * available port is chosen.
-	 * @param logLocation - the location where the the logs will be written
+\	 * @param logLocation - the location where the the logs will be written
 	 * for this application.
 	 * @param definition Establish the registered app name and the
 	 * required properties.
 	 */
-	public Application(int port, String logLocation, String definition) {
-		if(port == 0) {
-			this.port = SocketUtils.findAvailableTcpPort();
-		} else {
-			this.port = port;
-		}
+	public Application(String logLocation, String definition) {
 		this.logLocation = logLocation;
 		setDefinition(definition);
 	}
@@ -60,8 +52,8 @@ public class Application {
 	 * @param definition
 	 */
 	public void setDefinition (String definition) {
-		this.definition = String.format("%s --logging.file=%s --server.port=%s",
-				definition, this.logLocation, this.port);
+		this.definition = String.format("%s --logging.file=%s",
+				definition, this.logLocation);
 	}
 
 	/**
@@ -74,34 +66,17 @@ public class Application {
 
 	/**
 	 * The host where the application can be reached.
-	 * @param host
+	 * @param uri
 	 */
-	public void setHost(String host) {
-		this.host = host;
+	public void setUri(String uri) {
+		this.uri = uri;
 	}
 
 	/**
-	 * Retrieve the host for this application.
-	 * @return
+	 * Retrieve the uri for this application.
 	 */
-	public String getHost() {
-		return this.host;
-	}
-
-	/**
-	 * Retrieve the port that this application is listening.
-	 * @return
-	 */
-	public int getPort() {
-		return this.port;
-	}
-
-	/**
-	 * Set the port that this application will receive requests.
-	 * @param port
-	 */
-	public void setPort(int port) {
-		this.port = port;
+	public String getUri() {
+		return this.uri;
 	}
 
 	public String toString() {

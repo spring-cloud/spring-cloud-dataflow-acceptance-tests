@@ -1,17 +1,21 @@
 package org.springframework.cloud.dataflow.acceptance.test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 
 /**
+ * Executes acceptance tests for the transform processor app as a part of a stream.
  * @author Glenn Renfro
  */
 public class TransformTests extends AbstractStreamTests{
 	@Test
-	public void logTests() {
+	public void transformTests() throws Exception{
 		final String PROCESSOR_NAME = "transform1";
-		Stream stream = getStream("transform-test");
+		Stream stream = getStream("TRANSFORM-TEST");
 		stream.setSink("log");
-		stream.setSource("http --port=9000");
+		stream.setSource("http");
 		stream.addProcessor(PROCESSOR_NAME,
 				"transform --expression=payload.toUpperCase()");
 
@@ -21,7 +25,14 @@ public class TransformTests extends AbstractStreamTests{
 
 		deployStream(stream);
 
-		httpPostData(stream.getSource(), 9000, "abcdefg");
-		waitForLogEntry(5000, stream.getSink(), "ABCDEFG");
+		httpPostData(stream.getSource(), "abcdefg");
+		waitForLogEntry(stream.getSink(), "ABCDEFG");
+	}
+
+	@Override
+	public List<StreamTestTypes> getTarget() {
+		List<StreamTestTypes> types = new ArrayList<>();
+		types.add(StreamTestTypes.TRANSFORM);
+		return types;
 	}
 }

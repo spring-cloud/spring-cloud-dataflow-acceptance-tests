@@ -17,9 +17,13 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 
 /**
+ * Executes acceptance tests for the ticktock demo.
  * @author Glenn Renfro
  */
 
@@ -27,12 +31,20 @@ public class TickTockTests extends AbstractStreamTests {
 
 	@Test
 	public void tickTockTests() {
-		Stream stream = getStream("ticktock");
+		Stream stream = getStream("TICKTOCK");
 		stream.setSink("log");
 		stream.setSource("time");
 		stream.setDefinition(stream.getSource() + " | " +stream.getSink());
 		deployStream(stream);
-		waitForLogEntry(5000, stream.getSink(), "Started LogSinkRabbitApplication");
-		waitForLogEntry(5000, stream.getSink(), "] log.sink");
+		waitForLogEntry(stream.getSink(), "Started LogSinkRabbitApplication");
+		waitForLogEntry(stream.getSink(), "] log.sink");
+	}
+
+	@Override
+	public List<StreamTestTypes> getTarget() {
+		List<StreamTestTypes> types = new ArrayList<>();
+		types.add(StreamTestTypes.TICKTOCK);
+		types.add(StreamTestTypes.CORE);
+		return types;
 	}
 }

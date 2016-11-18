@@ -1,112 +1,143 @@
-== spring-cloud-dataflow-acceptance-tests Spike Project
+= Spring Cloud Data Flow Acceptance Tests
 
 This project starts a basic Spring Cloud Data Flow environment and then launches
-acceptance tests against the Spring Cloud Data Flow Server Local. The acceptance
-tests evaluate how the local server handles a stream's
-full lifecycle as well as various Spring Cloud Stream App Starters.
+acceptance tests against the Spring Cloud Data Flow Server. The acceptance
+tests evaluate how the server handles a stream's or task's
+full lifecycle.  The acceptance test also can be used to evaluate various
+Spring Cloud Stream and Spring Cloud Task App Starters.
 
 == How To Run it
 
-=== How to run out the box
-To execute a test that will pull down the latest 1.1.0-BUILD-SNAPSHOT, start
+=== Running acceptance tests on the Spring Cloud Data Flow Server Local
+To execute a test that will pull down the latest 1.1.1-BUILD-SNAPSHOT, start
 a Rabbit instance and a Spring Cloud Data Flow Server Local instance execute
-the following: `./startAcceptanceTests.sh -ke`.  The -ke kills the Rabbit Docker
+the following: `./startLocalAcceptance.sh -ke`.  The -ke kills the Rabbit Docker
 container as well as the Spring Cloud Data Flow Server after the test completes.
 
 NOTE: You will need docker-compose installed to run acceptance tests on your local machine
 
-=== How to execute an acceptance test and leave the SCDF and Rabbit instances up
+==== How to execute an acceptance test and leave the SCDF and Rabbit instances up
 
-Execute the following: `./startAcceptanceTests.sh`
+Execute the following: `./startLocalAcceptance.sh`
+
+This will execute the CORE acceptance tests which includes the TICKTOCK and
+TIMESTAMP tests.
 
 Once you are finished using the Rabbit and SCDF instances you may shut them down
-by executing the `./startAcceptanceTests.sh -n`
+by executing the `./startLocalAcceptance.sh -n`
 
-=== How to test against a running system (just run the acceptance tests themselves)
+==== How to test against a running system (just run the acceptance tests themselves)
 In a scenario where you already have a Spring Cloud Data Flow Server Local and
 Rabbit instance running and want to use them, execute the following:
-`./startAcceptanceTests.sh -s -d`.  This execution will skip the download of the
+`./startLocalAcceptance.sh -s -d`.  This execution will skip the download of the
 SCDF server jar and not start the rabbit nor SCDF-Server-Local instances,
-but will run all the acceptance tests.
+but will run core acceptance tests.
 
-=== How to run a single test
+==== Running a specific acceptance test.
 In a scenario where you are writing a test and you just want to run that one
 acceptance test, execute the following:
 
 ```
-export ACCEPTANCE_TEST_OPTS="-DSERVER_URL=http://localhost -DSERVER_PORT=9393 -DAPP_LOG_DIR=/Users/glennrenfro/project/spring-cloud-dataflow-acceptance-tests/dataflowlib -Dtest=TickTockTests"
-./startAcceptanceTests.sh -s -d
+./startLocalAcceptance.sh -t <WHAT_TO_TEST>
+```
+For example if you wanted to run tests for the tap and destination features of
+a stream you would execute:
+```
+./startLocalAcceptance.sh -t TAP
 ```
 
-This will skip the download of the SCDF server jar and not start the rabbit nor
-SCDF-Server-Local instances and run only the TickTockTests acceptance test.
+This will download of the SCDF server jar, start the rabbit and
+SCDF-Server-Local instances and run only the TAPTEST acceptance test.
 
-=== Use an existing rabbit instance
-In a scenario where you already have a Rabbit instance running but want to bring
+If the particular test needs to have a additional apps (for example HADOOP)
+running prior to the test being executed you may add a script to launch them.
+This is done by adding a script to the main project that is in the form of
+`local-scripts/start-peripherals-<WHAT_TO_TEST>.sh`.  For example `start-peripherals-TAP.sh`.
+Also when the test is complete the application will call a
+`local-scripts/stop-peripherals-<WHAT_TO_TEST>.sh where you can place the scripts to terminate
+the peripherals started for the test.  For example `stop-peripherals-TAP.sh`.
+
+==== Use an existing rabbit instance
+In a scenario where you already have a Rabbit or Kafka instance running but want to bring
 up an instance of Spring Cloud Data Flow Server Local and execute acceptance
 tests, execute the following:
-`./startAcceptanceTests.sh -sb`.
+`./startLocalAcceptance.sh -sb`.
 
-=== Get Help
-Execute `./startAcceptanceTests.sh --help` and the following will be displayed:
+==== Get Help
+Execute `./startLocalAcceptance.sh --help` and the following will be displayed:
 
 ```
 GLOBAL:
 -a  |--applogdir - define the location where stream & task logs will be written
 -b  |--binder - define the binder to use for the test (i.e. RABBIT, KAFKA)
 -j  |--jarurl - which jar to use? Defaults to 1.1.0.BUILD-SNAPSHOT
--h  |--healthhost - what is your health host? where is docker? defaults to localhost
+-h  |--healthhost - what is your host you are running SCDF? where is docker? defaults to localhost
 -l  |--numberoflines - how many lines of logs of your app do you want to print? Defaults to 1000
 -ke |--killattheend - should kill all the running apps at the end of execution? Defaults to "no"
 -n  |--killnow - should not run all the logic but only kill the running apps? Defaults to "no"
 -s  |--skipdownloading - should skip downloading the Data Flow Jar. Defaults to "no"
 -sb |--skipbinder - should skip starting rabbit docker instance. Defaults to "no"
 -d  |--skipdeployment - should skip deployment of apps? Defaults to "no"
+-t  |--whattotest - define what you want to test (i.e. CORE, TAP, TICKTOCK, TIMESTAMP, TRANSFORM, HTTP_SOURCE)
 ```
+
+NOTE: CORE target runs TICKTOCK and TIMESTAMP tests, which represents "core"
+functionality of Spring Cloud Data Flow.
+
+=== Running Cloud Foundry Acceptance Tests
+By default all all acceptance tests will run against a local platform.  However,
+if you wish to execute the acceptance tests against a Cloud Foundry instance, add the
+following environment variables to your maven execution:
+
+* `PLATFORM_TYPE` specifies that we want to execute this test against a specify
+type of platform instance.  Default is `LOCAL`.
+* `PLATFORM_SUFFIX` specifies the suffix to be appended to each application's
+name to create a URI. default is `local.pcfdev.io`
+* `DEPLOY_PAUSE_RETRIES` Need to make sure that this is set to at least 100
+because the default of 25 is too few attempts when deploying a stream to
+Cloud Foundry.
+
+For example if you wish to run a test on a currently running Data Flow Server on
+PCFDev the mvn command would look something like this:
+`mvn clean test -DPLATFORM_TYPE=CLOUD_FOUNDRY -DDEPLOY_PAUSE_RETRIES=100 -DWHAT_TO_TEST=TICKTOCK -DSERVER_URI=http://dataflow-server.local.pcfdev.io`
 
 == Project Structure
 
 The project is comprised of 3 primary components:
 
 * `src/` contains the acceptance tests
-* `startAcceptanceTests.sh` creates the test environment and executes the
+* `startLocalAcceptance.sh` creates a local Spring Cloud Data Flow Server test environment and executes the
 acceptance tests
-* `start-peripherals-RABBIT` starts a rabbit docker container that will be used
+* `local-scripts/` contains scripts that start or stops peripheral apps for the local Spring Cloud DataFlow server test
+** `local-scripts/start-peripherals-RABBIT` starts a rabbit docker container that will be used
+ as the binder for a acceptance tests run.
+ ** `local-scripts/start-peripherals-KAFKA` starts a kafka docker container that will be used
+ as the binder for a acceptance tests run.
+  ** `local-scripts/stop-peripherals-KAFKA` stops a kafka docker container that was used
  as the binder for a acceptance tests run.
 
 == Acceptance Tests
 All stream acceptance tests inherit from the a common AbstractStreamTests class,
 that offers utility methods for testing as well as handles the creation of
 Stream objects so that upon failures a log can be dumped for each of the
-applications in the stream.
+applications in the stream.  Similarly AbstractTaskTests class offers utility
+methods for testing tasks.
+
 The current tests that have been written are the:
 
-* TickTockTests creates a TickTock stream and evaluates that it is deployed and
+* `TICKTOCK` - TickTockTests creates a TickTock stream and evaluates that it is deployed and
 working.
-* HttpSourceTests tests the http source in a stream.
-* TapTests that includes tests for topics as well as stream taps.
+* `HTTP-SOURCE` - HttpSourceTests tests the http source in a stream.
+* `TAP` - TapTests  includes tests for topics as well as stream taps.
+* `TRANSFORM` - TransformTests  includes tests for the `transform` processor.
+* `TIMESTAMP` TimestampTaskTests includes test for the `timestamp` task.
 
 == What's Next -> Stories:
 
-* While hooks have been added to support Kafka.  These need to be flushed out
-including adding a start-peripherals-KAFKA.sh script for starting a Kafka
-Docker Container.
-* Need to add support for processors to the Stream Acceptance Tests
-* Need to add support for task Acceptance Tests
-* Need to abstract out the local centric portions startAcceptanceTests and
-have them as a platform that is supported like CF, K8's etc.
+* Need to create start`<platform>`Acceptance.sh scripts for CF, Kubernetes, Yarn, Mesos.
 * Add support for pulling in files that are written by sinks and conversely put
 files for sources.
-* Rename serverURL to serverHost
 * Support for MySQL local deployment for JDBC and Task based Acceptance tests
-* Add Support for running CF acceptance tests on PCF/PCF-Dev
-* Create Repository for SCDF Acceptance Tests
-* Create CI Environment for running local acceptance tests
-* Add option to specify which test to run like GEMFIRE, or HADOOP instead of the
-ACCEPTANCE_TESTS options currently specified.  That way we can use the AssumeTrue
-for the test and use the name to specify the start-peripherals-* we need to kick
-off for the test.
-* Use Multi-Job for Jenkins for the tests.  And each acceptance test gets its own
-run. i.e. CORE-Tests, HADOOP-Tests, GEMFIRE-Tests... etc
-* Replace waitMillis with a waitUtility like what is specified in brewery.
-
+* Need to support ability to make CF based calls so that ports can be opened up
+for http source based tests.
+* Need to test the tests for CF.  Only tested ticktock and HttpSource.

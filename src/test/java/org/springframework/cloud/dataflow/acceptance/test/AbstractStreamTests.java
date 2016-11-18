@@ -22,7 +22,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -36,10 +35,13 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
+import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
+
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Abstract base class that is used by stream acceptance tests.  This class
@@ -50,32 +52,37 @@ import org.springframework.web.client.RestTemplate;
 @RunWith(SpringRunner.class)
 public abstract class AbstractStreamTests implements InitializingBean {
 
-	private static final String LOCAL_PLATFORM = "local";
+	public enum StreamTestTypes {HTTP_SOURCE, TAP, TICKTOCK, TRANSFORM, CORE}
+
+	public enum PlatformTypes {LOCAL, CLOUD_FOUNDRY}
 
 	private static final String RABBIT_BINDER = "RABBIT";
 
 	private static final String KAFKA_BINDER = "KAFKA";
 
-	@Value("${deploy_pause_time:5}")
+	@Value("${DEPLOY_PAUSE_TIME:5}")
 	protected int deployPauseTime;
 
-	@Value("${deploy_pause_retries:25}")
+	@Value("${DEPLOY_PAUSE_RETRIES:25}")
 	protected int deployPauseRetries;
 
-	@Value("${SERVER_HOST:http://localhost}")
-	protected String serverHost;
+	@Value("${SERVER_URI:http://localhost:9393}")
+	protected String serverUri;
 
-	@Value("${SERVER_PORT:9393}")
-	protected int serverPort;
-
-	@Value("${APP_LOG_DIR:.}")
-	protected String appLogDir;
-
-	@Value("${PLATFORM_TYPE:local}")
+	@Value("${PLATFORM_TYPE:LOCAL}")
 	protected String platformType;
 
 	@Value("${BINDER:RABBIT}")
 	protected String binder;
+
+	@Value("${MAX_WAIT_TIME:30}")
+	protected int maxWaitTime;
+
+	@Value("${WHAT_TO_TEST:CORE}")
+	protected String whatToTest;
+
+	@Value("${PLATFORM_SUFFIX:local.pcfdev.io}")
+	protected String platformSuffix;
 
 	protected RestTemplate restTemplate;
 
@@ -83,12 +90,14 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 	private AppRegistryOperations appRegistryOperations;
 
+	private RuntimeOperations runtimeOperations;
+
 	private List<Stream> streams = new ArrayList<>();
 
 	private static final Logger logger =
 			LoggerFactory.getLogger(AbstractStreamTests.class);
 
-	private HostHelper hostHelper;
+	private UriHelper uriHelper;
 
 	/**
 	 * A TestWatcher that will write the logs for the failed apps in the
@@ -142,29 +151,43 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	@Before
 	public void setup() {
 		registerApps();
+		boolean isTestable = false;
+		for(StreamTestTypes type : getTarget()) {
+			if(type.toString().equals(whatToTest))
+			{
+				isTestable = true;
+				break;
+			}
+		}
+		assumeTrue(isTestable);
 	}
 
 	/**
-	 * Creates the stream and app operations as well as establish the host helper
+	 * Creates the stream and app operations as well as establish the uri helper
 	 * that will be used for the acceptance test.
 	 */
 	public void afterPropertiesSet() {
 		if (restTemplate == null) {
 			try {
 				DataFlowTemplate dataFlowOperationsTemplate =
-						new DataFlowTemplate(new URI(serverHost + ":" + serverPort));
+						new DataFlowTemplate(new URI(serverUri));
 				streamOperations = dataFlowOperationsTemplate.streamOperations();
+				runtimeOperations = dataFlowOperationsTemplate.runtimeOperations();
 				appRegistryOperations =
 						dataFlowOperationsTemplate.appRegistryOperations();
+				if (platformType.equals(PlatformTypes.LOCAL.name())) {
+					uriHelper = new LocalUriHelper(runtimeOperations);
+				}
+				if (platformType.equals(PlatformTypes.CLOUD_FOUNDRY.name())) {
+					uriHelper = new CloudFoundryUriHelper(runtimeOperations,
+							platformSuffix);
+				}
 			}
 			catch (URISyntaxException uriException) {
 				throw new IllegalStateException(uriException);
 			}
 			restTemplate = new RestTemplate();
 
-			if (platformType.equals(LOCAL_PLATFORM)) {
-				hostHelper = new LocalHostHelper(serverHost);
-			}
 		}
 	}
 
@@ -172,7 +195,9 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * Destroys all streams registered with the Spring Cloud Data Flow instance.
 	 */
 	protected void destroyStreams() {
-		streamOperations.destroyAll();
+		for(Stream stream : streams) {
+			streamOperations.destroy(stream.getStreamName());
+		}
 		streams.clear();
 	}
 
@@ -181,23 +206,10 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @param stream the stream object containing the stream definition.
 	 */
 	protected void deployStream(Stream stream) {
-		streamOperations.createStream(stream.getStreamName(), stream.getDefinition(), true);
+		streamOperations.createStream(stream.getStreamName(),
+				stream.getDefinition(), true);
 		streamAvailable(stream.getStreamName());
-		if(stream.getSource() != null) {
-			stream.getSource().setHost(
-					hostHelper.hostForApplication(stream.getStreamName(),
-							stream.getSource().getDefinition()));
-		}
-		for(Application processor : stream.getProcessors().values()) {
-			processor.setHost(
-					hostHelper.hostForApplication(stream.getStreamName(),
-							processor.getDefinition()));
-		}
-		if(stream.getSink() != null) {
-			stream.getSink().setHost(
-					hostHelper.hostForApplication(stream.getStreamName(),
-							stream.getSink().getDefinition()));
-		}
+		uriHelper.setUrisForStream(stream);
 	}
 
 	/**
@@ -245,7 +257,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 					break;
 				}
 			}
-			System.out.println(String.format("Waiting for stream to start " +
+			logger.info(String.format("Waiting for stream to start " +
 					"current status is %s:  " +
 					"Attempt %s of %s", status, attempt, deployPauseRetries));
 			attempt++;
@@ -263,7 +275,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @return initialized stream instance.
 	 */
 	protected Stream getStream(String streamName) {
-		Stream stream = new Stream(streamName, appLogDir);
+		Stream stream = new Stream(streamName);
 		streams.add(stream);
 		return stream;
 	}
@@ -296,7 +308,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 */
 	protected String getLog(Application app) {
 		String logFileUrl =
-				String.format("%s:%d/logfile", app.getHost(), app.getPort());
+				String.format("%s/logfile", app.getUri());
 		return restTemplate.getForObject(
 				logFileUrl, String.class);
 	}
@@ -304,27 +316,25 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	/**
 	 * Post data to the app specified.
 	 * @param app the app that will receive the data.
-	 * @param port that port the app is monitoring.
 	 * @param message the data to be sent to the app.
 	 */
-	protected void httpPostData(Application app, int port, String message) {
+	protected void httpPostData(Application app, String message)
+			throws URISyntaxException {
 		restTemplate.postForObject(
-				String.format("%s:%d", app.getHost(), port),
+				String.format(app.getUri()),
 				message, String.class);
 	}
 
 	/**
 	 * Waits the specified period of time for an entry to appear in the log of
 	 * the specified app.
-	 * @param waitTime the time in seconds to wait for an entry to appear in the
-	 * log.
 	 * @param app the app that is being monitored for a specific entry in its log.
 	 * @param entry the value being monitored for in the log.
 	 * @return
 	 */
-	protected boolean waitForLogEntry(int waitTime, Application app,
+	protected boolean waitForLogEntry(Application app,
 			String entry) {
-		long timeout = System.currentTimeMillis() + (waitTime * 1000);
+		long timeout = System.currentTimeMillis() + (maxWaitTime * 1000);
 		boolean exists = false;
 		while (!exists && System.currentTimeMillis() < timeout) {
 			try {
@@ -339,4 +349,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		return exists;
 	}
 
+	/**
+	 * Return a list of targets this test should be associated with
+	 */
+	public abstract List<StreamTestTypes> getTarget();
 }

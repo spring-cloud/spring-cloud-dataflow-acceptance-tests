@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.cloud.dataflow.acceptance.test.Application;
 import org.springframework.util.Assert;
 
 /**
@@ -43,19 +42,15 @@ public class Stream {
 
 	private String definition;
 
-	private String appLogDir;
 
 	/**
 	 * Initialize the stream instance.
 	 * @param streamName the name of the stream.
-	 * @param appLogDir the directory where apps in the stream will write their
 	 * logs.
 	 */
-	public Stream(String streamName,  String appLogDir){
+	public Stream(String streamName){
 		Assert.hasText(streamName, "streamName must not be empty nor null");
-		Assert.hasText(appLogDir, "appLogDir must not be empty nor null");
 		this.streamName = streamName;
-		this.appLogDir = appLogDir;
 		this.processors = new HashMap<>();
 	}
 
@@ -65,9 +60,9 @@ public class Stream {
 	 * @param definition the registered app name and its properties for the sink.
 	 */
 	public void setSink(String definition) {
-		String sinkLog = String.format("%s/%s-%s", appLogDir,
+		String sinkLog = String.format("%s-%s",
 				streamName, "sink.txt");
-		sink = new Application(0, sinkLog , definition);
+		sink = new Application(sinkLog , definition);
 	}
 
 	/**
@@ -84,9 +79,9 @@ public class Stream {
 	 * @param definition the registered app name and its properties for the source.
 	 */
 	public void setSource(String definition) {
-		String sourceLog = String.format("%s/%s-%s", appLogDir,
+		String sourceLog = String.format("%s-%s",
 				streamName, "source.txt");
-		source = new Application(0, sourceLog, definition);
+		source = new Application(sourceLog, definition);
 	}
 
 	/**
@@ -130,9 +125,9 @@ public class Stream {
 	 */
 	public void addProcessor(String processorName, String definition) {
 		int processorCount = processors.size();
-		String log = String.format("%s/%s-%s-%d.txt", appLogDir,
+		String log = String.format("%s-%s-%d.txt",
 				streamName, "processor", processorCount);
-		Application processor = new Application(0, log, definition);
+		Application processor = new Application(log, definition);
 		this.processors.put(processorName, processor);
 	}
 

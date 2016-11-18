@@ -17,24 +17,37 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import org.junit.Test;
 
 /**
+ * Executes acceptance tests for the http source app as a part of a stream.
  * @author Glenn Renfro
  */
 
 public class HttpSourceTests extends AbstractStreamTests {
 
 	@Test
-	public void logTests() {
-		Stream stream = getStream("http-test");
+	public void httpSourceTests() throws Exception{
+		Stream stream = getStream("HTTP-TEST");
 		stream.setSink("log");
-		stream.setSource("http --port=9000");
+		stream.setSource("http");
 		stream.setDefinition(stream.getSource() + " | " +stream.getSink());
 
 		deployStream(stream);
+		String testVal = UUID.randomUUID().toString();
+		httpPostData(stream.getSource(), testVal);
+		waitForLogEntry(stream.getSink(), testVal);
+	}
 
-		httpPostData(stream.getSource(), 9000, "1341241234");
-		waitForLogEntry(5000, stream.getSink(), "1341241234");
+	@Override
+	public List<StreamTestTypes> getTarget() {
+		List<StreamTestTypes> types = new ArrayList<>();
+		types.add(StreamTestTypes.HTTP_SOURCE);
+		types.add(StreamTestTypes.CORE);
+		return types;
 	}
 }
