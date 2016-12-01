@@ -10,7 +10,7 @@ Spring Cloud Stream and Spring Cloud Task App Starters.
 
 === Running acceptance tests on the Spring Cloud Data Flow Server Local
 To execute a test that will pull down the latest 1.1.1-BUILD-SNAPSHOT, start
-a Rabbit instance and a Spring Cloud Data Flow Server Local instance execute
+a Rabbit docker instance and a Spring Cloud Data Flow Server Local instance, execute
 the following: `./startLocalAcceptance.sh -ke`.  The -ke kills the Rabbit Docker
 container as well as the Spring Cloud Data Flow Server after the test completes.
 
@@ -45,6 +45,7 @@ a stream you would execute:
 ```
 ./startLocalAcceptance.sh -t TAP
 ```
+NOTE: Available tests are TICKTOCK, TAP, TIMESTAMP, HTTP_SOURCE
 
 This will download of the SCDF server jar, start the rabbit and
 SCDF-Server-Local instances and run only the TAPTEST acceptance test.
@@ -113,8 +114,6 @@ acceptance tests
  as the binder for a acceptance tests run.
  ** `local-scripts/start-peripherals-KAFKA` starts a kafka docker container that will be used
  as the binder for a acceptance tests run.
-  ** `local-scripts/stop-peripherals-KAFKA` stops a kafka docker container that was used
- as the binder for a acceptance tests run.
 
 == Acceptance Tests
 All stream acceptance tests inherit from the a common AbstractStreamTests class,
@@ -127,7 +126,7 @@ The current tests that have been written are the:
 
 * `TICKTOCK` - TickTockTests creates a TickTock stream and evaluates that it is deployed and
 working.
-* `HTTP-SOURCE` - HttpSourceTests tests the http source in a stream.
+* `HTTP_SOURCE` - HttpSourceTests tests the http source in a stream.
 * `TAP` - TapTests  includes tests for topics as well as stream taps.
 * `TRANSFORM` - TransformTests  includes tests for the `transform` processor.
 * `TIMESTAMP` TimestampTaskTests includes test for the `timestamp` task.
