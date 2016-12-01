@@ -261,7 +261,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 					"current status is %s:  " +
 					"Attempt %s of %s", status, attempt, deployPauseRetries));
 			attempt++;
-			waitForDeploymentPauseTime();
+			deploymentPause();
 		}
 		if (!isStarted) {
 			throw new IllegalStateException("Unable to start app");
@@ -284,17 +284,9 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * Pauses the run to for a period of seconds as specified by the the
 	 * deployPauseTime attribute.
 	 */
-	private void waitForDeploymentPauseTime() {
-		waitForMillis(deployPauseTime * 1000);
-	}
-
-	/**
-	 * Pause for the specified time of millis.
-	 * @param millis the amount of time to wait in millis.
-	 */
-	private void waitForMillis(int millis) {
+	private void deploymentPause() {
 		try {
-			Thread.sleep(millis);
+			Thread.sleep(deployPauseTime * 1000);
 		}
 		catch (Exception ex) {
 			// ignore
