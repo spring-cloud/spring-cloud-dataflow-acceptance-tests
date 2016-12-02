@@ -14,7 +14,10 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
@@ -34,6 +37,7 @@ import static org.junit.Assume.assumeTrue;
  * @author Glenn Renfro
  */
 @RunWith(SpringRunner.class)
+@EnableConfigurationProperties(TestConfigurationProperties.class)
 public abstract class AbstractTaskTests implements InitializingBean {
 
 	public enum TaskTestTypes {TIMESTAMP, CORE}
@@ -44,24 +48,14 @@ public abstract class AbstractTaskTests implements InitializingBean {
 
 	protected AppRegistryOperations appRegistryOperations;
 
-	@Value("${SERVER_HOST:http://localhost}")
-	protected String serverHost;
-
-	@Value("${SERVER_PORT:9393}")
-	protected int serverPort;
-
-	@Value("${MAX_WAIT_TIME:30}")
-	protected int maxWaitTime;
-
-	@Value("${WHAT_TO_TEST:CORE}")
-	protected String whatToTest;
+	@Autowired
+	TestConfigurationProperties configurationProperties;
 
 	@Before
 	public void setup() {
 		boolean isTestable = false;
 		for(TaskTestTypes type :getTarget()) {
-			System.out.println(type.toString());
-			if(type.toString().equals(whatToTest))
+			if(type.toString().equals(configurationProperties.getWhatToTest()))
 			{
 				isTestable = true;
 				break;
@@ -70,7 +64,6 @@ public abstract class AbstractTaskTests implements InitializingBean {
 		assumeTrue(isTestable);
 		registerApps();
 	}
-
 
 	@After
 	public void teardown() {
@@ -151,7 +144,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 		if (restTemplate == null) {
 			try {
 				DataFlowTemplate dataFlowOperationsTemplate =
-						new DataFlowTemplate(new URI(serverHost + ":" + serverPort));
+						new DataFlowTemplate(new URI(configurationProperties.getServerUri()));
 				taskOperations = dataFlowOperationsTemplate.taskOperations();
 				appRegistryOperations =
 						dataFlowOperationsTemplate.appRegistryOperations();
@@ -174,7 +167,8 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 */
 	protected boolean waitForTaskToComplete(String taskDefinitionName,
 			int taskExecutionCount) {
-		long timeout = System.currentTimeMillis() + (maxWaitTime * 1000);
+		long timeout = System.currentTimeMillis() + (
+				configurationProperties.getMaxWaitTime() * 1000);
 		boolean isComplete = false;
 		while (!isComplete && System.currentTimeMillis() < timeout) {
 			try {

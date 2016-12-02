@@ -32,7 +32,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
@@ -50,6 +52,7 @@ import static org.junit.Assume.assumeTrue;
  * @author Glenn Renfro
  */
 @RunWith(SpringRunner.class)
+@EnableConfigurationProperties(TestConfigurationProperties.class)
 public abstract class AbstractStreamTests implements InitializingBean {
 
 	public enum StreamTestTypes {HTTP_SOURCE, TAP, TICKTOCK, TRANSFORM, CORE}
@@ -60,29 +63,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 	private static final String KAFKA_BINDER = "KAFKA";
 
-	@Value("${DEPLOY_PAUSE_TIME:5}")
-	protected int deployPauseTime;
-
-	@Value("${DEPLOY_PAUSE_RETRIES:25}")
-	protected int deployPauseRetries;
-
-	@Value("${SERVER_URI:http://localhost:9393}")
-	protected String serverUri;
-
-	@Value("${PLATFORM_TYPE:LOCAL}")
-	protected String platformType;
-
-	@Value("${BINDER:RABBIT}")
-	protected String binder;
-
-	@Value("${MAX_WAIT_TIME:30}")
-	protected int maxWaitTime;
-
-	@Value("${WHAT_TO_TEST:CORE}")
-	protected String whatToTest;
-
-	@Value("${PLATFORM_SUFFIX:local.pcfdev.io}")
-	protected String platformSuffix;
+	@Autowired
+	TestConfigurationProperties configurationProperties;
 
 	protected RestTemplate restTemplate;
 
@@ -153,7 +135,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		registerApps();
 		boolean isTestable = false;
 		for(StreamTestTypes type : getTarget()) {
-			if(type.toString().equals(whatToTest))
+			if(type.toString().equals(configurationProperties.getWhatToTest()))
 			{
 				isTestable = true;
 				break;
@@ -170,17 +152,20 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		if (restTemplate == null) {
 			try {
 				DataFlowTemplate dataFlowOperationsTemplate =
-						new DataFlowTemplate(new URI(serverUri));
+						new DataFlowTemplate(new URI(
+								configurationProperties.getServerUri()));
 				streamOperations = dataFlowOperationsTemplate.streamOperations();
 				runtimeOperations = dataFlowOperationsTemplate.runtimeOperations();
 				appRegistryOperations =
 						dataFlowOperationsTemplate.appRegistryOperations();
-				if (platformType.equals(PlatformTypes.LOCAL.name())) {
+				if (configurationProperties.getPlatformType().
+						equals(PlatformTypes.LOCAL.name())) {
 					uriHelper = new LocalUriHelper(runtimeOperations);
 				}
-				if (platformType.equals(PlatformTypes.CLOUD_FOUNDRY.name())) {
+				if (configurationProperties.getPlatformType().
+						equals(PlatformTypes.CLOUD_FOUNDRY.name())) {
 					uriHelper = new CloudFoundryUriHelper(runtimeOperations,
-							platformSuffix);
+							configurationProperties.getPlatformSuffix());
 				}
 			}
 			catch (URISyntaxException uriException) {
@@ -217,19 +202,19 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * which binder has been selected (RABBIT, KAFKA).
 	 */
 	protected void registerApps() {
-		if(binder.equals(RABBIT_BINDER)) {
+		if(configurationProperties.getBinder().equals(RABBIT_BINDER)) {
 			appRegistryOperations.importFromResource(
 					"http://bit.ly/stream-applications-rabbit-maven", true);
 		}
-		else if (binder.equals(KAFKA_BINDER)) {
+		else if (configurationProperties.getBinder().equals(KAFKA_BINDER)) {
 			appRegistryOperations.importFromResource(
 					"http://bit.ly/stream-applications-kafka-maven", true);
 		}
 		else {
 			throw new IllegalStateException(String.format(
 					"Binder type of \"%s\" is invalid.   Only valid types are "
-					+ "\"%s\" and \"%s\" ", binder, RABBIT_BINDER,
-					KAFKA_BINDER));
+					+ "\"%s\" and \"%s\" ", configurationProperties.getBinder(),
+					RABBIT_BINDER, KAFKA_BINDER));
 
 		}
 	}
@@ -243,7 +228,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		boolean isStarted = false;
 		int attempt = 0;
 		String status = "not present";
-		while (!isStarted && attempt < deployPauseRetries) {
+		while (!isStarted && attempt <
+				configurationProperties.getDeployPauseRetries()) {
 			Iterator<StreamDefinitionResource> streamIter =
 					streamOperations.list().getContent().iterator();
 			StreamDefinitionResource resource = null;
@@ -259,7 +245,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			}
 			logger.info(String.format("Waiting for stream to start " +
 					"current status is %s:  " +
-					"Attempt %s of %s", status, attempt, deployPauseRetries));
+					"Attempt %s of %s", status, attempt,
+					configurationProperties.getDeployPauseRetries()));
 			attempt++;
 			deploymentPause();
 		}
@@ -286,7 +273,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 */
 	private void deploymentPause() {
 		try {
-			Thread.sleep(deployPauseTime * 1000);
+			Thread.sleep(configurationProperties.getDeployPauseTime() * 1000);
 		}
 		catch (Exception ex) {
 			// ignore
@@ -326,7 +313,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 */
 	protected boolean waitForLogEntry(Application app,
 			String entry) {
-		long timeout = System.currentTimeMillis() + (maxWaitTime * 1000);
+		long timeout = System.currentTimeMillis() + (
+				configurationProperties.getMaxWaitTime() * 1000);
 		boolean exists = false;
 		while (!exists && System.currentTimeMillis() < timeout) {
 			try {
