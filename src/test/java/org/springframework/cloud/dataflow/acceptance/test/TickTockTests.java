@@ -12,7 +12,6 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *
  */
 
 package org.springframework.cloud.dataflow.acceptance.test;
@@ -21,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
+
+import org.springframework.cloud.dataflow.acceptance.test.util.Stream;
 
 /**
  * Executes acceptance tests for the ticktock demo.

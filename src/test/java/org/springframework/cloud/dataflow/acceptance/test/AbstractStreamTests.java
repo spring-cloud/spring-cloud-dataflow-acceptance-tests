@@ -33,14 +33,20 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.acceptance.test.util.Application;
+import org.springframework.cloud.dataflow.acceptance.test.util.CloudFoundryUriHelper;
+import org.springframework.cloud.dataflow.acceptance.test.util.LocalUriHelper;
+import org.springframework.cloud.dataflow.acceptance.test.util.Stream;
+import org.springframework.cloud.dataflow.acceptance.test.util.TestConfigurationProperties;
+import org.springframework.cloud.dataflow.acceptance.test.util.UriHelper;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.Assume.assumeTrue;
@@ -202,7 +208,11 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * which binder has been selected (RABBIT, KAFKA).
 	 */
 	protected void registerApps() {
-		if(configurationProperties.getBinder().equals(RABBIT_BINDER)) {
+		if(StringUtils.hasText(configurationProperties.getRegistrationResource())){
+			appRegistryOperations.importFromResource(
+					configurationProperties.getRegistrationResource(), true);
+		}
+		else if(configurationProperties.getBinder().equals(RABBIT_BINDER)) {
 			appRegistryOperations.importFromResource(
 					"http://bit.ly/stream-applications-rabbit-maven", true);
 		}

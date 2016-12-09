@@ -80,6 +80,7 @@ GLOBAL:
 -sb |--skipbinder - should skip starting rabbit docker instance. Defaults to "no"
 -d  |--skipdeployment - should skip deployment of apps? Defaults to "no"
 -t  |--whattotest - define what you want to test (i.e. CORE, TAP, TICKTOCK, TIMESTAMP, TRANSFORM, HTTP_SOURCE)
+-r  |--registrationresource - specify resource that contains app registrations for a specific test
 ```
 
 NOTE: CORE target runs TICKTOCK and TIMESTAMP tests, which represents "core"

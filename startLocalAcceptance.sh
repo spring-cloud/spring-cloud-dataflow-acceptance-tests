@@ -207,6 +207,10 @@ case ${key} in
     -sb|--skipbinder)
     SKIP_BINDER="yes"
     ;;
+    -r|--registrationresource)
+    REGISTRATION_RESOURCE="$2"
+    shift # past argument
+    ;;
     --help)
     print_usage
     exit 0
@@ -225,8 +229,10 @@ done
 [[ -z "${HEALTH_HOST}" ]] && HEALTH_HOST="${DEFAULT_HEALTH_HOST}"
 [[ -z "${NUMBER_OF_LINES_TO_LOG}" ]] && NUMBER_OF_LINES_TO_LOG="${DEFAULT_NUMBER_OF_LINES_TO_LOG}"
 
-HEALTH_PORTS=('9393')
-HEALTH_ENDPOINTS="$( printf "http://${LOCALHOST}:%s/management/health " "${HEALTH_PORTS[@]}" )"
+HEALTH_PORT=9393
+HEALTH_ENDPOINT="$( printf "http://${LOCALHOST}:%s/management/health " "${HEALTH_PORT}" )"
+echo $HEALTH_ENDPOINT
+
 ACCEPTANCE_TEST_OPTS="${ACCEPTANCE_TEST_OPTS:--DSERVER_URI=http://${HEALTH_HOST}:9393 -DWHAT_TO_TEST=${WHAT_TO_TEST}}"
 
 cat <<EOF
@@ -244,6 +250,7 @@ SKIP_DOWNLOADING=${SKIP_DOWNLOADING}
 ACCEPTANCE_TEST_OPTS=${ACCEPTANCE_TEST_OPTS}
 SKIP_DEPLOYMENT=${SKIP_DEPLOYMENT}
 SKIP_BINDER=${SKIP_BINDER}
+REGISTRATION_RESOURCE=${REGISTRATION_RESOURCE}
 
 EOF
 
@@ -265,6 +272,7 @@ export SKIP_DEPLOYMENT=${SKIP_DEPLOYMENT}
 export SKIP_BINDER=${SKIP_BINDER}
 export JAVA_PATH_TO_BIN=${JAVA_PATH_TO_BIN}
 export DEFAULT_HEALTH_HOST=${DEFAULT_HEALTH_HOST}
+export REGISTRATION_RESOURCE=${REGISTRATION_RESOURCE}
 
 export -f tail_log
 export -f print_logs
@@ -319,7 +327,7 @@ if [[ "${BINDER_INITIALIZATION_FAILED}" == "yes" && "${INITIALIZATION_FAILED}" =
     exit 1
 fi
 
-# ======================================= Checking if apps are booted =======================================
+# ======================================= Checking if dataflow is booted =======================================
 if [[ -z "${SKIP_DEPLOYMENT}" ]] ; then
     # Wait for the apps to boot up
     APPS_ARE_RUNNING="no"
@@ -327,7 +335,7 @@ if [[ -z "${SKIP_DEPLOYMENT}" ]] ; then
     echo -e "\n\nWaiting for the apps to boot for [$(( WAIT_TIME * RETRIES ))] seconds"
     for i in $( seq 1 "${RETRIES}" ); do
         sleep "${WAIT_TIME}"
-        curl -m 5 ${HEALTH_ENDPOINTS} && APPS_ARE_RUNNING="yes" && break
+        curl -m 5 ${HEALTH_ENDPOINT} && APPS_ARE_RUNNING="yes" && break
         echo "Fail #$i/${RETRIES}... will try again in [${WAIT_TIME}] seconds"
     done
 

@@ -12,63 +12,52 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *
  */
 
-package org.springframework.cloud.dataflow.acceptance.test;
-
+package org.springframework.cloud.dataflow.acceptance.test.util;
 
 import java.util.Iterator;
 
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
-import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
-import org.springframework.hateoas.Resources;
 
 /**
  * @author Glenn Renfro
  */
-public class LocalUriHelper implements UriHelper {
-
-	private final String URL = "url";
+public class CloudFoundryUriHelper implements UriHelper {
 
 	private RuntimeOperations operations;
 
-	public LocalUriHelper(RuntimeOperations operations) {
+	private String cfSuffix;
+
+	public CloudFoundryUriHelper(RuntimeOperations operations, String cfSuffix) {
 		this.operations = operations;
+		this.cfSuffix = cfSuffix;
 	}
 
 	@Override
 	public void setUrisForStream(Stream stream) {
-		if(stream.getSource() != null) {
-			setAppUri(stream.getStreamName(), stream.getSource());
-		}
-		if(stream.getSink() != null) {
-			setAppUri(stream.getStreamName(), stream.getSink());
-		}
-		for (Application processor : stream.getProcessors().values()) {
-			setAppUri(stream.getStreamName(), processor);
+		Iterator<AppStatusResource> statsIterator = operations.status().iterator();
+		while (statsIterator.hasNext()) {
+			AppStatusResource appStatus = statsIterator.next();
+			setUriForApplication(stream.getStreamName(), cfSuffix, stream.getSource(),
+					appStatus);
+			setUriForApplication(stream.getStreamName(), cfSuffix, stream.getSink(),
+					appStatus);
+			for (Application processor : stream.getProcessors().values()) {
+				setUriForApplication(stream.getStreamName(), cfSuffix, processor,
+						appStatus);
+			}
 		}
 	}
 
-	private void setAppUri(String streamName, Application application) {
-		Iterator<AppStatusResource> statsIterator = operations.status().iterator();
-		AppStatusResource appStatus;
-		while (statsIterator.hasNext()) {
-			appStatus = statsIterator.next();
-			if (appStatus.getDeploymentId().contains(streamName)
-					&& appStatus.getDeploymentId().contains(getAppName(application.getDefinition()))){
-				Iterator<AppInstanceStatusResource> resourceIterator =
-						appStatus.getInstances().iterator();
-				while (resourceIterator.hasNext()) {
-					AppInstanceStatusResource resource = resourceIterator.next();
-					if (resource.getAttributes().containsKey(URL)) {
-						application.setUri(resource.getAttributes().get(URL));
-						break;
-					}
-				}
-				break;
-			}
+	private void setUriForApplication(String streamName, String cfSuffix,
+			Application application, AppStatusResource appStatus) {
+		if (application != null
+				&& appStatus.getDeploymentId().contains(streamName)
+				&& appStatus.getDeploymentId().contains(getAppName(application.getDefinition()))) {
+			application.setUri(String.format("http://%s.%s",
+					appStatus.getDeploymentId(), cfSuffix));
 		}
 	}
 
@@ -79,5 +68,4 @@ public class LocalUriHelper implements UriHelper {
 		}
 		return definition;
 	}
-
 }

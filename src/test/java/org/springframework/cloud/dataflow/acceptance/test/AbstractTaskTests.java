@@ -15,9 +15,8 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.acceptance.test.util.TestConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
@@ -25,6 +24,7 @@ import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.Assume.assumeTrue;
@@ -132,8 +132,14 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 * Imports the proper apps required for the acceptance tests.
 	 */
 	protected void registerApps() {
-		appRegistryOperations.importFromResource(
-				"http://bit.ly/task-applications-maven", true);
+		if(StringUtils.hasText(configurationProperties.getRegistrationResource())){
+			appRegistryOperations.importFromResource(
+					configurationProperties.getRegistrationResource(), true);
+		}
+		else {
+			appRegistryOperations.importFromResource(
+					"http://bit.ly/task-applications-maven", true);
+		}
 	}
 
 	/**

@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.acceptance.test;
+package org.springframework.cloud.dataflow.acceptance.test.util;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -28,13 +28,22 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class TestConfigurationProperties {
 
 	private String whatToTest = "CORE";
+
 	private int maxWaitTime = 30;
+
 	private String binder = "RABBIT";
+
 	private int deployPauseRetries = 25;
+
 	private int deployPauseTime = 5;
+
 	private String serverUri = "http://localhost:9393";
+
 	private String platformType = "LOCAL";
+
 	private String platformSuffix = "local.pcfdev.io";
+
+	private String registrationResource;
 
 	public String getWhatToTest() {
 		return whatToTest;
@@ -98,5 +107,13 @@ public class TestConfigurationProperties {
 
 	public void setPlatformSuffix(String platformSuffix) {
 		this.platformSuffix = platformSuffix;
+	}
+
+	public String getRegistrationResource() {
+		return registrationResource;
+	}
+
+	public void setRegistrationResource(String registrationResource) {
+		this.registrationResource = registrationResource;
 	}
 }
