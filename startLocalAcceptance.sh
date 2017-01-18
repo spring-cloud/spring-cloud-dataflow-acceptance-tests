@@ -225,7 +225,7 @@ shift # past argument or value
 done
 [[ -z "${WHAT_TO_TEST}" ]] && WHAT_TO_TEST=CORE
 [[ -z "${BINDER}" ]] && BINDER=RABBIT
-[[ -z "${JAR_URL}" ]] && JAR_URL=https://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-local/1.1.1.BUILD-SNAPSHOT/spring-cloud-dataflow-server-local-1.1.1.BUILD-SNAPSHOT.jar
+[[ -z "${JAR_URL}" ]] && JAR_URL=https://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-local/1.2.0.BUILD-SNAPSHOT/spring-cloud-dataflow-server-local-1.2.0.BUILD-SNAPSHOT.jar
 [[ -z "${HEALTH_HOST}" ]] && HEALTH_HOST="${DEFAULT_HEALTH_HOST}"
 [[ -z "${NUMBER_OF_LINES_TO_LOG}" ]] && NUMBER_OF_LINES_TO_LOG="${DEFAULT_NUMBER_OF_LINES_TO_LOG}"
 
