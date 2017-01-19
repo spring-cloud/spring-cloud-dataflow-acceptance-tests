@@ -97,7 +97,6 @@ function kill_all_apps() {
     kill_all_apps_with_port
     if [[ -z "${KILL_NOW_APPS}" ]] ; then
         docker kill $(docker ps -q) || echo "No running docker containers are left"
-        docker stop `docker ps -a -q --filter="image=spotify/kafka"` || echo "No docker with Kafka was running - won't stop anything"
         if [[ -f ./local-scripts/stop-peripherals-${WHAT_TO_TEST}.sh ]] ; then
             . ./local-scripts/stop-peripherals-${WHAT_TO_TEST}.sh || echo "Failed to stop ${WHAT_TO_TEST} peripherals"
         fi
