@@ -55,6 +55,16 @@ function setup() {
   popd
 }
 
+function tear_down() {
+  pushd $PLATFORM
+    run_scripts "server" "destroy.sh"
+    run_scripts "redis" "destroy.sh"
+    run_scripts "mysql" "destroy.sh"
+    pushd "binder"
+      run_scripts $BINDER "destroy.sh"
+    popd
+  popd
+}
 # ======================================= FUNCTIONS END =======================================
 
 CURRENT_DIR=`pwd`
@@ -76,8 +86,8 @@ case ${key} in
  BINDER="$2"
  shift # past argument
  ;;
- -s|--skip)
- BINDER="true"
+ -s|--skipTests)
+ skip="true"
  shift # past argument
  ;;
  --help)
