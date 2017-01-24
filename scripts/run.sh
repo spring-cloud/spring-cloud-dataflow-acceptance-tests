@@ -1,7 +1,5 @@
 #!/bin/bash
 
-
-
 # ======================================= FUNCTIONS START =======================================
 
 # ======================================= BE QUIET PUSHD/POPD ===================================
@@ -50,7 +48,7 @@ function netcat_port() {
 }
 
 function download(){
-  if ! -f $1/scdf-server.jar; then
+  if [ ! -f "$1/scdf-server.jar" ]; then
     echo "Downloading latest release from $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL"
     wget $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL --progress=bar -O $1/scdf-server.jar
   fi
@@ -128,8 +126,14 @@ esac
 shift
 done
 
+# ======================================= DEFAULTS ============================================
 [[ -z "${BINDER}" ]] && BINDER=rabbit
 WAIT_TIME="${WAIT_TIME:-5}"
 RETRIES="${RETRIES:-3}"
+JAVA_PATH_TO_BIN="${JAVA_HOME}/bin/"
+MEM_ARGS="-Xmx128m -Xss1024k"
+JAVA_OPTS=""
+APPLICATION_ARGS=""
+# ======================================= DEFAULTS END ========================================
 
 setup

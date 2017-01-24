@@ -9,7 +9,6 @@ function deploy_docker_image() {
     echo "It appears that you don't have a docker command line executable available. Halting."
     exit 1
   fi
-
   docker-compose up -d mysql
   $(netcat_port $DOCKER_SERVER "3306")
   service_running=$?
@@ -19,7 +18,8 @@ function deploy_docker_image() {
     exit 1;
   fi
 
-  export SPRING_DATASOURCE_URL="jdbc:mysql://spring:cloud@$DOCKER_SERVER/scdf"
+  APPLICATION_ARGS="$APPLICATION_ARGS  --spring.datasource.url=jdbc:mysql://$DOCKER_SERVER/scdf --spring.datasource.username=spring --spring.datasource.password=cloud  --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver"
+
   echo "mySQL server running. JDBC URL:$SPRING_DATASOURCE_URL"
 }
 

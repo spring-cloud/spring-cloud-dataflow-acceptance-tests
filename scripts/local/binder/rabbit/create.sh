@@ -23,8 +23,9 @@ function deploy_docker_image() {
     exit 1;
   fi
 
-  export SPRING_RABBITMQ_ADDRESSES=$DOCKER_SERVER:5672
-  echo "RabbitMQ server running, address: $SPRING_RABBITMQ_ADDRESSES"
+
+  APPLICATION_ARGS="$APPLICATION_ARGS  --spring.cloud.dataflow.applicationProperties.stream.spring.rabbitmq.host=$DOCKER_SERVER"
+  echo "RabbitMQ server running, address: $DOCKER_SERVER"
 
 }
 
