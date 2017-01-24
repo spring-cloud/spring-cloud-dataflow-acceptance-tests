@@ -20,7 +20,7 @@ function deploy_docker_image() {
     exit 1;
   fi
 
-  export SPRING_REDIS_HOST=$DOCKER_SERVER
+  APPLICATION_ARGS="$APPLICATION_ARGS  --spring.redis.host=$DOCKER_SERVER"
   echo "redis server running on $DOCKER_SERVER:$SERVER_PORT"
 }
 
