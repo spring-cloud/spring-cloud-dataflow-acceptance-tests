@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -o errexit
+
 
 # ======================================= FUNCTIONS START =======================================
 
@@ -29,11 +29,31 @@ function load_file() {
 filename=$1
 
 while IFS='=' read -r var value; do
-
   if [ -z ${!var} ]; then
     export $var=$value
   fi
 done < "$filename"
+}
+
+function test_port() {
+  nc -z -w1 ${1} $2
+}
+
+function netcat_port() {
+    local READY_FOR_TESTS=1
+    for i in $( seq 1 "${RETRIES}" ); do
+        nc -z -w1 ${1} $2 && READY_FOR_TESTS=0 && break
+        echo "Fail #$i/${RETRIES}... will try again in [${WAIT_TIME}] seconds" >&2
+        sleep "${WAIT_TIME}"
+    done
+    return ${READY_FOR_TESTS}
+}
+
+function download(){
+  if ! -f $1/scdf-server.jar; then
+    echo "Downloading latest release from $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL"
+    wget $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL --progress=bar -O $1/scdf-server.jar
+  fi
 }
 
 function run_scripts()
@@ -53,6 +73,11 @@ function setup() {
     run_scripts "redis" "create.sh"
     run_scripts "server" "create.sh"
   popd
+  echo $SPRING_REDIS_HOST
+}
+
+function command_exists() {
+  type "$1" &> /dev/null ;
 }
 
 function tear_down() {
@@ -104,6 +129,7 @@ shift
 done
 
 [[ -z "${BINDER}" ]] && BINDER=rabbit
-
+WAIT_TIME="${WAIT_TIME:-5}"
+RETRIES="${RETRIES:-3}"
 
 setup

@@ -4,9 +4,7 @@ set -o errexit
 
 # ======================================= FUNCTIONS START =======================================
 
-function command_exists() {
-  type "$1" &> /dev/null ;
-}
+
 
 function cf_authenticate_and_target() {
   echo "api is : $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL"
