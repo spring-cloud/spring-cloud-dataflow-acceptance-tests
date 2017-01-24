@@ -2,10 +2,7 @@
 
 set -o errexit
 
-function download(){
-  echo "Downloading latest release from $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOWNLOAD_URL"
-  wget $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOWNLOAD_URL --progress=bar -O scdf-server.jar
-}
+
 
 function generate_manifest() {
 cat << EOF > ./scdf-manifest.yml
@@ -40,6 +37,6 @@ function push_application() {
 }
 
 
-download
+download $PWD
 generate_manifest
 push_application
