@@ -25,6 +25,7 @@ function deploy_docker_container() {
     exit 1
   fi
 
+<<<<<<< HEAD
   docker-compose up -d 
   $(netcat_port $DOCKER_SERVER $SERVER_PORT)
   service_running=$?
