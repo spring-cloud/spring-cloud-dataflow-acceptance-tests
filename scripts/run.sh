@@ -153,7 +153,7 @@ done
 # ======================================= DEFAULTS ============================================
 [[ -z "${BINDER}" ]] && BINDER=rabbit
 WAIT_TIME="${WAIT_TIME:-5}"
-RETRIES="${RETRIES:-3}"
+RETRIES="${RETRIES:-6}"
 JAVA_PATH_TO_BIN="${JAVA_HOME}/bin/"
 MEM_ARGS="-Xmx128m -Xss1024k"
 JAVA_OPTS=""
