@@ -13,14 +13,21 @@ popd () {
 
 function print_usage() {
 cat <<EOF
-USAGE:
-You can use the following options:
-GLOBAL:
+
+USAGE: run.sh -p <PLATFORM> -b <BINDER> [-s -t -c]
+  The default mode will setup, run tests and clean up, you can control which stage you want to
+  have executed by toggling the flags (-s, -t, -c)
+
+Flags:
+
 [*] -p  | --platform - define the target platform to run
-    -b  | --binder - define the binder to use for the test (i.e. RABBIT, KAFKA)
-    -s  | --skip - skip tests and just prepares environment
-    -k  | --keepRunning - Keep services and server running after execution
+    -b  | --binder - define the binder (i.e. RABBIT, KAFKA) defaults to RABBIT
+    -s  | --skipSetup - skip setup phase
+    -t  | --skipTests - skip test phase
+    -c  | --skipCleanup - skip the clean up phase
+
 [*] = Required arguments
+
 EOF
 }
 
@@ -104,6 +111,11 @@ if [[ $1 == "--help" || $1 == "-h" ]] ; then
     exit 0
 fi
 
+if [[ $# == 0 ]]; then
+  print_usage
+  exit 0
+fi
+
 while [[ $# > 0 ]]
 do
 key="$1"
@@ -116,11 +128,14 @@ case ${key} in
  BINDER="$2"
  shift # past argument
  ;;
- -s|--skipTests)
- skip="true"
+ -t|--skipTests)
+ skipTests="true"
  ;;
- -k|--keepRunning)
- keep="true"
+ -s|--skipSetup)
+ skipSetup="true"
+ ;;
+ -c|--skipCleanup)
+ skipCleanup="true"
  ;;
  --help)
  print_usage
@@ -144,11 +159,13 @@ MEM_ARGS="-Xmx128m -Xss1024k"
 JAVA_OPTS=""
 APPLICATION_ARGS=""
 # ======================================= DEFAULTS END ========================================
-echo "skip: $skip keep: $keep"
-setup
-if [ -z "$skip" ]; then
+
+if [ -z "$skipSetup" ]; then
+  setup
+fi
+if [ -z "$skipTests" ]; then
   run_tests
 fi
-if [ -z "$keep" ]; then
+if [ -z "$skipCleanup" ]; then
   tear_down
 fi

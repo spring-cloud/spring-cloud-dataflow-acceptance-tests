@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 source ../common.sh
 
-destroy_service "redis"
+destroy "redis" 6379
