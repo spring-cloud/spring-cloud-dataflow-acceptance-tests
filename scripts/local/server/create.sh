@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 function java_jar() {
     local APP_JAVA_PATH=$1
