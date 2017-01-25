@@ -1,5 +1,4 @@
 #!/bin/sh
-
 source ../../common.sh
 
-destroy_service "rabbit"
+destroy "rabbit" 5672
