@@ -19,6 +19,7 @@ GLOBAL:
 [*] -p  | --platform - define the target platform to run
     -b  | --binder - define the binder to use for the test (i.e. RABBIT, KAFKA)
     -s  | --skip - skip tests and just prepares environment
+    -k  | --keepRunning - Keep services and server running after execution
 [*] = Required arguments
 EOF
 }
@@ -79,6 +80,7 @@ function command_exists() {
 }
 
 function tear_down() {
+  echo "Clean up, clean up, everybody everywhere; clean up clean up, everybody do your share!"
   pushd $PLATFORM
     run_scripts "server" "destroy.sh"
     run_scripts "redis" "destroy.sh"
@@ -88,6 +90,11 @@ function tear_down() {
     popd
   popd
 }
+
+function run_tests() {
+  echo "Running tests ..."
+}
+
 # ======================================= FUNCTIONS END =======================================
 
 CURRENT_DIR=`pwd`
@@ -111,7 +118,9 @@ case ${key} in
  ;;
  -s|--skipTests)
  skip="true"
- shift # past argument
+ ;;
+ -k|--keepRunning)
+ keep="true"
  ;;
  --help)
  print_usage
@@ -135,5 +144,11 @@ MEM_ARGS="-Xmx128m -Xss1024k"
 JAVA_OPTS=""
 APPLICATION_ARGS=""
 # ======================================= DEFAULTS END ========================================
-
+echo "skip: $skip keep: $keep"
 setup
+if [ -z "$skip" ]; then
+  run_tests
+fi
+if [ -z "$keep" ]; then
+  tear_down
+fi
