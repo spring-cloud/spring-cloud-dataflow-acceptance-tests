@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 
 if ! (cf services | grep "^mysql"); then
