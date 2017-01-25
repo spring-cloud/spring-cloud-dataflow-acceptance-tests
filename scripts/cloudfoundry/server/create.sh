@@ -1,8 +1,5 @@
 #!/bin/bash
 
-set -o errexit
-
-
 
 function generate_manifest() {
 cat << EOF > ./scdf-manifest.yml
