@@ -25,8 +25,7 @@ function deploy_docker_container() {
     exit 1
   fi
 
-<<<<<<< HEAD
-  docker-compose up -d 
+  docker-compose up -d
   $(netcat_port $DOCKER_SERVER $SERVER_PORT)
   service_running=$?
 
@@ -37,6 +36,26 @@ function deploy_docker_container() {
 
   echo "$PROCESS_NAME running on $DOCKER_SERVER:$SERVER_PORT"
 }
+
+function create_kafka_docker_compose_file(){
+  cat << EOF > $1/docker-compose.yml
+  version: '2'
+  services:
+    zookeeper:
+      image: wurstmeister/zookeeper
+      ports:
+        - "2181:2181"
+    kafka:
+      image: wurstmeister/kafka
+      ports:
+        - "9092:9092"
+      environment:
+        KAFKA_ADVERTISED_HOST_NAME: $DOCKER_SERVER
+        KAFKA_ADVERTISED_PORT: 9092
+        KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  EOF
+}
+
 
 function destroy() {
   PROCESS_NAME=$1

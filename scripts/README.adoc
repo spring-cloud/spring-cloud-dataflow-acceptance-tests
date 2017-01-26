@@ -1,7 +1,6 @@
 = Spring Cloud Data Flow Acceptance Tests =
 
-This project bootstrap a dataflow server on a target platform, executes a series of tests by deploying some
-apps and then cleans up after its done.
+This project bootstrap a dataflow server on a target platform, executes a series of tests by creating a series of streams and tasks and then cleans up after its done.
 
 == How to run it
 
