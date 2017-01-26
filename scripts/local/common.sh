@@ -35,6 +35,7 @@ function deploy_docker_container() {
   fi
 
   echo "$PROCESS_NAME running on $DOCKER_SERVER:$SERVER_PORT"
+  SERVICE_HOST=$DOCKER_SERVER
 }
 
 function create_kafka_docker_compose_file(){
@@ -53,7 +54,7 @@ function create_kafka_docker_compose_file(){
         KAFKA_ADVERTISED_HOST_NAME: $DOCKER_SERVER
         KAFKA_ADVERTISED_PORT: 9092
         KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-  EOF
+EOF
 }
 
 
@@ -80,8 +81,10 @@ function create() {
   if [[ "$service_running" == 1 ]]; then
     echo "Could not find a local $PROCESS_NAME server, trying docker."
     deploy_docker_container
+  else
+    echo "$PROCESS_NAME found on localhost"
+    SERVICE_HOST="127.0.0.1"
   fi
-
 }
 
 # ======================================= FUNCTIONS END =======================================
