@@ -1,0 +1,109 @@
+= Spring Cloud Data Flow Acceptance Tests =
+
+This project bootstraps a dataflow server on a target platform, executes a series of tests by creating a series of streams and tasks and then cleans up after its done.
+
+== How to run it
+
+The main script is called `run.sh` and supports a few flags:
+
+```
+USAGE: run.sh -p <PLATFORM> -b <BINDER> [-s -t -c]
+  The default mode will setup, run tests and clean up, you can control which stage you want to
+  have executed by toggling the flags (-s, -t, -c)
+
+Flags:
+
+[*] -p  | --platform - define the target platform to run
+    -b  | --binder - define the binder (i.e. RABBIT, KAFKA) defaults to RABBIT
+    -s  | --skipSetup - skip setup phase
+    -t  | --skipTests - skip test phase
+    -c  | --skipCleanup - skip the clean up phase
+
+[*] = Required arguments
+```
+
+The first option is to choose a *PLATFORM*, available options are located as folders of the main directory:
+```
+.
+├── README.adoc
+├── cloudfoundry
+├── k8s
+├── local
+└── run.sh
+```
+By default the script will execute three main phases:
+
+* Setup: It will traverse each folder and call any relevant `create.sh` scripts, at the end you should expect to have an enviroment available with the Data Flow server along with any services required for it to run (redis, binder and mysql)
+* Test: The test phase will invoke the `mvn test` and deploy apps into the environment and run tests
+* Clean: The clean up phase will undeploy the server and remove any services
+
+Each phase can be toggled by setting the appropriate flag (-s, -t, -c)
+
+== Examples
+
+Let's say you want to deploy to cloudfoundry, run all tests on binder and clean up (that's the default):
+
+`./run.sh -p cloudfoundry`
+
+Or perhaps you want to just standup a server on cloudfoundry and not run tests or clean up:
+
+`./run.sh -p cloudfoundry -c -t`
+
+Maybe you want to run it locally and keep it running
+
+`./run.sh -p local -c`
+
+Run locally with a kafka service and keep it running
+
+`./run.sh -p local -b kafka -c`
+
+= General configuration
+
+Make sure you have `JAVA_HOME` configured correctly in your environment. 
+
+Each platform will have a file named `env.properties` located on `init/env.properties`, change those to reflect your
+environment. Each platform has different flags, but the global ones should be:
+
+* RETRIES : Number of times to test for a port when checking a service status (6 by defaut)
+* WAIT_TIME: How long to wait for another port test (5s by default)
+* SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL: Location of the dataflow jar file to be downloaded.
+
+= Platform specific notes
+
+== Local
+
+=== Pre-requisites
+
+* docker-compose installed
+* `$DOCKER_HOST` environment variable properly set (on linux is usually localhost, on MacOS `192.168.99.100`)
+
+The local deployment will always try to connect to a service running on your local machine. So if you have
+a local redis we will use it.
+
+If a local service is not found, the script will try to deploy using `docker-compose` so it's important that
+you have that installed and configured properly.
+
+When cleaning up, the script will only remove docker images, if you are using a local service like redis or mysql
+the script will not do anything to it
+
+== Cloudfoundry
+
+=== Pre-requisites
+On Cloudfoundry, make sure you have the following environment variables exported. We will not include them on any files
+to prevent it to be leaked into github repos with credentials.
+
+* SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL
+* SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN
+* SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME
+* SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD
+
+=== Configuration
+
+You can override service names and plans by either exporting or changing the following properties:
+
+* MYSQL_SERVICE_NAME
+* MYSQL_PLAN_NAME
+* RABBIT_SERVICE_NAME
+* RABBIT_PLAN_NAME
+* REDIS_SERVICE_NAME
+* REDIS_PLAN_NAME
