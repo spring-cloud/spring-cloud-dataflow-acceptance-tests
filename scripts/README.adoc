@@ -1,6 +1,6 @@
 = Spring Cloud Data Flow Acceptance Tests =
 
-This project bootstrap a dataflow server on a target platform, executes a series of tests by creating a series of streams and tasks and then cleans up after its done.
+This project bootstraps a dataflow server on a target platform, executes a series of tests by creating a series of streams and tasks and then cleans up after its done.
 
 == How to run it
 
@@ -58,6 +58,8 @@ Run locally with a kafka service and keep it running
 `./run.sh -p local -b kafka -c`
 
 = General configuration
+
+Make sure you have `JAVA_HOME` configured correctly in your environment. 
 
 Each platform will have a file named `env.properties` located on `init/env.properties`, change those to reflect your
 environment. Each platform has different flags, but the global ones should be:
