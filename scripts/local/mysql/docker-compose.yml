@@ -1,9 +1,9 @@
 mysql:
   image: mysql:5.7
   environment:
-    MYSQL_ROOT_PASSWORD: spring
-    MYSQL_DATABASE: scdf
+    MYSQL_ROOT_PASSWORD: cloud
+    MYSQL_DATABASE: dataflow
     MYSQL_USER: spring
     MYSQL_PASSWORD: cloud
   ports:
-    - 3306:3306  
+    - 3306:3306

@@ -39,6 +39,7 @@ function deploy_docker_container() {
 }
 
 function create_kafka_docker_compose_file(){
+  echo "Creating kafka compose file on $1/docker-compose.yml"
   cat << EOF > $1/docker-compose.yml
   version: '2'
   services:
@@ -83,7 +84,7 @@ function create() {
     deploy_docker_container
   else
     echo "$PROCESS_NAME found on localhost"
-    SERVICE_HOST="127.0.0.1"
+    export SERVICE_HOST="127.0.0.1"
   fi
 }
 
