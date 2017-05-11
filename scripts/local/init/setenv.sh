@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "Setting the environment variables"
 load_file "$PWD/env.properties"

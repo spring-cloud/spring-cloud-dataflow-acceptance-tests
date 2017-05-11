@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # ======================================= FUNCTIONS START =======================================
 
@@ -49,7 +49,7 @@ function netcat_port() {
     local READY_FOR_TESTS=1
     for i in $( seq 1 "${RETRIES}" ); do
         nc -z -w1 ${1} $2 && READY_FOR_TESTS=0 && break
-        echo "Fail #$i/${RETRIES}... will try again in [${WAIT_TIME}] seconds" >&2
+        echo "Failed to connect to ${1}:$2. Attempt  #$i/${RETRIES}... will try again in [${WAIT_TIME}] seconds" >&2
         sleep "${WAIT_TIME}"
     done
     return ${READY_FOR_TESTS}
