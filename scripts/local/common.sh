@@ -5,7 +5,7 @@
 
 function stop_docker_container() {
 
-  [ -z "$DOCKER_SERVER" ] && { echo "Environment variable DOCKER_HOST must be set"; exit 1; }
+  [ -z "$DOCKER_SERVER" ] && { echo "Environment variable DOCKER_SERVER must be set"; exit 1; }
 
   if ! command_exists docker-compose; then
     echo "It appears that you don't have a docker command line executable available. Halting."
@@ -17,7 +17,7 @@ function stop_docker_container() {
 
 function deploy_docker_container() {
 
-  [ -z "$DOCKER_SERVER" ] && { echo "Environment variable DOCKER_HOST must be set"; exit 1; }
+  [ -z "$DOCKER_SERVER" ] && { echo "Environment variable DOCKER_SERVER must be set"; exit 1; }
   if ! command_exists docker-compose; then
     echo "It appears that you don't have a docker command line executable available. Halting."
     exit 1
