@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 function create_service() {
   SCDF_SERVICE_NAME=$1

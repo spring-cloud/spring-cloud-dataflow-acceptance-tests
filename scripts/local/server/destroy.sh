@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 PID=$(cat app.pid)
 

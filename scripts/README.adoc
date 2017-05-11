@@ -75,7 +75,7 @@ environment. Each platform has different flags, but the global ones should be:
 === Pre-requisites
 
 * docker-compose installed
-* `$DOCKER_HOST` environment variable properly set (on linux is usually localhost, on MacOS `192.168.99.100`)
+* `$DOCKER_SERVER` environment variable properly set (on linux is usually localhost, on MacOS `192.168.99.100`)
 
 The local deployment will always try to connect to a service running on your local machine. So if you have
 a local redis we will use it.
