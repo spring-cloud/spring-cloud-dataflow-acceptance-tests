@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: mysql
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: mysql
+    spec:
+      containers:
+      - image: mysql:5.7
+        name: mysql
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            # Change this password!
+            value: yourpassword
+        ports:
+          - containerPort: 3306
+            name: mysql
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: mysql
+  name: mysql
+spec:
+# Use "LoadBalancer" if you want an external IP for your service to connect from external tools
+  type: LoadBalancer
+  ports:
+    - port: 3306
+  selector:
+    name: mysql

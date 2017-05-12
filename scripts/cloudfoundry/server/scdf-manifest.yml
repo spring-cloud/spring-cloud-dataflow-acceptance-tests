@@ -1,0 +1,22 @@
+
+applications:
+- name: scdf-server
+  path: ./scdf-server.jar
+  memory: 1G
+  host: dataflow-server-${random-word}
+  services:
+    - mysql
+    - redis
+  env:
+    EXTERNAL_SERVERS_REQUIRED: true
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: https://api.run.pivotal.io
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: cfapps.io
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: scdf-ci
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: space-tr
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME: trisberg@pivotal.io
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD: NikonD7000!
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: true
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_SERVICES: rabbit
+    MAVEN_REMOTE_REPOSITORIES_REPO1_URL: https://repo.spring.io/libs-snapshot
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_API_TIMEOUT: 300
+
