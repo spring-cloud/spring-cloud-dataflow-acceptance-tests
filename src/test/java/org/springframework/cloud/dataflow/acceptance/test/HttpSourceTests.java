@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -44,11 +42,4 @@ public class HttpSourceTests extends AbstractStreamTests {
 		waitForLogEntry(stream.getSink(), testVal);
 	}
 
-	@Override
-	public List<StreamTestTypes> getTarget() {
-		List<StreamTestTypes> types = new ArrayList<>();
-		types.add(StreamTestTypes.HTTP_SOURCE);
-		types.add(StreamTestTypes.CORE);
-		return types;
-	}
 }

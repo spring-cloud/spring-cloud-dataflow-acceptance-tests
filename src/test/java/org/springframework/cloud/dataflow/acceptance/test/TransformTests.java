@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.acceptance.test.util.Stream;
@@ -47,10 +44,4 @@ public class TransformTests extends AbstractStreamTests{
 		waitForLogEntry(stream.getSink(), "ABCDEFG");
 	}
 
-	@Override
-	public List<StreamTestTypes> getTarget() {
-		List<StreamTestTypes> types = new ArrayList<>();
-		types.add(StreamTestTypes.TRANSFORM);
-		return types;
-	}
 }

@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.acceptance.test.util.Stream;
@@ -63,10 +60,4 @@ public class TapTests extends AbstractStreamTests{
 		waitForLogEntry(tapStream.getSink(), "] log.sink");
 	}
 
-	@Override
-	public List<StreamTestTypes> getTarget() {
-		List<StreamTestTypes> types = new ArrayList<>();
-		types.add(StreamTestTypes.TAP);
-		return types;
-	}
 }

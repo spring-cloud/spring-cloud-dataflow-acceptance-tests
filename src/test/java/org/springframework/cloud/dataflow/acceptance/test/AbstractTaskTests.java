@@ -2,12 +2,7 @@ package org.springframework.cloud.dataflow.acceptance.test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import org.junit.After;
 import org.junit.Before;
@@ -26,8 +21,6 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
-
-import static org.junit.Assume.assumeTrue;
 
 /**
  * Abstract base class that is used by task acceptance tests.  This class
@@ -53,15 +46,6 @@ public abstract class AbstractTaskTests implements InitializingBean {
 
 	@Before
 	public void setup() {
-		boolean isTestable = false;
-		for(TaskTestTypes type :getTarget()) {
-			if(type.toString().equals(configurationProperties.getWhatToTest()))
-			{
-				isTestable = true;
-				break;
-			}
-		}
-		assumeTrue(isTestable);
 		registerApps();
 	}
 
@@ -222,10 +206,5 @@ public abstract class AbstractTaskTests implements InitializingBean {
 		}
 		return result;
 	}
-
-	/**
-	 * Return a list of targets this test should be associated with
-	 */
-	public abstract List<TaskTestTypes> getTarget();
 
 }
