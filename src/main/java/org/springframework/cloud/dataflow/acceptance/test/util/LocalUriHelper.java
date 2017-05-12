@@ -55,7 +55,7 @@ public class LocalUriHelper implements UriHelper {
 		while (statsIterator.hasNext()) {
 			appStatus = statsIterator.next();
 			if (appStatus.getDeploymentId().contains(streamName)
-					&& appStatus.getDeploymentId().contains(getAppName(application.getDefinition()))){
+					&& appStatus.getDeploymentId().contains((application.getDefinition()))){
 				Iterator<AppInstanceStatusResource> resourceIterator =
 						appStatus.getInstances().iterator();
 				while (resourceIterator.hasNext()) {
@@ -70,12 +70,5 @@ public class LocalUriHelper implements UriHelper {
 		}
 	}
 
-	private String getAppName(String definition) {
-		definition = definition.trim();
-		if (definition.contains(" ")) {
-			definition = definition.substring(0, definition.indexOf(" "));
-		}
-		return definition;
-	}
 
 }
