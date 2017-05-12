@@ -14,7 +14,7 @@ USAGE: run.sh -p <PLATFORM> -b <BINDER> [-s -t -c]
 Flags:
 
 [*] -p  | --platform - define the target platform to run
-    -b  | --binder - define the binder (i.e. RABBIT, KAFKA) defaults to RABBIT
+    -b  | --binder - define the binder (i.e. rabbit, kafka) defaults to rabbit
     -s  | --skipSetup - skip setup phase
     -t  | --skipTests - skip test phase
     -c  | --skipCleanup - skip the clean up phase
@@ -22,40 +22,45 @@ Flags:
 [*] = Required arguments
 ```
 
-The first option is to choose a *PLATFORM*, available options are located as folders of the main directory:
-```
-.
-├── README.adoc
-├── cloudfoundry
-├── k8s
-├── local
-└── run.sh
-```
+The first option is to choose a *PLATFORM*, available options `cloudfoundry`, `local` and `k8s` (kubernetes).  The scripts for each plaform are located in folders of the same name in the main directory.
+
 By default the script will execute three main phases:
 
-* Setup: It will traverse each folder and call any relevant `create.sh` scripts, at the end you should expect to have an enviroment available with the Data Flow server along with any services required for it to run (redis, binder and mysql)
-* Test: The test phase will invoke the `mvn test` and deploy apps into the environment and run tests
-* Clean: The clean up phase will undeploy the server and remove any services
+* Setup: The setup phase will traversese each folder and call `create.sh` scripts.  At the end of this pase you should expect to have an enviroment available with the Data Flow server along with the services required for it to run.
+* Test: The test phase will invoke the `mvn test` and deploy apps into the environment and run tests.
+* Clean: The clean up phase will undeploy the server and remove any services.
 
 Each phase can be toggled by setting the appropriate flag (-s, -t, -c)
 
+The services created in the setup phase are `mysql` and `redis`.  Depending on the binder selected, it will create a Rabbit or Kafka service.
+
 == Examples
 
-Let's say you want to deploy to cloudfoundry, run all tests on binder and clean up (that's the default):
+To run the tests locally cleaning up services using Rabbit (the default binder)
+
+`./run.sh -p local`
+
+To run the tests locally cleaning up services using Kafka
+
+`./run.sh -p local -b kafka`
+
+To run the tests locally and keep the Kafka service running afterwards
+
+`./run.sh -p local -b kafka -c`
+
+
+
+To run the tests on cloudfoundry, cleaning up services and using Rabbit (the default binder)
 
 `./run.sh -p cloudfoundry`
 
-Or perhaps you want to just standup a server on cloudfoundry and not run tests or clean up:
+To setup a Data Flow Server and services on CloudFoundry, but not run tests
 
 `./run.sh -p cloudfoundry -c -t`
 
-Maybe you want to run it locally and keep it running
+To run the test and keep the Data Flow Server and services running
 
 `./run.sh -p local -c`
-
-Run locally with a kafka service and keep it running
-
-`./run.sh -p local -b kafka -c`
 
 = General configuration
 
@@ -74,8 +79,9 @@ environment. Each platform has different flags, but the global ones should be:
 
 === Pre-requisites
 
-* docker-compose installed
-* `$DOCKER_SERVER` environment variable properly set (on linux is usually localhost, on MacOS `192.168.99.100`)
+* `docker` and `docker-compose` installed.  Make sure you can connect to the docker daemon without using 'sudo', e.g. `docker info` works.
+
+* `$DOCKER_SERVER` environment variable properly set.  Defaults to localhost, which works on unix.  For MacOS `192.168.99.100` should work.
 
 The local deployment will always try to connect to a service running on your local machine. So if you have
 a local redis we will use it.
