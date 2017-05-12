@@ -26,7 +26,7 @@ The first option is to choose a *PLATFORM*, available options `cloudfoundry`, `l
 
 By default the script will execute three main phases:
 
-* Setup: The setup phase will traversese each folder and call `create.sh` scripts.  At the end of this pase you should expect to have an enviroment available with the Data Flow server along with the services required for it to run.
+* Setup: The setup phase will traverse each folder and call `create.sh` scripts.  At the end of this phase you should expect to have an environment available with the Spring Cloud Data Flow server along with the services required for it to run.
 * Test: The test phase will invoke the `mvn test` and deploy apps into the environment and run tests.
 * Clean: The clean up phase will undeploy the server and remove any services.
 
@@ -44,10 +44,9 @@ To run the tests locally cleaning up services using Kafka
 
 `./run.sh -p local -b kafka`
 
-To run the tests locally and keep the Kafka service running afterwards
+To run the tests locally and keep the Data Flow Server, Kafka, and other services running afterwards
 
 `./run.sh -p local -b kafka -c`
-
 
 
 To run the tests on cloudfoundry, cleaning up services and using Rabbit (the default binder)
@@ -58,9 +57,6 @@ To setup a Data Flow Server and services on CloudFoundry, but not run tests
 
 `./run.sh -p cloudfoundry -c -t`
 
-To run the test and keep the Data Flow Server and services running
-
-`./run.sh -p local -c`
 
 = General configuration
 
