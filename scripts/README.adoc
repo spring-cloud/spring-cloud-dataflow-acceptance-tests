@@ -109,3 +109,19 @@ You can override service names and plans by either exporting or changing the fol
 * RABBIT_PLAN_NAME
 * REDIS_SERVICE_NAME
 * REDIS_PLAN_NAME
+
+== Kubernetes
+
+=== Pre-requisites
+
+_Google Cloud SDK_ installed with the `kubectl` component enabled.
+
+=== Configuration
+
+For Kubernetes, make sure you have the following environment variables exported.
+
+* GCLOUD_PROJECT
+* GCLOUD_COMPUTE_ZONE
+* GCLOUD_CONTAINER_CLUSTER
+
+If you use a service account make sure to set the GOOGLE_APPLICATION_CREDENTIALS environment variable to point to your service account key file.
