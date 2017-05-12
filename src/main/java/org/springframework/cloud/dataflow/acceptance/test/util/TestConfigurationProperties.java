@@ -27,8 +27,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties
 public class TestConfigurationProperties {
 
-	private String whatToTest = "CORE";
-
 	private int maxWaitTime = 30;
 
 	private String binder = "RABBIT";
@@ -44,14 +42,6 @@ public class TestConfigurationProperties {
 	private String platformSuffix = "local.pcfdev.io";
 
 	private String registrationResource;
-
-	public String getWhatToTest() {
-		return whatToTest;
-	}
-
-	public void setWhatToTest(String whatToTest) {
-		this.whatToTest = whatToTest;
-	}
 
 	public int getMaxWaitTime() {
 		return maxWaitTime;

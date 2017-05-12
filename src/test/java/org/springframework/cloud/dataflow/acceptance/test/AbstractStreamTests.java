@@ -34,12 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.acceptance.test.util.Application;
-import org.springframework.cloud.dataflow.acceptance.test.util.CloudFoundryUriHelper;
-import org.springframework.cloud.dataflow.acceptance.test.util.LocalUriHelper;
-import org.springframework.cloud.dataflow.acceptance.test.util.Stream;
-import org.springframework.cloud.dataflow.acceptance.test.util.TestConfigurationProperties;
-import org.springframework.cloud.dataflow.acceptance.test.util.UriHelper;
+import org.springframework.cloud.dataflow.acceptance.test.util.*;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
@@ -48,8 +43,6 @@ import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
-
-import static org.junit.Assume.assumeTrue;
 
 /**
  * Abstract base class that is used by stream acceptance tests.  This class
@@ -60,8 +53,6 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(SpringRunner.class)
 @EnableConfigurationProperties(TestConfigurationProperties.class)
 public abstract class AbstractStreamTests implements InitializingBean {
-
-	public enum StreamTestTypes {HTTP_SOURCE, TAP, TICKTOCK, TRANSFORM, CORE}
 
 	public enum PlatformTypes {LOCAL, CLOUD_FOUNDRY}
 
@@ -139,15 +130,6 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	@Before
 	public void setup() {
 		registerApps();
-		boolean isTestable = false;
-		for(StreamTestTypes type : getTarget()) {
-			if(type.toString().equals(configurationProperties.getWhatToTest()))
-			{
-				isTestable = true;
-				break;
-			}
-		}
-		assumeTrue(isTestable);
 	}
 
 	/**
@@ -339,8 +321,4 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		return exists;
 	}
 
-	/**
-	 * Return a list of targets this test should be associated with
-	 */
-	public abstract List<StreamTestTypes> getTarget();
 }

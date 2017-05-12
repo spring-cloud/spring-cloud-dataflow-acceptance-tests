@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -30,7 +29,7 @@ import static org.junit.Assert.assertTrue;
  * Executes acceptance tests for the timestamp task.
  * @author Glenn Renfro
  */
-public class TimestampTaskTests extends AbstractTaskTests{
+public class TimestampTaskTests extends AbstractTaskTests {
 
 	@Test
 	public void timeStampTests() {
@@ -61,14 +60,6 @@ public class TimestampTaskTests extends AbstractTaskTests{
 		for(TaskExecutionResource taskExecutionResource : taskExecutionResources) {
 			assertEquals(expectedExitCode, taskExecutionResource.getExitCode());
 		}
-	}
-
-	@Override
-	public List<AbstractTaskTests.TaskTestTypes> getTarget() {
-		List<AbstractTaskTests.TaskTestTypes> types = new ArrayList<>();
-		types.add(AbstractTaskTests.TaskTestTypes.TIMESTAMP);
-		types.add(AbstractTaskTests.TaskTestTypes.CORE);
-		return types;
 	}
 
 }
