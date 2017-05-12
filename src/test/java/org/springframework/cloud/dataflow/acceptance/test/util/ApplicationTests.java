@@ -28,28 +28,22 @@ import static org.junit.Assert.assertEquals;
 public class ApplicationTests {
 
 	public static final String DEFAULT_URI = "http://myURI";
-	public static final String DEFAULT_LOG_FILE_URI = "file://foo";
 
 	@Test
 	public void testApplication() {
-		Application application = new Application(DEFAULT_LOG_FILE_URI, "BAR");
+		Application application = new Application( "BAR");
 		application.setUri(DEFAULT_URI);
-		validateApplication(application, DEFAULT_LOG_FILE_URI, "BAR",
-				DEFAULT_URI);
+		validateApplication(application, "BAR", 	DEFAULT_URI);
 	}
 	@Test
 	public void testApplicationParam() {
-		Application application = new Application(DEFAULT_LOG_FILE_URI,
-				"BAR --BAZ=FOO");
+		Application application = new Application("BAR --BAZ=FOO");
 		application.setUri(DEFAULT_URI);
-		validateApplication(application, DEFAULT_LOG_FILE_URI, "BAR --BAZ=FOO",
-				DEFAULT_URI);
+		validateApplication(application, "BAR --BAZ=FOO", DEFAULT_URI);
 	}
 
-	private void validateApplication(Application application,
-			String logFileUri, String definition, String uri) {
-		assertEquals(String.format("%s --logging.file=%s", definition,
-				logFileUri), application.getDefinition());
+	private void validateApplication(Application application, String definition, String uri) {
+		assertEquals(definition, application.getDefinition());
 		assertEquals(uri, application.getUri());
 	}
 

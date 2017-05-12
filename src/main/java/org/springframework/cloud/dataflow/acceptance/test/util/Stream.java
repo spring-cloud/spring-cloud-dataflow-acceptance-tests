@@ -55,14 +55,12 @@ public class Stream {
 	}
 
 	/**
-	 * Sets the registered app name and its properties for the sink.  The default
-	 * log location will be added to the sink app properties.
-	 * @param definition the registered app name and its properties for the sink.
+	 * Sets the registered app name for the sink
+	 *
+	 * @param definition the registered app name
 	 */
-	public void setSink(String definition) {
-		String sinkLog = String.format("%s-%s",
-				streamName, "sink.txt");
-		sink = new Application(sinkLog , definition);
+	public void setSink(String definition) {;
+		sink = new Application(definition);
 	}
 
 	/**
@@ -74,14 +72,12 @@ public class Stream {
 	}
 
 	/**
-	 * Sets the registered app name and its properties for the source.  The
-	 * default log location will be added to the source app properties.
-	 * @param definition the registered app name and its properties for the source.
+	 * Sets the registered app name for the source.
+	 *
+	 * @param definition the registered app name
 	 */
 	public void setSource(String definition) {
-		String sourceLog = String.format("%s-%s",
-				streamName, "source.txt");
-		source = new Application(sourceLog, definition);
+		source = new Application(definition);
 	}
 
 	/**
@@ -125,9 +121,7 @@ public class Stream {
 	 */
 	public void addProcessor(String processorName, String definition) {
 		int processorCount = processors.size();
-		String log = String.format("%s-%s-%d.txt",
-				streamName, "processor", processorCount);
-		Application processor = new Application(log, definition);
+		Application processor = new Application(definition);
 		this.processors.put(processorName, processor);
 	}
 

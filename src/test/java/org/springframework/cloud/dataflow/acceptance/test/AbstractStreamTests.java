@@ -19,9 +19,7 @@ package org.springframework.cloud.dataflow.acceptance.test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -179,8 +177,10 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @param stream the stream object containing the stream definition.
 	 */
 	protected void deployStream(Stream stream) {
-		streamOperations.createStream(stream.getStreamName(),
-				stream.getDefinition(), true);
+		streamOperations.createStream(stream.getStreamName(),stream.getDefinition(), false);
+		Map<String, String> streamProperties = new HashMap<>();
+		streamProperties.put("app.*.logging.file", "${PID}");
+		streamOperations.deploy(stream.getStreamName(), streamProperties);
 		streamAvailable(stream.getStreamName());
 		uriHelper.setUrisForStream(stream);
 	}

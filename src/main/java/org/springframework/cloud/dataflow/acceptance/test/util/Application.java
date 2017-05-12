@@ -25,28 +25,16 @@ package org.springframework.cloud.dataflow.acceptance.test.util;
 public class Application {
 
 	protected String uri;
-	protected String logLocation;
 	protected String definition;
 
 	/**
 	 * Initializes the application instance.
-\	 * @param logLocation - the location where the the logs will be written
-	 * for this application.
+	 *
 	 * @param definition Establish the registered app name and the
 	 * required properties.
 	 */
-	public Application(String logLocation, String definition) {
-		this.logLocation = logLocation;
-		setDefinition(definition);
-	}
-
-	/**
-	 * Establish the registered app name and the required properties.
-	 * @param definition
-	 */
-	public void setDefinition (String definition) {
-		this.definition = String.format("%s --logging.file=%s",
-				definition, this.logLocation);
+	public Application(String definition) {
+		this.definition = definition;
 	}
 
 	/**
