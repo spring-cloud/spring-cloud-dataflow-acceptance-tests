@@ -1,143 +1,127 @@
-= Spring Cloud Data Flow Acceptance Tests
+= Spring Cloud Data Flow Acceptance Tests =
 
-This project starts a basic Spring Cloud Data Flow environment and then launches
-acceptance tests against the Spring Cloud Data Flow Server. The acceptance
-tests evaluate how the server handles a stream's or task's
-full lifecycle.  The acceptance test also can be used to evaluate various
-Spring Cloud Stream and Spring Cloud Task App Starters.
+This project bootstraps a dataflow server on a target platform, executes a series of tests by creating a series of streams and tasks and then cleans up after its done.
 
-== How To Run it
+== How to run it
 
-=== Running acceptance tests on the Spring Cloud Data Flow Server Local
-To execute a test that will pull down the latest 1.1.1-BUILD-SNAPSHOT, start
-a Rabbit docker instance and a Spring Cloud Data Flow Server Local instance, execute
-the following: `./startLocalAcceptance.sh -ke`.  The -ke kills the Rabbit Docker
-container as well as the Spring Cloud Data Flow Server after the test completes.
-
-NOTE: You will need docker-compose installed to run acceptance tests on your local machine
-
-==== How to execute an acceptance test and leave the SCDF and Rabbit instances up
-
-Execute the following: `./startLocalAcceptance.sh`
-
-This will execute the CORE acceptance tests which includes the TICKTOCK and
-TIMESTAMP tests.
-
-Once you are finished using the Rabbit and SCDF instances you may shut them down
-by executing the `./startLocalAcceptance.sh -n`
-
-==== How to test against a running system (just run the acceptance tests themselves)
-In a scenario where you already have a Spring Cloud Data Flow Server Local and
-Rabbit instance running and want to use them, execute the following:
-`./startLocalAcceptance.sh -s -d`.  This execution will skip the download of the
-SCDF server jar and not start the rabbit nor SCDF-Server-Local instances,
-but will run core acceptance tests.
-
-==== Running a specific acceptance test.
-In a scenario where you are writing a test and you just want to run that one
-acceptance test, execute the following:
+The main script is called `run.sh` and supports a few flags:
 
 ```
-./startLocalAcceptance.sh -t <WHAT_TO_TEST>
-```
-For example if you wanted to run tests for the tap and destination features of
-a stream you would execute:
-```
-./startLocalAcceptance.sh -t TAP
-```
-NOTE: Available tests are TICKTOCK, TAP, TIMESTAMP, HTTP_SOURCE
+USAGE: run.sh -p <PLATFORM> -b <BINDER> [-s -t -c]
+  The default mode will setup, run tests and clean up, you can control which stage you want to
+  have executed by toggling the flags (-s, -t, -c)
 
-This will download of the SCDF server jar, start the rabbit and
-SCDF-Server-Local instances and run only the TAPTEST acceptance test.
+Flags:
 
-If the particular test needs to have a additional apps (for example HADOOP)
-running prior to the test being executed you may add a script to launch them.
-This is done by adding a script to the main project that is in the form of
-`local-scripts/start-peripherals-<WHAT_TO_TEST>.sh`.  For example `start-peripherals-TAP.sh`.
-Also when the test is complete the application will call a
-`local-scripts/stop-peripherals-<WHAT_TO_TEST>.sh where you can place the scripts to terminate
-the peripherals started for the test.  For example `stop-peripherals-TAP.sh`.
+[*] -p  | --platform - define the target platform to run
+    -b  | --binder - define the binder (i.e. rabbit, kafka) defaults to rabbit
+    -s  | --skipSetup - skip setup phase
+    -t  | --skipTests - skip test phase
+    -c  | --skipCleanup - skip the clean up phase
 
-==== Use an existing rabbit instance
-In a scenario where you already have a Rabbit or Kafka instance running but want to bring
-up an instance of Spring Cloud Data Flow Server Local and execute acceptance
-tests, execute the following:
-`./startLocalAcceptance.sh -sb`.
-
-==== Get Help
-Execute `./startLocalAcceptance.sh --help` and the following will be displayed:
-
-```
-GLOBAL:
--a  |--applogdir - define the location where stream & task logs will be written
--b  |--binder - define the binder to use for the test (i.e. RABBIT, KAFKA)
--j  |--jarurl - which jar to use? Defaults to 1.1.0.BUILD-SNAPSHOT
--h  |--healthhost - what is your host you are running SCDF? where is docker? defaults to localhost
--l  |--numberoflines - how many lines of logs of your app do you want to print? Defaults to 1000
--ke |--killattheend - should kill all the running apps at the end of execution? Defaults to "no"
--n  |--killnow - should not run all the logic but only kill the running apps? Defaults to "no"
--s  |--skipdownloading - should skip downloading the Data Flow Jar. Defaults to "no"
--sb |--skipbinder - should skip starting rabbit docker instance. Defaults to "no"
--d  |--skipdeployment - should skip deployment of apps? Defaults to "no"
--t  |--whattotest - define what you want to test (i.e. CORE, TAP, TICKTOCK, TIMESTAMP, TRANSFORM, HTTP_SOURCE)
--r  |--registrationresource - specify resource that contains app registrations for a specific test
+[*] = Required arguments
 ```
 
-NOTE: CORE target runs TICKTOCK and TIMESTAMP tests, which represents "core"
-functionality of Spring Cloud Data Flow.
+The first option is to choose a *PLATFORM*, available options `cloudfoundry`, `local` and `k8s` (kubernetes).  The scripts for each plaform are located in folders of the same name in the main directory.
 
-=== Running Cloud Foundry Acceptance Tests
-By default all all acceptance tests will run against a local platform.  However,
-if you wish to execute the acceptance tests against a Cloud Foundry instance, add the
-following environment variables to your maven execution:
+By default the script will execute three main phases:
 
-* `PLATFORM_TYPE` specifies that we want to execute this test against a specify
-type of platform instance.  Default is `LOCAL`.
-* `PLATFORM_SUFFIX` specifies the suffix to be appended to each application's
-name to create a URI. default is `local.pcfdev.io`
-* `DEPLOY_PAUSE_RETRIES` Need to make sure that this is set to at least 100
-because the default of 25 is too few attempts when deploying a stream to
-Cloud Foundry.
+* Setup: The setup phase will traverse each folder and call `create.sh` scripts.  At the end of this phase you should expect to have an environment available with the Spring Cloud Data Flow server along with the services required for it to run.
+* Test: The test phase will invoke the `mvn test` and deploy apps into the environment and run tests.
+* Clean: The clean up phase will undeploy the server and remove any services.
 
-For example if you wish to run a test on a currently running Data Flow Server on
-PCFDev the mvn command would look something like this:
-`mvn clean test -DPLATFORM_TYPE=CLOUD_FOUNDRY -DDEPLOY_PAUSE_RETRIES=100 -DWHAT_TO_TEST=TICKTOCK -DSERVER_URI=http://dataflow-server.local.pcfdev.io`
+Each phase can be toggled by setting the appropriate flag (-s, -t, -c)
 
-== Project Structure
+The services created in the setup phase are `mysql` and `redis`.  Depending on the binder selected, it will create a Rabbit or Kafka service.
 
-The project is comprised of 3 primary components:
+== Examples
 
-* `src/` contains the acceptance tests
-* `startLocalAcceptance.sh` creates a local Spring Cloud Data Flow Server test environment and executes the
-acceptance tests
-* `local-scripts/` contains scripts that start or stops peripheral apps for the local Spring Cloud DataFlow server test
-** `local-scripts/start-peripherals-RABBIT` starts a rabbit docker container that will be used
- as the binder for a acceptance tests run.
- ** `local-scripts/start-peripherals-KAFKA` starts a kafka docker container that will be used
- as the binder for a acceptance tests run.
+To run the tests locally cleaning up services using Rabbit (the default binder)
 
-== Acceptance Tests
-All stream acceptance tests inherit from the a common AbstractStreamTests class,
-that offers utility methods for testing as well as handles the creation of
-Stream objects so that upon failures a log can be dumped for each of the
-applications in the stream.  Similarly AbstractTaskTests class offers utility
-methods for testing tasks.
+`./run.sh -p local`
 
-The current tests that have been written are the:
+To run the tests locally cleaning up services using Kafka
 
-* `TICKTOCK` - TickTockTests creates a TickTock stream and evaluates that it is deployed and
-working.
-* `HTTP_SOURCE` - HttpSourceTests tests the http source in a stream.
-* `TAP` - TapTests  includes tests for topics as well as stream taps.
-* `TRANSFORM` - TransformTests  includes tests for the `transform` processor.
-* `TIMESTAMP` TimestampTaskTests includes test for the `timestamp` task.
+`./run.sh -p local -b kafka`
 
-== What's Next -> Stories:
+To run the tests locally and keep the Data Flow Server, Kafka, and other services running afterwards
 
-* Need to create start`<platform>`Acceptance.sh scripts for CF, Kubernetes, Yarn, Mesos.
-* Add support for pulling in files that are written by sinks and conversely put
-files for sources.
-* Support for MySQL local deployment for JDBC and Task based Acceptance tests
-* Need to support ability to make CF based calls so that ports can be opened up
-for http source based tests.
-* Need to test the tests for CF.  Only tested ticktock and HttpSource.
+`./run.sh -p local -b kafka -c`
+
+
+To run the tests on cloudfoundry, cleaning up services and using Rabbit (the default binder)
+
+`./run.sh -p cloudfoundry`
+
+To setup a Data Flow Server and services on CloudFoundry, but not run tests
+
+`./run.sh -p cloudfoundry -c -t`
+
+
+= General configuration
+
+Make sure you have `JAVA_HOME` configured correctly in your environment. 
+
+Each platform will have a file named `env.properties` located on `init/env.properties`, change those to reflect your
+environment. Each platform has different flags, but the global ones should be:
+
+* RETRIES : Number of times to test for a port when checking a service status (6 by defaut)
+* WAIT_TIME: How long to wait for another port test (5s by default)
+* SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL: Location of the dataflow jar file to be downloaded.
+
+= Platform specific notes
+
+== Local
+
+=== Pre-requisites
+
+* `docker` and `docker-compose` installed.  Make sure you can connect to the docker daemon without using 'sudo', e.g. `docker info` works.
+
+* `$DOCKER_SERVER` environment variable properly set.  Defaults to localhost, which works on unix.  For MacOS `192.168.99.100` should work.
+
+The local deployment will always try to connect to a service running on your local machine. So if you have
+a local redis we will use it.
+
+If a local service is not found, the script will try to deploy using `docker-compose` so it's important that
+you have that installed and configured properly.
+
+When cleaning up, the script will only remove docker images, if you are using a local service like redis or mysql
+the script will not do anything to it
+
+== Cloudfoundry
+
+=== Pre-requisites
+On Cloudfoundry, make sure you have the following environment variables exported. We will not include them on any files
+to prevent it to be leaked into github repos with credentials.
+
+* SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL
+* SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN
+* SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME
+* SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD
+
+=== Configuration
+
+You can override service names and plans by either exporting or changing the following properties:
+
+* MYSQL_SERVICE_NAME
+* MYSQL_PLAN_NAME
+* RABBIT_SERVICE_NAME
+* RABBIT_PLAN_NAME
+* REDIS_SERVICE_NAME
+* REDIS_PLAN_NAME
+
+== Kubernetes
+
+=== Pre-requisites
+
+_Google Cloud SDK_ installed with the `kubectl` component enabled.
+
+=== Configuration
+
+For Kubernetes, make sure you have the following environment variables exported.
+
+* GCLOUD_PROJECT
+* GCLOUD_COMPUTE_ZONE
+* GCLOUD_CONTAINER_CLUSTER
+
+If you use a service account make sure to set the GOOGLE_APPLICATION_CREDENTIALS environment variable to point to your service account key file.
