@@ -22,6 +22,8 @@ dataflowlib/
 *.jar
 *.log
 *.out
+**/scdf-manifest.yml
+
 # Eclipse artifacts, including WTP generated manifests
 .classpath
 .project
