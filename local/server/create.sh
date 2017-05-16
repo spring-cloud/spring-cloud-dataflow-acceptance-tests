@@ -2,14 +2,14 @@
 
 function java_jar() {
     APP_JAVA_PATH=$PWD
-    EXPRESSION="nohup ${JAVA_PATH_TO_BIN}java $JAVA_OPTS $MEM_ARGS -jar $APP_JAVA_PATH/scdf-server.jar $APPLICATION_ARGS > $APP_JAVA_PATH/scdf-server.log &"
-    echo "\n executing [$EXPRESSION]"
-    eval ${EXPRESSION}
+    EXPRESSION="nohup ${JAVA_PATH_TO_BIN}java $JAVA_OPTS $MEM_ARGS -jar $APP_JAVA_PATH/scdf-server.jar ${APPLICATION_ARGS} > $APP_JAVA_PATH/scdf-server.log &"
+    echo "executing [$EXPRESSION]"
+    eval "${EXPRESSION}"
     pid=$!
     echo ${pid} > ${APP_JAVA_PATH}/app.pid
     echo "[$1] process pid is [$pid]"
-    echo "System props are [$APPLICATION_ARGS]"
-    echo "Logs are under [$APP_JAVA_PATH/scdf-server.log] or from nohup [$APP_JAVA_PATH/nohup.log]\n"
+    echo "System props are [$2]"
+    echo "Logs are under [$APP_JAVA_PATH/scdf-server.log] or from nohup [$APP_JAVA_PATH/nohup.log]"
     $(netcat_port localhost 9393)
     return 0
 }
