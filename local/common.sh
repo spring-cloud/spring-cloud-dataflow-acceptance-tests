@@ -8,10 +8,9 @@ function stop_docker_container() {
   [ -z "$DOCKER_SERVER" ] && { echo "Environment variable DOCKER_SERVER must be set"; exit 1; }
 
   if ! command_exists docker-compose; then
-    echo "It appears that you don't have a docker command line executable available. Halting."
+    echo "It appears that you don't have a docker-compose command line executable available. Halting."
     exit 1
   fi
-  echo "Shutting down $PROCESS_NAME server"
   docker-compose stop
 }
 
@@ -58,16 +57,7 @@ EOF
 
 
 function destroy() {
-  PROCESS_NAME=$1
-  SERVER_PORT=$2
-
-  $(test_port "127.0.0.1" $SERVER_PORT)
-  service_running=$?
-
-  if [[ "$service_running" == 1 ]]; then
-    echo "Could not find a local $PROCESS_NAME server, trying docker."
     stop_docker_container
-  fi
 }
 
 function create() {
