@@ -5,11 +5,9 @@
 
 function stop_docker_container() {
 
-  if ! command_exists docker-compose; then
-    echo "It appears that you don't have a docker-compose command line executable available. Halting."
-    exit 1
+  if command_exists docker-compose; then
+    docker-compose stop
   fi
-  docker-compose stop
 }
 
 function deploy_docker_container() {
