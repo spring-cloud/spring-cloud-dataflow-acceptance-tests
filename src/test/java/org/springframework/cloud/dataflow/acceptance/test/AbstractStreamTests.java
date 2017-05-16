@@ -196,7 +196,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		}
 		else if(configurationProperties.getBinder().equals(RABBIT_BINDER)) {
 			appRegistryOperations.importFromResource(
-					"http://bit.ly/stream-applications-rabbit-maven", true);
+					"http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven", true);
 		}
 		else if (configurationProperties.getBinder().equals(KAFKA_BINDER)) {
 			appRegistryOperations.importFromResource(

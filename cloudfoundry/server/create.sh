@@ -32,7 +32,7 @@ EOF
 function push_application() {
   cf push -f scdf-manifest.yml
   SERVER_URI=$(cf app scdf-server | grep urls | awk '{print $2}' | sed 's:,::g')
-  $SERVER_URI="http://$SERVER_URI"
+  SERVER_URI="http://$SERVER_URI"
   echo "SCDF SERVER URI: $SERVER_URI"
   export $SERVER_URI
 }

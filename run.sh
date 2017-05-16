@@ -99,7 +99,7 @@ function tear_down() {
 }
 
 function run_tests() {
-  ./mvnw clean test -Dtests=$TESTS
+   eval "./mvnw -Dtest=$TESTS  test"
 }
 
 # ======================================= FUNCTIONS END =======================================
