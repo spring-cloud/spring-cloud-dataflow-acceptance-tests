@@ -5,8 +5,6 @@
 
 function stop_docker_container() {
 
-  [ -z "$DOCKER_SERVER" ] && { echo "Environment variable DOCKER_SERVER must be set"; exit 1; }
-
   if ! command_exists docker-compose; then
     echo "It appears that you don't have a docker-compose command line executable available. Halting."
     exit 1
