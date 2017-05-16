@@ -22,6 +22,7 @@ Flags:
 
 [*] -p  | --platform - define the target platform to run
     -b  | --binder - define the binder (i.e. RABBIT, KAFKA) defaults to RABBIT
+    -tests - coma separated list of tests to run (you can also specify expressions such as *http* for all tests with http word on it)
     -s  | --skipSetup - skip setup phase
     -t  | --skipTests - skip test phase
     -c  | --skipCleanup - skip the clean up phase
@@ -79,7 +80,6 @@ function setup() {
     run_scripts "redis" "create.sh"
     run_scripts "server" "create.sh"
   popd
-  echo $SPRING_REDIS_HOST
 }
 
 function command_exists() {
@@ -99,7 +99,7 @@ function tear_down() {
 }
 
 function run_tests() {
-  echo "Running tests ..."
+  ./mvnw clean test -Dtests=$TESTS
 }
 
 # ======================================= FUNCTIONS END =======================================
@@ -128,6 +128,10 @@ case ${key} in
  BINDER="$2"
  shift # past argument
  ;;
+ -tests)
+ TESTS="$2"
+ shift
+ ;;
  -t|--skipTests)
  skipTests="true"
  ;;
@@ -155,7 +159,7 @@ done
 WAIT_TIME="${WAIT_TIME:-5}"
 RETRIES="${RETRIES:-6}"
 JAVA_PATH_TO_BIN="${JAVA_HOME}/bin/"
-MEM_ARGS="-Xmx128m -Xss1024k"
+MEM_ARGS="-Xmx1024m -Xss1024k"
 JAVA_OPTS=""
 APPLICATION_ARGS=""
 # ======================================= DEFAULTS END ========================================
