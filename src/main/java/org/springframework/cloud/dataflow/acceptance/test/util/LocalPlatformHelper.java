@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -25,14 +25,15 @@ import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 
 /**
  * @author Glenn Renfro
+ * @author Thomas Risberg
  */
-public class LocalUriHelper implements UriHelper {
+public class LocalPlatformHelper implements PlatformHelper {
 
 	private final String URL = "url";
 
 	private RuntimeOperations operations;
 
-	public LocalUriHelper(RuntimeOperations operations) {
+	public LocalPlatformHelper(RuntimeOperations operations) {
 		this.operations = operations;
 	}
 
@@ -47,6 +48,11 @@ public class LocalUriHelper implements UriHelper {
 		for (Application processor : stream.getProcessors().values()) {
 			setAppUri(stream.getStreamName(), processor);
 		}
+	}
+
+	@Override
+	public String getLogfileName() {
+		return "${PID}";
 	}
 
 	private void setAppUri(String streamName, Application application) {

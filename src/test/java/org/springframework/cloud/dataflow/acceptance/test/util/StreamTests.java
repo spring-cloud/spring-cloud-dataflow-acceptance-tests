@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import static org.junit.Assert.assertEquals;
  * Verifies the basic functionality of the Stream util.
  *
  * @author Glenn Renfro
+ * @author Thomas Risberg
  */
 public class StreamTests {
 
@@ -33,8 +34,7 @@ public class StreamTests {
 		stream.setSink("BAR");
 		stream.setSource("FOO");
 		stream.setDefinition(stream.getSource() + " | " + stream.getSink());
-		assertEquals ("FOO --logging.file=test1-source.txt | BAR "
-				+ "--logging.file=test1-sink.txt", stream.getDefinition());
+		assertEquals ("FOO | BAR", stream.getDefinition());
 	}
 
 	@Test
@@ -46,9 +46,7 @@ public class StreamTests {
 		stream.setDefinition(stream.getSource() + " | " +
 				stream.getProcessors().get("BAZ") + " | " +
 				stream.getSink());
-		assertEquals ("FOO --logging.file=test2-source.txt "
-				+ "| BAZBAZ --logging.file=test2-processor-0.txt "
-				+ "| BAR --logging.file=test2-sink.txt", stream.getDefinition());
+		assertEquals ("FOO | BAZBAZ | BAR", stream.getDefinition());
 	}
 
 	@Test
@@ -56,8 +54,7 @@ public class StreamTests {
 		Stream stream = new Stream("test3");
 		stream.setSink("BAR");
 		stream.setDefinition(":WOMBAT.time > " + stream.getSink());
-		assertEquals (":WOMBAT.time > BAR "
-				+ "--logging.file=test3-sink.txt", stream.getDefinition());
+		assertEquals (":WOMBAT.time > BAR", stream.getDefinition());
 	}
 
 }

@@ -99,7 +99,7 @@ function tear_down() {
 }
 
 function run_tests() {
-   eval "./mvnw -Dtest=$TESTS  test"
+   eval "./mvnw -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM test"
 }
 
 # ======================================= FUNCTIONS END =======================================
@@ -155,6 +155,7 @@ shift
 done
 
 # ======================================= DEFAULTS ============================================
+[[ -z "${PLATFORM}" ]] && PLATFORM=local
 [[ -z "${BINDER}" ]] && BINDER=rabbit
 WAIT_TIME="${WAIT_TIME:-5}"
 RETRIES="${RETRIES:-6}"
@@ -163,6 +164,7 @@ MEM_ARGS="-Xmx1024m -Xss1024k"
 JAVA_OPTS=""
 APPLICATION_ARGS=""
 # ======================================= DEFAULTS END ========================================
+[[ ! -d "$PLATFORM" ]] && { echo "$PLATFORM is an invalid platform"; exit 1; }
 
 if [ -z "$skipSetup" ]; then
   setup

@@ -20,6 +20,8 @@ import org.junit.Test;
 
 import org.springframework.cloud.dataflow.acceptance.test.util.Stream;
 
+import static org.junit.Assert.assertTrue;
+
 /**
  * Executes acceptance tests for the for obtaining messages from a tap and
  * a destination.
@@ -39,8 +41,8 @@ public class TapTests extends AbstractStreamTests{
 		timeStream.setDefinition(timeStream.getSource() + " > :DESTINATION1");
 		deployStream(timeStream);
 
-		waitForLogEntry(logStream.getSink(), "Started LogSinkRabbitApplication");
-		waitForLogEntry(logStream.getSink(), "] log.sink");
+		assertTrue("Sink not started", waitForLogEntry(logStream.getSink(), "Started LogSink"));
+		assertTrue("No output found", waitForLogEntry(logStream.getSink(), ".DESTINATION1-"));
 	}
 
 	@Test
@@ -56,8 +58,8 @@ public class TapTests extends AbstractStreamTests{
 		tapStream.setDefinition(" :TAPTOCK.time > " +tapStream.getSink());
 		deployStream(tapStream);
 
-		waitForLogEntry(tapStream.getSink(), "Started LogSinkRabbitApplication");
-		waitForLogEntry(tapStream.getSink(), "] log.sink");
+		assertTrue("Sink not started", waitForLogEntry(tapStream.getSink(), "Started LogSink"));
+		assertTrue("No output found", waitForLogEntry(tapStream.getSink(), "time.TAPSTREAM-"));
 	}
 
 }

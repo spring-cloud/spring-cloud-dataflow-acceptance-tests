@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -22,9 +22,12 @@ import org.junit.Test;
 
 import org.springframework.cloud.dataflow.acceptance.test.util.Stream;
 
+import static org.junit.Assert.assertTrue;
+
 /**
  * Executes acceptance tests for the http source app as a part of a stream.
  * @author Glenn Renfro
+ * @author Thomas Risberg
  */
 
 public class HttpSourceTests extends AbstractStreamTests {
@@ -35,11 +38,12 @@ public class HttpSourceTests extends AbstractStreamTests {
 		stream.setSink("log");
 		stream.setSource("http");
 		stream.setDefinition(stream.getSource() + " | " +stream.getSink());
-
 		deployStream(stream);
 		String testVal = UUID.randomUUID().toString();
+		assertTrue("Source not started", waitForLogEntry(stream.getSource(), "Started HttpSource"));
 		httpPostData(stream.getSource(), testVal);
-		waitForLogEntry(stream.getSink(), testVal);
+		assertTrue("Sink not started", waitForLogEntry(stream.getSink(), "Started LogSink"));
+		assertTrue("No output found", waitForLogEntry(stream.getSink(), testVal));
 	}
 
 }

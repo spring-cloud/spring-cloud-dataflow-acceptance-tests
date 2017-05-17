@@ -35,6 +35,7 @@ function push_application() {
   SERVER_URI="http://$SERVER_URI"
   echo "SCDF SERVER URI: $SERVER_URI"
   export SERVER_URI
+  export PLATFORM_SUFFIX=$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN
   rm -f scdf-manifest.yml
 }
 
