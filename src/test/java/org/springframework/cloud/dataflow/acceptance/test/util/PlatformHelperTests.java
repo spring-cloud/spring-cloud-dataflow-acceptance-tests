@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -34,15 +34,16 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Glenn Renfro
+ * @author Thomas Risberg
  */
-public class UriHelperTests {
+public class PlatformHelperTests {
 
 	private String STREAM_NAME = "teststream";
 
 	@Mock
 	private RuntimeOperations runtimeOperations;
 
-	private UriHelper uriHelper;
+	private PlatformHelper platformHelper;
 
 	@Before
 	public void setUp() {
@@ -60,11 +61,11 @@ public class UriHelperTests {
 		Stream stream = new Stream(STREAM_NAME);
 		stream.setSource("time");
 		stream.setSink("log");
-		uriHelper = new LocalUriHelper(runtimeOperations);
-		uriHelper.setUrisForStream(stream);
-		assertEquals("time --logging.file=teststream-source.txt", stream.getSource().getDefinition());
-		assertEquals("log --logging.file=teststream-sink.txt", stream.getSink().getDefinition());
-		System.out.println(stream.getSource().getUri());
+		platformHelper = new LocalPlatformHelper(runtimeOperations);
+		platformHelper.setUrisForStream(stream);
+		assertEquals("time", stream.getSource().getDefinition());
+		assertEquals("log", stream.getSink().getDefinition());
+		assertEquals("${PID}", platformHelper.getLogfileName());
 	}
 
 	@Test
@@ -72,10 +73,10 @@ public class UriHelperTests {
 		Stream stream = new Stream("teststream");
 		stream.setSource("time");
 		stream.setSink("log");
-		uriHelper = new CloudFoundryUriHelper(runtimeOperations, "TESTSUFFIX");
-		uriHelper.setUrisForStream(stream);
-		assertEquals("time --logging.file=teststream-source.txt", stream.getSource().getDefinition());
-		assertEquals("log --logging.file=teststream-sink.txt", stream.getSink().getDefinition());
-		System.out.println(stream.getSource().getUri());
+		platformHelper = new CloudFoundryPlatformHelper(runtimeOperations, "TESTSUFFIX");
+		platformHelper.setUrisForStream(stream);
+		assertEquals("time", stream.getSource().getDefinition());
+		assertEquals("log", stream.getSink().getDefinition());
+		assertEquals("test.log", platformHelper.getLogfileName());
 	}
 }

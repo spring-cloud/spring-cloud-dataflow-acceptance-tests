@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -47,12 +48,30 @@ import org.springframework.web.client.RestTemplate;
  * contains commonly used utility methods for acceptance tests as well as the
  * ability to dump logs of apps when a stream acceptance test fails.
  * @author Glenn Renfro
+ * @author Thomas Risberg
  */
 @RunWith(SpringRunner.class)
 @EnableConfigurationProperties(TestConfigurationProperties.class)
 public abstract class AbstractStreamTests implements InitializingBean {
 
-	public enum PlatformTypes {LOCAL, CLOUD_FOUNDRY}
+	public enum PlatformTypes {
+		LOCAL("local"), CLOUDFOUNDRY("cloudfoundry");
+
+		PlatformTypes(String value) {
+			this.value = value;
+		}
+
+		private String value;
+
+		public String getValue() {
+			return value;
+		}
+
+		@Override
+		public String toString() {
+			return value;
+		}
+	}
 
 	private static final String RABBIT_BINDER = "RABBIT";
 
@@ -74,7 +93,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	private static final Logger logger =
 			LoggerFactory.getLogger(AbstractStreamTests.class);
 
-	private UriHelper uriHelper;
+	private PlatformHelper platformHelper;
 
 	/**
 	 * A TestWatcher that will write the logs for the failed apps in the
@@ -145,12 +164,12 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				appRegistryOperations =
 						dataFlowOperationsTemplate.appRegistryOperations();
 				if (configurationProperties.getPlatformType().
-						equals(PlatformTypes.LOCAL.name())) {
-					uriHelper = new LocalUriHelper(runtimeOperations);
+						equals(PlatformTypes.LOCAL.getValue())) {
+					platformHelper = new LocalPlatformHelper(runtimeOperations);
 				}
 				if (configurationProperties.getPlatformType().
-						equals(PlatformTypes.CLOUD_FOUNDRY.name())) {
-					uriHelper = new CloudFoundryUriHelper(runtimeOperations,
+						equals(PlatformTypes.CLOUDFOUNDRY.getValue())) {
+					platformHelper = new CloudFoundryPlatformHelper(runtimeOperations,
 							configurationProperties.getPlatformSuffix());
 				}
 			}
@@ -179,10 +198,11 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	protected void deployStream(Stream stream) {
 		streamOperations.createStream(stream.getStreamName(),stream.getDefinition(), false);
 		Map<String, String> streamProperties = new HashMap<>();
-		streamProperties.put("app.*.logging.file", "${PID}");
+		streamProperties.put("app.*.logging.file", platformHelper.getLogfileName());
+		streamProperties.put("app.*.endpoints.logfile.sensitive", "false");
 		streamOperations.deploy(stream.getStreamName(), streamProperties);
 		streamAvailable(stream.getStreamName());
-		uriHelper.setUrisForStream(stream);
+		platformHelper.setUrisForStream(stream);
 	}
 
 	/**
@@ -275,13 +295,15 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	/**
 	 * Retrieve the log for an app.
 	 * @param app the app to query to retrieve the log.
-	 * @return String containing the contents of the log.
+	 * @return String containing the contents of the log or 'null' if not found.
 	 */
 	protected String getLog(Application app) {
-		String logFileUrl =
-				String.format("%s/logfile", app.getUri());
-		return restTemplate.getForObject(
-				logFileUrl, String.class);
+		String logFileUrl = String.format("%s/logfile", app.getUri());
+		String log = null;
+		try {
+			log = restTemplate.getForObject(logFileUrl, String.class);
+		} catch (HttpClientErrorException e) {}
+		return log;
 	}
 
 	/**
@@ -310,13 +332,19 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		boolean exists = false;
 		while (!exists && System.currentTimeMillis() < timeout) {
 			try {
-				Thread.sleep(500);
+				Thread.sleep(5000);
 			}
 			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 				throw new IllegalStateException(e.getMessage(), e);
 			}
-			exists = getLog(app).contains(entry);
+			String log = getLog(app);
+			if (log != null) {
+				exists = log.contains(entry);
+				if (exists) {
+					logger.info("Matched '" + entry + "' for " +app.getDefinition());
+				}
+			}
 		}
 		return exists;
 	}

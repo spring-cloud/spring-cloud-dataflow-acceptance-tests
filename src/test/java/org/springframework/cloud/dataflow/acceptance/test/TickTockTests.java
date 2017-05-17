@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -20,9 +20,12 @@ import org.junit.Test;
 
 import org.springframework.cloud.dataflow.acceptance.test.util.Stream;
 
+import static org.junit.Assert.assertTrue;
+
 /**
  * Executes acceptance tests for the ticktock demo.
  * @author Glenn Renfro
+ * @author Thomas Risberg
  */
 
 public class TickTockTests extends AbstractStreamTests {
@@ -34,8 +37,9 @@ public class TickTockTests extends AbstractStreamTests {
 		stream.setSource("time");
 		stream.setDefinition(stream.getSource() + " | " +stream.getSink());
 		deployStream(stream);
-		waitForLogEntry(stream.getSink(), "Started LogSinkRabbitApplication");
-		waitForLogEntry(stream.getSink(), "] log.sink");
+		assertTrue("Source not started", waitForLogEntry(stream.getSource(), "Started TimeSource"));
+		assertTrue("Sink not started", waitForLogEntry(stream.getSink(), "Started LogSink"));
+		assertTrue("No output found", waitForLogEntry(stream.getSink(), "time.TICKTOCK-"));
 	}
 
 }

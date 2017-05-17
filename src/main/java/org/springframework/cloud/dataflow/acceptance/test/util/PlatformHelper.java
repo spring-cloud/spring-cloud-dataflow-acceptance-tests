@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,12 +19,18 @@ package org.springframework.cloud.dataflow.acceptance.test.util;
 /**
  * Methods that help retrieve app uri information for a specific platform.
  * @author Glenn Renfro
+ * @author Thomas Risberg
  */
-public interface UriHelper {
+public interface PlatformHelper {
 
 	/**
 	 * Identifies and sets the uri for each app in a stream.
 	 * @param stream the stream to augment.
 	 */
-	public void setUrisForStream(Stream stream);
+	void setUrisForStream(Stream stream);
+
+	/**
+	 * Returns the logfile name to use.
+	 */
+	String getLogfileName();
 }
