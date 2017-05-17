@@ -2,6 +2,8 @@
 
 source ../../common.sh
 
+load_file "$PWD/env.properties"
+
 create_kafka_docker_compose_file $PWD
 create "kafka" 9092
 

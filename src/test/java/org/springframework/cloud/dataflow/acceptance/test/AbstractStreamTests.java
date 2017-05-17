@@ -39,29 +39,30 @@ import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Abstract base class that is used by stream acceptance tests.  This class
- * contains commonly used utility methods for acceptance tests as well as the
- * ability to dump logs of apps when a stream acceptance test fails.
+ * Abstract base class that is used by stream acceptance tests. This class contains
+ * commonly used utility methods for acceptance tests as well as the ability to dump logs
+ * of apps when a stream acceptance test fails.
  * @author Glenn Renfro
  */
 @RunWith(SpringRunner.class)
 @EnableConfigurationProperties(TestConfigurationProperties.class)
 public abstract class AbstractStreamTests implements InitializingBean {
 
-	public enum PlatformTypes {LOCAL, CLOUD_FOUNDRY}
-
 	private static final String RABBIT_BINDER = "RABBIT";
 
 	private static final String KAFKA_BINDER = "KAFKA";
 
-	@Autowired
-	TestConfigurationProperties configurationProperties;
+	private static final Logger logger = LoggerFactory.getLogger(AbstractStreamTests.class);
 
 	protected RestTemplate restTemplate;
+
+	@Autowired
+	TestConfigurationProperties configurationProperties;
 
 	private StreamOperations streamOperations;
 
@@ -71,15 +72,10 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 	private List<Stream> streams = new ArrayList<>();
 
-	private static final Logger logger =
-			LoggerFactory.getLogger(AbstractStreamTests.class);
-
-	private UriHelper uriHelper;
-
 	/**
-	 * A TestWatcher that will write the logs for the failed apps in the
-	 * streams that were registered. Also destroys all streams regardless if
-	 * the test was successful or failed.
+	 * A TestWatcher that will write the logs for the failed apps in the streams that were
+	 * registered. Also destroys all streams regardless if the test was successful or
+	 * failed.
 	 */
 	@Rule
 	public TestWatcher testResultHandler = new TestWatcher() {
@@ -125,31 +121,29 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		}
 	};
 
+	private UriHelper uriHelper;
+
 	@Before
 	public void setup() {
 		registerApps();
 	}
 
 	/**
-	 * Creates the stream and app operations as well as establish the uri helper
-	 * that will be used for the acceptance test.
+	 * Creates the stream and app operations as well as establish the uri helper that will
+	 * be used for the acceptance test.
 	 */
 	public void afterPropertiesSet() {
 		if (restTemplate == null) {
 			try {
-				DataFlowTemplate dataFlowOperationsTemplate =
-						new DataFlowTemplate(new URI(
-								configurationProperties.getServerUri()));
+				DataFlowTemplate dataFlowOperationsTemplate = new DataFlowTemplate(
+						new URI(configurationProperties.getServerUri()));
 				streamOperations = dataFlowOperationsTemplate.streamOperations();
 				runtimeOperations = dataFlowOperationsTemplate.runtimeOperations();
-				appRegistryOperations =
-						dataFlowOperationsTemplate.appRegistryOperations();
-				if (configurationProperties.getPlatformType().
-						equals(PlatformTypes.LOCAL.name())) {
+				appRegistryOperations = dataFlowOperationsTemplate.appRegistryOperations();
+				if (configurationProperties.getPlatformType().equals(PlatformTypes.LOCAL.name())) {
 					uriHelper = new LocalUriHelper(runtimeOperations);
 				}
-				if (configurationProperties.getPlatformType().
-						equals(PlatformTypes.CLOUD_FOUNDRY.name())) {
+				if (configurationProperties.getPlatformType().equals(PlatformTypes.CLOUD_FOUNDRY.name())) {
 					uriHelper = new CloudFoundryUriHelper(runtimeOperations,
 							configurationProperties.getPlatformSuffix());
 				}
@@ -166,7 +160,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * Destroys all streams registered with the Spring Cloud Data Flow instance.
 	 */
 	protected void destroyStreams() {
-		for(Stream stream : streams) {
+		for (Stream stream : streams) {
 			streamOperations.destroy(stream.getStreamName());
 		}
 		streams.clear();
@@ -177,7 +171,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @param stream the stream object containing the stream definition.
 	 */
 	protected void deployStream(Stream stream) {
-		streamOperations.createStream(stream.getStreamName(),stream.getDefinition(), false);
+		streamOperations.createStream(stream.getStreamName(), stream.getDefinition(), false);
 		Map<String, String> streamProperties = new HashMap<>();
 		streamProperties.put("app.*.logging.file", "${PID}");
 		streamOperations.deploy(stream.getStreamName(), streamProperties);
@@ -185,45 +179,25 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		uriHelper.setUrisForStream(stream);
 	}
 
-	/**
-	 * Imports the proper apps required for the acceptance tests based on
-	 * which binder has been selected (RABBIT, KAFKA).
-	 */
-	protected void registerApps() {
-		if(StringUtils.hasText(configurationProperties.getRegistrationResource())){
-			appRegistryOperations.importFromResource(
-					configurationProperties.getRegistrationResource(), true);
-		}
-		else if(configurationProperties.getBinder().equals(RABBIT_BINDER)) {
-			appRegistryOperations.importFromResource(
-					"http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven", true);
-		}
-		else if (configurationProperties.getBinder().equals(KAFKA_BINDER)) {
-			appRegistryOperations.importFromResource(
-					"http://bit.ly/stream-applications-kafka-maven", true);
-		}
-		else {
-			throw new IllegalStateException(String.format(
-					"Binder type of \"%s\" is invalid.   Only valid types are "
-					+ "\"%s\" and \"%s\" ", configurationProperties.getBinder(),
-					RABBIT_BINDER, KAFKA_BINDER));
 
-		}
+	protected void registerApps() {
+		Assert.hasText(configurationProperties.getRegistrationResource(),
+				"You need to specify the REGISTRATION_RESOURCE variable in order to deploy the correct apps");
+		logger.info(String.format("Importing apps from uri resource: %s",configurationProperties.getRegistrationResource()));
+		appRegistryOperations.importFromResource(configurationProperties.getRegistrationResource(), true);
 	}
 
 	/**
-	 * Waits for the stream to be deployed and once deployed the function
-	 * returns control else it throws an IllegalStateException.
+	 * Waits for the stream to be deployed and once deployed the function returns control
+	 * else it throws an IllegalStateException.
 	 * @param streamName the name of the stream that is to be monitored.
 	 */
 	protected void streamAvailable(String streamName) {
 		boolean isStarted = false;
 		int attempt = 0;
 		String status = "not present";
-		while (!isStarted && attempt <
-				configurationProperties.getDeployPauseRetries()) {
-			Iterator<StreamDefinitionResource> streamIter =
-					streamOperations.list().getContent().iterator();
+		while (!isStarted && attempt < configurationProperties.getDeployPauseRetries()) {
+			Iterator<StreamDefinitionResource> streamIter = streamOperations.list().getContent().iterator();
 			StreamDefinitionResource resource = null;
 			while (streamIter.hasNext()) {
 				resource = streamIter.next();
@@ -235,10 +209,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 					break;
 				}
 			}
-			logger.info(String.format("Waiting for stream to start " +
-					"current status is %s:  " +
-					"Attempt %s of %s", status, attempt,
-					configurationProperties.getDeployPauseRetries()));
+			logger.info(String.format("Waiting for stream to start " + "current status is %s:  " + "Attempt %s of %s",
+					status, attempt, configurationProperties.getDeployPauseRetries()));
 			attempt++;
 			deploymentPause();
 		}
@@ -248,8 +220,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	}
 
 	/**
-	 * Creates and initializes a stream object.  Also adds the stream to a
-	 * list of streams that will be dumped to logs if the acceptance test fails.
+	 * Creates and initializes a stream object. Also adds the stream to a list of streams
+	 * that will be dumped to logs if the acceptance test fails.
 	 * @param streamName the name of the stream to create.
 	 * @return initialized stream instance.
 	 */
@@ -260,8 +232,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	}
 
 	/**
-	 * Pauses the run to for a period of seconds as specified by the the
-	 * deployPauseTime attribute.
+	 * Pauses the run to for a period of seconds as specified by the the deployPauseTime
+	 * attribute.
 	 */
 	private void deploymentPause() {
 		try {
@@ -278,10 +250,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @return String containing the contents of the log.
 	 */
 	protected String getLog(Application app) {
-		String logFileUrl =
-				String.format("%s/logfile", app.getUri());
-		return restTemplate.getForObject(
-				logFileUrl, String.class);
+		String logFileUrl = String.format("%s/logfile", app.getUri());
+		return restTemplate.getForObject(logFileUrl, String.class);
 	}
 
 	/**
@@ -289,24 +259,19 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @param app the app that will receive the data.
 	 * @param message the data to be sent to the app.
 	 */
-	protected void httpPostData(Application app, String message)
-			throws URISyntaxException {
-		restTemplate.postForObject(
-				String.format(app.getUri()),
-				message, String.class);
+	protected void httpPostData(Application app, String message) throws URISyntaxException {
+		restTemplate.postForObject(String.format(app.getUri()), message, String.class);
 	}
 
 	/**
-	 * Waits the specified period of time for an entry to appear in the log of
-	 * the specified app.
+	 * Waits the specified period of time for an entry to appear in the log of the
+	 * specified app.
 	 * @param app the app that is being monitored for a specific entry in its log.
 	 * @param entry the value being monitored for in the log.
 	 * @return
 	 */
-	protected boolean waitForLogEntry(Application app,
-			String entry) {
-		long timeout = System.currentTimeMillis() + (
-				configurationProperties.getMaxWaitTime() * 1000);
+	protected boolean waitForLogEntry(Application app, String entry) {
+		long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
 		boolean exists = false;
 		while (!exists && System.currentTimeMillis() < timeout) {
 			try {
@@ -319,6 +284,10 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			exists = getLog(app).contains(entry);
 		}
 		return exists;
+	}
+
+	public enum PlatformTypes {
+		LOCAL, CLOUD_FOUNDRY
 	}
 
 }
