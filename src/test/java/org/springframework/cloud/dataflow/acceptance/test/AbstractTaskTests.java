@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016-2017 the original author or authors.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.springframework.cloud.dataflow.acceptance.test;
 
 import java.net.URI;
@@ -28,6 +44,7 @@ import org.springframework.web.client.RestTemplate;
  * the ability to retrieve results from task repository.
  *
  * @author Glenn Renfro
+ * @author Thomas Risberg
  */
 @RunWith(SpringRunner.class)
 @EnableConfigurationProperties(TestConfigurationProperties.class)
@@ -122,7 +139,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 		}
 		else {
 			appRegistryOperations.importFromResource(
-					"http://bit.ly/task-applications-maven", true);
+					"http://bit.ly/Belmont-GA-task-applications-maven", true);
 		}
 	}
 
@@ -155,23 +172,21 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 * @param taskExecutionCount the number of expected task executions.
 	 * @return true if they are complete else false.
 	 */
-	protected boolean waitForTaskToComplete(String taskDefinitionName,
-			int taskExecutionCount) {
+	protected boolean waitForTaskToComplete(String taskDefinitionName, int taskExecutionCount) {
 		long timeout = System.currentTimeMillis() + (
 				configurationProperties.getMaxWaitTime() * 1000);
 		boolean isComplete = false;
 		while (!isComplete && System.currentTimeMillis() < timeout) {
 			try {
-				Thread.sleep(500);
+				Thread.sleep(5000);
 			}
 			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 				throw new IllegalStateException(e.getMessage(), e);
 			}
-			List<TaskExecutionResource> taskExecutionResources =
-					getTaskExecutionResource(taskDefinitionName);
 
-			if (taskExecutionResources.size() > taskExecutionCount - 1) {
+			List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
+			if (taskExecutionResources.size() >= taskExecutionCount) {
 				isComplete = true;
 				for (TaskExecutionResource taskExecutionResource : taskExecutionResources) {
 					isComplete = (taskExecutionResource != null && taskExecutionResource.getEndTime() != null);
