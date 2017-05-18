@@ -187,6 +187,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * Destroys all streams registered with the Spring Cloud Data Flow instance.
 	 */
 	protected void destroyStreams() {
+		streamOperations.undeployAll();
 		for(Stream stream : streams) {
 			streamOperations.destroy(stream.getStreamName());
 		}
@@ -198,6 +199,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @param stream the stream object containing the stream definition.
 	 */
 	protected void deployStream(Stream stream) {
+		logger.info("Deploying stream '" + stream.getStreamName() + "'");
 		streamOperations.createStream(stream.getStreamName(),stream.getDefinition(), false);
 		Map<String, String> streamProperties = new HashMap<>();
 		streamProperties.put("app.*.logging.file", platformHelper.getLogfileName());
@@ -302,20 +304,20 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	}
 
 	/**
-	 * Waits the specified period of time for an entry to appear in the log of
+	 * Waits the specified period of time for an entry to appear in the logfile of
 	 * the specified app.
-	 * @param app the app that is being monitored for a specific entry in its log.
-	 * @param entry the value being monitored for in the log.
+	 * @param app the app that is being monitored for a specific entry.
+	 * @param entry the value being monitored for.
 	 * @return
 	 */
-	protected boolean waitForLogEntry(Application app,
-			String entry) {
+	protected boolean waitForLogEntry(Application app, String entry) {
+		logger.info("Looking for '" + entry + "' in logfile for " + app.getDefinition());
 		long timeout = System.currentTimeMillis() + (
 				configurationProperties.getMaxWaitTime() * 1000);
 		boolean exists = false;
 		while (!exists && System.currentTimeMillis() < timeout) {
 			try {
-				Thread.sleep(5000);
+				Thread.sleep(configurationProperties.getDeployPauseTime() * 1000);
 			}
 			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
@@ -324,10 +326,13 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			String log = getLog(app);
 			if (log != null) {
 				exists = log.contains(entry);
-				if (exists) {
-					logger.info("Matched '" + entry + "' for " +app.getDefinition());
-				}
 			}
+		}
+		if (exists) {
+			logger.info("Matched '" + entry + "' in logfile for " +app.getDefinition());
+		}
+		else {
+			logger.error("ERROR: Couldn't find '" + entry + "' in logfile for " +app.getDefinition());
 		}
 		return exists;
 	}
