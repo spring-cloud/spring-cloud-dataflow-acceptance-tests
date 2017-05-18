@@ -47,7 +47,9 @@ import org.springframework.web.client.RestTemplate;
  * Abstract base class that is used by stream acceptance tests. This class contains
  * commonly used utility methods for acceptance tests as well as the ability to dump logs
  * of apps when a stream acceptance test fails.
+ *
  * @author Glenn Renfro
+ * @author Vinicius Carvalho
  */
 @RunWith(SpringRunner.class)
 @EnableConfigurationProperties(TestConfigurationProperties.class)
