@@ -13,6 +13,6 @@ function java_jar() {
     $(netcat_port localhost 9393)
     return 0
 }
-export APPLICATION_ARGS="$APPLICATION_ARGS --spring.cloud.dataflow.applicationProperties.stream.security.basic.enabled=false --spring.cloud.dataflow.applicationProperties.stream.management.security.enabled=false"
+export APPLICATION_ARGS="$APPLICATION_ARGS --spring.cloud.dataflow.applicationProperties.stream.security.basic.enabled=false"
 download $PWD
 java_jar $PWD
