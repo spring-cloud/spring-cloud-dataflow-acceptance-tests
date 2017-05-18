@@ -28,11 +28,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties
 public class TestConfigurationProperties {
 
-	private int maxWaitTime = 30;
+	private int maxWaitTime = 120;
 
 	private String binder = "RABBIT";
 
-	private int deployPauseRetries = 25;
+	private int deployPauseRetries = 30;
 
 	private int deployPauseTime = 5;
 

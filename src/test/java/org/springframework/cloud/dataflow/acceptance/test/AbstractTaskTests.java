@@ -178,7 +178,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 		boolean isComplete = false;
 		while (!isComplete && System.currentTimeMillis() < timeout) {
 			try {
-				Thread.sleep(5000);
+				Thread.sleep(configurationProperties.getDeployPauseTime() * 1000);
 			}
 			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
