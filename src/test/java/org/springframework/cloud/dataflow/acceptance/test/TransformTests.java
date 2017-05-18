@@ -20,6 +20,8 @@ import org.junit.Test;
 
 import org.springframework.cloud.dataflow.acceptance.test.util.Stream;
 
+import static org.junit.Assert.assertTrue;
+
 /**
  * Executes acceptance tests for the transform processor app as a part of a stream.
  * @author Glenn Renfro
@@ -40,8 +42,10 @@ public class TransformTests extends AbstractStreamTests{
 
 		deployStream(stream);
 
+		assertTrue("Source not started", waitForLogEntry(stream.getSource(), "Started HttpSource"));
 		httpPostData(stream.getSource(), "abcdefg");
-		waitForLogEntry(stream.getSink(), "ABCDEFG");
+		assertTrue("Sink not started", waitForLogEntry(stream.getSink(), "Started LogSink"));
+		assertTrue("No output found", waitForLogEntry(stream.getSink(), "ABCDEFG"));
 	}
 
 }
