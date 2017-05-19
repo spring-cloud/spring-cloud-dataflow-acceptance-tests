@@ -18,7 +18,8 @@ package org.springframework.cloud.dataflow.acceptance.test;
 
 import org.junit.Test;
 
-import org.springframework.cloud.dataflow.acceptance.test.util.Stream;
+
+import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
 
 import static org.junit.Assert.assertTrue;
 
@@ -26,20 +27,20 @@ import static org.junit.Assert.assertTrue;
  * Executes acceptance tests for the ticktock demo.
  * @author Glenn Renfro
  * @author Thomas Risberg
+ * @author Vinicius Carvalho
  */
 
 public class TickTockTests extends AbstractStreamTests {
 
 	@Test
 	public void tickTockTests() {
-		Stream stream = getStream("TICKTOCK");
-		stream.setSink("log");
-		stream.setSource("time");
-		stream.setDefinition(stream.getSource() + " | " +stream.getSink());
+		StreamDefinition stream = StreamDefinition.builder("TICKTOCK")
+				.definition("time | log").build();
+
 		deployStream(stream);
-		assertTrue("Source not started", waitForLogEntry(stream.getSource(), "Started TimeSource"));
-		assertTrue("Sink not started", waitForLogEntry(stream.getSink(), "Started LogSink"));
-		assertTrue("No output found", waitForLogEntry(stream.getSink(), "time.TICKTOCK-"));
+		assertTrue("Source not started", waitForLogEntry(stream.getApplication("time"), "Started TimeSource"));
+		assertTrue("Sink not started", waitForLogEntry(stream.getApplication("log"), "Started LogSink"));
+		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "time.TICKTOCK-"));
 	}
 
 }

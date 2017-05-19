@@ -15,7 +15,7 @@ public class StreamDefinition {
 	private String name;
 	private String definition;
 	private Map<String,String> deploymentProperties = new HashMap<>();
-	private Map<String,StreamAppDefinition> applications = new HashMap<>();
+	private Map<String,Application> applications = new HashMap<>();
 
 	private StreamDefinition(){}
 
@@ -24,23 +24,35 @@ public class StreamDefinition {
 		this.definition = builder.definition;
 		this.deploymentProperties = builder.deploymentProperties;
 		for(StreamAppDefinition appDefinition : new org.springframework.cloud.dataflow.core.StreamDefinition(name,definition).getAppDefinitions()){
-			this.applications.put(appDefinition.getRegisteredAppName(),appDefinition);
+			this.applications.put(appDefinition.getRegisteredAppName(),new Application(appDefinition.getRegisteredAppName()));
 		}
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getDefinition() {
+		return definition;
+	}
+
+	public Map<String, String> getDeploymentProperties() {
+		return deploymentProperties;
 	}
 
 	public static StreamDefinitionBuilder builder(String name){
 		return new StreamDefinitionBuilder(name);
 	}
 
-	public Collection<StreamAppDefinition> getApplications(){
+	public Collection<Application> getApplications(){
 		return applications.values();
 	}
 
-	public StreamAppDefinition getApplication(String name){
+	public Application getApplication(String name){
 		return applications.get(name);
 	}
 
-	static class StreamDefinitionBuilder {
+	public static class StreamDefinitionBuilder {
 
 		private String name;
 		private String definition;

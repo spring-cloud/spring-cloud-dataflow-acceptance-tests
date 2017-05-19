@@ -40,7 +40,7 @@ public class TestConfigurationProperties {
 
 	private String serverUri = "http://localhost:9393";
 
-	private String platformType = "LOCAL";
+	private String platformType = "local";
 
 	private String platformSuffix = "local.pcfdev.io";
 

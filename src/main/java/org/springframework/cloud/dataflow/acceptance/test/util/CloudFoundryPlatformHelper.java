@@ -37,19 +37,19 @@ public class CloudFoundryPlatformHelper implements PlatformHelper {
 	}
 
 	@Override
-	public void setUrisForStream(Stream stream) {
+	public void setUrisForStream(StreamDefinition stream) {
 		Iterator<AppStatusResource> statsIterator = operations.status().iterator();
-		while (statsIterator.hasNext()) {
-			AppStatusResource appStatus = statsIterator.next();
-			setUriForApplication(stream.getStreamName(), cfSuffix, stream.getSource(),
-					appStatus);
-			setUriForApplication(stream.getStreamName(), cfSuffix, stream.getSink(),
-					appStatus);
-			for (Application processor : stream.getProcessors().values()) {
-				setUriForApplication(stream.getStreamName(), cfSuffix, processor,
-						appStatus);
-			}
-		}
+//		while (statsIterator.hasNext()) {
+//			AppStatusResource appStatus = statsIterator.next();
+//			setUriForApplication(stream.getName(), cfSuffix, stream.getSource(),
+//					appStatus);
+//			setUriForApplication(stream.getName(), cfSuffix, stream.getSink(),
+//					appStatus);
+//			for (Application processor : stream.getProcessors().values()) {
+//				setUriForApplication(stream.getStreamName(), cfSuffix, processor,
+//						appStatus);
+//			}
+//		}
 	}
 
 	@Override
