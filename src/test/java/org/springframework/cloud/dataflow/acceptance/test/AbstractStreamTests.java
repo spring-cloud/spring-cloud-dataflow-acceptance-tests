@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestWatcher;
@@ -161,10 +162,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * Destroys all streams registered with the Spring Cloud Data Flow instance.
 	 */
 	protected void destroyStreams() {
-		streamOperations.undeployAll();
-		for(StreamDefinition stream : streams) {
-			streamOperations.destroy(stream.getName());
-		}
+		streamOperations.destroyAll();
 		streams.clear();
 	}
 
@@ -178,6 +176,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		Map<String, String> streamProperties = new HashMap<>();
 		streamProperties.put("app.*.logging.file", platformHelper.getLogfileName());
 		streamProperties.put("app.*.endpoints.logfile.sensitive", "false");
+
 		streamProperties.putAll(stream.getDeploymentProperties());
 		streamOperations.deploy(stream.getName(), streamProperties);
 		streamAvailable(stream.getName());

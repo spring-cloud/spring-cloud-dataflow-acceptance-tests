@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.acceptance.test;
 
 import org.junit.Test;
 
+import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
+
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -30,35 +32,36 @@ public class TapTests extends AbstractStreamTests{
 
 	@Test
 	public void testDestination() {
-//		Stream logStream = getStream("DESTINATION1");
-//		logStream.setSink("log");
-//		logStream.setDefinition(":DESTINATION1 " + " > " +logStream.getSink());
-//		deployStream(logStream);
-//
-//		Stream timeStream = getStream("DESTINATION2");
-//		timeStream.setSource("time");
-//		timeStream.setDefinition(timeStream.getSource() + " > :DESTINATION1");
-//		deployStream(timeStream);
-//
-//		assertTrue("Sink not started", waitForLogEntry(logStream.getSink(), "Started LogSink"));
-//		assertTrue("No output found", waitForLogEntry(logStream.getSink(), ".DESTINATION1-"));
+		StreamDefinition logStream = StreamDefinition.builder("DESTINATION1")
+				.definition(":DESTINATION1 > log")
+				.build();
+		deployStream(logStream);
+
+		StreamDefinition timeStream = StreamDefinition.builder("DESTINATION2")
+				.definition("time > :DESTINATION1")
+				.build();
+		deployStream(timeStream);
+
+
+		assertTrue("Sink not started", waitForLogEntry(logStream.getApplication("log"), "Started LogSink"));
+		assertTrue("No output found", waitForLogEntry(logStream.getApplication("log"), ".DESTINATION1-"));
+
 	}
 
 	@Test
 	public void tapTests() {
-//		Stream stream = getStream("TAPTOCK");
-//		stream.setSink("log");
-//		stream.setSource("time");
-//		stream.setDefinition(stream.getSource() + " | " +stream.getSink());
-//		deployStream(stream);
-//
-//		Stream tapStream = getStream("TAPSTREAM");
-//		tapStream.setSink("log");
-//		tapStream.setDefinition(" :TAPTOCK.time > " +tapStream.getSink());
-//		deployStream(tapStream);
-//
-//		assertTrue("Sink not started", waitForLogEntry(tapStream.getSink(), "Started LogSink"));
-//		assertTrue("No output found", waitForLogEntry(tapStream.getSink(), "time.TAPSTREAM-"));
+		StreamDefinition stream = StreamDefinition.builder("TAPTOCK")
+				.definition("time | log")
+				.build();
+		deployStream(stream);
+
+		StreamDefinition tapStream = StreamDefinition.builder("TAPSTREAM")
+				.definition(":TAPTOCK.time > log")
+				.build();
+		deployStream(tapStream);
+		assertTrue("Sink not started", waitForLogEntry(tapStream.getApplication("log"), "Started LogSink"));
+		assertTrue("No output found", waitForLogEntry(tapStream.getApplication("log"), "time.TAPSTREAM-"));
+
 	}
 
 }
