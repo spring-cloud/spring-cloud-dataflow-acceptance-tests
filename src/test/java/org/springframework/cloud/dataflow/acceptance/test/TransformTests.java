@@ -18,34 +18,31 @@ package org.springframework.cloud.dataflow.acceptance.test;
 
 import org.junit.Test;
 
-import org.springframework.cloud.dataflow.acceptance.test.util.Stream;
+import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
 
 import static org.junit.Assert.assertTrue;
 
 /**
  * Executes acceptance tests for the transform processor app as a part of a stream.
  * @author Glenn Renfro
+ * @author Vinicius Carvalho
  */
 public class TransformTests extends AbstractStreamTests{
 	@Test
 	public void transformTests() throws Exception{
 		final String PROCESSOR_NAME = "transform1";
-		Stream stream = getStream("TRANSFORM-TEST");
-		stream.setSink("log");
-		stream.setSource("http");
-		stream.addProcessor(PROCESSOR_NAME,
-				"transform --expression=payload.toUpperCase()");
 
-		stream.setDefinition(stream.getSource() + " | " +
-				stream.getProcessors().get(PROCESSOR_NAME) + " | "
-				+ stream.getSink());
+		StreamDefinition stream = StreamDefinition.builder("TRANSFORM-TEST")
+				.definition("http | transform --expression=payload.toUpperCase() | log")
+				.build();
+
 
 		deployStream(stream);
 
-		assertTrue("Source not started", waitForLogEntry(stream.getSource(), "Started HttpSource"));
-		httpPostData(stream.getSource(), "abcdefg");
-		assertTrue("Sink not started", waitForLogEntry(stream.getSink(), "Started LogSink"));
-		assertTrue("No output found", waitForLogEntry(stream.getSink(), "ABCDEFG"));
+		assertTrue("Source not started", waitForLogEntry(stream.getApplication("http"), "Started HttpSource"));
+		httpPostData(stream.getApplication("http"), "abcdefg");
+		assertTrue("Sink not started", waitForLogEntry(stream.getApplication("log"), "Started LogSink"));
+		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "ABCDEFG"));
 	}
 
 }
