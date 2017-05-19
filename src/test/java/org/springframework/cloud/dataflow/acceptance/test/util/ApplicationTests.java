@@ -35,11 +35,13 @@ public class ApplicationTests {
 		application.setUri(DEFAULT_URI);
 		validateApplication(application, "BAR", 	DEFAULT_URI);
 	}
+
 	@Test
 	public void testApplicationParam() {
 		Application application = new Application("BAR --BAZ=FOO");
 		application.setUri(DEFAULT_URI);
 		validateApplication(application, "BAR --BAZ=FOO", DEFAULT_URI);
+		assertEquals("BAR", application.getName());
 	}
 
 	private void validateApplication(Application application, String definition, String uri) {

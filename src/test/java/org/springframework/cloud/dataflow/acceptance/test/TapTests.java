@@ -32,7 +32,7 @@ public class TapTests extends AbstractStreamTests{
 	@Test
 	public void testDestination() {
 		Stream logStream = getStream("DESTINATION1");
-		logStream.setSink("log");
+		logStream.setSink("log --log.expression='\"DESTINATION1 - TIMESTAMP: \".concat(payload)'");
 		logStream.setDefinition(":DESTINATION1 " + " > " +logStream.getSink());
 		deployStream(logStream);
 
@@ -42,7 +42,7 @@ public class TapTests extends AbstractStreamTests{
 		deployStream(timeStream);
 
 		assertTrue("Sink not started", waitForLogEntry(logStream.getSink(), "Started LogSink"));
-		assertTrue("No output found", waitForLogEntry(logStream.getSink(), ".DESTINATION1-"));
+		assertTrue("No output found", waitForLogEntry(logStream.getSink(), "DESTINATION1 - TIMESTAMP:"));
 	}
 
 	@Test
@@ -54,12 +54,12 @@ public class TapTests extends AbstractStreamTests{
 		deployStream(stream);
 
 		Stream tapStream = getStream("TAPSTREAM");
-		tapStream.setSink("log");
+		tapStream.setSink("log --log.expression='\"TAPSTREAM - TIMESTAMP: \".concat(payload)'");
 		tapStream.setDefinition(" :TAPTOCK.time > " +tapStream.getSink());
 		deployStream(tapStream);
 
 		assertTrue("Sink not started", waitForLogEntry(tapStream.getSink(), "Started LogSink"));
-		assertTrue("No output found", waitForLogEntry(tapStream.getSink(), "time.TAPSTREAM-"));
+		assertTrue("No output found", waitForLogEntry(tapStream.getSink(), "TAPSTREAM - TIMESTAMP:"));
 	}
 
 }
