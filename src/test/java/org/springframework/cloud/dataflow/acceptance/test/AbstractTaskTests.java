@@ -24,6 +24,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -57,6 +59,8 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	protected TaskOperations taskOperations;
 
 	protected AppRegistryOperations appRegistryOperations;
+
+	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskTests.class);
 
 	@Autowired
 	TestConfigurationProperties configurationProperties;
@@ -133,14 +137,8 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 * Imports the proper apps required for the acceptance tests.
 	 */
 	protected void registerApps() {
-		if(StringUtils.hasText(configurationProperties.getRegistrationResource())){
-			appRegistryOperations.importFromResource(
-					configurationProperties.getRegistrationResource(), true);
-		}
-		else {
-			appRegistryOperations.importFromResource(
-					"http://bit.ly/Belmont-GA-task-applications-maven", true);
-		}
+		logger.info(String.format("Importing task apps from uri resource: %s",configurationProperties.getTaskRegistrationResource()));
+		appRegistryOperations.importFromResource(configurationProperties.getTaskRegistrationResource(), true);
 	}
 
 	/**

@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.acceptance.test.util;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Properties that are required by the acceptance tests to connect to
  * a Spring Cloud Data Flow Server and the associated binder.
@@ -42,7 +44,11 @@ public class TestConfigurationProperties {
 
 	private String platformSuffix = "local.pcfdev.io";
 
-	private String registrationResource;
+	@NotNull(message = "You must specify a STREAM_REGISTRATION_RESOURCE url value")
+	private String streamRegistrationResource;
+
+	@NotNull(message = "You must specify a TASK_REGISTRATION_RESOURCE url value")
+	private String taskRegistrationResource;
 
 	public int getMaxWaitTime() {
 		return maxWaitTime;
@@ -100,11 +106,19 @@ public class TestConfigurationProperties {
 		this.platformSuffix = platformSuffix;
 	}
 
-	public String getRegistrationResource() {
-		return registrationResource;
+	public String getStreamRegistrationResource() {
+		return streamRegistrationResource;
 	}
 
-	public void setRegistrationResource(String registrationResource) {
-		this.registrationResource = registrationResource;
+	public void setStreamRegistrationResource(String streamRegistrationResource) {
+		this.streamRegistrationResource = streamRegistrationResource;
+	}
+
+	public String getTaskRegistrationResource() {
+		return taskRegistrationResource;
+	}
+
+	public void setTaskRegistrationResource(String taskRegistrationResource) {
+		this.taskRegistrationResource = taskRegistrationResource;
 	}
 }

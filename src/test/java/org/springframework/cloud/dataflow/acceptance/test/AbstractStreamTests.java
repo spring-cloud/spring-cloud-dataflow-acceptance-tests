@@ -210,10 +210,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	}
 
 	protected void registerApps() {
-		Assert.hasText(configurationProperties.getRegistrationResource(),
-				"You need to specify the REGISTRATION_RESOURCE variable in order to deploy the correct apps");
-		logger.info(String.format("Importing apps from uri resource: %s",configurationProperties.getRegistrationResource()));
-		appRegistryOperations.importFromResource(configurationProperties.getRegistrationResource(), true);
+		logger.info(String.format("Importing stream apps from uri resource: %s",configurationProperties.getStreamRegistrationResource()));
+		appRegistryOperations.importFromResource(configurationProperties.getStreamRegistrationResource(), true);
 	}
 
 	/**
