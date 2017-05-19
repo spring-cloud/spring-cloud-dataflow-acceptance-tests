@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -49,6 +50,7 @@ import org.springframework.web.client.RestTemplate;
  * ability to dump logs of apps when a stream acceptance test fails.
  * @author Glenn Renfro
  * @author Thomas Risberg
+ * @author Vinicius Carvalho
  */
 @RunWith(SpringRunner.class)
 @EnableConfigurationProperties(TestConfigurationProperties.class)
@@ -205,30 +207,11 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		platformHelper.setUrisForStream(stream);
 	}
 
-	/**
-	 * Imports the proper apps required for the acceptance tests based on
-	 * which binder has been selected (RABBIT, KAFKA).
-	 */
 	protected void registerApps() {
-		if(StringUtils.hasText(configurationProperties.getRegistrationResource())){
-			appRegistryOperations.importFromResource(
-					configurationProperties.getRegistrationResource(), true);
-		}
-		else if(configurationProperties.getBinder().equals(RABBIT_BINDER)) {
-			appRegistryOperations.importFromResource(
-					"http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven", true);
-		}
-		else if (configurationProperties.getBinder().equals(KAFKA_BINDER)) {
-			appRegistryOperations.importFromResource(
-					"http://bit.ly/stream-applications-kafka-maven", true);
-		}
-		else {
-			throw new IllegalStateException(String.format(
-					"Binder type of \"%s\" is invalid.   Only valid types are "
-					+ "\"%s\" and \"%s\" ", configurationProperties.getBinder(),
-					RABBIT_BINDER, KAFKA_BINDER));
-
-		}
+		Assert.hasText(configurationProperties.getRegistrationResource(),
+				"You need to specify the REGISTRATION_RESOURCE variable in order to deploy the correct apps");
+		logger.info(String.format("Importing apps from uri resource: %s",configurationProperties.getRegistrationResource()));
+		appRegistryOperations.importFromResource(configurationProperties.getRegistrationResource(), true);
 	}
 
 	/**
