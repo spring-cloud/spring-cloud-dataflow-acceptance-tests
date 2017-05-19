@@ -49,15 +49,15 @@ public class TimestampTaskTests extends AbstractTaskTests {
 	@Test
 	public void taskNoLaunch() {
 		taskOperations.create("task-foobar", "timestamp");
-		waitForTaskToComplete("task-foobar", 1); // this should time out
-		assertTrue(waitForTaskToComplete("task-foobar", 0));
+		waitForTaskToComplete("task-foobar", 1, true); // this should time out
+		assertTrue(waitForTaskToComplete("task-foobar", 0,false));
 	}
 
 	private void assertTaskExecutions(String taskDefinitionName,
 			int expectedExitCode, int expectedCount) {
 		List<TaskExecutionResource> taskExecutionResources =
 				getTaskExecutionResource(taskDefinitionName);
-		assertTrue(waitForTaskToComplete(taskDefinitionName, expectedCount));
+		assertTrue(waitForTaskToComplete(taskDefinitionName, expectedCount, false));
 
 		for(TaskExecutionResource taskExecutionResource : taskExecutionResources) {
 			assertEquals(expectedExitCode, taskExecutionResource.getExitCode());

@@ -172,7 +172,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 * @param taskExecutionCount the number of expected task executions.
 	 * @return true if they are complete else false.
 	 */
-	protected boolean waitForTaskToComplete(String taskDefinitionName, int taskExecutionCount) {
+	protected boolean waitForTaskToComplete(String taskDefinitionName, int taskExecutionCount, boolean testOnlyOnce) {
 		long timeout = System.currentTimeMillis() + (
 				configurationProperties.getMaxWaitTime() * 1000);
 		boolean isComplete = false;
@@ -194,6 +194,9 @@ public abstract class AbstractTaskTests implements InitializingBean {
 						break;
 					}
 				}
+			}
+			if (testOnlyOnce) {
+				break;
 			}
 		}
 		return isComplete;
