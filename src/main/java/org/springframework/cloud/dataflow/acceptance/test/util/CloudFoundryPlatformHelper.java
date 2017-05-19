@@ -61,7 +61,7 @@ public class CloudFoundryPlatformHelper implements PlatformHelper {
 			Application application, AppStatusResource appStatus) {
 		if (application != null
 				&& appStatus.getDeploymentId().contains(streamName)
-				&& appStatus.getDeploymentId().contains(getAppName(application.getDefinition()))) {
+				&& appStatus.getDeploymentId().contains(getAppName(application.getName()))) {
 			application.setUri(String.format("http://%s.%s",
 					appStatus.getDeploymentId(), cfSuffix));
 		}

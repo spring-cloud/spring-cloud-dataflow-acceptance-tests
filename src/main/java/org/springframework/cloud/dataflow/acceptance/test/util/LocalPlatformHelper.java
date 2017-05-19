@@ -61,7 +61,7 @@ public class LocalPlatformHelper implements PlatformHelper {
 		while (statsIterator.hasNext()) {
 			appStatus = statsIterator.next();
 			if (appStatus.getDeploymentId().contains(streamName)
-					&& appStatus.getDeploymentId().contains((application.getDefinition()))){
+					&& appStatus.getDeploymentId().contains((application.getName()))){
 				Iterator<AppInstanceStatusResource> resourceIterator =
 						appStatus.getInstances().iterator();
 				while (resourceIterator.hasNext()) {

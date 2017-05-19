@@ -33,13 +33,13 @@ public class TickTockTests extends AbstractStreamTests {
 	@Test
 	public void tickTockTests() {
 		Stream stream = getStream("TICKTOCK");
-		stream.setSink("log");
+		stream.setSink("log --log.expression='\"TICKTOCK - TIMESTAMP: \".concat(payload)'");
 		stream.setSource("time");
 		stream.setDefinition(stream.getSource() + " | " +stream.getSink());
 		deployStream(stream);
 		assertTrue("Source not started", waitForLogEntry(stream.getSource(), "Started TimeSource"));
 		assertTrue("Sink not started", waitForLogEntry(stream.getSink(), "Started LogSink"));
-		assertTrue("No output found", waitForLogEntry(stream.getSink(), "time.TICKTOCK-"));
+		assertTrue("No output found", waitForLogEntry(stream.getSink(), "TICKTOCK - TIMESTAMP:"));
 	}
 
 }

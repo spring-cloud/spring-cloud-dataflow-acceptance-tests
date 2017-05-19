@@ -285,7 +285,9 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		String log = null;
 		try {
 			log = restTemplate.getForObject(logFileUrl, String.class);
-		} catch (HttpClientErrorException e) {}
+		} catch (Exception e) {
+			logger.warn("Error getting log for '" + logFileUrl + "': " + e.getMessage());
+		}
 		return log;
 	}
 
@@ -309,7 +311,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @return
 	 */
 	protected boolean waitForLogEntry(Application app, String entry) {
-		logger.info("Looking for '" + entry + "' in logfile for " + app.getDefinition());
+		logger.info("Looking for '" + entry + "' in logfile for " + app.getName());
 		long timeout = System.currentTimeMillis() + (
 				configurationProperties.getMaxWaitTime() * 1000);
 		boolean exists = false;
@@ -327,10 +329,10 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			}
 		}
 		if (exists) {
-			logger.info("Matched '" + entry + "' in logfile for " +app.getDefinition());
+			logger.info("Matched '" + entry + "' in logfile for " +app.getName());
 		}
 		else {
-			logger.error("ERROR: Couldn't find '" + entry + "' in logfile for " +app.getDefinition());
+			logger.error("ERROR: Couldn't find '" + entry + "' in logfile for " +app.getName());
 		}
 		return exists;
 	}

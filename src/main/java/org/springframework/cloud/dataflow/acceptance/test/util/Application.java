@@ -63,4 +63,18 @@ public class Application {
 	public String toString() {
 		return this.definition;
 	}
+
+	/**
+	 * Retrieve the app name for this application.
+	 * @return app name parsed from definition
+	 */
+	public String getName() {
+		if (definition.contains(" ")) {
+			return this.definition.substring(0, this.definition.indexOf(" "));
+		}
+		else {
+			return this.definition;
+		}
+	}
+
 }
