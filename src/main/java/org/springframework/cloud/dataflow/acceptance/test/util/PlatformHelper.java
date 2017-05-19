@@ -20,6 +20,7 @@ package org.springframework.cloud.dataflow.acceptance.test.util;
  * Methods that help retrieve app uri information for a specific platform.
  * @author Glenn Renfro
  * @author Thomas Risberg
+ * @author Vinicius Carvalho
  */
 public interface PlatformHelper {
 
@@ -27,7 +28,7 @@ public interface PlatformHelper {
 	 * Identifies and sets the uri for each app in a stream.
 	 * @param stream the stream to augment.
 	 */
-	void setUrisForStream(Stream stream);
+	void setUrisForStream(StreamDefinition stream);
 
 	/**
 	 * Returns the logfile name to use.

@@ -20,7 +20,7 @@ import java.util.UUID;
 
 import org.junit.Test;
 
-import org.springframework.cloud.dataflow.acceptance.test.util.Stream;
+import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
 
 import static org.junit.Assert.assertTrue;
 
@@ -28,22 +28,22 @@ import static org.junit.Assert.assertTrue;
  * Executes acceptance tests for the http source app as a part of a stream.
  * @author Glenn Renfro
  * @author Thomas Risberg
+ * @author Vinicius Carvalho
  */
 
 public class HttpSourceTests extends AbstractStreamTests {
 
 	@Test
 	public void httpSourceTests() throws Exception{
-		Stream stream = getStream("HTTP-TEST");
-		stream.setSink("log");
-		stream.setSource("http");
-		stream.setDefinition(stream.getSource() + " | " +stream.getSink());
+		StreamDefinition stream = StreamDefinition.builder("HTTP-TEST")
+				.definition("http | log")
+				.build();
 		deployStream(stream);
 		String testVal = UUID.randomUUID().toString();
-		assertTrue("Source not started", waitForLogEntry(stream.getSource(), "Started HttpSource"));
-		httpPostData(stream.getSource(), testVal);
-		assertTrue("Sink not started", waitForLogEntry(stream.getSink(), "Started LogSink"));
-		assertTrue("No output found", waitForLogEntry(stream.getSink(), testVal));
+		assertTrue("Source not started", waitForLogEntry(stream.getApplication("http"), "Started HttpSource"));
+		httpPostData(stream.getApplication("http"), testVal);
+		assertTrue("Sink not started", waitForLogEntry(stream.getApplication("log"), "Started LogSink"));
+		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), testVal));
 	}
 
 }

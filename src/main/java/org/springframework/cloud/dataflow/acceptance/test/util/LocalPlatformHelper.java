@@ -26,6 +26,7 @@ import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 /**
  * @author Glenn Renfro
  * @author Thomas Risberg
+ * @author Vinicius Carvalho
  */
 public class LocalPlatformHelper implements PlatformHelper {
 
@@ -38,15 +39,9 @@ public class LocalPlatformHelper implements PlatformHelper {
 	}
 
 	@Override
-	public void setUrisForStream(Stream stream) {
-		if(stream.getSource() != null) {
-			setAppUri(stream.getStreamName(), stream.getSource());
-		}
-		if(stream.getSink() != null) {
-			setAppUri(stream.getStreamName(), stream.getSink());
-		}
-		for (Application processor : stream.getProcessors().values()) {
-			setAppUri(stream.getStreamName(), processor);
+	public void setUrisForStream(StreamDefinition streamDefinition) {
+		for(Application application : streamDefinition.getApplications()){
+			setAppUri(streamDefinition.getName(),application);
 		}
 	}
 

@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestWatcher;
@@ -40,7 +41,6 @@ import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -90,7 +90,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 	private RuntimeOperations runtimeOperations;
 
-	private List<Stream> streams = new ArrayList<>();
+	private List<StreamDefinition> streams = new ArrayList<>();
 
 	private static final Logger logger =
 			LoggerFactory.getLogger(AbstractStreamTests.class);
@@ -107,36 +107,11 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		@Override
 		protected void failed(Throwable e, Description description) {
 			logger.warn(">>>>>>>>>>Test Failed Dumping App Logs<<<<<<<<<");
-			for (Stream stream : streams) {
-				if (stream.getSink() != null) {
-					logger.warn(">>>>>>>> Dumping Sink Log <<<<<<<<<");
-					try {
-						logger.warn(getLog(stream.getSink()));
-					}
-					catch (Exception exception) {
-						logger.warn("Failed to get log for sink because: ", exception);
-					}
-				}
-				for (String key : stream.getProcessors().keySet()) {
-					logger.warn(">>>>>>>> Dumping Processor Log <<<<<<<<<");
-					try {
-						logger.warn(getLog(stream.getProcessors().get(key)));
-					}
-					catch (Exception exception) {
-						logger.warn("Failed to get log for processor because: ", exception);
-					}
-				}
-				if (stream.getSource() != null) {
-					logger.warn(">>>>>>>> Dumping Source Log <<<<<<<<<");
-					try {
-						logger.warn(getLog(stream.getSource()));
-					}
-					catch (Exception exception) {
-						logger.warn("Failed to get log for source because: ", exception);
-					}
+			for (StreamDefinition stream : streams) {
+				for(Application application : stream.getApplications()){
+					getLog(application);
 				}
 			}
-			logger.warn(">>>>> App Log Dump Complete <<<<<<");
 			destroyStreams();
 		}
 
@@ -187,10 +162,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * Destroys all streams registered with the Spring Cloud Data Flow instance.
 	 */
 	protected void destroyStreams() {
-		streamOperations.undeployAll();
-		for(Stream stream : streams) {
-			streamOperations.destroy(stream.getStreamName());
-		}
+		streamOperations.destroyAll();
 		streams.clear();
 	}
 
@@ -198,14 +170,16 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * Deploys the stream specified to the Spring Cloud Data Flow instance.
 	 * @param stream the stream object containing the stream definition.
 	 */
-	protected void deployStream(Stream stream) {
-		logger.info("Deploying stream '" + stream.getStreamName() + "'");
-		streamOperations.createStream(stream.getStreamName(),stream.getDefinition(), false);
+	protected void deployStream(StreamDefinition stream) {
+		logger.info("Deploying stream '" + stream.getName() + "'");
+		streamOperations.createStream(stream.getName(),stream.getDefinition(), false);
 		Map<String, String> streamProperties = new HashMap<>();
 		streamProperties.put("app.*.logging.file", platformHelper.getLogfileName());
 		streamProperties.put("app.*.endpoints.logfile.sensitive", "false");
-		streamOperations.deploy(stream.getStreamName(), streamProperties);
-		streamAvailable(stream.getStreamName());
+
+		streamProperties.putAll(stream.getDeploymentProperties());
+		streamOperations.deploy(stream.getName(), streamProperties);
+		streamAvailable(stream.getName());
 		platformHelper.setUrisForStream(stream);
 	}
 
@@ -250,17 +224,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		}
 	}
 
-	/**
-	 * Creates and initializes a stream object.  Also adds the stream to a
-	 * list of streams that will be dumped to logs if the acceptance test fails.
-	 * @param streamName the name of the stream to create.
-	 * @return initialized stream instance.
-	 */
-	protected Stream getStream(String streamName) {
-		Stream stream = new Stream(streamName);
-		streams.add(stream);
-		return stream;
-	}
+
 
 	/**
 	 * Pauses the run to for a period of seconds as specified by the the
