@@ -171,13 +171,14 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @param stream the stream object containing the stream definition.
 	 */
 	protected void deployStream(StreamDefinition stream) {
-		logger.info("Deploying stream '" + stream.getName() + "'");
+		logger.info("Creating stream '" + stream.getName() + "'");
 		streamOperations.createStream(stream.getName(),stream.getDefinition(), false);
 		Map<String, String> streamProperties = new HashMap<>();
 		streamProperties.put("app.*.logging.file", platformHelper.getLogfileName());
 		streamProperties.put("app.*.endpoints.logfile.sensitive", "false");
 
 		streamProperties.putAll(stream.getDeploymentProperties());
+		logger.info("Deploying stream '" + stream.getName() + "' with properties: " + streamProperties);
 		streamOperations.deploy(stream.getName(), streamProperties);
 		streamAvailable(stream.getName());
 		platformHelper.setUrisForStream(stream);

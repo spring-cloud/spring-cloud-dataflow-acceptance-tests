@@ -99,7 +99,7 @@ function tear_down() {
 }
 
 function run_tests() {
-   eval "./mvnw clean -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM surefire-report:report"
+   eval "./mvnw clean -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM test surefire-report:report"
 }
 
 # ======================================= FUNCTIONS END =======================================

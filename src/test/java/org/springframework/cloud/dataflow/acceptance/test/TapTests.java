@@ -34,6 +34,7 @@ public class TapTests extends AbstractStreamTests{
 	public void testDestination() {
 		StreamDefinition logStream = StreamDefinition.builder("DESTINATION1")
 				.definition(":DESTINATION1 > log")
+				.addProperty("app.log.log.expression","'DESTINATION1 - TIMESTAMP: '.concat(payload)")
 				.build();
 		deployStream(logStream);
 
@@ -42,9 +43,8 @@ public class TapTests extends AbstractStreamTests{
 				.build();
 		deployStream(timeStream);
 
-
 		assertTrue("Sink not started", waitForLogEntry(logStream.getApplication("log"), "Started LogSink"));
-		assertTrue("No output found", waitForLogEntry(logStream.getApplication("log"), ".DESTINATION1-"));
+		assertTrue("No output found", waitForLogEntry(logStream.getApplication("log"), "DESTINATION1 - TIMESTAMP:"));
 
 	}
 
@@ -57,10 +57,11 @@ public class TapTests extends AbstractStreamTests{
 
 		StreamDefinition tapStream = StreamDefinition.builder("TAPSTREAM")
 				.definition(":TAPTOCK.time > log")
+				.addProperty("app.log.log.expression","'TAPSTREAM - TIMESTAMP: '.concat(payload)")
 				.build();
 		deployStream(tapStream);
 		assertTrue("Sink not started", waitForLogEntry(tapStream.getApplication("log"), "Started LogSink"));
-		assertTrue("No output found", waitForLogEntry(tapStream.getApplication("log"), "time.TAPSTREAM-"));
+		assertTrue("No output found", waitForLogEntry(tapStream.getApplication("log"), "TAPSTREAM - TIMESTAMP:"));
 
 	}
 
