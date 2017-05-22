@@ -57,10 +57,8 @@ function netcat_port() {
 }
 
 function download(){
-  if [ ! -f "$1/scdf-server.jar" ]; then
-    echo "Downloading latest release from $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL"
-    wget $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL --progress=bar -O $1/scdf-server.jar
-  fi
+  echo "Downloading latest release from $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL"
+  wget $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL --progress=bar -O $1/scdf-server.jar
 }
 
 function run_scripts()
