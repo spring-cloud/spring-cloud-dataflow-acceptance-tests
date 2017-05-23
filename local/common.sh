@@ -7,6 +7,7 @@ function stop_docker_container() {
 
   if command_exists docker-compose; then
     docker-compose stop
+    docker-compose rm -vf
   fi
 }
 
