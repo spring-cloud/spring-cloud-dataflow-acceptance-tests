@@ -32,19 +32,19 @@ public class ApplicationTests {
 	@Test
 	public void testApplication() {
 		Application application = new Application( "BAR");
-		application.setUri(DEFAULT_URI);
+		application.setUrl(DEFAULT_URI);
 		validateApplication(application, "BAR", 	DEFAULT_URI);
 	}
 	@Test
 	public void testApplicationParam() {
 		Application application = new Application("BAR --BAZ=FOO");
-		application.setUri(DEFAULT_URI);
+		application.setUrl(DEFAULT_URI);
 		validateApplication(application, "BAR --BAZ=FOO", DEFAULT_URI);
 	}
 
 	private void validateApplication(Application application, String definition, String uri) {
 		assertEquals(definition, application.getDefinition());
-		assertEquals(uri, application.getUri());
+		assertEquals(uri, application.getUrl());
 	}
 
 }

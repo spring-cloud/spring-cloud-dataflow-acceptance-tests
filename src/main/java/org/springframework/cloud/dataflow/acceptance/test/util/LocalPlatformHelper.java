@@ -16,60 +16,19 @@
 
 package org.springframework.cloud.dataflow.acceptance.test.util;
 
-
-import java.util.Iterator;
-
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
-import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
-import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 
 /**
- * @author Glenn Renfro
  * @author Thomas Risberg
- * @author Vinicius Carvalho
  */
-public class LocalPlatformHelper implements PlatformHelper {
-
-	private final String URL = "url";
-
-	private RuntimeOperations operations;
+public class LocalPlatformHelper extends AbstractPlatformHelper {
 
 	public LocalPlatformHelper(RuntimeOperations operations) {
-		this.operations = operations;
-	}
-
-	@Override
-	public void setUrisForStream(StreamDefinition streamDefinition) {
-		for(Application application : streamDefinition.getApplications()){
-			setAppUri(streamDefinition.getName(),application);
-		}
+		super(operations);
 	}
 
 	@Override
 	public String getLogfileName() {
 		return "${PID}";
 	}
-
-	private void setAppUri(String streamName, Application application) {
-		Iterator<AppStatusResource> statsIterator = operations.status().iterator();
-		AppStatusResource appStatus;
-		while (statsIterator.hasNext()) {
-			appStatus = statsIterator.next();
-			if (appStatus.getDeploymentId().contains(streamName)
-					&& appStatus.getDeploymentId().contains((application.getDefinition()))){
-				Iterator<AppInstanceStatusResource> resourceIterator =
-						appStatus.getInstances().iterator();
-				while (resourceIterator.hasNext()) {
-					AppInstanceStatusResource resource = resourceIterator.next();
-					if (resource.getAttributes().containsKey(URL)) {
-						application.setUri(resource.getAttributes().get(URL));
-						break;
-					}
-				}
-				break;
-			}
-		}
-	}
-
-
 }
