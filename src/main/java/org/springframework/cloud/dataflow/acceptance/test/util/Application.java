@@ -24,7 +24,7 @@ package org.springframework.cloud.dataflow.acceptance.test.util;
  */
 public class Application {
 
-	protected String uri;
+	protected String url;
 	protected String definition;
 
 	/**
@@ -39,25 +39,36 @@ public class Application {
 
 	/**
 	 * Retrieve the definition for this application.
-	 * @return
+	 * @return the definition
 	 */
 	public String getDefinition () {
 		return this.definition;
 	}
 
 	/**
-	 * The host where the application can be reached.
-	 * @param uri
+	 * Retrieve the name of the app for this definition.
+	 * @return name of app
 	 */
-	public void setUri(String uri) {
-		this.uri = uri;
+	public String getName () {
+		if (definition.trim().contains(" ")) {
+			return definition.trim().substring(0, definition.indexOf(" "));
+		}
+		return this.definition;
+	}
+
+	/**
+	 * The host where the application can be reached.
+	 * @param url
+	 */
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 	/**
 	 * Retrieve the uri for this application.
 	 */
-	public String getUri() {
-		return this.uri;
+	public String getUrl() {
+		return this.url;
 	}
 
 	public String toString() {

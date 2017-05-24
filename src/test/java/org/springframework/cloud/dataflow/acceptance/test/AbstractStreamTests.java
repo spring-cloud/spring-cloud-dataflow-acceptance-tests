@@ -21,7 +21,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestWatcher;
@@ -40,7 +39,6 @@ import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.Assert;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -57,7 +55,7 @@ import org.springframework.web.client.RestTemplate;
 public abstract class AbstractStreamTests implements InitializingBean {
 
 	public enum PlatformTypes {
-		LOCAL("local"), CLOUDFOUNDRY("cloudfoundry");
+		LOCAL("local"), CLOUDFOUNDRY("cloudfoundry"), KUBERNETES("kubernetes");
 
 		PlatformTypes(String value) {
 			this.value = value;
@@ -149,6 +147,10 @@ public abstract class AbstractStreamTests implements InitializingBean {
 					platformHelper = new CloudFoundryPlatformHelper(runtimeOperations,
 							configurationProperties.getPlatformSuffix());
 				}
+				if (configurationProperties.getPlatformType().
+						equals(PlatformTypes.KUBERNETES.getValue())) {
+					platformHelper = new KubernetesPlatformHelper(runtimeOperations);
+				}
 			}
 			catch (URISyntaxException uriException) {
 				throw new IllegalStateException(uriException);
@@ -176,12 +178,12 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		Map<String, String> streamProperties = new HashMap<>();
 		streamProperties.put("app.*.logging.file", platformHelper.getLogfileName());
 		streamProperties.put("app.*.endpoints.logfile.sensitive", "false");
+		platformHelper.addDeploymentProperties(stream, streamProperties);
 
 		streamProperties.putAll(stream.getDeploymentProperties());
 		logger.info("Deploying stream '" + stream.getName() + "' with properties: " + streamProperties);
 		streamOperations.deploy(stream.getName(), streamProperties);
-		streamAvailable(stream.getName());
-		platformHelper.setUrisForStream(stream);
+		streamAvailable(stream);
 	}
 
 	protected void registerApps() {
@@ -192,23 +194,26 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	/**
 	 * Waits for the stream to be deployed and once deployed the function
 	 * returns control else it throws an IllegalStateException.
-	 * @param streamName the name of the stream that is to be monitored.
+	 * @param stream the stream that is to be monitored.
 	 */
-	protected void streamAvailable(String streamName) {
-		boolean isStarted = false;
+	protected void streamAvailable(StreamDefinition stream) {
+		boolean streamStarted = false;
 		int attempt = 0;
 		String status = "not present";
-		while (!isStarted && attempt <
+		while (!streamStarted && attempt <
 				configurationProperties.getDeployPauseRetries()) {
 			Iterator<StreamDefinitionResource> streamIter =
 					streamOperations.list().getContent().iterator();
 			StreamDefinitionResource resource = null;
 			while (streamIter.hasNext()) {
 				resource = streamIter.next();
-				if (resource.getName().equals(streamName)) {
+				if (resource.getName().equals(stream.getName())) {
 					status = resource.getStatus();
 					if (status.equals("deployed")) {
-						isStarted = true;
+						boolean urlsAvailable = platformHelper.setUrlsForStream(stream);
+						if (urlsAvailable) {
+							streamStarted = true;
+						}
 					}
 					break;
 				}
@@ -220,7 +225,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			attempt++;
 			deploymentPause();
 		}
-		if (!isStarted) {
+		if (!streamStarted) {
 			throw new IllegalStateException("Unable to start app");
 		}
 	}
@@ -246,7 +251,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @return String containing the contents of the log or 'null' if not found.
 	 */
 	protected String getLog(Application app) {
-		String logFileUrl = String.format("%s/logfile", app.getUri());
+		String logFileUrl = String.format("%s/logfile", app.getUrl());
 		String log = null;
 		try {
 			log = restTemplate.getForObject(logFileUrl, String.class);
@@ -262,7 +267,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	protected void httpPostData(Application app, String message)
 			throws URISyntaxException {
 		restTemplate.postForObject(
-				String.format(app.getUri()),
+				String.format(app.getUrl()),
 				message, String.class);
 	}
 

@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.acceptance.test.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -25,11 +26,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
+import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resources;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 /**
@@ -39,45 +43,59 @@ import static org.mockito.Mockito.when;
  */
 public class PlatformHelperTests {
 
-	private String STREAM_NAME = "teststream";
+	private String STREAM_NAME = "test-stream";
+
+	private StreamDefinition stream;
 
 	@Mock
 	private RuntimeOperations runtimeOperations;
 
-	private PlatformHelper platformHelper;
-
 	@Before
 	public void setUp() {
+		stream = StreamDefinition.builder(STREAM_NAME).definition("time | log").build();
 		MockitoAnnotations.initMocks(this);
-		List<AppStatusResource> list = new ArrayList<>();
-		list.add(new AppStatusResource(STREAM_NAME,"TEST"));
+		List<AppStatusResource> appStatusResources = new ArrayList<>();
+		AppStatusResource logStatus = new AppStatusResource(STREAM_NAME + "-log","deployed");
+		logStatus.setInstances(new Resources<>(Collections.singletonList(
+				new AppInstanceStatusResource(STREAM_NAME + "-log", "deployed",
+				Collections.singletonMap("url", "http://log"))), (Link[])(new Link[0])));
+		appStatusResources.add(logStatus);
+		AppStatusResource timeStatus = new AppStatusResource(STREAM_NAME + "-time","deployed");
+		timeStatus.setInstances(new Resources<>(Collections.singletonList(
+				new AppInstanceStatusResource(STREAM_NAME + "-time", "deployed",
+				Collections.singletonMap("url", "http://time"))), (Link[])(new Link[0])));
+		appStatusResources.add(timeStatus);
 		PagedResources<AppStatusResource> resources =
-				new PagedResources<>(list, null,
-						new Link("test"));
+				new PagedResources<>(appStatusResources, null, new Link("test"));
 		when(this.runtimeOperations.status()).thenReturn(resources);
 	}
 
 	@Test
-	public void testLocalUriHelperWithStream() {
-//		Stream stream = new Stream(STREAM_NAME);
-//		stream.setSource("time");
-//		stream.setSink("log");
-//		platformHelper = new LocalPlatformHelper(runtimeOperations);
-//		platformHelper.setUrisForStream(stream);
-//		assertEquals("time", stream.getSource().getDefinition());
-//		assertEquals("log", stream.getSink().getDefinition());
-//		assertEquals("${PID}", platformHelper.getLogfileName());
+	public void testLocalPlatformHelper() {
+		PlatformHelper platformHelper = new LocalPlatformHelper(runtimeOperations);
+		assertEquals("${PID}", platformHelper.getLogfileName());
+		assertTrue(platformHelper.setUrlsForStream(stream));
+		assertEquals("http://log", stream.getApplication("log").getUrl());
+		assertEquals("http://time", stream.getApplication("time").getUrl());
 	}
 
 	@Test
-	public void testCloudFoundryUriHelperWithStream() {
-//		Stream stream = new Stream("teststream");
-//		stream.setSource("time");
-//		stream.setSink("log");
-//		platformHelper = new CloudFoundryPlatformHelper(runtimeOperations, "TESTSUFFIX");
-//		platformHelper.setUrisForStream(stream);
-//		assertEquals("time", stream.getSource().getDefinition());
-//		assertEquals("log", stream.getSink().getDefinition());
-//		assertEquals("test.log", platformHelper.getLogfileName());
+	public void testCloudFoundryPlatformHelper() {
+		String suffix = "cf.local";
+		PlatformHelper platformHelper = new CloudFoundryPlatformHelper(runtimeOperations, suffix);
+		assertEquals("test.log", platformHelper.getLogfileName());
+		assertTrue(platformHelper.setUrlsForStream(stream));
+		assertEquals("http://" + STREAM_NAME + "-log." + suffix, stream.getApplication("log").getUrl());
+		assertEquals("http://" + STREAM_NAME + "-time." + suffix, stream.getApplication("time").getUrl());
 	}
+
+	@Test
+	public void testKubernetesPlatformHelper() {
+		PlatformHelper platformHelper = new KubernetesPlatformHelper(runtimeOperations);
+		assertEquals("test.log", platformHelper.getLogfileName());
+		assertTrue(platformHelper.setUrlsForStream(stream));
+		assertEquals("http://log", stream.getApplication("log").getUrl());
+		assertEquals("http://time", stream.getApplication("time").getUrl());
+	}
+
 }

@@ -16,23 +16,23 @@
 
 package org.springframework.cloud.dataflow.acceptance.test.util;
 
+
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
-import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
-import org.springframework.util.StringUtils;
 
 /**
- * @author Glenn Renfro
  * @author Thomas Risberg
  */
-public class CloudFoundryPlatformHelper extends AbstractPlatformHelper {
+public class KubernetesPlatformHelper extends AbstractPlatformHelper {
 
-	private String cfSuffix;
-
-	public CloudFoundryPlatformHelper(RuntimeOperations operations, String cfSuffix) {
+	public KubernetesPlatformHelper(RuntimeOperations operations) {
 		super(operations);
-		this.cfSuffix = cfSuffix;
+	}
+
+	@Override
+	public void addDeploymentProperties(StreamDefinition stream, Map<String, String> properties) {
+		properties.put("deployer.*.kubernetes.createLoadBalancer", "true");
 	}
 
 	@Override
@@ -40,15 +40,4 @@ public class CloudFoundryPlatformHelper extends AbstractPlatformHelper {
 		return "test.log";
 	}
 
-	@Override
-	protected boolean setUrlForApplication(Application application, AppStatusResource appStatus) {
-		//TODO: remove this implementation once CF returns 'url' attribute
-		if (StringUtils.hasText(appStatus.getDeploymentId()) && cfSuffix != null) {
-			application.setUrl(String.format("http://%s.%s", appStatus.getDeploymentId(), cfSuffix));
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
 }
