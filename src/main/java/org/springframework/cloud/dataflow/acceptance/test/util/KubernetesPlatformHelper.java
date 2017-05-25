@@ -33,6 +33,7 @@ public class KubernetesPlatformHelper extends AbstractPlatformHelper {
 	@Override
 	public void addDeploymentProperties(StreamDefinition stream, Map<String, String> properties) {
 		properties.put("deployer.*.kubernetes.createLoadBalancer", "true");
+		properties.put("app.*.server.port", "80");
 	}
 
 	@Override
