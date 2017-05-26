@@ -26,6 +26,7 @@ Flags:
     -s  | --skipSetup - skip setup phase
     -t  | --skipTests - skip test phase
     -c  | --skipCleanup - skip the clean up phase
+    -d  | --doNotDownload - skip the downloading of the server
 
 [*] = Required arguments
 
@@ -57,8 +58,10 @@ function netcat_port() {
 }
 
 function download(){
-  echo "Downloading latest release from $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL"
-  wget $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL --progress=bar -O $1/scdf-server.jar
+  if [ -z "$doNotDownload" ]; then
+    echo "Downloading server from $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL"
+    wget $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL --progress=bar -O $1/scdf-server.jar
+  fi
 }
 
 function run_scripts()
@@ -138,6 +141,9 @@ case ${key} in
  ;;
  -c|--skipCleanup)
  skipCleanup="true"
+ ;;
+ -d|--doNotDownload)
+ doNotDownload="false"
  ;;
  --help)
  print_usage
