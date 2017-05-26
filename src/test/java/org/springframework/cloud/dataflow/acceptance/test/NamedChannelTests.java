@@ -31,8 +31,8 @@ public class NamedChannelTests extends AbstractStreamTests {
 
 	@Test
 	public void testDestination() throws Exception{
-		StreamDefinition logStream = deployLog("LOG_DESTINATION_SINK", ":LOG_DESTINATION > log");
-		StreamDefinition httpStream = deployHttp("HTTP_DESTINATION_SOURCE", "http > :LOG_DESTINATION");
+		StreamDefinition logStream = deployLog("LOG-DESTINATION-SINK", ":LOG-DESTINATION > log");
+		StreamDefinition httpStream = deployHttp("HTTP-DESTINATION-SOURCE", "http > :LOG-DESTINATION");
 
 		httpPostData(httpStream.getApplication("http"), "abcdefg");
 
@@ -54,9 +54,9 @@ public class NamedChannelTests extends AbstractStreamTests {
 
 	@Test
 	public void manyToOneTest() throws Exception {
-		StreamDefinition logStream = deployLog("MANY_TO_ONE", ":MANY_TO_ONE_DESTINATION > log");
-		StreamDefinition httpStreamOne = deployHttp("HTTP_SOURCE_1", "http > :MANY_TO_ONE_DESTINATION");
-		StreamDefinition httpStreamTwo = deployHttp("HTTP_SOURCE_2", "http > :MANY_TO_ONE_DESTINATION");
+		StreamDefinition logStream = deployLog("MANY-TO-ONE", ":MANY-TO-ONE-DESTINATION > log");
+		StreamDefinition httpStreamOne = deployHttp("HTTP-SOURCE-1", "http > :MANY-TO-ONE-DESTINATION");
+		StreamDefinition httpStreamTwo = deployHttp("HTTP-SOURCE-2", "http > :MANY-TO-ONE-DESTINATION");
 
 		httpPostData(httpStreamOne.getApplication("http"), "abcdefg");
 		assertTrue("No output found", waitForLogEntry(logStream.getApplication("log"), "abcdefg"));
@@ -67,9 +67,9 @@ public class NamedChannelTests extends AbstractStreamTests {
 
 	@Test
 	public void directedGraphTest() throws Exception {
-		StreamDefinition fooLogStream = deployLog("DIRECTED_GRAPH_DESTINATION1", ":foo > transform --expression=payload+'-foo' | log");
-		StreamDefinition barLogStream = deployLog("DIRECTED_GRAPH_DESTINATION2", ":bar > transform --expression=payload+'-bar' | log");
-		StreamDefinition httpStream = deployHttp("DIRECTED_GRAPH_HTTP_SOURCE","http | router --expression=payload.contains('a')?'foo':'bar'");
+		StreamDefinition fooLogStream = deployLog("DIRECTED-GRAPH-DESTINATION1", ":foo > transform --expression=payload+'-foo' | log");
+		StreamDefinition barLogStream = deployLog("DIRECTED-GRAPH-DESTINATION2", ":bar > transform --expression=payload+'-bar' | log");
+		StreamDefinition httpStream = deployHttp("DIRECTED-GRAPH-HTTP-SOURCE","http | router --expression=payload.contains('a')?'foo':'bar'");
 
 		httpPostData(httpStream.getApplication("http"), "abcd");
 		httpPostData(httpStream.getApplication("http"), "defg");
