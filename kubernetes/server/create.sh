@@ -14,7 +14,7 @@ function kubectl_create() {
   return 0
 }
 
-RETRIES=12
+RETRIES=20
 WAIT_TIME=15
 kubectl_create
 SERVER_URI=$(kubectl get svc scdf | grep scdf | awk '{print $3}')
