@@ -15,5 +15,6 @@ mysql:
 EOF
 
 create "mysql" 3306
+sleep 5
 echo "Service host is $SERVICE_HOST"
 APPLICATION_ARGS="$APPLICATION_ARGS --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver --spring.datasource.url=jdbc:mysql://$SERVICE_HOST/$SPRING_SCHEMA_NAME --spring.datasource.username=$SPRING_DATASOURCE_USERNAME --spring.datasource.password=$SPRING_DATASOURCE_PASSWORD"
