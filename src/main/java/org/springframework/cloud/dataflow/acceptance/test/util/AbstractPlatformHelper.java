@@ -60,6 +60,11 @@ public abstract class AbstractPlatformHelper implements PlatformHelper {
 	public void addDeploymentProperties(StreamDefinition stream, Map<String, String> properties) {
 	}
 
+	@Override
+	public String getLogfileName() {
+		return "test.log";
+	}
+
 	/**
 	 * Set URL for application based on 'url' attribute from the instances.
 	 * Can be overridden by platform implementation that do not provide the 'url' instance attribute.

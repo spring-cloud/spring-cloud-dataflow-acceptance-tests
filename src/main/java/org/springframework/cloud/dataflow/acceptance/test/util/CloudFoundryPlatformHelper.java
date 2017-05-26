@@ -36,11 +36,6 @@ public class CloudFoundryPlatformHelper extends AbstractPlatformHelper {
 	}
 
 	@Override
-	public String getLogfileName() {
-		return "test.log";
-	}
-
-	@Override
 	protected boolean setUrlForApplication(Application application, AppStatusResource appStatus) {
 		//TODO: remove this implementation once CF returns 'url' attribute
 		if (StringUtils.hasText(appStatus.getDeploymentId()) && cfSuffix != null) {

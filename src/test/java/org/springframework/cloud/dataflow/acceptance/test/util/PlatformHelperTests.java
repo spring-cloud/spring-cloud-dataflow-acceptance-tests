@@ -73,7 +73,7 @@ public class PlatformHelperTests {
 	@Test
 	public void testLocalPlatformHelper() {
 		PlatformHelper platformHelper = new LocalPlatformHelper(runtimeOperations);
-		assertEquals("${PID}", platformHelper.getLogfileName());
+		assertEquals("test.log", platformHelper.getLogfileName());
 		assertTrue(platformHelper.setUrlsForStream(stream));
 		assertEquals("http://log", stream.getApplication("log").getUrl());
 		assertEquals("http://time", stream.getApplication("time").getUrl());

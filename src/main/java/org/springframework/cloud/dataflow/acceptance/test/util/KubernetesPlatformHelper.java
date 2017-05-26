@@ -36,9 +36,4 @@ public class KubernetesPlatformHelper extends AbstractPlatformHelper {
 		properties.put("app.*.server.port", "80");
 	}
 
-	@Override
-	public String getLogfileName() {
-		return "test.log";
-	}
-
 }
