@@ -44,11 +44,9 @@ public class TestConfigurationProperties {
 
 	private String platformSuffix = "local.pcfdev.io";
 
-	@NotNull(message = "You must specify a STREAM_REGISTRATION_RESOURCE url value")
-	private String streamRegistrationResource;
+	private String streamRegistrationResource = "http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven";
 
-	@NotNull(message = "You must specify a TASK_REGISTRATION_RESOURCE url value")
-	private String taskRegistrationResource;
+	private String taskRegistrationResource = "http://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven";
 
 	public int getMaxWaitTime() {
 		return maxWaitTime;
