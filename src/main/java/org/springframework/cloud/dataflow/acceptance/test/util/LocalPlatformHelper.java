@@ -27,8 +27,4 @@ public class LocalPlatformHelper extends AbstractPlatformHelper {
 		super(operations);
 	}
 
-	@Override
-	public String getLogfileName() {
-		return "${PID}";
-	}
 }
