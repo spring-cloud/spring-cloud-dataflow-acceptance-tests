@@ -70,6 +70,16 @@ environment. Each platform has different flags, but the global ones should be:
 * WAIT_TIME: How long to wait for another port test (5s by default)
 * SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL: Location of the dataflow jar file to be downloaded.
 
+= Required environment variables when skipping setup
+
+If you want to point to an already running Data Flow server, set the environment variables
+
+* SERVER_URI - default is http://localhost:9393
+* STREAM_REGISTRATION_RESOURCE - default is  maven + rabbit based apps
+* TASK_REGISTRATION_RESOURCE - deafult is maven + rabbit based tasks
+
+To point to where your server is located and also specify which artifacts you want to register with the server.
+
 = Platform specific notes
 
 == Local
