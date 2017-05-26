@@ -58,9 +58,15 @@ function netcat_port() {
 }
 
 function download(){
-  if [ -z "$doNotDownload" ]; then
+  if [ -z "$doNotDownload" ] || [ ! -f $1/scdf-server.jar ]; then
+    if [  ! -z "$doNotDownload" ]; then
+      echo "Forcing download since $1/scdf-server.jar was not found"
+    fi
     echo "Downloading server from $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL"
     wget $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL --progress=bar -O $1/scdf-server.jar
+  else
+    echo "Using already downloaded server, waiting for services to start"
+    sleep "${WAIT_TIME}"
   fi
 }
 
