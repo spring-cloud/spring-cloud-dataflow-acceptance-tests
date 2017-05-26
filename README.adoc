@@ -19,6 +19,7 @@ Flags:
     -s  | --skipSetup - skip setup phase
     -t  | --skipTests - skip test phase
     -c  | --skipCleanup - skip the clean up phase
+    -d  | --doNotDownload - skip the downloading of the server
 
 [*] = Required arguments
 ```
