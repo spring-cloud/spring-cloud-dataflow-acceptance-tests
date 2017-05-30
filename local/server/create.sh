@@ -13,9 +13,8 @@ function java_jar() {
     $(netcat_port localhost 9393)
     return 0
 }
-export APPLICATION_ARGS="$APPLICATION_ARGS"
-SERVER_URI="http://localhost:9393"
-echo "SCDF SERVER URI: $SERVER_URI"
-export SERVER_URI
+
+run_scripts "$PWD" "config.sh"
+
 download $PWD
 java_jar $PWD

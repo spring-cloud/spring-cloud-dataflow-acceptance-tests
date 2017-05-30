@@ -89,6 +89,16 @@ function setup() {
   popd
 }
 
+function config() {
+  pushd $PLATFORM
+    run_scripts "init" "setenv.sh"
+    pushd "binder"
+      run_scripts $BINDER "config.sh"
+    popd
+    run_scripts "server" "config.sh"
+  popd
+}
+
 function command_exists() {
   type "$1" &> /dev/null ;
 }
@@ -175,9 +185,12 @@ JAVA_OPTS=""
 APPLICATION_ARGS=""
 # ======================================= DEFAULTS END ========================================
 [[ ! -d "$PLATFORM" ]] && { echo "$PLATFORM is an invalid platform"; exit 1; }
+[[ ! -d "$PLATFORM/binder/$BINDER" ]] && { echo "$BINDER is an invalid binder for $PLATFORM platform"; exit 1; }
 
 if [ -z "$skipSetup" ]; then
   setup
+else
+  config
 fi
 if [ -z "$skipTests" ]; then
   run_tests

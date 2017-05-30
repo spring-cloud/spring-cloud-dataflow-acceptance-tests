@@ -17,8 +17,4 @@ function kubectl_create() {
 RETRIES=20
 WAIT_TIME=15
 kubectl_create
-SERVER_URI=$(kubectl get svc scdf | grep scdf | awk '{print $3}')
-SERVER_URI="http://$SERVER_URI"
-echo "SCDF SERVER URI: $SERVER_URI"
-export SERVER_URI
-export DEPLOY_PAUSE_RETRIES=50
+run_scripts "$PWD" "config.sh"
