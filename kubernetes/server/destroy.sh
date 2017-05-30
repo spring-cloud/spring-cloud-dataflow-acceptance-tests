@@ -2,6 +2,6 @@
 
 set -o errexit
 
-kubectl delete rc/scdf
-kubectl delete svc/scdf
-kubectl delete secret/scdf-secrets
+kubectl delete rc/scdf --namespace $KUBERNETES_NAMESPACE
+kubectl delete svc/scdf --namespace $KUBERNETES_NAMESPACE
+kubectl delete secret/scdf-secrets --namespace $KUBERNETES_NAMESPACE

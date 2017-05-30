@@ -2,5 +2,5 @@
 
 set -o errexit
 
-kubectl delete rc/redis
-kubectl delete svc/redis
+kubectl delete rc/redis --namespace $KUBERNETES_NAMESPACE
+kubectl delete svc/redis --namespace $KUBERNETES_NAMESPACE

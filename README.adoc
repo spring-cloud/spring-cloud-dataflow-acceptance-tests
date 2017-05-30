@@ -136,4 +136,10 @@ For Kubernetes, make sure you have the following environment variables exported.
 * GCLOUD_COMPUTE_ZONE
 * GCLOUD_CONTAINER_CLUSTER
 
-If you use a service account make sure to set the GOOGLE_APPLICATION_CREDENTIALS environment variable to point to your service account key file.
+NOTE: You can also set a KUBERNETES_NAMESPACE environment variable that specifies an existing namespace to use for the testing. If this is not specified the 'default' namespace will be used.
+
+If you use a service account make sure to set the GOOGLE_APPLICATION_CREDENTIALS environment variable to point to your service account key file and to use the following to authenticate:
+
+```
+gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+```

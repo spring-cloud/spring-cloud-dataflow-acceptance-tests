@@ -2,4 +2,4 @@
 
 set -o errexit
 
-kubectl create -f redis.yml
+kubectl create -f redis.yml --namespace $KUBERNETES_NAMESPACE

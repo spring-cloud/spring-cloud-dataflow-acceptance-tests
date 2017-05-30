@@ -5,7 +5,7 @@ set -o errexit
 # ======================================= FUNCTIONS START =======================================
 
 function gcp_authenticate_and_target() {
-  echo "Using project:$GCLOUD_PROJECT zone:$GCLOUD_COMPUTE_ZONE cluster:$GCLOUD_CONTAINER_CLUSTER"
+  echo "Using cluster settings -> project:$GCLOUD_PROJECT zone:$GCLOUD_COMPUTE_ZONE cluster:$GCLOUD_CONTAINER_CLUSTER"
   [ -z "$GCLOUD_PROJECT" ] && { echo "Environment variable GCLOUD_PROJECT must be set"; exit 1; }
   [ -z "$GCLOUD_COMPUTE_ZONE" ] && { echo "Environment variable GCLOUD_COMPUTE_ZONE must be set"; exit 1; }
   [ -z "$GCLOUD_CONTAINER_CLUSTER" ] && { echo "Environment variable GCLOUD_CONTAINER_CLUSTER must be set"; exit 1; }
@@ -30,3 +30,7 @@ echo "Connecting to kubernetes cluster"
 
 gcp_authenticate_and_target
 
+if [ -z "$KUBERNETES_NAMESPACE" ]; then
+  export KUBERNETES_NAMESPACE='default'
+fi
+echo "Using namespace $KUBERNETES_NAMESPACE"
