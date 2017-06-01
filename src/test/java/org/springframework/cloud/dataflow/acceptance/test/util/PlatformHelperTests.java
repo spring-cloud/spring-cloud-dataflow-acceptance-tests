@@ -71,22 +71,12 @@ public class PlatformHelperTests {
 	}
 
 	@Test
-	public void testLocalPlatformHelper() {
-		PlatformHelper platformHelper = new LocalPlatformHelper(runtimeOperations);
+	public void testDefaultPlatformHelper() {
+		PlatformHelper platformHelper = new DefaultPlatformHelper(runtimeOperations);
 		assertEquals("test.log", platformHelper.getLogfileName());
 		assertTrue(platformHelper.setUrlsForStream(stream));
 		assertEquals("http://log", stream.getApplication("log").getUrl());
 		assertEquals("http://time", stream.getApplication("time").getUrl());
-	}
-
-	@Test
-	public void testCloudFoundryPlatformHelper() {
-		String suffix = "cf.local";
-		PlatformHelper platformHelper = new CloudFoundryPlatformHelper(runtimeOperations, suffix);
-		assertEquals("test.log", platformHelper.getLogfileName());
-		assertTrue(platformHelper.setUrlsForStream(stream));
-		assertEquals("http://" + STREAM_NAME + "-log." + suffix, stream.getApplication("log").getUrl());
-		assertEquals("http://" + STREAM_NAME + "-time." + suffix, stream.getApplication("time").getUrl());
 	}
 
 	@Test

@@ -19,11 +19,13 @@ package org.springframework.cloud.dataflow.acceptance.test.util;
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 
 /**
+ * Default {@link PlatformHelper} implementation.
+ *
  * @author Thomas Risberg
  */
-public class LocalPlatformHelper extends AbstractPlatformHelper {
+public class DefaultPlatformHelper extends AbstractPlatformHelper {
 
-	public LocalPlatformHelper(RuntimeOperations operations) {
+	public DefaultPlatformHelper(RuntimeOperations operations) {
 		super(operations);
 	}
 

@@ -139,17 +139,11 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				appRegistryOperations =
 						dataFlowOperationsTemplate.appRegistryOperations();
 				if (configurationProperties.getPlatformType().
-						equals(PlatformTypes.LOCAL.getValue())) {
-					platformHelper = new LocalPlatformHelper(runtimeOperations);
-				}
-				if (configurationProperties.getPlatformType().
-						equals(PlatformTypes.CLOUDFOUNDRY.getValue())) {
-					platformHelper = new CloudFoundryPlatformHelper(runtimeOperations,
-							configurationProperties.getPlatformSuffix());
-				}
-				if (configurationProperties.getPlatformType().
 						equals(PlatformTypes.KUBERNETES.getValue())) {
 					platformHelper = new KubernetesPlatformHelper(runtimeOperations);
+				}
+				else {
+					platformHelper = new DefaultPlatformHelper(runtimeOperations);
 				}
 			}
 			catch (URISyntaxException uriException) {

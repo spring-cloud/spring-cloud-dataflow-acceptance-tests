@@ -22,6 +22,8 @@ import java.util.Map;
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 
 /**
+ * Implementation of {@link PlatformHelper} for Kubernetes.
+ *
  * @author Thomas Risberg
  */
 public class KubernetesPlatformHelper extends AbstractPlatformHelper {
