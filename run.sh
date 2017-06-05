@@ -44,13 +44,13 @@ done < "$filename"
 }
 
 function test_port() {
-  nc -z -w1 ${1} $2
+  nc -w1 ${1} $2 </dev/null
 }
 
 function netcat_port() {
     local READY_FOR_TESTS=1
     for i in $( seq 1 "${RETRIES}" ); do
-        nc -z -w1 ${1} $2 && READY_FOR_TESTS=0 && break
+        nc -w1 ${1} $2 </dev/null && READY_FOR_TESTS=0 && break
         echo "Failed to connect to ${1}:$2. Attempt  #$i/${RETRIES}... will try again in [${WAIT_TIME}] seconds" >&2
         sleep "${WAIT_TIME}"
     done
