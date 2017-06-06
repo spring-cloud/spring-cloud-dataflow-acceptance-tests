@@ -190,7 +190,9 @@ APPLICATION_ARGS=""
 if [ -z "$skipSetup" ]; then
   setup
 else
-  config
+  if [ -z "$skipTests" ]; then
+    config
+  fi
 fi
 if [ -z "$skipTests" ]; then
   run_tests
