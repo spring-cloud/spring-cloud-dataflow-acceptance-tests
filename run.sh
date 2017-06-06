@@ -22,7 +22,7 @@ Flags:
 
 [*] -p  | --platform - define the target platform to run
     -b  | --binder - define the binder (i.e. RABBIT, KAFKA) defaults to RABBIT
-    -tests - coma separated list of tests to run (you can also specify expressions such as *http* for all tests with http word on it)
+    -tests - comma separated list of tests to run (you can also specify expressions such as *http* for all tests with http word on it)
     -s  | --skipSetup - skip setup phase
     -t  | --skipTests - skip test phase
     -c  | --skipCleanup - skip the clean up phase
