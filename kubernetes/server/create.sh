@@ -1,6 +1,8 @@
 #!/bin/bash
 
 function kubectl_create() {
+  kubectl create -f secret.yml --namespace $KUBERNETES_NAMESPACE
+  sleep 5
   kubectl create -f scdf.yml --namespace $KUBERNETES_NAMESPACE
   READY_FOR_TESTS=1
   for i in $( seq 1 "${RETRIES}" ); do
