@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.acceptance.test.util;
 
-
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;

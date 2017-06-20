@@ -34,7 +34,7 @@ import static org.junit.Assert.assertTrue;
 public class HttpSourceTests extends AbstractStreamTests {
 
 	@Test
-	public void httpSourceTests() throws Exception{
+	public void httpSourceTests() throws Exception {
 		StreamDefinition stream = StreamDefinition.builder("HTTP-TEST")
 				.definition("http | log")
 				.build();

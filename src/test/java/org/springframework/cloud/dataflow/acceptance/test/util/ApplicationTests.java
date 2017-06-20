@@ -31,10 +31,11 @@ public class ApplicationTests {
 
 	@Test
 	public void testApplication() {
-		Application application = new Application( "BAR");
+		Application application = new Application("BAR");
 		application.setUrl(DEFAULT_URI);
-		validateApplication(application, "BAR", 	DEFAULT_URI);
+		validateApplication(application, "BAR", DEFAULT_URI);
 	}
+
 	@Test
 	public void testApplicationParam() {
 		Application application = new Application("BAR --BAZ=FOO");

@@ -30,7 +30,7 @@ import static org.junit.Assert.assertTrue;
 public class NamedChannelTests extends AbstractStreamTests {
 
 	@Test
-	public void testDestination() throws Exception{
+	public void testDestination() throws Exception {
 		StreamDefinition logStream = deployLog("LOG-DESTINATION-SINK", ":LOG-DESTINATION > log");
 		StreamDefinition httpStream = deployHttp("HTTP-DESTINATION-SOURCE", "http > :LOG-DESTINATION");
 
@@ -40,9 +40,9 @@ public class NamedChannelTests extends AbstractStreamTests {
 	}
 
 	@Test
-	public void testTap() throws Exception{
+	public void testTap() throws Exception {
 		StreamDefinition stream = deployHttp("TAPHTTP", "http | log");
-		//make sure log is running as well
+		// make sure log is running as well
 		assertTrue(String.format("'%s' not started", stream.getDefinition()),
 				waitForLogEntry(stream.getApplication("log"), "Started LogSink"));
 		StreamDefinition tapStream = deployLog("TAPSTREAM", ":TAPHTTP.http > log");
@@ -67,9 +67,12 @@ public class NamedChannelTests extends AbstractStreamTests {
 
 	@Test
 	public void directedGraphTest() throws Exception {
-		StreamDefinition fooLogStream = deployLog("DIRECTED-GRAPH-DESTINATION1", ":foo > transform --expression=payload+'-foo' | log");
-		StreamDefinition barLogStream = deployLog("DIRECTED-GRAPH-DESTINATION2", ":bar > transform --expression=payload+'-bar' | log");
-		StreamDefinition httpStream = deployHttp("DIRECTED-GRAPH-HTTP-SOURCE","http | router --expression=payload.contains('a')?'foo':'bar'");
+		StreamDefinition fooLogStream = deployLog("DIRECTED-GRAPH-DESTINATION1",
+				":foo > transform --expression=payload+'-foo' | log");
+		StreamDefinition barLogStream = deployLog("DIRECTED-GRAPH-DESTINATION2",
+				":bar > transform --expression=payload+'-bar' | log");
+		StreamDefinition httpStream = deployHttp("DIRECTED-GRAPH-HTTP-SOURCE",
+				"http | router --expression=payload.contains('a')?'foo':'bar'");
 
 		httpPostData(httpStream.getApplication("http"), "abcd");
 		httpPostData(httpStream.getApplication("http"), "defg");

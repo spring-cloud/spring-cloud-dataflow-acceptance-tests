@@ -17,21 +17,21 @@
 package org.springframework.cloud.dataflow.acceptance.test.util;
 
 /**
- * Contains the metadata required for the acceptance test execute calls against
- * the application's end points.
+ * Contains the metadata required for the acceptance test execute calls against the
+ * application's end points.
  *
  * @author Glenn Renfro
  */
 public class Application {
 
 	protected String url;
+
 	protected String definition;
 
 	/**
 	 * Initializes the application instance.
 	 *
-	 * @param definition Establish the registered app name and the
-	 * required properties.
+	 * @param definition Establish the registered app name and the required properties.
 	 */
 	public Application(String definition) {
 		this.definition = definition;
@@ -41,7 +41,7 @@ public class Application {
 	 * Retrieve the definition for this application.
 	 * @return the definition
 	 */
-	public String getDefinition () {
+	public String getDefinition() {
 		return this.definition;
 	}
 
@@ -49,11 +49,18 @@ public class Application {
 	 * Retrieve the name of the app for this definition.
 	 * @return name of app
 	 */
-	public String getName () {
+	public String getName() {
 		if (definition.trim().contains(" ")) {
 			return definition.trim().substring(0, definition.indexOf(" "));
 		}
 		return this.definition;
+	}
+
+	/**
+	 * Retrieve the uri for this application.
+	 */
+	public String getUrl() {
+		return this.url;
 	}
 
 	/**
@@ -62,13 +69,6 @@ public class Application {
 	 */
 	public void setUrl(String url) {
 		this.url = url;
-	}
-
-	/**
-	 * Retrieve the uri for this application.
-	 */
-	public String getUrl() {
-		return this.url;
 	}
 
 	public String toString() {

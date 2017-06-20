@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.acceptance.test.util;
 
-
 import java.util.Iterator;
 import java.util.Map;
 
@@ -44,7 +43,7 @@ public abstract class AbstractPlatformHelper implements PlatformHelper {
 		Iterator<AppStatusResource> statsIterator = operations.status().iterator();
 		while (statsIterator.hasNext()) {
 			AppStatusResource appStatus = statsIterator.next();
-			for(Application application : stream.getApplications()){
+			for (Application application : stream.getApplications()) {
 				if (appStatus.getDeploymentId().toLowerCase().contains(stream.getName().toLowerCase())
 						&& appStatus.getDeploymentId().endsWith((application.getName()))) {
 					if (!setUrlForApplication(application, appStatus)) {
@@ -66,8 +65,9 @@ public abstract class AbstractPlatformHelper implements PlatformHelper {
 	}
 
 	/**
-	 * Set URL for application based on 'url' attribute from the instances.
-	 * Can be overridden by platform implementation that do not provide the 'url' instance attribute.
+	 * Set URL for application based on 'url' attribute from the instances. Can be
+	 * overridden by platform implementation that do not provide the 'url' instance
+	 * attribute.
 	 *
 	 * @param application
 	 * @param appStatus

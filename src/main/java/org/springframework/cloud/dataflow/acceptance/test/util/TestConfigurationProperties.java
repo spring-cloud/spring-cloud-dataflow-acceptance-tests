@@ -18,11 +18,9 @@ package org.springframework.cloud.dataflow.acceptance.test.util;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import javax.validation.constraints.NotNull;
-
 /**
- * Properties that are required by the acceptance tests to connect to
- * a Spring Cloud Data Flow Server and the associated binder.
+ * Properties that are required by the acceptance tests to connect to a Spring Cloud Data
+ * Flow Server and the associated binder.
  *
  * @author Glenn Renfro
  * @author Thomas Risberg

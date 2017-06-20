@@ -55,18 +55,19 @@ public class PlatformHelperTests {
 		stream = StreamDefinition.builder(STREAM_NAME).definition("time | log").build();
 		MockitoAnnotations.initMocks(this);
 		List<AppStatusResource> appStatusResources = new ArrayList<>();
-		AppStatusResource logStatus = new AppStatusResource(STREAM_NAME + "-log","deployed");
+		AppStatusResource logStatus = new AppStatusResource(STREAM_NAME + "-log", "deployed");
 		logStatus.setInstances(new Resources<>(Collections.singletonList(
 				new AppInstanceStatusResource(STREAM_NAME + "-log", "deployed",
-				Collections.singletonMap("url", "http://log"))), (Link[])(new Link[0])));
+						Collections.singletonMap("url", "http://log"))),
+				(Link[]) (new Link[0])));
 		appStatusResources.add(logStatus);
-		AppStatusResource timeStatus = new AppStatusResource(STREAM_NAME + "-time","deployed");
+		AppStatusResource timeStatus = new AppStatusResource(STREAM_NAME + "-time", "deployed");
 		timeStatus.setInstances(new Resources<>(Collections.singletonList(
 				new AppInstanceStatusResource(STREAM_NAME + "-time", "deployed",
-				Collections.singletonMap("url", "http://time"))), (Link[])(new Link[0])));
+						Collections.singletonMap("url", "http://time"))),
+				(Link[]) (new Link[0])));
 		appStatusResources.add(timeStatus);
-		PagedResources<AppStatusResource> resources =
-				new PagedResources<>(appStatusResources, null, new Link("test"));
+		PagedResources<AppStatusResource> resources = new PagedResources<>(appStatusResources, null, new Link("test"));
 		when(this.runtimeOperations.status()).thenReturn(resources);
 	}
 

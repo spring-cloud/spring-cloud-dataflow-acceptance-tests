@@ -18,14 +18,19 @@ package org.springframework.cloud.dataflow.acceptance.test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -37,13 +42,12 @@ import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Abstract base class that is used by task acceptance tests.  This class
- * contains commonly used utility methods for task acceptance tests as well as
- * the ability to retrieve results from task repository.
+ * Abstract base class that is used by task acceptance tests. This class contains commonly
+ * used utility methods for task acceptance tests as well as the ability to retrieve
+ * results from task repository.
  *
  * @author Glenn Renfro
  * @author Thomas Risberg
@@ -52,15 +56,13 @@ import org.springframework.web.client.RestTemplate;
 @EnableConfigurationProperties(TestConfigurationProperties.class)
 public abstract class AbstractTaskTests implements InitializingBean {
 
-	public enum TaskTestTypes {TIMESTAMP, CORE}
+	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskTests.class);
 
 	protected RestTemplate restTemplate;
 
 	protected TaskOperations taskOperations;
 
 	protected AppRegistryOperations appRegistryOperations;
-
-	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskTests.class);
 
 	@Autowired
 	TestConfigurationProperties configurationProperties;
@@ -72,10 +74,8 @@ public abstract class AbstractTaskTests implements InitializingBean {
 
 	@After
 	public void teardown() {
-		PagedResources<TaskDefinitionResource> taskExecutionResources =
-				taskOperations.list();
-		Iterator<TaskDefinitionResource> taskDefinitionResourceIterator =
-				taskExecutionResources.iterator();
+		PagedResources<TaskDefinitionResource> taskExecutionResources = taskOperations.list();
+		Iterator<TaskDefinitionResource> taskDefinitionResourceIterator = taskExecutionResources.iterator();
 		TaskDefinitionResource taskDefinitionResource = null;
 		while (taskDefinitionResourceIterator.hasNext()) {
 			taskDefinitionResource = taskDefinitionResourceIterator.next();
@@ -85,8 +85,8 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	}
 
 	/**
-	 * Creates a unique task definition name from a UUID and launches the task
-	 * based on the definition specified.
+	 * Creates a unique task definition name from a UUID and launches the task based on
+	 * the definition specified.
 	 *
 	 * @param definition The definition to test;
 	 * @return The name of the task associated with this launch.
@@ -97,12 +97,12 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	}
 
 	/**
-	 * Creates a unique task definition name from a UUID and launches the
-	 * task based on the definition specified.
+	 * Creates a unique task definition name from a UUID and launches the task based on
+	 * the definition specified.
 	 *
 	 * @param definition The definition to test.
 	 * @param properties Map containing deployment properties for the task.
-	 * @param arguments  List containing the arguments used to execute the task.
+	 * @param arguments List containing the arguments used to execute the task.
 	 * @return The name of the task associated with this launch.
 	 */
 	protected String taskLaunch(String definition,
@@ -112,7 +112,6 @@ public abstract class AbstractTaskTests implements InitializingBean {
 		taskOperations.launch(taskDefinitionName, properties, arguments);
 		return taskDefinitionName;
 	}
-
 
 	/**
 	 * Launch an existing task definition.
@@ -128,8 +127,8 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 * @param properties Map containing deployemrnt properties for the task.
 	 * @param arguments List containing the arguments used to execute the task.
 	 */
-	protected void launchExistingTask(String taskDefinitionName, Map<String,
-			String> properties, List<String> arguments) {
+	protected void launchExistingTask(String taskDefinitionName, Map<String, String> properties,
+			List<String> arguments) {
 		taskOperations.launch(taskDefinitionName, properties, arguments);
 	}
 
@@ -137,22 +136,21 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 * Imports the proper apps required for the acceptance tests.
 	 */
 	protected void registerApps() {
-		logger.info(String.format("Importing task apps from uri resource: %s",configurationProperties.getTaskRegistrationResource()));
+		logger.info(String.format("Importing task apps from uri resource: %s",
+				configurationProperties.getTaskRegistrationResource()));
 		appRegistryOperations.importFromResource(configurationProperties.getTaskRegistrationResource(), true);
 	}
 
 	/**
-	 * Creates the task and app operations that will be used for the
-	 * acceptance test.
+	 * Creates the task and app operations that will be used for the acceptance test.
 	 */
 	public void afterPropertiesSet() {
 		if (restTemplate == null) {
 			try {
-				DataFlowTemplate dataFlowOperationsTemplate =
-						new DataFlowTemplate(new URI(configurationProperties.getServerUri()));
+				DataFlowTemplate dataFlowOperationsTemplate = new DataFlowTemplate(
+						new URI(configurationProperties.getServerUri()));
 				taskOperations = dataFlowOperationsTemplate.taskOperations();
-				appRegistryOperations =
-						dataFlowOperationsTemplate.appRegistryOperations();
+				appRegistryOperations = dataFlowOperationsTemplate.appRegistryOperations();
 			}
 			catch (URISyntaxException uriException) {
 				throw new IllegalStateException(uriException);
@@ -162,17 +160,16 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	}
 
 	/**
-	 * Waits the specified period of time for all task executions to complete
-	 * for a specific task name.
+	 * Waits the specified period of time for all task executions to complete for a
+	 * specific task name.
 	 *
-	 * @param taskDefinitionName the task name to monitor for in task execution
-	 * list result.
+	 * @param taskDefinitionName the task name to monitor for in task execution list
+	 * result.
 	 * @param taskExecutionCount the number of expected task executions.
 	 * @return true if they are complete else false.
 	 */
 	protected boolean waitForTaskToComplete(String taskDefinitionName, int taskExecutionCount) {
-		long timeout = System.currentTimeMillis() + (
-				configurationProperties.getMaxWaitTime() * 1000);
+		long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
 		boolean isComplete = false;
 		while (!isComplete && System.currentTimeMillis() < timeout) {
 			try {
@@ -201,13 +198,11 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 * Retrieves a list of TaskExecutionResources for a specific task.
 	 *
 	 * @param taskDefinitionName The name of the task to query
-	 * @return list containing the TaskExecutionResources that
-	 * matched the task name.
+	 * @return list containing the TaskExecutionResources that matched the task name.
 	 */
 	protected List<TaskExecutionResource> getTaskExecutionResource(
 			String taskDefinitionName) {
-		Iterator<TaskExecutionResource> taskExecutionIterator =
-				taskOperations.executionList().iterator();
+		Iterator<TaskExecutionResource> taskExecutionIterator = taskOperations.executionList().iterator();
 		TaskExecutionResource taskExecutionResource;
 		List<TaskExecutionResource> result = new ArrayList<>();
 
@@ -218,6 +213,11 @@ public abstract class AbstractTaskTests implements InitializingBean {
 			}
 		}
 		return result;
+	}
+
+	public enum TaskTestTypes {
+		TIMESTAMP,
+		CORE
 	}
 
 }

@@ -27,15 +27,14 @@ import static org.junit.Assert.assertTrue;
  * @author Glenn Renfro
  * @author Vinicius Carvalho
  */
-public class TransformTests extends AbstractStreamTests{
+public class TransformTests extends AbstractStreamTests {
 	@Test
-	public void transformTests() throws Exception{
+	public void transformTests() throws Exception {
 		final String PROCESSOR_NAME = "transform1";
 
 		StreamDefinition stream = StreamDefinition.builder("TRANSFORM-TEST")
 				.definition("http | transform --expression=payload.toUpperCase() | log")
 				.build();
-
 
 		deployStream(stream);
 

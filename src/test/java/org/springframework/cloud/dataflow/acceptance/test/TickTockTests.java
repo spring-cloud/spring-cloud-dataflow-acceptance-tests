@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.acceptance.test;
 
 import org.junit.Test;
 
-
 import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
 
 import static org.junit.Assert.assertTrue;
@@ -36,7 +35,7 @@ public class TickTockTests extends AbstractStreamTests {
 	public void tickTockTests() {
 		StreamDefinition stream = StreamDefinition.builder("TICKTOCK")
 				.definition("time | log")
-				.addProperty("app.log.log.expression","'TICKTOCK - TIMESTAMP: '.concat(payload)")
+				.addProperty("app.log.log.expression", "'TICKTOCK - TIMESTAMP: '.concat(payload)")
 				.build();
 
 		deployStream(stream);
