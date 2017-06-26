@@ -65,8 +65,8 @@ function download(){
     echo "Downloading server from $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL"
     wget $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL --progress=bar -O $1/scdf-server.jar
   else
-    echo "Using already downloaded server, waiting for services to start"
-    sleep "${WAIT_TIME}"
+    echo "Using already downloaded server, waiting for services to start ..."
+    sleep 15
   fi
 }
 
