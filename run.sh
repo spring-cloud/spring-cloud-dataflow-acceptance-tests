@@ -115,8 +115,14 @@ function tear_down() {
   popd
 }
 
+function log_versions() {
+  echo "SCDF SERVER ABOUT:"
+  wget -q -O - stdout $SERVER_URI/about | python -m json.tool
+}
+
 function run_tests() {
-   eval "./mvnw clean -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM test surefire-report:report"
+  log_versions 
+  eval "./mvnw clean -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM test surefire-report:report"
 }
 
 # ======================================= FUNCTIONS END =======================================
