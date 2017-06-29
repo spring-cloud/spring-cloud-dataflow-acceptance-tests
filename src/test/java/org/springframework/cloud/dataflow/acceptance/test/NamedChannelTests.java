@@ -89,9 +89,8 @@ public class NamedChannelTests extends AbstractStreamTests {
 	}
 
 	private StreamDefinition deployLog(String streamName, String definition) {
-		StreamDefinition.StreamDefinitionBuilder logBuilder = StreamDefinition.builder(streamName)
-				.definition(definition);
-		StreamDefinition logDefinition = logBuilder.build();
+		StreamDefinition logDefinition = StreamDefinition.builder(streamName)
+				.definition(definition).build();
 		deployStream(logDefinition, "log", "Started LogSink");
 		return logDefinition;
 	}
