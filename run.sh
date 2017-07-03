@@ -44,7 +44,7 @@ done < "$filename"
 }
 
 function test_port() {
-  nc -w1 ${1} $2 </dev/null
+  nc -w1 ${1} $2 >/dev/null
 }
 
 function netcat_port() {
