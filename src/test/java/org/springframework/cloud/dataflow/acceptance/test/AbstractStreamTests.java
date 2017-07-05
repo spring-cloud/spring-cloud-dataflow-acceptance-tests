@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -48,6 +49,7 @@ import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -157,6 +159,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		streamOperations.createStream(stream.getName(), stream.getDefinition(), false);
 		Map<String, String> streamProperties = new HashMap<>();
 		streamProperties.put("app.*.logging.file", platformHelper.getLogfileName());
+		streamProperties.put("app.*.logging.pattern.level", "acctests:${instance.index} %5p");
 		streamProperties.put("app.*.endpoints.logfile.sensitive", "false");
 		platformHelper.addDeploymentProperties(stream, streamProperties);
 
@@ -262,7 +265,30 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @return
 	 */
 	protected boolean waitForLogEntry(Application app, String entry) {
-		logger.info("Looking for '" + entry + "' in logfile for " + app.getDefinition());
+		return waitForLogEntry(app, new String[] { entry });
+	}
+
+	/**
+	 * Waits the specified period of time for an entries to appear in the logfile of the
+	 * specified app.
+	 * @param app the app that is being monitored for a specific entry.
+	 * @param entries the value being monitored for.
+	 * @return
+	 */
+	protected boolean waitForLogEntry(Application app, String... entries) {
+		return waitForLogEntry(1, app, entries);
+	}
+
+	/**
+	 * Waits the specified period of time for an entries to appear in the logfile of the
+	 * specified app.
+	 * @param attempts number of attempts to read log file
+	 * @param app the app that is being monitored for a specific entry.
+	 * @param entries the value being monitored for.
+	 * @return
+	 */
+	protected boolean waitForLogEntry(int attempts, Application app, String... entries) {
+		logger.info("Looking for '" + StringUtils.arrayToCommaDelimitedString(entries) + "' in logfile for " + app.getDefinition());
 		long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
 		boolean exists = false;
 		while (!exists && System.currentTimeMillis() < timeout) {
@@ -273,16 +299,21 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				Thread.currentThread().interrupt();
 				throw new IllegalStateException(e.getMessage(), e);
 			}
-			String log = getLog(app);
-			if (log != null) {
-				exists = log.contains(entry);
+			for (int i = 0; i < attempts; i++) {
+				String log = getLog(app);
+				if (log != null) {
+					if (Stream.of(entries).allMatch(s -> log.contains(s))) {
+						exists = true;
+						break;
+					}
+				}
 			}
 		}
 		if (exists) {
-			logger.info("Matched '" + entry + "' in logfile for " + app.getDefinition());
+			logger.info("Matched all '" + StringUtils.arrayToCommaDelimitedString(entries) + "' in logfile for " + app.getDefinition());
 		}
 		else {
-			logger.error("ERROR: Couldn't find '" + entry + "' in logfile for " + app.getDefinition());
+			logger.error("ERROR: Couldn't find all '" + StringUtils.arrayToCommaDelimitedString(entries) + "' in logfile for " + app.getDefinition());
 		}
 		return exists;
 	}
