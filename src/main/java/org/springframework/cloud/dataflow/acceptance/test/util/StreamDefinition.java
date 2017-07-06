@@ -1,17 +1,17 @@
 /*
  * Copyright 2016-2017 the original author or authors.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.cloud.dataflow.acceptance.test.util;
 
@@ -26,6 +26,7 @@ import org.springframework.cloud.dataflow.core.StreamAppDefinition;
  * <p>
  * Example usage:
  * </p>
+ *
  * <pre>
  * {@code
  * StreamDefinition.builder("TICKTOCK")
@@ -64,10 +65,10 @@ public class StreamDefinition {
 
 	/**
 	 * Creates an instance of the builder for a named stream
-	 * @return an instance of a builder that <b>only</b> supports definition of the
-	 * stream (e.g., <code>builder.definition("time | log")</code>).
-	 * Once the definition is provided the subsequent builder will make additional
-	 * operations available (i.e., add/set application and/or deployemnt properties)
+	 * @return an instance of a builder that <b>only</b> supports definition of the stream
+	 * (e.g., <code>builder.definition("time | log")</code>). Once the definition is
+	 * provided the subsequent builder will make additional operations available (i.e.,
+	 * add/set application and/or deployemnt properties)
 	 */
 	public static StreamDefinitionBuilder builder(String name) {
 		return new StreamDefinitionBuilder(name);
@@ -93,6 +94,14 @@ public class StreamDefinition {
 		return applications.get(name);
 	}
 
+	public interface StreamPropertiesBuilder {
+		StreamPropertiesBuilder addProperty(String key, String value);
+
+		StreamPropertiesBuilder addProperties(Map<String, String> properties);
+
+		StreamDefinition build();
+	}
+
 	public static class StreamDefinitionBuilder {
 		private final String name;
 
@@ -107,8 +116,8 @@ public class StreamDefinition {
 		/**
 		 * Sets the definition of this stream (e.g., <code>"time | log"</code>)
 		 * @return an instance of a builder that <b>only</b> supports addition of
-		 * application and/or deployment properties as well as the building of the
-		 * actual {@link StreamDefinition}
+		 * application and/or deployment properties as well as the building of the actual
+		 * {@link StreamDefinition}
 		 */
 		public StreamPropertiesBuilder definition(String streamDefinitionDsl) {
 			this.streamDefinitionDsl = streamDefinitionDsl;
@@ -132,11 +141,5 @@ public class StreamDefinition {
 				}
 			};
 		}
-	}
-
-	public interface StreamPropertiesBuilder {
-		StreamPropertiesBuilder addProperty(String key, String value);
-		StreamPropertiesBuilder addProperties(Map<String, String> properties);
-		StreamDefinition build();
 	}
 }
