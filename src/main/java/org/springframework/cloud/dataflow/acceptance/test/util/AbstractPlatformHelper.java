@@ -49,6 +49,10 @@ public abstract class AbstractPlatformHelper implements PlatformHelper {
 					if (!setUrlForApplication(application, appStatus)) {
 						return false;
 					}
+					else {
+						setInstanceUrlsForApplication(application, appStatus);
+						System.out.println("*** INSTANCE URLS: " + application.getInstanceUrls());
+					}
 				}
 			}
 		}
@@ -86,6 +90,25 @@ public abstract class AbstractPlatformHelper implements PlatformHelper {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Set URL the instance URLs based on 'url' attribute from each instances. Can be
+	 * overridden by platform implementations that do not provide the 'url' instance
+	 * attribute.
+	 *
+	 * @param application
+	 * @param appStatus
+	 * @return whether any url was set
+	 */
+	protected void setInstanceUrlsForApplication(Application application, AppStatusResource appStatus) {
+		Iterator<AppInstanceStatusResource> resourceIterator = appStatus.getInstances().iterator();
+		while (resourceIterator.hasNext()) {
+			AppInstanceStatusResource resource = resourceIterator.next();
+			if (resource.getAttributes().containsKey(URL)) {
+				application.addInstanceUrl(resource.getInstanceId(), resource.getAttributes().get(URL));
+			}
+		}
 	}
 
 }
