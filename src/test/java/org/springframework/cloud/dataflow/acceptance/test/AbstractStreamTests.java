@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -42,6 +43,7 @@ import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -255,11 +257,11 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * Waits the specified period of time for an entry to appear in the logfile of the
 	 * specified app.
 	 * @param app the app that is being monitored for a specific entry.
-	 * @param entry the value being monitored for.
+	 * @param entries the array of values being monitored for.
 	 * @return
 	 */
-	protected boolean waitForLogEntry(Application app, String entry) {
-		logger.info("Looking for '" + entry + "' in logfile for " + app.getDefinition());
+	protected boolean waitForLogEntry(Application app, String... entries) {
+		logger.info("Looking for '" + StringUtils.arrayToCommaDelimitedString(entries) + "' in logfile for " + app.getDefinition());
 		long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
 		boolean exists = false;
 		String instance = "?";
@@ -275,7 +277,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				if (!exists) {
 					String log = getLog(app.getInstanceUrls().get(appInstance));
 					if (log != null) {
-						if (log.contains(entry)) {
+						if (Stream.of(entries).allMatch(s -> log.contains(s))) {
 							exists = true;
 							instance = appInstance;
 						}
@@ -284,10 +286,10 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			}
 		}
 		if (exists) {
-			logger.info("Matched '" + entry + "' in logfile for instance " + instance + " of app " + app.getDefinition());
+			logger.info("Matched all '" + StringUtils.arrayToCommaDelimitedString(entries) + "' in logfile for instance " + instance + " of app " + app.getDefinition());
 		}
 		else {
-			logger.error("ERROR: Couldn't find '" + entry + "' in logfile for " + app.getDefinition());
+			logger.error("ERROR: Couldn't find all '" + StringUtils.arrayToCommaDelimitedString(entries) + "' in logfile for " + app.getDefinition());
 		}
 		return exists;
 	}
