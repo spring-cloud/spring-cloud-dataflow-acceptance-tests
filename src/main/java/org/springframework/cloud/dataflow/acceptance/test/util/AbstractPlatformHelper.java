@@ -51,7 +51,6 @@ public abstract class AbstractPlatformHelper implements PlatformHelper {
 					}
 					else {
 						setInstanceUrlsForApplication(application, appStatus);
-						System.out.println("*** INSTANCE URLS: " + application.getInstanceUrls());
 					}
 				}
 			}
