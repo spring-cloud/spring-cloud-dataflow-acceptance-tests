@@ -81,6 +81,13 @@ public class PlatformHelperTests {
 	}
 
 	@Test
+	public void testLocalPlatformHelper() {
+		PlatformHelper platformHelper = new LocalPlatformHelper(runtimeOperations);
+		assertTrue(platformHelper.getLogfileName().contains("test.log"));
+		assertTrue(platformHelper.getLogfileName().contains("${PID}"));
+	}
+
+	@Test
 	public void testKubernetesPlatformHelper() {
 		PlatformHelper platformHelper = new KubernetesPlatformHelper(runtimeOperations);
 		assertEquals("test.log", platformHelper.getLogfileName());

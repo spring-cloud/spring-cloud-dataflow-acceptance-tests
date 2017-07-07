@@ -35,12 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.acceptance.test.util.Application;
-import org.springframework.cloud.dataflow.acceptance.test.util.DefaultPlatformHelper;
-import org.springframework.cloud.dataflow.acceptance.test.util.KubernetesPlatformHelper;
-import org.springframework.cloud.dataflow.acceptance.test.util.PlatformHelper;
-import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
-import org.springframework.cloud.dataflow.acceptance.test.util.TestConfigurationProperties;
+import org.springframework.cloud.dataflow.acceptance.test.util.*;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
@@ -93,7 +88,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			logger.warn(">>>>>>>>>>Test Failed Dumping App Logs<<<<<<<<<");
 			for (StreamDefinition stream : streams) {
 				for (Application application : stream.getApplications()) {
-					getLog(application);
+					getLog(application.getUrl());
 				}
 			}
 			destroyStreams();
@@ -126,6 +121,9 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				appRegistryOperations = dataFlowOperationsTemplate.appRegistryOperations();
 				if (configurationProperties.getPlatformType().equals(PlatformTypes.KUBERNETES.getValue())) {
 					platformHelper = new KubernetesPlatformHelper(runtimeOperations);
+				}
+				else if (configurationProperties.getPlatformType().equals(PlatformTypes.LOCAL.getValue())) {
+					platformHelper = new LocalPlatformHelper(runtimeOperations);
 				}
 				else {
 					platformHelper = new DefaultPlatformHelper(runtimeOperations);
@@ -223,11 +221,11 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 	/**
 	 * Retrieve the log for an app.
-	 * @param app the app to query to retrieve the log.
+	 * @param url the app URL to query to retrieve the log.
 	 * @return String containing the contents of the log or 'null' if not found.
 	 */
-	protected String getLog(Application app) {
-		String logFileUrl = String.format("%s/logfile", app.getUrl());
+	protected String getLog(String url) {
+		String logFileUrl = String.format("%s/logfile", url);
 		String log = null;
 		try {
 			log = restTemplate.getForObject(logFileUrl, String.class);
@@ -264,6 +262,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		logger.info("Looking for '" + entry + "' in logfile for " + app.getDefinition());
 		long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
 		boolean exists = false;
+		String instance = "?";
 		while (!exists && System.currentTimeMillis() < timeout) {
 			try {
 				Thread.sleep(configurationProperties.getDeployPauseTime() * 1000);
@@ -272,13 +271,20 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				Thread.currentThread().interrupt();
 				throw new IllegalStateException(e.getMessage(), e);
 			}
-			String log = getLog(app);
-			if (log != null) {
-				exists = log.contains(entry);
+			for (String appInstance : app.getInstanceUrls().keySet()) {
+				if (!exists) {
+					String log = getLog(app.getInstanceUrls().get(appInstance));
+					if (log != null) {
+						if (log.contains(entry)) {
+							exists = true;
+							instance = appInstance;
+						}
+					}
+				}
 			}
 		}
 		if (exists) {
-			logger.info("Matched '" + entry + "' in logfile for " + app.getDefinition());
+			logger.info("Matched '" + entry + "' in logfile for instance " + instance + " of app " + app.getDefinition());
 		}
 		else {
 			logger.error("ERROR: Couldn't find '" + entry + "' in logfile for " + app.getDefinition());

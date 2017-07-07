@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.acceptance.test.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Contains the metadata required for the acceptance test execute calls against the
  * application's end points.
@@ -25,6 +28,8 @@ package org.springframework.cloud.dataflow.acceptance.test.util;
 public class Application {
 
 	protected String url;
+
+	protected Map<String, String> instanceUrls = new HashMap<>();
 
 	protected String definition;
 
@@ -73,5 +78,18 @@ public class Application {
 
 	public String toString() {
 		return this.definition;
+	}
+
+	public Map<String, String> getInstanceUrls() {
+		return instanceUrls;
+	}
+
+	/**
+	 * The add URL where the application instance can be reached.
+	 * @param instanceId
+	 * @param url
+	 */
+	public void addInstanceUrl(String instanceId , String url) {
+		this.instanceUrls.put(instanceId, url);
 	}
 }
