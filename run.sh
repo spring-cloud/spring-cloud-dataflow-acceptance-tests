@@ -196,7 +196,7 @@ APPLICATION_ARGS=""
 if [ -z "$skipSetup" ]; then
   setup
 else
-  if [ -z "$skipTests" ]; then
+  if [ -z "$skipTests" ] || [ -z "$skipCleanup" ]; then
     config
   fi
 fi
