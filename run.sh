@@ -122,7 +122,7 @@ function log_versions() {
 
 function run_tests() {
   log_versions 
-  eval "./mvnw clean -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM test surefire-report:report"
+  eval "./mvnw -B -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM clean test surefire-report:report"
 }
 
 # ======================================= FUNCTIONS END =======================================
@@ -197,7 +197,7 @@ if [ -z "$skipSetup" ]; then
   setup
 else
   if [ -z "$skipTests" ] || [ -z "$skipCleanup" ]; then
-    config
+    ./
   fi
 fi
 if [ -z "$skipTests" ]; then
