@@ -87,13 +87,12 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	public TestWatcher testResultHandler = new TestWatcher() {
 		@Override
 		protected void failed(Throwable e, Description description) {
-			logger.warn(">>>>>>>>>>Test Failed Dumping App Logs<<<<<<<<<");
+			logger.error(">>> Test Failed !!!");
 			for (StreamDefinition stream : streams) {
 				for (Application application : stream.getApplications()) {
-					getLog(application.getUrl());
+					logger.error(">>> App " + application.getName() + " with URL "  +  application.getUrl() + " left behind for troubleshooting");
 				}
 			}
-			destroyStreams();
 		}
 
 		@Override
@@ -196,15 +195,17 @@ public abstract class AbstractStreamTests implements InitializingBean {
 					break;
 				}
 			}
-			logger.info(String.format("Waiting for stream to start " +
-					"current status is %s:  " +
-					"Attempt %s of %s", status, attempt,
-					configurationProperties.getDeployPauseRetries()));
 			attempt++;
 			deploymentPause();
 		}
-		if (!streamStarted) {
-			throw new IllegalStateException("Unable to start app");
+		if (streamStarted) {
+			logger.info(String.format("Stream started current status: %s", status));
+			for (Application app : stream.getApplications()) {
+				logger.info("App " + app.getName() + " has instances: " + app.getInstanceUrls());
+			}
+		}
+		else {
+			throw new IllegalStateException("Unable to start stream");
 		}
 	}
 
