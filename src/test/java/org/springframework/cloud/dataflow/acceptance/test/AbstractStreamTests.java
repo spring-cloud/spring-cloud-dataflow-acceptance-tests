@@ -87,12 +87,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	public TestWatcher testResultHandler = new TestWatcher() {
 		@Override
 		protected void failed(Throwable e, Description description) {
-			logger.error(">>> Test Failed !!!");
-			for (StreamDefinition stream : streams) {
-				for (Application application : stream.getApplications()) {
-					logger.error(">>> App " + application.getName() + " with URL "  +  application.getUrl() + " left behind for troubleshooting");
-				}
-			}
+			logger.error("!!! Test '" + description.getDisplayName() + "' Failed !!!", e);
+			destroyStreams();
 		}
 
 		@Override
@@ -105,6 +101,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 	@Before
 	public void setup() {
+		logger.info("Running test: " + getClass().getSimpleName());
 		registerApps();
 	}
 
@@ -142,6 +139,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * Destroys all streams registered with the Spring Cloud Data Flow instance.
 	 */
 	protected void destroyStreams() {
+		logger.warn("Destroy Streams: " + streams);
 		streamOperations.destroyAll();
 		streams.clear();
 	}
@@ -199,9 +197,9 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			deploymentPause();
 		}
 		if (streamStarted) {
-			logger.info(String.format("Stream started current status: %s", status));
+			logger.info(String.format("Stream '"+ stream.getName() + "' started with status: %s", status));
 			for (Application app : stream.getApplications()) {
-				logger.info("App " + app.getName() + " has instances: " + app.getInstanceUrls());
+				logger.info("App '" + app.getName() + "' has instances: " + app.getInstanceUrls());
 			}
 		}
 		else {
