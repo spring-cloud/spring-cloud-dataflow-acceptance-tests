@@ -230,12 +230,18 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		String log = null;
 		try {
 			log = restTemplate.getForObject(logFileUrl, String.class);
+			if (log == null) {
+				logger.info("Unable to retrieve logfile from '" + logFileUrl);
+			}
+			else {
+				logger.info("Retrieved logfile from '" + logFileUrl);
+			}
 		}
 		catch (HttpClientErrorException e) {
-			logger.info("Failed to access logfile at '" + logFileUrl + "' due to : " + e.getMessage());
+			logger.info("Failed to access logfile from '" + logFileUrl + "' due to : " + e.getMessage());
 		}
 		catch (Exception e) {
-			logger.warn("Error while trying to access logfile at '" + logFileUrl + "' due to : " + e);
+			logger.warn("Error while trying to access logfile from '" + logFileUrl + "' due to : " + e);
 		}
 		return log;
 	}
