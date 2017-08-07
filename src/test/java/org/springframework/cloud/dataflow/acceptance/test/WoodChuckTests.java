@@ -37,6 +37,7 @@ public class WoodChuckTests extends AbstractStreamTests {
 				.definition("http | splitter --expression=payload.split(' ') | log")
 				.addProperty("deployer.log.count", "2")
 				.addProperty("app.splitter.producer.partitionKeyExpression", "payload")
+				.addProperty("app.log.spring.cloud.stream.kafka.bindings.input.consumer.autoRebalanceEnabled", "false")
 				.addProperty("app.log.logging.pattern.level", "WOODCHUCK-${instance.index} %5p")
 				.build();
 		deployStream(stream);
