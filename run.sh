@@ -85,6 +85,24 @@ function setup() {
       run_scripts $BINDER "create.sh"
     popd
     run_scripts "redis" "create.sh"
+    if [ "$PLATFORM" == "cloudfoundry" ];
+    then
+    export SPRING_PROFILES_ACTIVE=cloud1
+    run_scripts "server" "create.sh"
+    SERVER_URI=$(cf app scdf-server | grep dataflow-server- | awk '{print $2}' | sed 's:,::g')
+    SERVER_URI="http://$SERVER_URI"
+    wget $SERVER_URI/features -O features.txt
+    if grep -Fxq "{\"analyticsEnabled\":true,\"streamsEnabled\":false,\"tasksEnabled\":true}" features.txt
+        then
+        echo "Spring Cloud Config server properties are updated correctly."
+        rm features.txt
+        else
+        echo "Spring Cloud Config server properties are not available for the SCDF server. Tests fails"
+        exit 0
+    fi
+    run_scripts "server" "destroy.sh"
+    export SPRING_PROFILES_ACTIVE=cloud
+    fi
     run_scripts "server" "create.sh"
   popd
 }
@@ -112,6 +130,10 @@ function tear_down() {
     pushd "binder"
       run_scripts $BINDER "destroy.sh"
     popd
+#    if [ "$PLATFORM" == "cloudfoundry" ];
+#    then
+#    run_scripts "config-server" "destroy.sh"
+#    fi
   popd
 }
 
@@ -184,7 +206,7 @@ done
 [[ -z "${PLATFORM}" ]] && PLATFORM=local
 [[ -z "${BINDER}" ]] && BINDER=rabbit
 WAIT_TIME="${WAIT_TIME:-5}"
-RETRIES="${RETRIES:-6}"
+RETRIES="${RETRIES:-60}"
 JAVA_PATH_TO_BIN="${JAVA_HOME}/bin/"
 MEM_ARGS="-Xmx1024m -Xss1024k"
 JAVA_OPTS=""

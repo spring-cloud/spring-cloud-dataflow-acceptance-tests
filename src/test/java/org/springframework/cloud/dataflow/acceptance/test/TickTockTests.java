@@ -16,17 +16,20 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeThat;
 
 /**
  * Executes acceptance tests for the ticktock demo.
  * @author Glenn Renfro
  * @author Thomas Risberg
  * @author Vinicius Carvalho
+ * @author Ilayaperumal Gopinathan
  */
 
 public class TickTockTests extends AbstractStreamTests {
@@ -44,4 +47,17 @@ public class TickTockTests extends AbstractStreamTests {
 		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "TICKTOCK - TIMESTAMP:"));
 	}
 
+	@Test
+	public void tickTockTestsFromConfigServer() {
+		String platformType = System.getProperty("PLATFORM_TYPE", "");
+		assumeThat("Skipping test", "cloudfoundry", Matchers.equalToIgnoringCase(platformType));
+		StreamDefinition stream = StreamDefinition.builder("TICKTOCK-config-server")
+				.definition("time | log")
+				.addProperty("app.log.spring.profiles.active", "test")
+				.build();
+		deployStream(stream);
+		assertTrue("Source not started", waitForLogEntry(stream.getApplication("time"), "Started TimeSource"));
+		assertTrue("Sink not started", waitForLogEntry(stream.getApplication("log"), "Started LogSink"));
+		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "TICKTOCK CLOUD CONFIG - TIMESTAMP:"));
+	}
 }
