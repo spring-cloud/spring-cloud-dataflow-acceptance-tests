@@ -1,3 +1,5 @@
 #!/bin/bash
 
-cf delete scdf-server -f -r
+ if (cf apps | grep "scdf-server"); then
+    cf delete scdf-server -f -r
+ fi
