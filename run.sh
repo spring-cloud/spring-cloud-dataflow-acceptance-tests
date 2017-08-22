@@ -98,7 +98,7 @@ function setup() {
         rm features.txt
         else
         echo "Spring Cloud Config server properties are not available for the SCDF server. Tests fails"
-        exit 0
+        exit 1
     fi
     run_scripts "server" "destroy.sh"
     export SPRING_PROFILES_ACTIVE=cloud
@@ -130,10 +130,6 @@ function tear_down() {
     pushd "binder"
       run_scripts $BINDER "destroy.sh"
     popd
-#    if [ "$PLATFORM" == "cloudfoundry" ];
-#    then
-#    run_scripts "config-server" "destroy.sh"
-#    fi
   popd
 }
 
