@@ -19,7 +19,7 @@ if [ $LOG_SERVICE_NAME ]; then
 EOF
 fi
 cat << EOF >> ./scdf-manifest.yml
-    - rabbit
+    - rabbit2
     - cloud-config-server
   env:
     EXTERNAL_SERVERS_REQUIRED: true

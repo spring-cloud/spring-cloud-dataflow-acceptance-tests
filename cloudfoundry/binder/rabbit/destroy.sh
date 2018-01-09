@@ -2,4 +2,4 @@
 
 source ../../common.sh
 
-destroy_service "rabbit"
+destroy_service "rabbit2"
