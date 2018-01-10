@@ -280,6 +280,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			}
 			for (String appInstance : app.getInstanceUrls().keySet()) {
 				if (!exists) {
+					logger.info("Polling to get log file. Remaining poll time = "
+							+ (timeout-System.currentTimeMillis() + " ms."));
 					String log = getLog(app.getInstanceUrls().get(appInstance));
 					if (log != null) {
 						if (Stream.of(entries).allMatch(s -> log.contains(s))) {
