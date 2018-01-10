@@ -9,6 +9,7 @@ applications:
   path: ./scdf-server.jar
   memory: 1G
   host: dataflow-server-\${random-word}
+  buildpack: java_buildpack
   services:
     - mysql
     - redis
