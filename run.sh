@@ -91,11 +91,11 @@ function setup() {
     run_scripts "server" "create.sh"
     SERVER_URI=$(cf app scdf-server | grep dataflow-server- | awk '{print $2}' | sed 's:,::g')
     SERVER_URI="http://$SERVER_URI"
-    wget $SERVER_URI/features -O features.txt
-    if grep -Fxq "{\"analyticsEnabled\":true,\"streamsEnabled\":false,\"tasksEnabled\":true}" features.txt
+    wget $SERVER_URI/about -O about.txt
+    if grep -Fxq "{\"analyticsEnabled\":true,\"streamsEnabled\":false,\"tasksEnabled\":true}" about.txt
         then
         echo "Spring Cloud Config server properties are updated correctly."
-        rm features.txt
+        rm about.txt
         else
         echo "Spring Cloud Config server properties are not available for the SCDF server. Tests fails"
         exit 1
