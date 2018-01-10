@@ -85,6 +85,9 @@ function setup() {
       run_scripts $BINDER "create.sh"
     popd
     run_scripts "redis" "create.sh"
+    if [ "$PLATFORM" == "cloudfoundry" ];
+       export SPRING_PROFILES_ACTIVE=cloud
+    fi
     if [ "$PLATFORM" == "cloudfoundry-disabled" ];
     then
     export SPRING_PROFILES_ACTIVE=cloud1
