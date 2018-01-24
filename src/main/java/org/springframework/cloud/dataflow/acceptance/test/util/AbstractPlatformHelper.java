@@ -45,7 +45,7 @@ public abstract class AbstractPlatformHelper implements PlatformHelper {
 			AppStatusResource appStatus = statsIterator.next();
 			for (Application application : stream.getApplications()) {
 				if (appStatus.getDeploymentId().toLowerCase().contains(stream.getName().toLowerCase())
-						&& appStatus.getDeploymentId().endsWith((application.getName()))) {
+						&& extractName(appStatus.getDeploymentId()).endsWith(application.getName())) {
 					if (!setUrlForApplication(application, appStatus)) {
 						return false;
 					}
@@ -56,6 +56,16 @@ public abstract class AbstractPlatformHelper implements PlatformHelper {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * removes the '-v1' like suffix from the deploymentId like 'HTTP-TEST.log-v1'
+	 */
+	private static String extractName(String appName) {
+		if (!appName.contains("-v")) {
+			return appName;
+		}
+		return appName.split("-v")[0];
 	}
 
 	@Override
