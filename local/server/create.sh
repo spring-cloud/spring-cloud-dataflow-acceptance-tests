@@ -15,6 +15,9 @@ function java_jar() {
 }
 
 run_scripts "$PWD" "config.sh"
+if [  ! -z "$skipperMode" ]; then
+ APPLICATION_ARGS="$APPLICATION_ARGS --spring.cloud.dataflow.features.skipper-enabled=true"
+fi
 
 download $PWD
 java_jar $PWD

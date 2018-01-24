@@ -26,7 +26,8 @@ Flags:
     -s  | --skipSetup - skip setup phase
     -t  | --skipTests - skip test phase
     -c  | --skipCleanup - skip the clean up phase
-    -d  | --doNotDownload - skip the downloading of the server
+    -d  | --doNotDownload - skip the downloading of the SCDF/Skipper servers
+    -m  | --skipperMode - specify if skipper mode should be enabled
 
 [*] = Required arguments
 
@@ -70,6 +71,19 @@ function download(){
   fi
 }
 
+function download_skipper(){
+  if [ -z "$doNotDownload" ] || [ ! -f $1/skipper-server.jar ]; then
+    if [  ! -z "$doNotDownload" ]; then
+      echo "Forcing download since $1/skipper-server.jar was not found"
+    fi
+    echo "Downloading server from $SPRING_CLOUD_SKIPPER_SERVER_DOWNLOAD_URL"
+    wget $SPRING_CLOUD_SKIPPER_SERVER_DOWNLOAD_URL --no-verbose -O $1/skipper-server.jar
+  else
+    echo "Using already downloaded server, waiting for services to start ..."
+    sleep 15
+  fi
+}
+
 function run_scripts()
 {
   pushd $1
@@ -107,6 +121,9 @@ function setup() {
     run_scripts "server" "destroy.sh"
     export SPRING_PROFILES_ACTIVE=cloud
     fi
+    if [  ! -z "$skipperMode" ]; then
+      run_scripts "skipper-server" "create.sh"
+    fi
     run_scripts "server" "create.sh"
   popd
 }
@@ -117,6 +134,9 @@ function config() {
     pushd "binder"
       run_scripts $BINDER "config.sh"
     popd
+    if [  ! -z "$skipperMode" ]; then
+      run_scripts "skipper-server" "config.sh"
+    fi
     run_scripts "server" "config.sh"
   popd
 }
@@ -129,6 +149,9 @@ function tear_down() {
   echo "Clean up, clean up, everybody everywhere; clean up clean up, everybody do your share!"
   pushd $PLATFORM
     run_scripts "server" "destroy.sh"
+    if [  ! -z "$skipperMode" ]; then
+      run_scripts "skipper-server" "destroy.sh"
+    fi
     run_scripts "redis" "destroy.sh"
     run_scripts "mysql" "destroy.sh"
     pushd "binder"
@@ -137,13 +160,21 @@ function tear_down() {
   popd
 }
 
-function log_versions() {
+function log_scdf_versions() {
   echo "SCDF SERVER ABOUT:"
   wget -q -O - stdout $SERVER_URI/about | python -m json.tool
 }
 
+function log_skipper_versions() {
+  echo "SKIPPER SERVER ABOUT:"
+  wget -q -O - stdout $SKIPPER_SERVER_URI/api/about | python -m json.tool
+}
+
 function run_tests() {
-  log_versions 
+  log_scdf_versions
+  if [  ! -z "$skipperMode" ]; then
+    log_skipper_versions
+  fi
   eval "./mvnw -B -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM clean test surefire-report:report"
 }
 
@@ -188,6 +219,9 @@ case ${key} in
  ;;
  -d|--doNotDownload)
  doNotDownload="false"
+ ;;
+ -m|--skipperMode)
+ skipperMode="true"
  ;;
  --help)
  print_usage
