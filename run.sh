@@ -101,16 +101,12 @@ function setup() {
     run_scripts "redis" "create.sh"
     if [ "$PLATFORM" == "cloudfoundry" ];
     then
-       export SPRING_PROFILES_ACTIVE=cloud
-    fi
-    if [ "$PLATFORM" == "cloudfoundry-disabled" ];
-    then
     export SPRING_PROFILES_ACTIVE=cloud1
     run_scripts "server" "create.sh"
     SERVER_URI=$(cf app scdf-server | grep dataflow-server- | awk '{print $2}' | sed 's:,::g')
     SERVER_URI="http://$SERVER_URI"
     wget $SERVER_URI/about -O about.txt
-    if grep -Fxq "{\"analyticsEnabled\":true,\"streamsEnabled\":false,\"tasksEnabled\":true}" about.txt
+    if grep -q "{\"analyticsEnabled\":true,\"streamsEnabled\":false,\"tasksEnabled\":true,\"skipperEnabled\":false}" about.txt
         then
         echo "Spring Cloud Config server properties are updated correctly."
         rm about.txt
