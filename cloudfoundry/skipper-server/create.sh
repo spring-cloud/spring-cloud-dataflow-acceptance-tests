@@ -11,7 +11,7 @@ applications:
   host: skipper-server-\${random-word}
   buildpack: java_buildpack
   services:
-    - mysql
+    - mysql_skipper
 EOF
 if [ $LOG_SERVICE_NAME ]; then
     cat << EOF >> ./skipper-manifest.yml
