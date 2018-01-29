@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: skipper
-        image: springcloud/spring-cloud-skipper-server
+        image: springcloud/spring-cloud-skipper-server:1.0.0.BUILD-SNAPSHOT
         imagePullPolicy: Always
         ports:
         - containerPort: 7577
@@ -31,8 +31,6 @@ spec:
               fieldPath: "metadata.namespace"
         - name: SERVER_PORT
           value: '7577'
-        - name: SPRING_CLOUD_SKIPPER_SERVER_URI
-          value: 'http://${SKIPPER_SERVER_URI}:${SKIPPER_SERVICE_PORT}'
           # Add Maven repo for metadata artifact resolution
         - name: SPRING_APPLICATION_JSON
           value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\"} } } }"

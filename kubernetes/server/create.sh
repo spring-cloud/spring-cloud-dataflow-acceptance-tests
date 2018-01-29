@@ -16,7 +16,82 @@ function kubectl_create() {
   return 0
 }
 
+function generate_manifest() {
+cat << EOF > ./scdf.yml
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: scdf
+spec:
+  replicas: 1
+  selector:
+    name: scdf
+  template:
+    metadata:
+      labels:
+        name: scdf
+    spec:
+      containers:
+      - name: scdf
+        image: springcloud/spring-cloud-dataflow-server-kubernetes
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: 1.0
+            memory: 2048Mi
+          requests:
+            cpu: 0.5
+            memory: 1024Mi
+        env:
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: "metadata.namespace"
+        - name: SERVER_PORT
+          value: '80'
+        - name: SPRING_CLOUD_CONFIG_SERVER_BOOTSTRAP
+          value: 'false'
+        - name: SPRING_CLOUD_DATAFLOW_FEATURES_ANALYTICS_ENABLED
+          value: 'true'
+        - name: SPRING_CLOUD_DEPLOYER_KUBERNETES_MEMORY
+          value: 1024Mi
+        - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
+          value: 'true'
+        - name: SPRING_CLOUD_KUBERNETES_SECRETS_NAME
+          value: scdf-secrets
+        - name: SPRING_CLOUD_KUBERNETES_CONFIG_NAME
+          value: scdf-config
+        - name: SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED
+          value: '$SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED'
+        - name: SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI
+          value: '$SKIPPER_SERVER_URI'
+          # Add Maven repo for metadata artifact resolution plus set metrics destination for all stream apps
+        - name: SPRING_APPLICATION_JSON
+          value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\"} } }, \"spring.cloud.dataflow.application-properties.stream.spring.cloud.stream.bindings.applicationMetrics.destination\": \"metrics\" }"
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: scdf
+  labels:
+    spring-cloud-service: scdf
+spec:
+  # If you are running k8s on a local dev box, you can use type NodePort instead
+  type: LoadBalancer
+  ports:
+    - port: 80
+  selector:
+    name: scdf
+EOF
+
+}
+
 RETRIES=20
 WAIT_TIME=15
+generate_manifest
 kubectl_create
 run_scripts "$PWD" "config.sh"
