@@ -24,6 +24,7 @@ dataflowlib/
 *.out
 **/scdf-manifest.yml
 **/skipper-manifest.yml
+**/scdf.yml
 
 # Eclipse artifacts, including WTP generated manifests
 .classpath

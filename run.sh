@@ -128,6 +128,12 @@ function setup() {
       export SKIPPER_SERVER_URI="http://$SKIPPER_SERVER_URI"
       echo "SKIPPER SERVER URI: $SKIPPER_SERVER_URI"
       fi
+      if [ "$PLATFORM" == "kubernetes" ];
+      then
+      SKIPPER_SERVER_URI=$(kubectl get svc skipper --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $4}')
+      export SKIPPER_SERVER_URI="http://$SKIPPER_SERVER_URI:7577"
+      echo "SKIPPER SERVER URI: $SKIPPER_SERVER_URI"
+      fi
     fi
     run_scripts "server" "create.sh"
   popd

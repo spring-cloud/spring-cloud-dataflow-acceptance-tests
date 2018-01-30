@@ -25,15 +25,20 @@ spec:
             cpu: 0.5
             memory: 1024Mi
         env:
+        - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
+          value: 'true'
+        - name: SPRING_CLOUD_KUBERNETES_SECRETS_NAME
+          value: scdf-secrets
+        - name: SPRING_CLOUD_KUBERNETES_CONFIG_NAME
+          value: scdf-config
         - name: KUBERNETES_NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: "metadata.namespace"
         - name: SERVER_PORT
           value: '7577'
-          # Add Maven repo for metadata artifact resolution
         - name: SPRING_APPLICATION_JSON
-          value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\"} } } }"
+          value: "{\"spring.cloud.skipper.server.enableLocalPlatform\" : false, \"spring.cloud.skipper.server.platform.kubernetes.accounts.cluster1.environmentVariables\" : \"SPRING_RABBITMQ_HOST=${RABBITMQ_SERVICE_HOST},SPRING_RABBITMQ_PORT=${RABBITMQ_SERVICE_PORT}\",\"spring.cloud.skipper.server.platform.kubernetes.accounts.cluster1.memory\" : \"1024Mi\",\"spring.cloud.skipper.server.platform.kubernetes.accounts.cluster1.createDeployment\" : true}"
 
 ---
 
