@@ -100,6 +100,7 @@ function setup() {
     popd
     run_scripts "redis" "create.sh"
     export SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED=false
+    export SKIPPER_SERVER_URI="http://localhost:7577"
     if [ "$PLATFORM" == "cloudfoundry" ];
     then
     export SPRING_PROFILES_ACTIVE=cloud1
@@ -121,6 +122,12 @@ function setup() {
     if [  ! -z "$skipperMode" ]; then
       export SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED=true
       run_scripts "skipper-server" "create.sh"
+      if [ "$PLATFORM" == "cloudfoundry" ];
+      then
+      SKIPPER_SERVER_URI=$(cf app skipper-server | grep skipper-server- | awk '{print $2}' | sed 's:,::g')
+      export SKIPPER_SERVER_URI="http://$SKIPPER_SERVER_URI"
+      echo "SKIPPER SERVER URI: $SKIPPER_SERVER_URI"
+      fi
     fi
     run_scripts "server" "create.sh"
   popd
