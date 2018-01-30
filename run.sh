@@ -99,6 +99,10 @@ function setup() {
       run_scripts $BINDER "create.sh"
     popd
     run_scripts "redis" "create.sh"
+    export SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED=false
+    if [  ! -z "$skipperMode" ]; then
+      export SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED=true
+    fi
     if [ "$PLATFORM" == "cloudfoundry" ];
     then
     export SPRING_PROFILES_ACTIVE=cloud1
@@ -119,7 +123,6 @@ function setup() {
     fi
     if [  ! -z "$skipperMode" ]; then
       run_scripts "skipper-server" "create.sh"
-      export SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED=true
     fi
     run_scripts "server" "create.sh"
   popd
