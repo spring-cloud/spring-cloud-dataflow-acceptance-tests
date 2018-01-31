@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.acceptance.test;
 
 import org.hamcrest.Matchers;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
@@ -35,6 +36,7 @@ import static org.junit.Assume.assumeThat;
 public class TickTockTests extends AbstractStreamTests {
 
 	@Test
+	@Ignore
 	public void tickTockTests() {
 		StreamDefinition stream = StreamDefinition.builder("TICKTOCK")
 				.definition("time | log")
@@ -50,7 +52,9 @@ public class TickTockTests extends AbstractStreamTests {
 	@Test
 	public void tickTockTestsFromConfigServer() {
 		String platformType = System.getProperty("PLATFORM_TYPE", "");
+		String skipCloudConfig = System.getProperty("SKIP_CLOUD_CONFIG", "false");
 		assumeThat("Skipping test", "cloudfoundry", Matchers.equalToIgnoringCase(platformType));
+		assumeThat("Skipping test", "false", Matchers.equalToIgnoringCase(skipCloudConfig));
 		StreamDefinition stream = StreamDefinition.builder("TICKTOCK-config-server")
 				.definition("time | log")
 				.addProperty("app.log.spring.profiles.active", "test")

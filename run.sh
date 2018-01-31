@@ -188,7 +188,10 @@ function run_tests() {
   if [  ! -z "$skipperMode" ]; then
     log_skipper_versions
   fi
-  eval "./mvnw -B -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM clean test surefire-report:report"
+  if [  -z "$skipCloudConfig" ]; then
+      skipCloudConfig="false"
+    fi
+  eval "./mvnw -B -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DSKIP_CLOUD_CONFIG=$skipCloudConfig test surefire-report:report"
 }
 
 # ======================================= FUNCTIONS END =======================================
