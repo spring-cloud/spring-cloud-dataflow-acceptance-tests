@@ -28,6 +28,7 @@ Flags:
     -c  | --skipCleanup - skip the clean up phase
     -d  | --doNotDownload - skip the downloading of the SCDF/Skipper servers
     -m  | --skipperMode - specify if skipper mode should be enabled
+    -cc | --skipCloudConfig - skip Cloud Config server tests for CF
 
 [*] = Required arguments
 
@@ -101,7 +102,8 @@ function setup() {
     run_scripts "redis" "create.sh"
     export SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED=false
     export SKIPPER_SERVER_URI="http://localhost:7577"
-    if [ "$PLATFORM" == "cloudfoundry" ];
+    export SPRING_PROFILES_ACTIVE=cloud
+    if [ "$PLATFORM" == "cloudfoundry" ] && [ -z "$skipCloudConfig" ];
     then
     export SPRING_PROFILES_ACTIVE=cloud1
     run_scripts "server" "create.sh"
@@ -186,7 +188,10 @@ function run_tests() {
   if [  ! -z "$skipperMode" ]; then
     log_skipper_versions
   fi
-  eval "./mvnw -B -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM clean test surefire-report:report"
+  if [  -z "$skipCloudConfig" ]; then
+      skipCloudConfig="false"
+    fi
+  eval "./mvnw -B -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DSKIP_CLOUD_CONFIG=$skipCloudConfig test surefire-report:report"
 }
 
 # ======================================= FUNCTIONS END =======================================
@@ -233,6 +238,9 @@ case ${key} in
  ;;
  -m|--skipperMode)
  skipperMode="true"
+ ;;
+ -cc|--skipCloudConfig)
+ skipCloudConfig="true"
  ;;
  --help)
  print_usage

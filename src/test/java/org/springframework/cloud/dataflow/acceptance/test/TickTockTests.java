@@ -50,7 +50,9 @@ public class TickTockTests extends AbstractStreamTests {
 	@Test
 	public void tickTockTestsFromConfigServer() {
 		String platformType = System.getProperty("PLATFORM_TYPE", "");
+		String skipCloudConfig = System.getProperty("SKIP_CLOUD_CONFIG", "false");
 		assumeThat("Skipping test", "cloudfoundry", Matchers.equalToIgnoringCase(platformType));
+		assumeThat("Skipping test", "false", Matchers.equalToIgnoringCase(skipCloudConfig));
 		StreamDefinition stream = StreamDefinition.builder("TICKTOCK-config-server")
 				.definition("time | log")
 				.addProperty("app.log.spring.profiles.active", "test")
