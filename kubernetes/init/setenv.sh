@@ -34,6 +34,6 @@ if [ -z "$KUBERNETES_NAMESPACE" ]; then
   export KUBERNETES_NAMESPACE='default'
 fi
 if [ -z "$SKIPPER_SERVER_IMAGE" ]; then
-  export SKIPPER_SERVER_IMAGE='springcloud/spring-cloud-skipper-server:1.0.0.BUILD-SNAPSHOT'
+  export SKIPPER_SERVER_IMAGE='springcloud/spring-cloud-skipper-server:1.0.0.RELEASE'
 fi
 echo "Using namespace $KUBERNETES_NAMESPACE"
