@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
       - name: scdf
-        image: springcloud/spring-cloud-dataflow-server-kubernetes
+        image: springcloud/spring-cloud-dataflow-server-kubernetes:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 80
