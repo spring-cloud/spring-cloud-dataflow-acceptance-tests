@@ -24,7 +24,7 @@ spec:
         - name: ZOOKEEPER_SERVER_1
           value: zookeeper
       - name: kafka
-        image: wurstmeister/kafka
+        image: wurstmeister/kafka:0.10.2.1
         ports:
         - containerPort: 9092
         env:
