@@ -275,7 +275,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	protected boolean waitForLogEntry(Application app, String... entries) {
 		logger.info("Looking for '" + StringUtils.arrayToCommaDelimitedString(entries) + "' in logfile for "
 				+ app.getDefinition());
-		long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
+		final long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
 		boolean exists = false;
 		String instance = "?";
 		while (!exists && System.currentTimeMillis() < timeout) {
@@ -288,14 +288,16 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			}
 			for (String appInstance : app.getInstanceUrls().keySet()) {
 				if (!exists) {
-					logger.info("Polling to get log file. Remaining poll time = "
-							+ (timeout - System.currentTimeMillis() + " ms."));
+					logger.info("Requesting log for app " + appInstance);
 					String log = getLog(app.getInstanceUrls().get(appInstance));
 					if (log != null) {
 						if (Stream.of(entries).allMatch(s -> log.contains(s))) {
 							exists = true;
 							instance = appInstance;
 						}
+					} else {
+						logger.info("Polling to get log file. Remaining poll time = "
+								+ Long.toString((timeout - System.currentTimeMillis()) / 1000) + " seconds.");
 					}
 				}
 			}
