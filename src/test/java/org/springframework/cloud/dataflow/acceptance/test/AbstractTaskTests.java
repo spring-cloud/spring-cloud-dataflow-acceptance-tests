@@ -59,9 +59,12 @@ import org.springframework.web.client.RestTemplate;
 public abstract class AbstractTaskTests implements InitializingBean {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskTests.class);
+
 	private static boolean tasksRegistered = false;
+
 	@Rule
 	public LogTestNameRule logTestName = new LogTestNameRule();
+
 	protected RestTemplate restTemplate;
 
 	protected TaskOperations taskOperations;
@@ -146,6 +149,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 		logger.info(String.format("Importing task apps from uri resource: %s",
 				configurationProperties.getTaskRegistrationResource()));
 		appRegistryOperations.importFromResource(configurationProperties.getTaskRegistrationResource(), true);
+		logger.info("Done importing task apps.");
 		this.tasksRegistered = true;
 	}
 
