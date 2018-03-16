@@ -3,6 +3,7 @@
 function java_jar() {
     APP_JAVA_PATH=$PWD
     EXPRESSION="nohup ${JAVA_PATH_TO_BIN}java $JAVA_OPTS $MEM_ARGS -jar $APP_JAVA_PATH/scdf-server.jar ${APPLICATION_ARGS} > $APP_JAVA_PATH/scdf-server.log &"
+    echo "SPRING_PROFILES_ACTIVE [$SPRING_PROFILES_ACTIVE]"
     echo "executing [$EXPRESSION]"
     eval "${EXPRESSION}"
     pid=$!

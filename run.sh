@@ -102,7 +102,6 @@ function setup() {
     run_scripts "redis" "create.sh"
     export SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED=false
     export SKIPPER_SERVER_URI="http://localhost:7577"
-    export SPRING_PROFILES_ACTIVE=cloud
     if [ "$PLATFORM" == "cloudfoundry" ] && [ -z "$skipCloudConfig" ];
     then
     export SPRING_PROFILES_ACTIVE=cloud1
@@ -110,14 +109,14 @@ function setup() {
     SERVER_URI=$(cf app scdf-server | grep dataflow-server- | awk '{print $2}' | sed 's:,::g')
     SERVER_URI="http://$SERVER_URI"
     wget $SERVER_URI/about -O about.txt
-    if grep -q "{\"analyticsEnabled\":true,\"streamsEnabled\":false,\"tasksEnabled\":true,\"skipperEnabled\":false}" about.txt
-        then
-        echo "Spring Cloud Config server properties are updated correctly."
-        rm about.txt
-        else
-        echo "Spring Cloud Config server properties are not available for the SCDF server. Tests fails"
-        exit 1
-    fi
+        if grep -q "{\"analyticsEnabled\":true,\"streamsEnabled\":false,\"tasksEnabled\":true,\"skipperEnabled\":false}" about.txt
+            then
+            echo "Spring Cloud Config server properties are updated correctly."
+            rm about.txt
+            else
+            echo "Spring Cloud Config server properties are not available for the SCDF server. Tests fails"
+            exit 1
+        fi
     run_scripts "server" "destroy.sh"
     export SPRING_PROFILES_ACTIVE=cloud
     fi
@@ -191,7 +190,7 @@ function run_tests() {
   if [  -z "$skipCloudConfig" ]; then
       skipCloudConfig="false"
     fi
-  eval "./mvnw -B -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DSKIP_CLOUD_CONFIG=$skipCloudConfig test surefire-report:report"
+  eval "./mvnw -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DSKIP_CLOUD_CONFIG=$skipCloudConfig test surefire-report:report"
 }
 
 # ======================================= FUNCTIONS END =======================================
