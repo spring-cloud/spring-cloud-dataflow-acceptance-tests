@@ -27,6 +27,7 @@ import java.util.UUID;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.acceptance.test.util.LogTestNameRule;
 import org.springframework.cloud.dataflow.acceptance.test.util.TestConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
@@ -57,7 +59,9 @@ import org.springframework.web.client.RestTemplate;
 public abstract class AbstractTaskTests implements InitializingBean {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskTests.class);
-
+	private static boolean tasksRegistered = false;
+	@Rule
+	public LogTestNameRule logTestName = new LogTestNameRule();
 	protected RestTemplate restTemplate;
 
 	protected TaskOperations taskOperations;
@@ -69,7 +73,10 @@ public abstract class AbstractTaskTests implements InitializingBean {
 
 	@Before
 	public void setup() {
-		registerApps();
+		if (tasksRegistered) {
+			return;
+		}
+		registerTasks();
 	}
 
 	@After
@@ -85,8 +92,8 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	}
 
 	/**
-	 * Creates a unique task definition name from a UUID and launches the task based on
-	 * the definition specified.
+	 * Creates a unique task definition name from a UUID and launches the task based on the
+	 * definition specified.
 	 *
 	 * @param definition The definition to test;
 	 * @return The name of the task associated with this launch.
@@ -97,8 +104,8 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	}
 
 	/**
-	 * Creates a unique task definition name from a UUID and launches the task based on
-	 * the definition specified.
+	 * Creates a unique task definition name from a UUID and launches the task based on the
+	 * definition specified.
 	 *
 	 * @param definition The definition to test.
 	 * @param properties Map containing deployment properties for the task.
@@ -135,10 +142,11 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	/**
 	 * Imports the proper apps required for the acceptance tests.
 	 */
-	protected void registerApps() {
+	protected void registerTasks() {
 		logger.info(String.format("Importing task apps from uri resource: %s",
 				configurationProperties.getTaskRegistrationResource()));
 		appRegistryOperations.importFromResource(configurationProperties.getTaskRegistrationResource(), true);
+		this.tasksRegistered = true;
 	}
 
 	/**
@@ -160,11 +168,10 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	}
 
 	/**
-	 * Waits the specified period of time for all task executions to complete for a
-	 * specific task name.
+	 * Waits the specified period of time for all task executions to complete for a specific
+	 * task name.
 	 *
-	 * @param taskDefinitionName the task name to monitor for in task execution list
-	 * result.
+	 * @param taskDefinitionName the task name to monitor for in task execution list result.
 	 * @param taskExecutionCount the number of expected task executions.
 	 * @return true if they are complete else false.
 	 */

@@ -36,7 +36,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.acceptance.test.util.*;
+import org.springframework.cloud.dataflow.acceptance.test.util.Application;
+import org.springframework.cloud.dataflow.acceptance.test.util.DefaultPlatformHelper;
+import org.springframework.cloud.dataflow.acceptance.test.util.KubernetesPlatformHelper;
+import org.springframework.cloud.dataflow.acceptance.test.util.LocalPlatformHelper;
+import org.springframework.cloud.dataflow.acceptance.test.util.LogTestNameRule;
+import org.springframework.cloud.dataflow.acceptance.test.util.PlatformHelper;
+import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
+import org.springframework.cloud.dataflow.acceptance.test.util.TestConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
@@ -59,12 +66,10 @@ import org.springframework.web.client.RestTemplate;
 @EnableConfigurationProperties(TestConfigurationProperties.class)
 public abstract class AbstractStreamTests implements InitializingBean {
 
-	private static final String RABBIT_BINDER = "RABBIT";
-
-	private static final String KAFKA_BINDER = "KAFKA";
-
 	private static final Logger logger = LoggerFactory.getLogger(AbstractStreamTests.class);
-
+	private static boolean appsRegistered = false;
+	@Rule
+	public LogTestNameRule logTestName = new LogTestNameRule();
 	protected RestTemplate restTemplate;
 
 	@Autowired
@@ -80,8 +85,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 	/**
 	 * A TestWatcher that will write the logs for the failed apps in the streams that were
-	 * registered. Also destroys all streams regardless if the test was successful or
-	 * failed.
+	 * registered. Also destroys all streams regardless if the test was successful or failed.
 	 */
 	@Rule
 	public TestWatcher testResultHandler = new TestWatcher() {
@@ -101,13 +105,15 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 	@Before
 	public void setup() {
-		logger.info("Running test: " + getClass().getSimpleName());
+		if (appsRegistered) {
+			return;
+		}
 		registerApps();
 	}
 
 	/**
-	 * Creates the stream and app operations as well as establish the uri helper that will
-	 * be used for the acceptance test.
+	 * Creates the stream and app operations as well as establish the uri helper that will be
+	 * used for the acceptance test.
 	 */
 	public void afterPropertiesSet() {
 		if (restTemplate == null) {
@@ -166,11 +172,12 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		logger.info(String.format("Importing stream apps from uri resource: %s",
 				configurationProperties.getStreamRegistrationResource()));
 		appRegistryOperations.importFromResource(configurationProperties.getStreamRegistrationResource(), true);
+		appsRegistered = true;
 	}
 
 	/**
-	 * Waits for the stream to be deployed and once deployed the function returns control
-	 * else it throws an IllegalStateException.
+	 * Waits for the stream to be deployed and once deployed the function returns control else
+	 * it throws an IllegalStateException.
 	 * @param stream the stream that is to be monitored.
 	 */
 	protected void streamAvailable(StreamDefinition stream) {
@@ -197,7 +204,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			deploymentPause();
 		}
 		if (streamStarted) {
-			logger.info(String.format("Stream '"+ stream.getName() + "' started with status: %s", status));
+			logger.info(String.format("Stream '" + stream.getName() + "' started with status: %s", status));
 			for (Application app : stream.getApplications()) {
 				logger.info("App '" + app.getName() + "' has instances: " + app.getInstanceUrls());
 			}
@@ -266,7 +273,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @return
 	 */
 	protected boolean waitForLogEntry(Application app, String... entries) {
-		logger.info("Looking for '" + StringUtils.arrayToCommaDelimitedString(entries) + "' in logfile for " + app.getDefinition());
+		logger.info("Looking for '" + StringUtils.arrayToCommaDelimitedString(entries) + "' in logfile for "
+				+ app.getDefinition());
 		long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
 		boolean exists = false;
 		String instance = "?";
@@ -281,7 +289,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			for (String appInstance : app.getInstanceUrls().keySet()) {
 				if (!exists) {
 					logger.info("Polling to get log file. Remaining poll time = "
-							+ (timeout-System.currentTimeMillis() + " ms."));
+							+ (timeout - System.currentTimeMillis() + " ms."));
 					String log = getLog(app.getInstanceUrls().get(appInstance));
 					if (log != null) {
 						if (Stream.of(entries).allMatch(s -> log.contains(s))) {
@@ -293,10 +301,12 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			}
 		}
 		if (exists) {
-			logger.info("Matched all '" + StringUtils.arrayToCommaDelimitedString(entries) + "' in logfile for instance " + instance + " of app " + app.getDefinition());
+			logger.info("Matched all '" + StringUtils.arrayToCommaDelimitedString(entries)
+					+ "' in logfile for instance " + instance + " of app " + app.getDefinition());
 		}
 		else {
-			logger.error("ERROR: Couldn't find all '" + StringUtils.arrayToCommaDelimitedString(entries) + "' in logfile for " + app.getDefinition());
+			logger.error("ERROR: Couldn't find all '" + StringUtils.arrayToCommaDelimitedString(entries)
+					+ "' in logfile for " + app.getDefinition());
 		}
 		return exists;
 	}
