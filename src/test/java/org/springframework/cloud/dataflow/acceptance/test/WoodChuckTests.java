@@ -38,7 +38,7 @@ public class WoodChuckTests extends AbstractStreamTests {
 				.addProperty("deployer.log.count", "2")
 				.addProperty("app.splitter.producer.partitionKeyExpression", "payload")
 				.addProperty("app.log.spring.cloud.stream.kafka.bindings.input.consumer.autoRebalanceEnabled", "false")
-				.addProperty("app.log.logging.pattern.level", "WOODCHUCK-${spring.cloud.stream.instanceIndex} %5p")
+				.addProperty("app.log.logging.pattern.level", "WOODCHUCK-${INSTANCE_INDEX:${CF_INSTANCE_INDEX:${spring.cloud.stream.instanceIndex:0}}} %5p")
 				.build();
 		deployStream(stream);
 
