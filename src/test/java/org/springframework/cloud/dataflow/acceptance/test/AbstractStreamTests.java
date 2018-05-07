@@ -278,6 +278,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		final long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
 		boolean exists = false;
 		String instance = "?";
+		String log = null;
 		while (!exists && System.currentTimeMillis() < timeout) {
 			try {
 				Thread.sleep(configurationProperties.getDeployPauseTime() * 1000);
@@ -289,9 +290,9 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			for (String appInstance : app.getInstanceUrls().keySet()) {
 				if (!exists) {
 					logger.info("Requesting log for app " + appInstance);
-					String log = getLog(app.getInstanceUrls().get(appInstance));
+					log = getLog(app.getInstanceUrls().get(appInstance));
 					if (log != null) {
-						if (Stream.of(entries).allMatch(s -> log.contains(s))) {
+						if (Stream.of(entries).allMatch(log::contains)) {
 							exists = true;
 							instance = appInstance;
 						}
@@ -309,6 +310,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		else {
 			logger.error("ERROR: Couldn't find all '" + StringUtils.arrayToCommaDelimitedString(entries)
 					+ "' in logfile for " + app.getDefinition());
+			logger.error("Log File from application = \n" + log);
 		}
 		return exists;
 	}
