@@ -278,7 +278,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		final long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
 		boolean exists = false;
 		String instance = "?";
-		String log = null;
+		Map<String,String> logData = new HashMap<>();;
 		while (!exists && System.currentTimeMillis() < timeout) {
 			try {
 				Thread.sleep(configurationProperties.getDeployPauseTime() * 1000);
@@ -290,7 +290,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			for (String appInstance : app.getInstanceUrls().keySet()) {
 				if (!exists) {
 					logger.info("Requesting log for app " + appInstance);
-					log = getLog(app.getInstanceUrls().get(appInstance));
+					String log = getLog(app.getInstanceUrls().get(appInstance));
+					logData.put(appInstance, log);
 					if (log != null) {
 						if (Stream.of(entries).allMatch(log::contains)) {
 							exists = true;
@@ -308,9 +309,13 @@ public abstract class AbstractStreamTests implements InitializingBean {
 					+ "' in logfile for instance " + instance + " of app " + app.getDefinition());
 		}
 		else {
-			logger.error("ERROR: Couldn't find all '" + StringUtils.arrayToCommaDelimitedString(entries)
-					+ "' in logfile for " + app.getDefinition());
-			logger.error("Log File from application = \n" + log);
+			logger.error("ERROR: Couldn't find '" + StringUtils.arrayToCommaDelimitedString(entries)
+					+ "' in logfiles for " + app.getDefinition() + ". Dumping log files.\n\n");
+			for (Map.Entry<String, String> entry : logData.entrySet()) {
+				logger.error("<logFile> =================");
+				logger.error("Log File for " + entry.getValue() + "\n" + entry.getValue());
+				logger.error("</logFile> ================\n");
+			}
 		}
 		return exists;
 	}
