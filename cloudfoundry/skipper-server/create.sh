@@ -6,9 +6,10 @@ cat << EOF > ./skipper-manifest.yml
 
 applications:
 - name: skipper-server
+  timeout: 120
   path: ./skipper-server.jar
   memory: 1G
-  host: skipper-server-\${random-word}
+  host: skipper-server-$RANDOM
   buildpack: java_buildpack
   services:
     - mysql_skipper
