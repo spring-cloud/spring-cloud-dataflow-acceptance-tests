@@ -29,6 +29,10 @@ Flags:
     -d  | --doNotDownload - skip the downloading of the SCDF/Skipper servers
     -m  | --skipperMode - specify if skipper mode should be enabled
     -cc | --skipCloudConfig - skip Cloud Config server tests for CF
+    -sv | --skipperVersion - set the skipper version to test (e.g. 1.0.4.BUILD-SNAPSHOT)
+    -dv | --dataflowVersion - set the dataflow version to test (e.g. 1.5.0.BUILD-SNAPSHOT)
+    -av | --appsVersion - set the stream app version to test (e.g. Celsius.SR2). Apps should be accessible via maven repo or docker hub.
+    -tv | --tasksVersion - set the task app version to test (e.g. Clark.RELEASE). Tasks should be accessible via maven repo or docker hub.
 
 [*] = Required arguments
 
@@ -40,7 +44,7 @@ filename=$1
 
 while IFS='=' read -r var value; do
   if [ -z ${!var} ]; then
-    export $var=$value
+    export $var=$(eval echo $value)
   fi
 done < "$filename"
 }
@@ -104,6 +108,7 @@ function setup() {
     export SKIPPER_SERVER_URI="http://localhost:7577"
     if [ "$PLATFORM" == "cloudfoundry" ] && [ -z "$skipCloudConfig" ];
     then
+    echo "The Config Server must be started using the config-server/create.sh"
     export SPRING_PROFILES_ACTIVE=cloud1
     run_scripts "server" "create.sh"
     SERVER_URI=$(cf app scdf-server | grep dataflow-server- | awk '{print $2}' | sed 's:,::g')
@@ -211,6 +216,22 @@ while [[ $# > 0 ]]
 do
 key="$1"
 case ${key} in
+ -av|--appsVersion)
+ STREAM_APPS_VERSION="$2"
+ shift
+ ;;
+ -tv|--tasksVersion)
+ TASKS_VERSION="$2"
+ shift
+ ;;
+ -sv|--skipperVersion)
+ SKIPPER_VERSION="$2"
+ shift
+ ;;
+ -dv|--dataflowVersion)
+ DATAFLOW_VERSION="$2"
+ shift
+ ;;
  -p|--platform)
  PLATFORM="$2"
  shift
@@ -257,6 +278,10 @@ done
 # ======================================= DEFAULTS ============================================
 [[ -z "${PLATFORM}" ]] && PLATFORM=local
 [[ -z "${BINDER}" ]] && BINDER=rabbit
+[[ -z "${SKIPPER_VERSION}" ]] && SKIPPER_VERSION=1.0.4.BUILD-SNAPSHOT
+[[ -z "${DATAFLOW_VERSION}" ]] && DATAFLOW_VERSION=1.5.0.BUILD-SNAPSHOT
+[[ -z "${STREAM_APPS_VERSION}" ]] && STREAM_APPS_VERSION=Celsius.SR2
+[[ -z "${TASKS_VERSION}" ]] && TASKS_VERSION=Clark.RELEASE
 WAIT_TIME="${WAIT_TIME:-5}"
 RETRIES="${RETRIES:-60}"
 JAVA_PATH_TO_BIN="${JAVA_HOME}/bin/"

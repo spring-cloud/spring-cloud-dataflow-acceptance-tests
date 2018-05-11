@@ -56,6 +56,7 @@ public class TickTockTests extends AbstractStreamTests {
 		StreamDefinition stream = StreamDefinition.builder("TICKTOCK-config-server")
 				.definition("time | log")
 				.addProperty("app.log.spring.profiles.active", "test")
+				.addProperty("deployer.log.cloudfoundry.services", "cloud-config-server")
 				.build();
 		deployStream(stream);
 		assertTrue("Source not started", waitForLogEntry(stream.getApplication("time"), "Started TimeSource"));
