@@ -32,7 +32,7 @@ public class TestConfigurationProperties {
 
 	private String binder = "RABBIT";
 
-	private int deployPauseRetries = 30;
+	private int deployPauseRetries = 60;
 
 	private int deployPauseTime = 5;
 
