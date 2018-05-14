@@ -6,9 +6,10 @@ cat << EOF > ./scdf-manifest.yml
 
 applications:
 - name: scdf-server
+  timeout: 120
   path: ./scdf-server.jar
   memory: 1G
-  host: dataflow-server-\${random-word}
+  host: dataflow-server-$RANDOM
   buildpack: java_buildpack
   services:
     - mysql

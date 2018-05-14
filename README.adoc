@@ -20,6 +20,12 @@ Flags:
     -t  | --skipTests - skip test phase
     -c  | --skipCleanup - skip the clean up phase
     -d  | --doNotDownload - skip the downloading of the server
+    -m  | --skipperMode - specify if skipper mode should be enabled
+    -cc | --skipCloudConfig - skip Cloud Config server tests for CF
+    -sv | --skipperVersion - set the skipper version to test (e.g. 1.0.4.BUILD-SNAPSHOT)
+    -dv | --dataflowVersion - set the dataflow version to test (e.g. 1.5.0.BUILD-SNAPSHOT)
+    -av | --appsVersion - set the stream app version to test (e.g. Celsius.SR2). Apps should be accessible via maven repo or docker hub.
+    -tv | --tasksVersion - set the task app version to test (e.g. Clark.RELEASE). Tasks should be accessible via maven repo or docker hub.
 
 [*] = Required arguments
 ```
