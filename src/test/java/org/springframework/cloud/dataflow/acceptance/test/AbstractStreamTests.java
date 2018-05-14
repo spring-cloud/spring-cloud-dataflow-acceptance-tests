@@ -191,6 +191,9 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				resource = streamIter.next();
 				if (resource.getName().equals(stream.getName())) {
 					status = resource.getStatus();
+					logger.info("Checking: Stream=" + stream.getName() +
+							", resource=" + resource.getName() +
+							", status = " + status);
 					if (status.equals("deployed")) {
 						boolean urlsAvailable = platformHelper.setUrlsForStream(stream);
 						if (urlsAvailable) {
@@ -201,6 +204,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				}
 			}
 			attempt++;
+			logger.info("Sleeping to check status of Stream="+stream.getName());
 			deploymentPause();
 		}
 		if (streamStarted) {
@@ -210,7 +214,9 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			}
 		}
 		else {
-			throw new IllegalStateException("Unable to start stream");
+			logger.info(String.format("Stream '" + stream.getName() + "' was not started.  Status: %s", status));
+			throw new IllegalStateException("Unable to start stream " + stream.getName() +
+					".  Definition = " + stream.getDefinition());
 		}
 	}
 
