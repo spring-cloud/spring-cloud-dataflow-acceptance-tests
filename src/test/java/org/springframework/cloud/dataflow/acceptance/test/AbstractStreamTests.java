@@ -185,16 +185,16 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		boolean streamStarted = false;
 		int attempt = 0;
 		String status = "not present";
+		StreamDefinitionResource resource = null;
 		while (!streamStarted && attempt < configurationProperties.getDeployPauseRetries()) {
 			Iterator<StreamDefinitionResource> streamIter = streamOperations.list().getContent().iterator();
-			StreamDefinitionResource resource = null;
 			while (streamIter.hasNext()) {
 				resource = streamIter.next();
 				if (resource.getName().equals(stream.getName())) {
 					status = resource.getStatus();
 					logger.info("Checking: Stream=" + stream.getName() +
-							", resource=" + resource.getName() +
-							", status = " + status);
+							", status = " + status +
+							", status description = " + resource.getStatusDescription());
 					if (status.equals("deployed")) {
 						boolean urlsAvailable = platformHelper.setUrlsForStream(stream);
 						if (urlsAvailable) {
@@ -209,13 +209,19 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			deploymentPause();
 		}
 		if (streamStarted) {
-			logger.info(String.format("Stream '" + stream.getName() + "' started with status: %s", status));
+			logger.info(String.format("Stream '%s' started with status: %s", stream.getName(), status));
 			for (Application app : stream.getApplications()) {
 				logger.info("App '" + app.getName() + "' has instances: " + app.getInstanceUrls());
 			}
 		}
 		else {
-			logger.info(String.format("Stream '" + stream.getName() + "' was not started.  Status: %s", status));
+		    String statusDescription = "null";
+			if (resource != null) {
+				statusDescription = resource.getStatusDescription();
+			}
+			logger.info(String.format("Stream '%s' NOT started with status: %s.  Description = %s",
+					stream.getName(), status, statusDescription));
+
 			throw new IllegalStateException("Unable to start stream " + stream.getName() +
 					".  Definition = " + stream.getDefinition());
 		}
