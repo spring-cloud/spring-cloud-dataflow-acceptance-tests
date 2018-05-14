@@ -66,7 +66,8 @@ import org.springframework.web.client.RestTemplate;
 @EnableConfigurationProperties(TestConfigurationProperties.class)
 public abstract class AbstractStreamTests implements InitializingBean {
 
-	private static final Logger logger = LoggerFactory.getLogger(AbstractStreamTests.class);
+	private final Logger logger = LoggerFactory.getLogger(getClass());
+
 	private static boolean appsRegistered = false;
 	@Rule
 	public LogTestNameRule logTestName = new LogTestNameRule();
