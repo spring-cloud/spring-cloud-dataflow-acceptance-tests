@@ -278,7 +278,7 @@ done
 # ======================================= DEFAULTS ============================================
 [[ -z "${PLATFORM}" ]] && PLATFORM=local
 [[ -z "${BINDER}" ]] && BINDER=rabbit
-[[ -z "${SKIPPER_VERSION}" ]] && SKIPPER_VERSION=1.0.4.BUILD-SNAPSHOT
+[[ -z "${SKIPPER_VERSION}" ]] && SKIPPER_VERSION=1.0.4.RELEASE
 [[ -z "${DATAFLOW_VERSION}" ]] && DATAFLOW_VERSION=1.5.0.BUILD-SNAPSHOT
 [[ -z "${STREAM_APPS_VERSION}" ]] && STREAM_APPS_VERSION=Celsius.SR2
 [[ -z "${TASKS_VERSION}" ]] && TASKS_VERSION=Clark.RELEASE
