@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Mark Pollack
+ * @author Christian Tzolov
  */
 public class LogTestNameRule extends TestWatcher {
 
@@ -29,11 +30,21 @@ public class LogTestNameRule extends TestWatcher {
 
 	@Override
 	protected void starting(Description description) {
-		log.info("Starting Test {}", description.getMethodName());
+		log.info("Starting Test {}", description.getDisplayName());
+	}
+
+	@Override
+	protected void failed(Throwable e, Description description) {
+		log.error("!!! Test {} Failed !!!", description.getDisplayName(), e);
+	}
+
+	@Override
+	protected void succeeded(Description description) {
+		log.info("Test {} Succeeded", description.getDisplayName());
 	}
 
 	@Override
 	protected void finished(Description description) {
-		log.info("Finished Test {}", description.getMethodName());
+		log.info("Finished Test {}", description.getDisplayName());
 	}
 }

@@ -22,15 +22,15 @@ Flags:
 
 [*] -p  | --platform - define the target platform to run
     -b  | --binder - define the binder (i.e. RABBIT, KAFKA) defaults to RABBIT
-    -tests - comma separated list of tests to run (you can also specify expressions such as *http* for all tests with http word on it)
+    -tests - comma separated list of tests to run. Wildcards such as *http* are allowed (e.g. --tests TickTockTests#tickTockTests)
     -s  | --skipSetup - skip setup phase
     -t  | --skipTests - skip test phase
     -c  | --skipCleanup - skip the clean up phase
     -d  | --doNotDownload - skip the downloading of the SCDF/Skipper servers
     -m  | --skipperMode - specify if skipper mode should be enabled
     -cc | --skipCloudConfig - skip Cloud Config server tests for CF
-    -sv | --skipperVersion - set the skipper version to test (e.g. 1.0.4.BUILD-SNAPSHOT)
-    -dv | --dataflowVersion - set the dataflow version to test (e.g. 1.5.0.BUILD-SNAPSHOT)
+    -sv | --skipperVersion - set the skipper version to test (e.g. 1.0.5.BUILD-SNAPSHOT)
+    -dv | --dataflowVersion - set the dataflow version to test (e.g. 1.5.1.BUILD-SNAPSHOT)
     -av | --appsVersion - set the stream app version to test (e.g. Celsius.SR2). Apps should be accessible via maven repo or docker hub.
     -tv | --tasksVersion - set the task app version to test (e.g. Clark.RELEASE). Tasks should be accessible via maven repo or docker hub.
 
@@ -42,9 +42,12 @@ EOF
 function load_file() {
 filename=$1
 
+echo "Export the unset env. variables from $filename :"
 while IFS='=' read -r var value; do
+  # only the un-set variables are exported
   if [ -z ${!var} ]; then
     export $var=$(eval echo $value)
+    echo "   $var = $(eval echo $value)"
   fi
 done < "$filename"
 }
@@ -106,14 +109,19 @@ function setup() {
     run_scripts "redis" "create.sh"
     export SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED=false
     export SKIPPER_SERVER_URI="http://localhost:7577"
+
+    # Spring Config Server Test (begin)
     if [ "$PLATFORM" == "cloudfoundry" ] && [ -z "$skipCloudConfig" ];
     then
-    echo "The Config Server must be started using the config-server/create.sh"
+    echo "The Config Server must be pre-started using the config-server/create.sh"
+    # Note: to create config server service on PWS run (creation takes couple of minutes!):
+    # cf create-service -c '{"git": { "uri": "https://github.com/spring-cloud/spring-cloud-dataflow-acceptance-tests"}}' p-config-server trial cloud-config-server
     export SPRING_PROFILES_ACTIVE=cloud1
     run_scripts "server" "create.sh"
-    SERVER_URI=$(cf app scdf-server | grep dataflow-server- | awk '{print $2}' | sed 's:,::g')
+    SERVER_URI=$(cf apps | grep dataflow-server- | awk '{print $6}' | sed 's:,::g')
     SERVER_URI="http://$SERVER_URI"
     wget $SERVER_URI/about -O about.txt
+        # Asserts that the streamsEnabled is false as it was configured in ./scdf-server-cloud1.properties
         if grep -q "{\"analyticsEnabled\":true,\"streamsEnabled\":false,\"tasksEnabled\":true,\"skipperEnabled\":false}" about.txt
             then
             echo "Spring Cloud Config server properties are updated correctly."
@@ -125,6 +133,8 @@ function setup() {
     run_scripts "server" "destroy.sh"
     export SPRING_PROFILES_ACTIVE=cloud
     fi
+    # Spring Config Server Test (end)
+
     if [  ! -z "$skipperMode" ]; then
       export SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED=true
       run_scripts "skipper-server" "create.sh"
@@ -174,6 +184,7 @@ function tear_down() {
     pushd "binder"
       run_scripts $BINDER "destroy.sh"
     popd
+    cf delete-orphaned-routes -f
   popd
 }
 

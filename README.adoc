@@ -15,7 +15,7 @@ Flags:
 
 [*] -p  | --platform - define the target platform to run
     -b  | --binder - define the binder (i.e. rabbit, kafka) defaults to rabbit
-    -tests - comma separated list of tests to run (you can also specify expressions such as *http* for all tests with http word on it)
+    -tests - comma separated list of tests to run. Wildcards such as *http* are allowed. (e.g. --tests TickTockTests#tickTockTests)
     -s  | --skipSetup - skip setup phase
     -t  | --skipTests - skip test phase
     -c  | --skipCleanup - skip the clean up phase
@@ -30,7 +30,7 @@ Flags:
 [*] = Required arguments
 ```
 
-The first option is to choose a *PLATFORM*, available options `cloudfoundry`, `local` and `k8s` (kubernetes).  The scripts for each plaform are located in folders of the same name in the main directory.
+The first option is to choose a *PLATFORM*, available options `cloudfoundry`, `local` and `k8s` (kubernetes).  The scripts for each platform are located in folders of the same name in the main directory.
 
 By default the script will execute three main phases:
 
@@ -73,7 +73,7 @@ Make sure you have `JAVA_HOME` configured correctly in your environment.
 Each platform will have a file named `env.properties` located on `init/env.properties`, change those to reflect your
 environment. Each platform has different flags, but the global ones should be:
 
-* RETRIES : Number of times to test for a port when checking a service status (6 by defaut)
+* RETRIES : Number of times to test for a port when checking a service status (6 by default)
 * WAIT_TIME: How long to wait for another port test (5s by default)
 * SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL: Location of the dataflow jar file to be downloaded.
 
@@ -83,7 +83,7 @@ If you want to point to an already running Data Flow server, set the environment
 
 * SERVER_URI - default is http://localhost:9393
 * STREAM_REGISTRATION_RESOURCE - default is  maven + rabbit based apps
-* TASK_REGISTRATION_RESOURCE - deafult is maven + rabbit based tasks
+* TASK_REGISTRATION_RESOURCE - default is maven + rabbit based tasks
 
 To point to where your server is located and also specify which artifacts you want to register with the server.
 
