@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import static org.junit.Assume.assumeThat;
  * @author Thomas Risberg
  * @author Vinicius Carvalho
  * @author Ilayaperumal Gopinathan
+ * @author Christian Tzolov
  */
 
 public class TickTockTests extends AbstractStreamTests {
@@ -57,6 +58,7 @@ public class TickTockTests extends AbstractStreamTests {
 				.definition("time | log")
 				.addProperty("app.log.spring.profiles.active", "test")
 				.addProperty("deployer.log.cloudfoundry.services", "cloud-config-server")
+				.addProperty("app.log.spring.cloud.config.name", "scdf-server-TICKTOCK-config-server-log")
 				.build();
 		deployStream(stream);
 		assertTrue("Source not started", waitForLogEntry(stream.getApplication("time"), "Started TimeSource"));

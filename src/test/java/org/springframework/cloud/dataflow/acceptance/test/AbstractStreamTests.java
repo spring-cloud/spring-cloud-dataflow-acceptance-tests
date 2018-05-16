@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,14 @@ package org.springframework.cloud.dataflow.acceptance.test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Rule;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
+import org.junit.rules.ExternalResource;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +58,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Glenn Renfro
  * @author Thomas Risberg
  * @author Vinicius Carvalho
+ * @author Christian Tzolov
  */
 @RunWith(SpringRunner.class)
 @EnableConfigurationProperties(TestConfigurationProperties.class)
@@ -69,12 +67,14 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private static boolean appsRegistered = false;
+
 	@Rule
 	public LogTestNameRule logTestName = new LogTestNameRule();
+
 	protected RestTemplate restTemplate;
 
 	@Autowired
-	TestConfigurationProperties configurationProperties;
+	protected TestConfigurationProperties configurationProperties;
 
 	private StreamOperations streamOperations;
 
@@ -82,27 +82,21 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 	private RuntimeOperations runtimeOperations;
 
-	private List<StreamDefinition> streams = new ArrayList<>();
+	private PlatformHelper platformHelper;
 
 	/**
-	 * A TestWatcher that will write the logs for the failed apps in the streams that were
-	 * registered. Also destroys all streams regardless if the test was successful or failed.
+	 * Ensures that all streams are destroyed regardless if the test was successful or failed.
 	 */
 	@Rule
-	public TestWatcher testResultHandler = new TestWatcher() {
+	public ExternalResource resourceCleaner = new ExternalResource() {
 		@Override
-		protected void failed(Throwable e, Description description) {
-			logger.error("!!! Test '" + description.getDisplayName() + "' Failed !!!", e);
-			destroyStreams();
-		}
-
-		@Override
-		protected void succeeded(Description description) {
-			destroyStreams();
+		protected void after() {
+			if (streamOperations != null) {
+				logger.info("Destroy all streams");
+				streamOperations.destroyAll();
+			}
 		}
 	};
-
-	private PlatformHelper platformHelper;
 
 	@Before
 	public void setup() {
@@ -140,15 +134,6 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			restTemplate = new RestTemplate();
 
 		}
-	}
-
-	/**
-	 * Destroys all streams registered with the Spring Cloud Data Flow instance.
-	 */
-	protected void destroyStreams() {
-		logger.warn("Destroy Streams: " + streams);
-		streamOperations.destroyAll();
-		streams.clear();
 	}
 
 	/**
@@ -205,7 +190,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				}
 			}
 			attempt++;
-			logger.info("Sleeping to check status of Stream="+stream.getName());
+			logger.info("Sleeping to check status of Stream=" + stream.getName());
 			deploymentPause();
 		}
 		if (streamStarted) {
@@ -215,7 +200,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			}
 		}
 		else {
-		    String statusDescription = "null";
+			String statusDescription = "null";
 			if (resource != null) {
 				statusDescription = resource.getStatusDescription();
 			}
@@ -271,8 +256,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @param app the app that will receive the data.
 	 * @param message the data to be sent to the app.
 	 */
-	protected void httpPostData(Application app, String message)
-			throws URISyntaxException {
+	protected void httpPostData(Application app, String message) {
 		restTemplate.postForObject(
 				String.format(app.getUrl()),
 				message, String.class);
@@ -291,7 +275,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		final long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
 		boolean exists = false;
 		String instance = "?";
-		Map<String,String> logData = new HashMap<>();;
+		Map<String, String> logData = new HashMap<>(); ;
 		while (!exists && System.currentTimeMillis() < timeout) {
 			try {
 				Thread.sleep(configurationProperties.getDeployPauseTime() * 1000);
@@ -310,7 +294,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 							exists = true;
 							instance = appInstance;
 						}
-					} else {
+					}
+					else {
 						logger.info("Polling to get log file. Remaining poll time = "
 								+ Long.toString((timeout - System.currentTimeMillis()) / 1000) + " seconds.");
 					}
@@ -353,5 +338,4 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			return value;
 		}
 	}
-
 }

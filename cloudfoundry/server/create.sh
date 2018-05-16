@@ -1,15 +1,17 @@
 #!/bin/bash
 
-
 function generate_manifest() {
+# NOTE: In classic mode the app-names are prefixed with the <SCDF-Name>-<Stream Name>- prefix.
+# The random suffix in the SCDF name ensures that in classic mode the app-name's route paths are randomized and wouldn't
+# interfere with acceptance tests run in different CF spaces.
+SCDF_RANDOM_SUFFIX=$RANDOM
 cat << EOF > ./scdf-manifest.yml
-
 applications:
-- name: scdf-server
+- name: scdf-server-$SCDF_RANDOM_SUFFIX
   timeout: 120
   path: ./scdf-server.jar
   memory: 1G
-  host: dataflow-server-$RANDOM
+  host: dataflow-server-$SCDF_RANDOM_SUFFIX
   buildpack: java_buildpack
   services:
     - mysql
@@ -44,6 +46,7 @@ cat << EOF >> ./scdf-manifest.yml
     SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_ENABLE_RANDOM_APP_NAME_PREFIX: false
     SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED: $SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED
     SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI: $SKIPPER_SERVER_URI/api
+    SPRING_CLOUD_CONFIG_NAME: scdf-server
 
 EOF
 
