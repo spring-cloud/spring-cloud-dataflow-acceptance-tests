@@ -184,7 +184,10 @@ function tear_down() {
     pushd "binder"
       run_scripts $BINDER "destroy.sh"
     popd
-    cf delete-orphaned-routes -f
+    if [ "$PLATFORM" == "cloudfoundry" ];
+    then
+      cf delete-orphaned-routes -f
+    fi
   popd
 }
 
