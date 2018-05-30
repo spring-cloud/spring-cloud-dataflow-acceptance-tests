@@ -41,6 +41,8 @@ public abstract class AbstractPlatformHelper implements PlatformHelper {
 	@Override
 	public boolean setUrlsForStream(StreamDefinition stream) {
 		Iterator<AppStatusResource> statsIterator = operations.status().iterator();
+		int numberOfAppsInStream = stream.getApplications().size();
+		int numberOfAppsWithUrls = 0;
 		while (statsIterator.hasNext()) {
 			AppStatusResource appStatus = statsIterator.next();
 			for (Application application : stream.getApplications()) {
@@ -51,11 +53,15 @@ public abstract class AbstractPlatformHelper implements PlatformHelper {
 					}
 					else {
 						setInstanceUrlsForApplication(application, appStatus);
+						numberOfAppsWithUrls++;
 					}
 				}
 			}
 		}
-		return true;
+		if (numberOfAppsInStream == numberOfAppsWithUrls) {
+			return true;
+		}
+		return false;
 	}
 
 	/**

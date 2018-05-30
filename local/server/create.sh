@@ -20,5 +20,12 @@ if [  ! -z "$skipperMode" ]; then
  APPLICATION_ARGS="$APPLICATION_ARGS --spring.cloud.dataflow.features.skipper-enabled=true"
 fi
 
+if [  -z "$skipperMode" ]; then
+ APP_LOG_PATH=$PWD/app-logs
+ rm -rf $APP_LOG_PATH
+ mkdir $APP_LOG_PATH
+ APPLICATION_ARGS="$APPLICATION_ARGS --spring.cloud.deployer.local.workingDirectoriesRoot=$APP_LOG_PATH"
+fi
+
 download $PWD
 java_jar $PWD

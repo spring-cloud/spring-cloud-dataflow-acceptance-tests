@@ -74,7 +74,7 @@ function download(){
     echo "Downloading server from $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL"
     wget $SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL --no-verbose -O $1/scdf-server.jar
   else
-    echo "Using already downloaded server, waiting for services to start ..."
+    echo "Using already downloaded server, waiting for server to start ..."
     sleep 15
   fi
 }
@@ -87,7 +87,7 @@ function download_skipper(){
     echo "Downloading server from $SPRING_CLOUD_SKIPPER_SERVER_DOWNLOAD_URL"
     wget $SPRING_CLOUD_SKIPPER_SERVER_DOWNLOAD_URL --no-verbose -O $1/skipper-server.jar
   else
-    echo "Using already downloaded server, waiting for services to start ..."
+    echo "Using already downloaded server, waiting for server to start ..."
     sleep 15
   fi
 }

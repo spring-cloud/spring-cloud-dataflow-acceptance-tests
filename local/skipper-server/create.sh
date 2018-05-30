@@ -16,5 +16,11 @@ function java_jar() {
 
 run_scripts "$PWD" "config.sh"
 
+if [  ! -z "$skipperMode" ]; then
+ APP_LOG_PATH=$PWD/app-logs
+ rm -rf $APP_LOG_PATH
+ mkdir $APP_LOG_PATH
+fi
+
 download_skipper $PWD
 java_jar $PWD
