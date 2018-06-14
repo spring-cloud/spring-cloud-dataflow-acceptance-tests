@@ -57,7 +57,11 @@ function push_application() {
   rm -f scdf-manifest.yml
 }
 
-download $PWD
+if [ -z "$DOWNLOADED_SERVER" ]; then
+  download $PWD
+else
+  echo "Already downloaded Data Flow Server"
+fi
 generate_manifest
 push_application
 run_scripts "$PWD" "config.sh"

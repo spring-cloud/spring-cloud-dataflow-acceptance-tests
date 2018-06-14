@@ -110,14 +110,17 @@ function setup() {
     export SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED=false
     export SKIPPER_SERVER_URI="http://localhost:7577"
 
+
+    DOWNLOADED_SERVER=
     # Spring Config Server Test (begin)
     if [ "$PLATFORM" == "cloudfoundry" ] && [ -z "$skipCloudConfig" ];
     then
-    echo "The Config Server must be pre-started using the config-server/create.sh"
+    echo "NOTE: The Config Server must be pre-started using the config-server/create.sh"
     # Note: to create config server service on PWS run (creation takes couple of minutes!):
     # cf create-service -c '{"git": { "uri": "https://github.com/spring-cloud/spring-cloud-dataflow-acceptance-tests"}}' p-config-server trial cloud-config-server
     export SPRING_PROFILES_ACTIVE=cloud1
     run_scripts "server" "create.sh"
+    echo "Running Config Server test"
     SERVER_URI=$(cf apps | grep dataflow-server- | awk '{print $6}' | sed 's:,::g')
     SERVER_URI="http://$SERVER_URI"
     wget $SERVER_URI/about -O about.txt
@@ -131,6 +134,8 @@ function setup() {
             exit 1
         fi
     run_scripts "server" "destroy.sh"
+    echo "Config Server test completed"
+    DOWNLOADED_SERVER=true
     export SPRING_PROFILES_ACTIVE=cloud
     fi
     # Spring Config Server Test (end)
