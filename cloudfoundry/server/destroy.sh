@@ -2,6 +2,7 @@
 
  if (cf apps | grep "scdf-server"); then
     SCDF_NAME=$(cf apps | grep dataflow-server- | awk '{print $1}' | sed 's:,::g')
+    echo "Deleting: $SCDF_NAME"
     cf delete $SCDF_NAME -f -r
  fi
 
