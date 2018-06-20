@@ -110,7 +110,7 @@ function setup() {
     export SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED=false
     export SKIPPER_SERVER_URI="http://localhost:7577"
 
-
+    export SPRING_PROFILES_ACTIVE=cloud
     DOWNLOADED_SERVER=
     # Spring Config Server Test (begin)
     if [ "$PLATFORM" == "cloudfoundry" ] && [ -z "$skipCloudConfig" ];
