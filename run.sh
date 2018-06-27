@@ -110,7 +110,6 @@ function setup() {
     export SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED=false
     export SKIPPER_SERVER_URI="http://localhost:7577"
 
-    export SPRING_PROFILES_ACTIVE=cloud
     DOWNLOADED_SERVER=
     # Spring Config Server Test (begin)
     if [ "$PLATFORM" == "cloudfoundry" ] && [ -z "$skipCloudConfig" ];
@@ -119,6 +118,7 @@ function setup() {
     # Note: to create config server service on PWS run (creation takes couple of minutes!):
     # cf create-service -c '{"git": { "uri": "https://github.com/spring-cloud/spring-cloud-dataflow-acceptance-tests"}}' p-config-server trial cloud-config-server
     export SPRING_PROFILES_ACTIVE=cloud1
+    echo "SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE"
     run_scripts "server" "create.sh"
     echo "Running Config Server test"
     SERVER_URI=$(cf apps | grep dataflow-server- | awk '{print $6}' | sed 's:,::g')
@@ -137,6 +137,12 @@ function setup() {
     echo "Config Server test completed"
     DOWNLOADED_SERVER=true
     export SPRING_PROFILES_ACTIVE=cloud
+    fi
+
+    if [ "$PLATFORM" == "cloudfoundry" ];
+    then
+        export SPRING_PROFILES_ACTIVE=cloud
+        echo "SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE"
     fi
     # Spring Config Server Test (end)
 
