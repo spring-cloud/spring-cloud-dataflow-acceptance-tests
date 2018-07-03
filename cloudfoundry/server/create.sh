@@ -24,7 +24,6 @@ EOF
 fi
 cat << EOF >> ./scdf-manifest.yml
     - rabbit2
-    - cloud-config-server
   env:
     EXTERNAL_SERVERS_REQUIRED: true
     SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL

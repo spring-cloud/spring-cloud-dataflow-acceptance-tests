@@ -13,7 +13,6 @@ applications:
   buildpack: $JAVA_BUILDPACK
   services:
     - mysql_skipper
-    - cloud-config-server
 EOF
 if [ $LOG_SERVICE_NAME ]; then
     cat << EOF >> ./skipper-manifest.yml
