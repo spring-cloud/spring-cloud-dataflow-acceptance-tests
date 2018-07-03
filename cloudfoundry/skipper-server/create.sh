@@ -10,7 +10,7 @@ applications:
   path: ./skipper-server.jar
   memory: 1G
   host: skipper-server-$RANDOM
-  buildpack: java_buildpack
+  buildpack: $JAVA_BUILDPACK
   services:
     - mysql_skipper
     - cloud-config-server

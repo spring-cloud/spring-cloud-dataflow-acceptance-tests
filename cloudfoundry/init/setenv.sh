@@ -8,6 +8,12 @@ set -o errexit
 
 function cf_authenticate_and_target() {
   echo "api is : $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL"
+
+  if [ -z "JAVA_BUILDPACK" ]; then
+    export JAVA_BUILDPACK='java_buildpack'
+  fi
+  echo "buildpack is : $JAVA_BUILDPACK"
+
   [ -z "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL" ] && { echo "Environment variable SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL must be set"; exit 1; }
   [ -z "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN" ] && { echo "Environment variable SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN must be set"; exit 1; }
   [ -z "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME" ] && { echo "Environment variable SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME must be set"; exit 1; }
