@@ -7,7 +7,7 @@ function generate_manifest() {
 SCDF_RANDOM_SUFFIX=$RANDOM
 cat << EOF > ./scdf-manifest.yml
 applications:
-- name: scdf-server-$SCDF_RANDOM_SUFFIX
+- name: dataflow-server-$SCDF_RANDOM_SUFFIX
   timeout: 120
   path: ./scdf-server.jar
   memory: 1G

@@ -5,11 +5,10 @@ function generate_manifest() {
 cat << EOF > ./skipper-manifest.yml
 
 applications:
-- name: skipper-server
+- name: skipper-server-$RANDOM
   timeout: 120
   path: ./skipper-server.jar
   memory: 1G
-  host: skipper-server-$RANDOM
   buildpack: $JAVA_BUILDPACK
   services:
     - mysql_skipper
