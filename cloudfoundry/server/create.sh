@@ -11,7 +11,6 @@ applications:
   timeout: 120
   path: ./scdf-server.jar
   memory: 1G
-  host: dataflow-server-$SCDF_RANDOM_SUFFIX
   buildpack: $JAVA_BUILDPACK
   services:
     - mysql
