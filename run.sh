@@ -151,7 +151,7 @@ function setup() {
       run_scripts "skipper-server" "create.sh"
       if [ "$PLATFORM" == "cloudfoundry" ];
       then
-      SKIPPER_SERVER_URI=$(cf app skipper-server | grep skipper-server- | awk '{print $2}' | sed 's:,::g')
+      SKIPPER_SERVER_URI=$(cf apps | grep skipper-server- | awk '{print $6}' | sed 's:,::g')
       export SKIPPER_SERVER_URI="http://$SKIPPER_SERVER_URI"
       echo "SKIPPER SERVER URI: $SKIPPER_SERVER_URI"
       fi
