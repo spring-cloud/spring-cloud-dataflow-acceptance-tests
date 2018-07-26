@@ -51,6 +51,8 @@ EOF
 }
 
 function push_application() {
+  echo "scdf-manifest.yml contents..."
+  cat scdf-manifest.yml
   cf push -f scdf-manifest.yml
   rm -f scdf-manifest.yml
 }
