@@ -303,8 +303,6 @@ done
 # ======================================= DEFAULTS ============================================
 [[ -z "${PLATFORM}" ]] && PLATFORM=local
 [[ -z "${BINDER}" ]] && BINDER=rabbit
-[[ -z "${SKIPPER_VERSION}" ]] && SKIPPER_VERSION=1.0.5.BUILD-SNAPSHOT
-[[ -z "${DATAFLOW_VERSION}" ]] && DATAFLOW_VERSION=1.5.1.BUILD-SNAPSHOT
 [[ -z "${STREAM_APPS_VERSION}" ]] && STREAM_APPS_VERSION=Celsius.SR3
 [[ -z "${TASKS_VERSION}" ]] && TASKS_VERSION=Clark.RELEASE
 WAIT_TIME="${WAIT_TIME:-5}"
@@ -316,6 +314,12 @@ APPLICATION_ARGS=""
 # ======================================= DEFAULTS END ========================================
 [[ ! -d "$PLATFORM" ]] && { echo "$PLATFORM is an invalid platform"; exit 1; }
 [[ ! -d "$PLATFORM/binder/$BINDER" ]] && { echo "$BINDER is an invalid binder for $PLATFORM platform"; exit 1; }
+[[ -z "$DATAFLOW_VERSION" ]] && { echo "Data Flow version must be defined"; exit 1; }
+
+if [ ! -z "$skipperMode" ] && [ -z "$SKIPPER_VERSION" ]; then
+  echo "Skipper enabled but Skipper Version not set"
+  exit 1
+fi
 
 if [ -z "$skipSetup" ]; then
   setup
