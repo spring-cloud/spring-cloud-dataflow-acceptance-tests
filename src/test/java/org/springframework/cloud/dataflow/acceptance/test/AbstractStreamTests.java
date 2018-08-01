@@ -32,7 +32,9 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.acceptance.test.util.Application;
 import org.springframework.cloud.dataflow.acceptance.test.util.DefaultPlatformHelper;
 import org.springframework.cloud.dataflow.acceptance.test.util.KubernetesPlatformHelper;
@@ -42,6 +44,7 @@ import org.springframework.cloud.dataflow.acceptance.test.util.PlatformHelper;
 import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
 import org.springframework.cloud.dataflow.acceptance.test.util.TestConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
+import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
@@ -60,6 +63,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Vinicius Carvalho
  * @author Christian Tzolov
  */
+@SpringBootTest(classes = { RedisTestConfiguration.class, RedisAutoConfiguration.class })
 @RunWith(SpringRunner.class)
 @EnableConfigurationProperties(TestConfigurationProperties.class)
 public abstract class AbstractStreamTests implements InitializingBean {
@@ -75,6 +79,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 	@Autowired
 	protected TestConfigurationProperties configurationProperties;
+
+	private DataFlowOperations dataFlowOperations;
 
 	private StreamOperations streamOperations;
 
@@ -113,11 +119,11 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	public void afterPropertiesSet() {
 		if (restTemplate == null) {
 			try {
-				DataFlowTemplate dataFlowOperationsTemplate = new DataFlowTemplate(new URI(
+				dataFlowOperations = new DataFlowTemplate(new URI(
 						configurationProperties.getServerUri()));
-				streamOperations = dataFlowOperationsTemplate.streamOperations();
-				runtimeOperations = dataFlowOperationsTemplate.runtimeOperations();
-				appRegistryOperations = dataFlowOperationsTemplate.appRegistryOperations();
+				streamOperations = dataFlowOperations.streamOperations();
+				runtimeOperations = dataFlowOperations.runtimeOperations();
+				appRegistryOperations = dataFlowOperations.appRegistryOperations();
 				if (configurationProperties.getPlatformType().equals(PlatformTypes.KUBERNETES.getValue())) {
 					platformHelper = new KubernetesPlatformHelper(runtimeOperations);
 				}
@@ -216,7 +222,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * Pauses the run to for a period of seconds as specified by the the deployPauseTime
 	 * attribute.
 	 */
-	private void deploymentPause() {
+	protected void deploymentPause() {
 		try {
 			Thread.sleep(configurationProperties.getDeployPauseTime() * 1000);
 		}
@@ -275,7 +281,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		final long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
 		boolean exists = false;
 		String instance = "?";
-		Map<String, String> logData = new HashMap<>(); ;
+		Map<String, String> logData = new HashMap<>();
+
 		while (!exists && System.currentTimeMillis() < timeout) {
 			try {
 				Thread.sleep(configurationProperties.getDeployPauseTime() * 1000);
@@ -316,6 +323,10 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			}
 		}
 		return exists;
+	}
+
+	protected DataFlowOperations dataFlowOperations() {
+		return dataFlowOperations;
 	}
 
 	public enum PlatformTypes {

@@ -218,8 +218,8 @@ function run_tests() {
     log_skipper_versions
   fi
   if [  -z "$skipCloudConfig" ]; then
-      skipCloudConfig="false"
-    fi
+    skipCloudConfig="false"
+  fi
   eval "./mvnw -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DSKIP_CLOUD_CONFIG=$skipCloudConfig test surefire-report:report"
 }
 
