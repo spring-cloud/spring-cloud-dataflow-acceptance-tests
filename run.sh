@@ -314,11 +314,17 @@ APPLICATION_ARGS=""
 # ======================================= DEFAULTS END ========================================
 [[ ! -d "$PLATFORM" ]] && { echo "$PLATFORM is an invalid platform"; exit 1; }
 [[ ! -d "$PLATFORM/binder/$BINDER" ]] && { echo "$BINDER is an invalid binder for $PLATFORM platform"; exit 1; }
-[[ -z "$DATAFLOW_VERSION" ]] && { echo "Data Flow version must be defined"; exit 1; }
 
-if [ ! -z "$skipperMode" ] && [ -z "$SKIPPER_VERSION" ]; then
-  echo "Skipper enabled but Skipper Version not set"
-  exit 1
+if [ -z "$skipSetup" ]; then
+  if [ -z "$DATAFLOW_VERSION" ]; then
+    echo "Data Flow version must be defined"
+    exit 1
+  fi
+
+  if [ ! -z "$skipperMode" ] && [ -z "$SKIPPER_VERSION" ]; then
+    echo "Skipper enabled but Skipper Version not set"
+    exit 1
+  fi
 fi
 
 if [ -z "$skipSetup" ]; then
