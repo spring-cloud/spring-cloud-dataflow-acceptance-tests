@@ -26,6 +26,8 @@ Flags:
     -dv | --dataflowVersion - set the dataflow version to test (e.g. 1.5.0.BUILD-SNAPSHOT)
     -av | --appsVersion - set the stream app version to test (e.g. Celsius.SR2). Apps should be accessible via maven repo or docker hub.
     -tv | --tasksVersion - set the task app version to test (e.g. Clark.RELEASE). Tasks should be accessible via maven repo or docker hub.
+    -se | --schedulerEnabled - installs scheduling infrastructure and configures SCDF to use the service.
+
 
 [*] = Required arguments
 ```
@@ -86,6 +88,13 @@ If you want to point to an already running Data Flow server, set the environment
 * TASK_REGISTRATION_RESOURCE - default is maven + rabbit based tasks
 
 To point to where your server is located and also specify which artifacts you want to register with the server.
+
+= Running Scheduling Acceptance Tests
+
+By default scheduling acceptance tests are disabled, because not all data flow implementations support it yet.
+To enable scheduling acceptance tests use the `-se` flag.
+
+NOTE: Currently Spring Cloud Data Flow Cloud Foundry is the only implementation that supports scheduling.
 
 = Platform specific notes
 
