@@ -33,6 +33,7 @@ Flags:
     -dv | --dataflowVersion - set the dataflow version to test (e.g. 1.5.1.BUILD-SNAPSHOT)
     -av | --appsVersion - set the stream app version to test (e.g. Celsius.SR2). Apps should be accessible via maven repo or docker hub.
     -tv | --tasksVersion - set the task app version to test (e.g. Clark.RELEASE). Tasks should be accessible via maven repo or docker hub.
+    -se | --schedulesEnabled - installs scheduling infrastructure and configures SCDF to use the service.
 
 [*] = Required arguments
 
@@ -107,6 +108,12 @@ function setup() {
       run_scripts $BINDER "create.sh"
     popd
     run_scripts "redis" "create.sh"
+    if [ "$schedulesEnabled" ]; then
+        run_scripts "scheduler" "create.sh"
+        export SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED=true
+    else
+        export SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED=false
+    fi
     export SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED=false
     export SKIPPER_SERVER_URI="http://localhost:7577"
 
@@ -125,7 +132,7 @@ function setup() {
     SERVER_URI="http://$SERVER_URI"
     wget $SERVER_URI/about -O about.txt
         # Asserts that the streamsEnabled is false as it was configured in ./scdf-server-cloud1.properties
-        if grep -q "\"analyticsEnabled\":true,\"streamsEnabled\":false,\"tasksEnabled\":true,\"skipperEnabled\":false" about.txt
+        if grep -q "\"analyticsEnabled\":true,\"streamsEnabled\":false,\"tasksEnabled\":true,\"skipperEnabled\":false,\"schedulerEnabled\":" about.txt
             then
             echo "Spring Cloud Config server properties are updated correctly."
             rm about.txt
@@ -192,6 +199,9 @@ function tear_down() {
     fi
     run_scripts "redis" "destroy.sh"
     run_scripts "mysql" "destroy.sh"
+    if [ "$schedulesEnabled" ]; then
+        run_scripts "scheduler" "destroy.sh"
+    fi
     pushd "binder"
       run_scripts $BINDER "destroy.sh"
     popd
@@ -286,6 +296,9 @@ case ${key} in
  ;;
  -cc|--skipCloudConfig)
  skipCloudConfig="true"
+ ;;
+ -se|--schedulesEnabled)
+ schedulesEnabled="true"
  ;;
  --help)
  print_usage

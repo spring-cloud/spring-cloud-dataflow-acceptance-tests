@@ -27,5 +27,9 @@ if [  -z "$skipperMode" ]; then
  APPLICATION_ARGS="$APPLICATION_ARGS --spring.cloud.deployer.local.workingDirectoriesRoot=$APP_LOG_PATH"
 fi
 
+if [ "$schedulesEnabled" ]; then
+ APPLICATION_ARGS="$APPLICATION_ARGS --spring.cloud.dataflow.features.schedules-enabled=true"
+fi
+
 download $PWD
 java_jar $PWD
