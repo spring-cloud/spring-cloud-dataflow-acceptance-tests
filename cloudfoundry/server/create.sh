@@ -21,6 +21,11 @@ if [ $LOG_SERVICE_NAME ]; then
     - $LOG_SERVICE_NAME
 EOF
 fi
+if [ "$SPRING_PROFILES_ACTIVE" = "cloud1" ]; then
+    cat << EOF >> ./scdf-manifest.yml
+    - cloud-config-server
+EOF
+fi
 cat << EOF >> ./scdf-manifest.yml
     - rabbit2
   env:

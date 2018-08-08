@@ -116,7 +116,7 @@ function setup() {
     then
     echo "NOTE: The Config Server must be pre-started using the config-server/create.sh"
     # Note: to create config server service on PWS run (creation takes couple of minutes!):
-    # cf create-service -c '{"git": { "uri": "https://github.com/spring-cloud/spring-cloud-dataflow-acceptance-tests"}}' p-config-server trial cloud-config-server
+    # cf create-service -c '{"git": { "uri": "https://github.com/spring-cloud/spring-cloud-dataflow-acceptance-tests"}}' $CONFIG_SERVER_SERVICE_NAME $CONFIG_SERVER_PLAN_NAME cloud-config-server
     export SPRING_PROFILES_ACTIVE=cloud1
     echo "SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE"
     run_scripts "server" "create.sh"
