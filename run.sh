@@ -125,7 +125,7 @@ function setup() {
     SERVER_URI="http://$SERVER_URI"
     wget $SERVER_URI/about -O about.txt
         # Asserts that the streamsEnabled is false as it was configured in ./scdf-server-cloud1.properties
-        if grep -q "{\"analyticsEnabled\":true,\"streamsEnabled\":false,\"tasksEnabled\":true,\"skipperEnabled\":false}" about.txt
+        if grep -q "\"analyticsEnabled\":true,\"streamsEnabled\":false,\"tasksEnabled\":true,\"skipperEnabled\":false" about.txt
             then
             echo "Spring Cloud Config server properties are updated correctly."
             rm about.txt
