@@ -39,16 +39,12 @@ import org.springframework.cloud.dataflow.acceptance.test.util.LogTestNameRule;
 import org.springframework.cloud.dataflow.acceptance.test.util.TestConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
-import org.springframework.cloud.dataflow.rest.client.SchedulerOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
-import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Abstract base class that is used by task acceptance tests. This class contains commonly
@@ -62,8 +58,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EnableConfigurationProperties(TestConfigurationProperties.class)
 public abstract class AbstractTaskTests implements InitializingBean {
 
-	protected static final String DEFAULT_CRON_EXPRESSION_KEY = "spring.cloud.scheduler.cron.expression";
-
 	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskTests.class);
 
 	private static boolean tasksRegistered = false;
@@ -74,8 +68,6 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	protected RestTemplate restTemplate;
 
 	protected TaskOperations taskOperations;
-
-	protected SchedulerOperations schedulerOperations;
 
 	protected AppRegistryOperations appRegistryOperations;
 
@@ -132,18 +124,6 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	}
 
 	/**
-	 * Creates a unique task definition name from a UUID.
-	 *
-	 * @param definition The definition to test.
-	 * @return The name of the task associated with this launch.
-	 */
-	protected String taskCreate(String definition) {
-		String taskDefinitionName = "task-" + UUID.randomUUID().toString();
-		taskOperations.create(taskDefinitionName, definition);
-		return taskDefinitionName;
-	}
-
-	/**
 	 * Launch an existing task definition.
 	 */
 	protected void launchExistingTask(String taskDefinitionName) {
@@ -182,7 +162,6 @@ public abstract class AbstractTaskTests implements InitializingBean {
 				DataFlowTemplate dataFlowOperationsTemplate = new DataFlowTemplate(
 						new URI(configurationProperties.getServerUri()));
 				taskOperations = dataFlowOperationsTemplate.taskOperations();
-				schedulerOperations = dataFlowOperationsTemplate.schedulerOperations();
 				appRegistryOperations = dataFlowOperationsTemplate.appRegistryOperations();
 			}
 			catch (URISyntaxException uriException) {
@@ -245,75 +224,6 @@ public abstract class AbstractTaskTests implements InitializingBean {
 			}
 		}
 		return result;
-	}
-
-	/**
-	 * Creates a unique schedule name from a UUID from an existing task definition.
-	 *
-	 * @param taskDefinitionName The definition to test.
-	 * @param properties Map containing deployment properties for the task.
-	 * @param arguments List containing the arguments used to execute the task.
-	 * @return The name of the schedule.
-	 */
-	protected String schedule(String taskDefinitionName,
-			Map<String, String> properties, List<String> arguments) {
-		String scheduleName = "schedule-" + UUID.randomUUID().toString();
-		this.schedulerOperations.schedule(scheduleName, taskDefinitionName, properties, arguments);
-		return scheduleName;
-	}
-
-	/**
-	 * Verifies that the scheduleName specified exists in the schedule list results.
-	 * @param scheduleName the name of the schedule to search.
-	 * @return true if found else false;
-	 */
-
-	protected boolean verifyScheduleExists(String scheduleName) {
-		boolean result = false;
-		for(ScheduleInfoResource resource : this.schedulerOperations.list()) {
-			if(resource.getScheduleName().equals(scheduleName)){
-				result = true;
-				break;
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * Asserts that the {@link ScheduleInfoResource} contains the expected data.
-	 * @param scheduleInfoResource the {@link ScheduleInfoResource} that needs to be interrogated.
-	 * @param scheduleName The expected name of the schedule.
-	 * @param cronExpression The expected expression.
-	 */
-	protected void verifyScheduleIsValid(ScheduleInfoResource scheduleInfoResource, String scheduleName, String cronExpression) {
-		assertThat(scheduleInfoResource.getScheduleName()).isEqualTo(scheduleName);
-		assertThat(scheduleInfoResource.getScheduleProperties().containsKey(DEFAULT_CRON_EXPRESSION_KEY)).isTrue();
-		assertThat(scheduleInfoResource.getScheduleProperties().get(DEFAULT_CRON_EXPRESSION_KEY)).isEqualTo(cronExpression);
-	}
-
-	/**
-	 * Retrieves a {@link PagedResources} of the existing schedules.
-	 */
-	protected PagedResources<ScheduleInfoResource> listSchedules() {
-		return this.schedulerOperations.list();
-	}
-
-	/**
-	 * Retrieves a {@link PagedResources} of the existing {@link ScheduleInfoResource}s that are
-	 * associated with the task definition name.
-	 * @param taskDefinitionName The name of the task definition that the schedules should be associated.
-	 */
-	protected PagedResources<ScheduleInfoResource> listSchedules(String taskDefinitionName) {
-		return this.schedulerOperations.list(taskDefinitionName);
-	}
-
-	/**
-	 * Deletes an existing schedule based on the schedule name.
-	 *
-	 * @param scheduleName the name of the schedule instance to be unscheduled.
-	 */
-	protected void unschedule(String scheduleName) {
-		this.schedulerOperations.unschedule(scheduleName);
 	}
 
 	public enum TaskTestTypes {
