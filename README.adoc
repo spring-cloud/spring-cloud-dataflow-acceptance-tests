@@ -26,7 +26,7 @@ Flags:
     -dv | --dataflowVersion - set the dataflow version to test (e.g. 1.5.0.BUILD-SNAPSHOT)
     -av | --appsVersion - set the stream app version to test (e.g. Celsius.SR2). Apps should be accessible via maven repo or docker hub.
     -tv | --tasksVersion - set the task app version to test (e.g. Clark.RELEASE). Tasks should be accessible via maven repo or docker hub.
-    -se | --schedulerEnabled - installs scheduling infrastructure and configures SCDF to use the service.
+    -se | --schedulesEnabled - installs scheduling infrastructure and configures SCDF to use the service.
 
 
 [*] = Required arguments

@@ -2,4 +2,4 @@
 
 source ../common.sh
 
-destroy_service $SCHEDULER_INSTANCE_NAME
+destroy_service $SCHEDULES_INSTANCE_NAME
