@@ -93,6 +93,7 @@ To point to where your server is located and also specify which artifacts you wa
 
 By default scheduling acceptance tests are disabled, because not all data flow implementations support it yet.
 To enable scheduling acceptance tests use the `-se` flag.
+Also you will need to set the scheduler URL.  For example `export SCHEDULES_URL=<your scheduler url>`.
 
 NOTE: Currently Spring Cloud Data Flow Cloud Foundry is the only implementation that supports scheduling.
 
