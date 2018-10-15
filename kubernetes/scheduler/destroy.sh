@@ -1,4 +1,4 @@
 #!/bin/bash
-
-echo "kubernetes scheduler not implemented."
-
+#
+# no-op for now
+#

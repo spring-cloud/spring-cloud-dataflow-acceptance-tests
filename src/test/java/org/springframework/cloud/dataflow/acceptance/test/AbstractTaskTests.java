@@ -92,14 +92,23 @@ public abstract class AbstractTaskTests implements InitializingBean {
 
 	@After
 	public void teardown() {
+		PagedResources<ScheduleInfoResource> scheduleInfoResources = schedulerOperations.list();
+		Iterator<ScheduleInfoResource> scheduleInfoResourceIterator = scheduleInfoResources.iterator();
+		ScheduleInfoResource scheduleInfoResource;
+
+		while(scheduleInfoResourceIterator.hasNext()) {
+			scheduleInfoResource = scheduleInfoResourceIterator.next();
+			schedulerOperations.unschedule(scheduleInfoResource.getScheduleName());
+		}
+
 		PagedResources<TaskDefinitionResource> taskExecutionResources = taskOperations.list();
 		Iterator<TaskDefinitionResource> taskDefinitionResourceIterator = taskExecutionResources.iterator();
-		TaskDefinitionResource taskDefinitionResource = null;
+		TaskDefinitionResource taskDefinitionResource;
+
 		while (taskDefinitionResourceIterator.hasNext()) {
 			taskDefinitionResource = taskDefinitionResourceIterator.next();
 			taskOperations.destroy(taskDefinitionResource.getName());
 		}
-
 	}
 
 	/**
