@@ -49,6 +49,9 @@ import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
@@ -152,6 +155,10 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		Map<String, String> streamProperties = new HashMap<>();
 		streamProperties.put("app.*.logging.file", platformHelper.getLogfileName());
 		streamProperties.put("app.*.endpoints.logfile.sensitive", "false");
+
+		// Specific to Boot 2.x applications
+		streamProperties.put("app.*.management.endpoints.web.exposure.include", "info, health, logfile");
+
 		platformHelper.addDeploymentProperties(stream, streamProperties);
 
 		streamProperties.putAll(stream.getDeploymentProperties());
@@ -237,7 +244,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @return String containing the contents of the log or 'null' if not found.
 	 */
 	protected String getLog(String url) {
-		String logFileUrl = String.format("%s/logfile", url);
+
+		String logFileUrl = getLogFileUrl(url);
 		String log = null;
 		try {
 			log = restTemplate.getForObject(logFileUrl, String.class);
@@ -255,6 +263,19 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			logger.warn("Error while trying to access logfile from '" + logFileUrl + "' due to : " + e);
 		}
 		return log;
+	}
+
+	private String getLogFileUrl(String url) {
+		String logFileUrl = null;
+		// check if this is a boot 2.x application, and if so, follow 2.x url conventions to access log file.
+		String actuatorUrl = String.format("%s/actuator", url);
+		ResponseEntity<String> responseEntity = restTemplate.exchange(actuatorUrl, HttpMethod.GET, null, String.class);
+		if (responseEntity.getStatusCode() == HttpStatus.OK) {
+			logFileUrl = String.format("%s/actuator/logfile", url);
+		} else {
+			logFileUrl = String.format("%s/logfile", url);
+		}
+		return logFileUrl;
 	}
 
 	/**
