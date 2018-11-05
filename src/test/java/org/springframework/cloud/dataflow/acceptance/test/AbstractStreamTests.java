@@ -151,7 +151,11 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		streamOperations.createStream(stream.getName(), stream.getDefinition(), false);
 		Map<String, String> streamProperties = new HashMap<>();
 		streamProperties.put("app.*.logging.file", platformHelper.getLogfileName());
+		// for boot1
 		streamProperties.put("app.*.endpoints.logfile.sensitive", "false");
+		// for boot2
+		streamProperties.put("app.*.management.endpoints.web.exposure.include", "*");
+		streamProperties.put("app.*.management.endpoints.web.base-path", "/");
 		platformHelper.addDeploymentProperties(stream, streamProperties);
 
 		streamProperties.putAll(stream.getDeploymentProperties());
