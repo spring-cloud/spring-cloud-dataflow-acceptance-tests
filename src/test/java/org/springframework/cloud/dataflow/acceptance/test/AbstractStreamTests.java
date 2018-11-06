@@ -156,8 +156,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		streamProperties.put("app.*.logging.file", platformHelper.getLogfileName());
 		streamProperties.put("app.*.endpoints.logfile.sensitive", "false");
 
-		// Specific to Boot 2.x applications
-		streamProperties.put("app.*.management.endpoints.web.exposure.include", "info, health, logfile");
+		// Specific to Boot 2.x applications, also allows access without authentication
+		streamProperties.put("app.*.management.endpoints.web.exposure.include", "*");
 
 		platformHelper.addDeploymentProperties(stream, streamProperties);
 
