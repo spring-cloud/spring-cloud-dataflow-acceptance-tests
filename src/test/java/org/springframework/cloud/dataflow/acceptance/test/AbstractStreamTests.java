@@ -269,8 +269,13 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		String logFileUrl = null;
 		// check if this is a boot 2.x application, and if so, follow 2.x url conventions to access log file.
 		String actuatorUrl = String.format("%s/actuator", url);
-		ResponseEntity<String> responseEntity = restTemplate.exchange(actuatorUrl, HttpMethod.GET, null, String.class);
-		if (responseEntity.getStatusCode() == HttpStatus.OK) {
+		ResponseEntity<String> responseEntity = null;
+		try {
+			responseEntity = restTemplate.exchange(actuatorUrl, HttpMethod.GET, null, String.class);
+		} catch (Exception e) {
+
+		}
+		if (responseEntity != null && responseEntity.getStatusCode() == HttpStatus.OK) {
 			logFileUrl = String.format("%s/actuator/logfile", url);
 		} else {
 			logFileUrl = String.format("%s/logfile", url);
