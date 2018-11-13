@@ -2,7 +2,7 @@
 
 function java_jar() {
     APP_JAVA_PATH=$PWD
-    EXPRESSION="nohup ${JAVA_PATH_TO_BIN}java $JAVA_OPTS $MEM_ARGS -jar $APP_JAVA_PATH/skipper-server.jar ${APPLICATION_ARGS} > $APP_JAVA_PATH/skipper-server.log &"
+    EXPRESSION="nohup ${JAVA_PATH_TO_BIN}java $JAVA_OPTS -Dlogging.level.org.springframework.cloud.deployer.spi.local.LocalAppDeployer=DEBUG $MEM_ARGS -jar $APP_JAVA_PATH/skipper-server.jar ${APPLICATION_ARGS} > $APP_JAVA_PATH/skipper-server.log &"
     echo "executing [$EXPRESSION]"
     eval "${EXPRESSION}"
     pid=$!
