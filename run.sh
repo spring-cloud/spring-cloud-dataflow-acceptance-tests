@@ -340,6 +340,12 @@ if [ -z "$skipSetup" ]; then
   fi
 fi
 
+STREAM_APPS_KAFKA_ARTIFACT_NAME="kafka-10"
+if [[ $STREAM_APPS_VERSION == D* ]];
+then
+  STREAM_APPS_KAFKA_ARTIFACT_NAME="kafka"
+fi
+
 if [ -z "$skipSetup" ]; then
   setup
 else

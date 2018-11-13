@@ -15,7 +15,7 @@ Flags:
 
 [*] -p  | --platform - define the target platform to run
     -b  | --binder - define the binder (i.e. rabbit, kafka) defaults to rabbit
-    -tests - comma separated list of tests to run. Wildcards such as *http* are allowed. (e.g. --tests TickTockTests#tickTockTests)
+    -tests - comma separated list of tests to run. Wildcards such as *http* are allowed. (e.g. -tests TickTockTests#tickTockTests)
     -s  | --skipSetup - skip setup phase
     -t  | --skipTests - skip test phase
     -c  | --skipCleanup - skip the clean up phase
