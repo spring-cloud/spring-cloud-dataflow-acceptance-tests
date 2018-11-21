@@ -8,6 +8,7 @@ _site/
 .DS_Store
 /application.yml
 /application.properties
+cloudfoundry/about.txt
 asciidoctor.css
 atlassian-ide-plugin.xml
 bin/
