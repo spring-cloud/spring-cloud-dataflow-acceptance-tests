@@ -41,6 +41,9 @@ EOF
 }
 
 function push_application() {
+  echo "============================="
+  echo "skipper-manifest.yml contents..."
+  cat skipper-manifest.yml
   cf push -f skipper-manifest.yml
   rm -f skipper-manifest.yml
 }
