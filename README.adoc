@@ -32,7 +32,7 @@ Flags:
 [*] = Required arguments
 ```
 
-The first option is to choose a *PLATFORM*, available options `cloudfoundry`, `local` and `k8s` (kubernetes).  The scripts for each platform are located in folders of the same name in the main directory.
+The first option is to choose a *PLATFORM*, available options `cloudfoundry`, `local`, `gke` (kubernetes) and `pks` (kubernetes).  The scripts for each platform are located in folders of the same name in the main directory.
 
 By default the script will execute three main phases:
 
@@ -138,7 +138,7 @@ You can override service names and plans by either exporting or changing the fol
 * REDIS_SERVICE_NAME
 * REDIS_PLAN_NAME
 
-== Kubernetes
+== Kubernetes (GKE)
 
 === Pre-requisites
 
@@ -146,19 +146,37 @@ _Google Cloud SDK_ installed with the `kubectl` component enabled.
 
 === Configuration
 
-For Kubernetes, make sure you have the following environment variables exported.
+The following environment variables must be set:
 
 * GCLOUD_PROJECT
 * GCLOUD_COMPUTE_ZONE
 * GCLOUD_CONTAINER_CLUSTER
 
-NOTE: You can also set a KUBERNETES_NAMESPACE environment variable that specifies an existing namespace to use for the testing. If this is not specified the 'default' namespace will be used.
+NOTE: You can also set a KUBERNETES_NAMESPACE environment variable that specifies an existing namespace to use for the testing. If this is not specified, the 'default' namespace will be used.
 
 If you use a service account make sure to set the GOOGLE_APPLICATION_CREDENTIALS environment variable to point to your service account key file and to use the following to authenticate:
 
 ```
 gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
 ```
+
+== Kubernetes (PKS)
+
+=== Pre-requisites
+
+* The `kubectl` command line tool needs to be installed. Installation information can be found at: https://kubernetes.io/docs/tasks/tools/install-kubectl/
+* The PKS command line tool needs to be installed and can be obtained from: https://network.pivotal.io/products/pivotal-container-service
+
+=== Configuration
+
+The following environment variables must be set:
+
+* PKS_CLUSTER_NAME
+* PKS_ENDPOINT
+* PKS_USERNAME
+* PKS_PASSWORD
+
+NOTE: You can also set a KUBERNETES_NAMESPACE environment variable that specifies an existing namespace to use for the testing. If this is not specified, the 'default' namespace will be used.
 
 === Code formatting guidelines
 
