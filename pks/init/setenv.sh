@@ -20,7 +20,7 @@ function pks_authenticate_and_target() {
 # ======================================= FUNCTIONS END =======================================
 
 if ! command_exists pks; then
-  echo "You don't have the 'PKS' installed, please visit https://network.pivotal.io/products/pivotal-container-service to download"
+  echo "You don't have the 'PKS' installed, please visit https://network.pivotal.io/products/pivotal-container-service to install it first"
   exit 1
 fi
 if ! command_exists kubectl; then
