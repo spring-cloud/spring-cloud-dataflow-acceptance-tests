@@ -16,10 +16,12 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -49,6 +51,8 @@ import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
+import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,6 +69,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Thomas Risberg
  * @author Vinicius Carvalho
  * @author Christian Tzolov
+ * @author Ilayaperumal Gopinathan
  */
 @SpringBootTest(classes = { RedisTestConfiguration.class, RedisAutoConfiguration.class })
 @RunWith(SpringRunner.class)
@@ -167,6 +172,49 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		streamAvailable(stream);
 	}
 
+	/**
+	 * Updates the stream specified to the Spring Cloud Data Flow instance.
+	 * @param stream the stream object containing the stream definition.
+	 * @return the available StreamDefinition REST resource.
+	 */
+	protected StreamDefinitionResource updateStream(StreamDefinition stream, String properties, List<String> appNames) {
+		Map<String, String> propertiesToUse = null;
+		try {
+			propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(properties,
+					null, 0);
+		}
+		catch(IOException e) {
+			throw new RuntimeException(e.getMessage());
+		}
+		String streamName = stream.getName();
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName(stream.getName());
+		logger.info("Updating stream '" + stream.getName() + "'");
+		this.streamOperations.updateStream(streamName, streamName, packageIdentifier, propertiesToUse, false, appNames);
+		return streamAvailable(stream);
+	}
+
+	/**
+	 * Rollback the stream to a specific version.
+	 * @param stream the stream object containing the stream definition.
+	 * @return the available StreamDefinition REST resource.
+	 */
+	protected StreamDefinitionResource rollbackStream(StreamDefinition stream) {
+		return this.rollbackStream(stream, 0);
+	}
+
+	/**
+	 * Rollback the stream to a specific version.
+	 * @param stream the stream object containing the stream definition.
+	 * @param streamVersion the stream version to rollback to
+	 * @return the available StreamDefinition REST resource.
+	 */
+	protected StreamDefinitionResource rollbackStream(StreamDefinition stream, int streamVersion) {
+		logger.info("Rolling back the stream '" + stream.getName() + "' to the version "+ streamVersion);
+		this.streamOperations.rollbackStream(stream.getName(), streamVersion);
+		return streamAvailable(stream);
+	}
+
 	protected void registerApps() {
 		logger.info(String.format("Importing stream apps from uri resource: %s",
 				configurationProperties.getStreamRegistrationResource()));
@@ -178,8 +226,9 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * Waits for the stream to be deployed and once deployed the function returns control else
 	 * it throws an IllegalStateException.
 	 * @param stream the stream that is to be monitored.
+	 * @return the available StreamDefinition REST resource.
 	 */
-	protected void streamAvailable(StreamDefinition stream) {
+	protected StreamDefinitionResource streamAvailable(StreamDefinition stream) {
 		boolean streamStarted = false;
 		int attempt = 0;
 		String status = "not present";
@@ -223,6 +272,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			throw new IllegalStateException("Unable to start stream " + stream.getName() +
 					".  Definition = " + stream.getDefinition());
 		}
+		return resource;
 	}
 
 	/**

@@ -20,6 +20,7 @@ import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
+import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeThat;
@@ -45,6 +46,27 @@ public class TickTockTests extends AbstractStreamTests {
 		deployStream(stream);
 		assertTrue("Source not started", waitForLogEntry(stream.getApplication("time"), "Started TimeSource"));
 		assertTrue("Sink not started", waitForLogEntry(stream.getApplication("log"), "Started LogSink"));
+		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "TICKTOCK - TIMESTAMP:"));
+	}
+
+	@Test
+	public void tickTockUpdateRollbackTests() {
+		StreamDefinition stream = StreamDefinition.builder("TICKTOCK")
+				.definition("time | log")
+				.addProperty("app.log.log.expression", "'TICKTOCK - TIMESTAMP: '.concat(payload)")
+				.build();
+
+		deployStream(stream);
+		assertTrue("Source not started", waitForLogEntry(stream.getApplication("time"), "Started TimeSource"));
+		assertTrue("Sink not started", waitForLogEntry(stream.getApplication("log"), "Started LogSink"));
+		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "TICKTOCK - TIMESTAMP:"));
+		StreamDefinitionResource updatedStream = updateStream(stream,
+				"app.log.log.expression='TICKTOCK Updated - TIMESTAMP: '.concat(payload)", null);
+		assertTrue(updatedStream.getDslText().contains("--log.expression=\"'TICKTOCK Updated - TIMESTAMP: '.concat(payload)\""));
+		assertTrue("Sink not started", waitForLogEntry(stream.getApplication("log"), "Started LogSink"));
+		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "TICKTOCK Updated - TIMESTAMP:"));
+		StreamDefinitionResource rolledBackStream = rollbackStream(stream);
+		assertTrue(!rolledBackStream.getDslText().contains("--log.expression=\"'TICKTOCK Updated - TIMESTAMP: '.concat(payload)\""));
 		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "TICKTOCK - TIMESTAMP:"));
 	}
 
