@@ -66,7 +66,10 @@ public class TickTockTests extends AbstractStreamTests {
 		assertTrue("Sink not started", waitForLogEntry(stream.getApplication("log"), "Started LogSink"));
 		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "TICKTOCK Updated - TIMESTAMP:"));
 		StreamDefinitionResource rolledBackStream = rollbackStream(stream);
-		assertTrue(!rolledBackStream.getDslText().contains("--log.expression=\"'TICKTOCK Updated - TIMESTAMP: '.concat(payload)\""));
+		if (rolledBackStream != null) {
+			assertTrue(!rolledBackStream.getDslText()
+					.contains("--log.expression=\"'TICKTOCK Updated - TIMESTAMP: '.concat(payload)\""));
+		}
 		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "TICKTOCK - TIMESTAMP:"));
 	}
 
