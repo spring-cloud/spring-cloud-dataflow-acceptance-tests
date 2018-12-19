@@ -29,6 +29,7 @@ Flags:
     -d  | --doNotDownload - skip the downloading of the SCDF/Skipper servers
     -m  | --skipperMode - specify if skipper mode should be enabled
     -cc | --skipCloudConfig - skip Cloud Config server tests for CF
+    -dn | --dataflowServerName - set the name of the SCDF server (single server or SCDF implementations from the versions before 2.x)
     -sv | --skipperVersion - set the skipper version to test (e.g. 1.0.5.BUILD-SNAPSHOT)
     -dv | --dataflowVersion - set the dataflow version to test (e.g. 1.5.1.BUILD-SNAPSHOT)
     -av | --appsVersion - set the stream app version to test (e.g. Celsius.SR2). Apps should be accessible via maven repo or docker hub.
@@ -259,6 +260,10 @@ case ${key} in
  TASKS_VERSION="$2"
  shift
  ;;
+ -dn|--dataflowServerName)
+  DATAFLOW_SERVER_NAME="$2"
+  shift
+  ;;
  -sv|--skipperVersion)
  SKIPPER_VERSION="$2"
  shift
