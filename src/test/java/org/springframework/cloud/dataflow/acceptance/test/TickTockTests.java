@@ -51,6 +51,9 @@ public class TickTockTests extends AbstractStreamTests {
 
 	@Test
 	public void tickTockUpdateRollbackTests() {
+		String skipperEnabled = System.getProperty("SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED", "false");
+		assumeThat("Skipping test", "true", Matchers.equalToIgnoringCase(skipperEnabled));
+		this.dataFlowOperations.streamOperations().destroyAll();
 		StreamDefinition stream = StreamDefinition.builder("TICKTOCK")
 				.definition("time | log")
 				.addProperty("app.log.log.expression", "'TICKTOCK - TIMESTAMP: '.concat(payload)")
@@ -65,11 +68,7 @@ public class TickTockTests extends AbstractStreamTests {
 		assertTrue(updatedStream.getDslText().contains("--log.expression=\"'TICKTOCK Updated - TIMESTAMP: '.concat(payload)\""));
 		assertTrue("Sink not started", waitForLogEntry(stream.getApplication("log"), "Started LogSink"));
 		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "TICKTOCK Updated - TIMESTAMP:"));
-		StreamDefinitionResource rolledBackStream = rollbackStream(stream);
-		if (rolledBackStream != null) {
-			assertTrue(!rolledBackStream.getDslText()
-					.contains("--log.expression=\"'TICKTOCK Updated - TIMESTAMP: '.concat(payload)\""));
-		}
+		rollbackStream(stream);
 		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "TICKTOCK - TIMESTAMP:"));
 	}
 

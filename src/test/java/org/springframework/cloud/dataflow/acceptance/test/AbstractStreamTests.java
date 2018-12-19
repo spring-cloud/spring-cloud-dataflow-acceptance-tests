@@ -88,7 +88,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	@Autowired
 	protected TestConfigurationProperties configurationProperties;
 
-	private DataFlowOperations dataFlowOperations;
+	protected DataFlowOperations dataFlowOperations;
 
 	private StreamOperations streamOperations;
 
