@@ -71,7 +71,7 @@ spec:
           value: '$SKIPPER_SERVER_URI/api'
           # Add Maven repo for metadata artifact resolution plus set metrics destination for all stream apps
         - name: SPRING_APPLICATION_JSON
-          value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\"} } }, \"spring.cloud.dataflow.application-properties.stream.spring.cloud.stream.bindings.applicationMetrics.destination\": \"metrics\" }"
+          value: '$SPRING_APPLICATION_JSON'
 
 ---
 
