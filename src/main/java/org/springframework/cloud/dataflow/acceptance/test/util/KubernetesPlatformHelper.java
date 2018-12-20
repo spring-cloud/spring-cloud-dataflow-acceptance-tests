@@ -35,6 +35,9 @@ public class KubernetesPlatformHelper extends AbstractPlatformHelper {
 	public void addDeploymentProperties(StreamDefinition stream, Map<String, String> properties) {
 		properties.put("deployer.*.kubernetes.createLoadBalancer", "true");
 		properties.put("app.*.server.port", "80");
+
+		// currently app starters have security enabled on endpoints..
+		properties.put("app.*.spring.autoconfigure.exclude", "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration");
 	}
 
 }
