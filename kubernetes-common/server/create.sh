@@ -72,6 +72,8 @@ spec:
           # Add Maven repo for metadata artifact resolution plus set metrics destination for all stream apps
         - name: SPRING_APPLICATION_JSON
           value: '$SPRING_APPLICATION_JSON'
+        - name: KUBERNETES_TRUST_CERTIFICATES
+          value: 'true'
 
 ---
 
