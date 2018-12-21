@@ -51,8 +51,10 @@ public class TickTockTests extends AbstractStreamTests {
 
 	@Test
 	public void tickTockUpdateRollbackTests() {
-		String skipperEnabled = System.getProperty("SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED", "false");
-		assumeThat("Skipping test", "true", Matchers.equalToIgnoringCase(skipperEnabled));
+		String skipperEnabled = System.getProperty("SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED");
+		if (skipperEnabled != null) {
+			assumeThat("Skipping test", "true", Matchers.equalToIgnoringCase(skipperEnabled));
+		}
 		this.dataFlowOperations.streamOperations().destroyAll();
 		StreamDefinition stream = StreamDefinition.builder("TICKTOCK")
 				.definition("time | log")
