@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
+import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeThat;
@@ -51,9 +52,11 @@ public class TickTockTests extends AbstractStreamTests {
 
 	@Test
 	public void tickTockUpdateRollbackTests() {
-		String skipperEnabled = System.getProperty("SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED");
-		if (skipperEnabled != null) {
-			assumeThat("Skipping test", "true", Matchers.equalToIgnoringCase(skipperEnabled));
+		AboutResource aboutResource = this.dataFlowOperations.aboutOperation().get();
+		String implementation = aboutResource.getVersionInfo().getImplementation().getName();
+		if (!implementation.equals("spring-cloud-dataflow-server")) {
+			assumeThat("Skipping test", "true",
+					Matchers.equalToIgnoringCase(String.valueOf(aboutResource.getFeatureInfo().isSkipperEnabled())));
 		}
 		this.dataFlowOperations.streamOperations().destroyAll();
 		StreamDefinition stream = StreamDefinition.builder("TICKTOCK")
