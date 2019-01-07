@@ -24,6 +24,7 @@ app-logs/
 *.jar
 *.log
 *.out
+.gradle
 **/scdf-manifest.yml
 **/skipper-manifest.yml
 **/scdf.yml
@@ -42,3 +43,4 @@ spring-*/src/main/java/META-INF/MANIFEST.MF
 *.iws
 .idea/*
 rebel.xml
+!acceptance-tests/gradle/wrapper/gradle-wrapper.jar

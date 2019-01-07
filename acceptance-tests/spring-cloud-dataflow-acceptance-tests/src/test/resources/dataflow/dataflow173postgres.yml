@@ -1,0 +1,19 @@
+version: '3'
+services:
+  dataflow:
+    image: 'springsource-docker-private-local.jfrog.io/scdf/spring-cloud-dataflow-acceptance-image-drivers173'
+    container_name: dataflow
+    network_mode: bridge
+    environment:
+      - ACCEPTANCE_TEST_START_WAIT=5
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/dataflow
+      - SPRING_DATASOURCE_USERNAME=spring
+      - SPRING_DATASOURCE_PASSWORD=spring
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED=true
+      - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=http://skipper:7577/api
+    ports:
+      - 9393
+    external_links:
+      - postgres:postgres
+      - skipper:skipper

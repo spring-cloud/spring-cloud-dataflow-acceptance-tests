@@ -1,0 +1,9 @@
+email-server: "smtp.svc.pivotal.io"
+email-from: "ci@spring.io"
+email-to: ["jvalkealahti@pivotal.io"]
+github-repo: "https://github.com/spring-cloud/spring-cloud-dataflow-acceptance-tests.git"
+github-repo-raw: "https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-acceptance-tests"
+artifactory-server: "https://repo.spring.io/"
+base-path: "acceptance-tests"
+branch: "master"
+build-name: "spring-cloud-dataflow-acceptance-tests"

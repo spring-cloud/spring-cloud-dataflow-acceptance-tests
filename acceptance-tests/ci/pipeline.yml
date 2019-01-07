@@ -1,0 +1,515 @@
+#################################################
+# Resource Types
+#################################################
+resource_types:
+- name: artifactory-resource
+  type: docker-image
+  source:
+    repository: springio/artifactory-resource
+    tag: 0.0.6
+
+#################################################
+# Resources
+#################################################
+resources:
+- name: git-repo
+  type: git
+  source:
+    uri: ((github-repo))
+    branch: ((branch))
+
+- name: ci-git-repo
+  type: git
+  source:
+    uri: ((github-repo))
+    branch: ((branch))
+    paths: ["((base-path))/ci/*"]
+
+- name: ci-apps-git-repo
+  type: git
+  source:
+    uri: ((github-repo))
+    branch: ((branch))
+    paths: ["((base-path))/custom-apps/*"]
+
+- name: ci-images-git-repo
+  type: git
+  source:
+    uri: ((github-repo))
+    branch: ((branch))
+    paths: ["((base-path))/ci/images/*"]
+
+- name: artifactory-repo
+  type: artifactory-resource
+  source:
+    uri: ((artifactory-server))
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+    build_name: ((build-name))
+
+- name: artifactory-repo-skipper
+  type: artifactory-resource
+  source:
+    uri: ((artifactory-server))
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+    build_name: "Spring Cloud Skipper - Spring Cloud Skipper - Master - Build and install Skipper"
+
+- name: artifactory-repo-dataflow
+  type: artifactory-resource
+  source:
+    uri: ((artifactory-server))
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+    build_name: "Spring Cloud Data Flow - Spring Cloud Data Flow - Master - Build and install SCDF"
+
+- name: spring-cloud-dataflow-ci-image
+  type: docker-image
+  source:
+    repository: springsource-docker-private-local.jfrog.io/spring-cloud-dataflow-ci-image
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+    tag: ((branch))
+
+- name: acceptance-tests-reports
+  type: s3
+  source:
+    bucket: ((spr-artifacts-s3-bucket-name))
+    regexp: distribution-repository/spring-cloud-dataflow-acceptance-tests-(.*).tar.gz
+    access_key_id: ((spr-s3-access-key-id))
+    secret_access_key: ((spr-s3-secret-access-key))
+    region_name: us-west-1
+
+- name: acceptance-tests-trigger1
+  type: s3
+  source:
+    bucket: ((spr-artifacts-s3-bucket-name))
+    regexp: triggers/trigger1-(.*)
+    access_key_id: ((spr-s3-access-key-id))
+    secret_access_key: ((spr-s3-secret-access-key))
+    region_name: us-west-1
+
+#################################################
+# Jobs
+#################################################
+jobs:
+- name: spring-cloud-dataflow-ci-images
+  plan:
+  - get: ci-images-git-repo
+    trigger: true
+  - put: spring-cloud-dataflow-ci-image
+    params:
+      build: ci-images-git-repo/((base-path))/ci/images/spring-cloud-dataflow-ci-image
+      build_args:
+        BRANCH: ((branch))
+        GITHUB_REPO_RAW: ((github-repo-raw))
+        BASE_PATH: ((base-path))
+
+- name: build-servers-with-drivers
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-dataflow-ci-image
+    trigger: true
+    passed:
+      - "spring-cloud-dataflow-ci-images"
+  - get: ci-git-repo
+  - get: ci-apps-git-repo
+    trigger: true
+  - get: artifactory-repo-skipper
+    params:
+      download_artifacts: false
+    trigger: true
+  - get: artifactory-repo-dataflow
+    params:
+      download_artifacts: false
+    trigger: true
+  - aggregate:
+    - task: build-skipper-server-with-drivers100
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-skipper100
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 100
+        APP_TEMPLATE: skipper-server-with-drivers-template1
+        SKIPPER_VERSION: 1.0.0.RELEASE
+    - task: build-skipper-server-with-drivers101
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-skipper101
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 101
+        APP_TEMPLATE: skipper-server-with-drivers-template1
+        SKIPPER_VERSION: 1.0.1.RELEASE
+    - task: build-skipper-server-with-drivers102
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-skipper102
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 102
+        APP_TEMPLATE: skipper-server-with-drivers-template2
+        SKIPPER_VERSION: 1.0.2.RELEASE
+    - task: build-skipper-server-with-drivers103
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-skipper103
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 103
+        APP_TEMPLATE: skipper-server-with-drivers-template2
+        SKIPPER_VERSION: 1.0.3.RELEASE
+    - task: build-skipper-server-with-drivers104
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-skipper104
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 104
+        APP_TEMPLATE: skipper-server-with-drivers-template2
+        SKIPPER_VERSION: 1.0.4.RELEASE
+    - task: build-skipper-server-with-drivers105
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-skipper105
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 105
+        APP_TEMPLATE: skipper-server-with-drivers-template2
+        SKIPPER_VERSION: 1.0.5.RELEASE
+    - task: build-skipper-server-with-drivers110
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-skipper110
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 110
+        APP_TEMPLATE: skipper-server-with-drivers-template2
+        SKIPPER_VERSION: 1.1.0.RELEASE
+    - task: build-skipper-server-with-drivers11x
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-skipper11x
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 11x
+        APP_TEMPLATE: skipper-server-with-drivers-template2
+        SKIPPER_VERSION: 1.1.3.BUILD-SNAPSHOT
+    - task: build-skipper-server-with-drivers20x
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-skipper20x
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 20x
+        APP_TEMPLATE: skipper-server-with-drivers-template3
+        SKIPPER_VERSION: 2.0.0.BUILD-SNAPSHOT
+    - task: build-dataflow-server-with-drivers173
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-dataflow-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-dataflow173
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 173
+        APP_TEMPLATE: dataflow-server-with-drivers-template1
+        DATAFLOW_VERSION: 1.7.3.RELEASE
+    - task: build-dataflow-server-with-drivers17x
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-dataflow-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-dataflow17x
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 17x
+        APP_TEMPLATE: dataflow-server-with-drivers-template1
+        DATAFLOW_VERSION: 1.7.4.BUILD-SNAPSHOT
+    - task: build-dataflow-server-with-drivers20x
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-dataflow-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-dataflow20x
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 20x
+        APP_TEMPLATE: dataflow-server-with-drivers-template2
+        DATAFLOW_VERSION: 2.0.0.BUILD-SNAPSHOT
+  - task: aggregate-build-skipper-server-with-drivers
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: busybox
+      inputs:
+      - name: ci-git-repo
+      - name: distribution-repository-skipper100
+      - name: distribution-repository-skipper101
+      - name: distribution-repository-skipper102
+      - name: distribution-repository-skipper103
+      - name: distribution-repository-skipper104
+      - name: distribution-repository-skipper105
+      - name: distribution-repository-skipper110
+      - name: distribution-repository-skipper11x
+      - name: distribution-repository-skipper20x
+      - name: distribution-repository-dataflow173
+      - name: distribution-repository-dataflow17x
+      - name: distribution-repository-dataflow20x
+      outputs:
+      - name: distribution-repository
+      run:
+        path: ci-git-repo/((base-path))/ci/scripts/aggregate-build-skipper-server-with-drivers.sh
+  - put: artifactory-repo
+    params:
+      repo: ext-private-local
+      folder: distribution-repository
+      strip_snapshot_timestamps: false
+      build_uri: "https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
+      build_number: "${BUILD_PIPELINE_NAME}-${BUILD_JOB_NAME}-${BUILD_NAME}"
+      disable_checksum_uploads: true
+      include:
+        - "**/*.jar"
+        - "**/*.pom"
+      exclude:
+        - "**/*.xml"
+
+- name: build-docker-servers
+  plan:
+  - get: spring-cloud-dataflow-ci-image
+    trigger: true
+    passed:
+      - "spring-cloud-dataflow-ci-images"
+  - get: git-repo
+    trigger: false    
+  - get: artifactory-repo-dataflow
+    params:
+      download_artifacts: false
+    trigger: true
+    passed:
+      - "build-servers-with-drivers"
+  - get: artifactory-repo-skipper
+    params:
+      download_artifacts: false
+    trigger: true
+    passed:
+      - "build-servers-with-drivers"
+  - do:
+    - task: build-project
+      privileged: true
+      timeout: 90m
+      image: spring-cloud-dataflow-ci-image
+      file: git-repo/((base-path))/ci/tasks/build-project.yml
+      params:
+        BASE_PATH: ((base-path))
+        DATAFLOW_INCLUDE_TAGS: postgres
+        ARTIFACTORY_DOCKER_PUSH: true
+        EXTRA_GRADLE_CMDLINE: "-x test"
+      on_success:
+        aggregate:
+        - put: acceptance-tests-trigger1
+          params:
+            file: triggers/trigger1-*
+
+- name: acceptance-tests-postgres
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-dataflow-ci-image
+    trigger: true
+    passed:
+      - "spring-cloud-dataflow-ci-images"
+  - get: git-repo
+    trigger: false
+  - get: acceptance-tests-trigger1
+    trigger: true
+    passed:
+      - "build-docker-servers"
+  - do:
+    - task: build-project
+      privileged: true
+      timeout: 90m
+      image: spring-cloud-dataflow-ci-image
+      file: git-repo/((base-path))/ci/tasks/build-project.yml
+      params:
+        BASE_PATH: ((base-path))
+        DATAFLOW_INCLUDE_TAGS: postgres
+      on_failure:
+        aggregate:
+        - put: acceptance-tests-reports
+          params:
+            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+
+- name: acceptance-tests-mysql
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-dataflow-ci-image
+    trigger: true
+    passed:
+      - "spring-cloud-dataflow-ci-images"
+  - get: git-repo
+    trigger: false
+  - get: acceptance-tests-trigger1
+    trigger: true
+    passed:
+      - "build-docker-servers"
+  - do:
+    - task: build-project
+      privileged: true
+      timeout: 90m
+      image: spring-cloud-dataflow-ci-image
+      file: git-repo/((base-path))/ci/tasks/build-project.yml
+      params:
+        BASE_PATH: ((base-path))
+        DATAFLOW_INCLUDE_TAGS: mysql
+      on_failure:
+        aggregate:
+        - put: acceptance-tests-reports
+          params:
+            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+
+- name: acceptance-tests-mssql
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-dataflow-ci-image
+    trigger: true
+    passed:
+      - "spring-cloud-dataflow-ci-images"
+  - get: git-repo
+    trigger: false
+  - get: acceptance-tests-trigger1
+    trigger: true
+    passed:
+      - "build-docker-servers"
+  - do:
+    - task: build-project
+      privileged: true
+      timeout: 90m
+      image: spring-cloud-dataflow-ci-image
+      file: git-repo/((base-path))/ci/tasks/build-project.yml
+      params:
+        BASE_PATH: ((base-path))
+        DATAFLOW_INCLUDE_TAGS: mssql
+      on_failure:
+        aggregate:
+        - put: acceptance-tests-reports
+          params:
+            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+
+- name: acceptance-tests-oracle
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-dataflow-ci-image
+    trigger: true
+    passed:
+      - "spring-cloud-dataflow-ci-images"
+  - get: git-repo
+    trigger: false
+  - get: acceptance-tests-trigger1
+    trigger: true
+    passed:
+      - "build-docker-servers"
+  - do:
+    - task: build-project
+      privileged: true
+      timeout: 90m
+      image: spring-cloud-dataflow-ci-image
+      file: git-repo/((base-path))/ci/tasks/build-project.yml
+      params:
+        BASE_PATH: ((base-path))
+        DATAFLOW_INCLUDE_TAGS: oracle
+      on_failure:
+        aggregate:
+        - put: acceptance-tests-reports
+          params:
+            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+
+- name: acceptance-tests-db2
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-dataflow-ci-image
+    trigger: true
+    passed:
+      - "spring-cloud-dataflow-ci-images"
+  - get: git-repo
+    trigger: false
+  - get: acceptance-tests-trigger1
+    trigger: true
+    passed:
+      - "build-docker-servers"
+  - do:
+    - task: build-project
+      privileged: true
+      timeout: 90m
+      image: spring-cloud-dataflow-ci-image
+      file: git-repo/((base-path))/ci/tasks/build-project.yml
+      params:
+        BASE_PATH: ((base-path))
+        DATAFLOW_INCLUDE_TAGS: db2
+      on_failure:
+        aggregate:
+        - put: acceptance-tests-reports
+          params:
+            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz

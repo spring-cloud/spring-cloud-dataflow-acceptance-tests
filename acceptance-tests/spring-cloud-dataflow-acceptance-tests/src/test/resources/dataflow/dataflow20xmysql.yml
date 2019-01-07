@@ -1,0 +1,18 @@
+version: '3'
+services:
+  dataflow:
+    image: 'springsource-docker-private-local.jfrog.io/scdf/spring-cloud-dataflow-acceptance-image-drivers20x'
+    container_name: dataflow
+    network_mode: bridge
+    environment:
+      - ACCEPTANCE_TEST_START_WAIT=5
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/dataflow
+      - SPRING_DATASOURCE_USERNAME=spring
+      - SPRING_DATASOURCE_PASSWORD=spring
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
+      - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=http://skipper:7577/api
+    ports:
+      - 9393
+    external_links:
+      - mysql:mysql
+      - skipper:skipper
