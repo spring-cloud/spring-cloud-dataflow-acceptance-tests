@@ -55,8 +55,6 @@ spec:
           value: 'false'
         - name: SPRING_CLOUD_DATAFLOW_FEATURES_ANALYTICS_ENABLED
           value: 'true'
-        - name: SPRING_CLOUD_DEPLOYER_KUBERNETES_MEMORY
-          value: 1024Mi
         - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
           value: 'true'
         - name: SPRING_CLOUD_KUBERNETES_SECRETS_NAME
