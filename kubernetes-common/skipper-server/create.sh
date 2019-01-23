@@ -67,6 +67,10 @@ spec:
           value: '7577'
         - name: KUBERNETES_TRUST_CERTIFICATES
           value: 'true'
+          # SAJ for 1.7.x compat as the configmap by name SPRING_CLOUD_KUBERNETES_CONFIG_NAME is
+          # only loaded in skipper 2.0 as it includes the spring-cloud-kubernetes dep
+        - name: SPRING_APPLICATION_JSON
+          value: "{\"spring.cloud.skipper.server.enableLocalPlatform\" : false, \"spring.cloud.skipper.server.platform.kubernetes.accounts.default.environmentVariables\" : \"SPRING_RABBITMQ_HOST=\${RABBITMQ_SERVICE_HOST},SPRING_RABBITMQ_PORT=\${RABBITMQ_SERVICE_PORT},SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=\${KAFKA_SERVICE_HOST}:\${KAFKA_SERVICE_PORT},SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES=\${KAFKA_SERVICE_HOST}:2181\",\"spring.cloud.skipper.server.platform.kubernetes.accounts.default.memory\" : \"1024Mi\"}"
 
 ---
 
