@@ -2,7 +2,13 @@
 
 function kubectl_create() {
   kubectl create -f secret.yml --namespace $KUBERNETES_NAMESPACE
-  sleep 5
+
+  if [ "$BINDER" == "rabbit" ]; then
+    kubectl create -f server-config-rabbit.yml --namespace $KUBERNETES_NAMESPACE
+  elif [ "$BINDER" == "kafka" ]; then
+    kubectl create -f server-config-kafka.yml --namespace $KUBERNETES_NAMESPACE
+  fi
+
   kubectl create -f scdf.yml --namespace $KUBERNETES_NAMESPACE
   READY_FOR_TESTS=1
   for i in $( seq 1 "${RETRIES}" ); do
@@ -97,7 +103,7 @@ if [ -z "$DATAFLOW_SERVER_NAME" ]; then
 fi
 
 if [ -z "$SPRING_APPLICATION_JSON" ]; then
-    SPRING_APPLICATION_JSON="{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\"} } }, \"spring.cloud.dataflow.application-properties.stream.spring.cloud.stream.bindings.applicationMetrics.destination\": \"metrics\", \"spring.cloud.dataflow.task.platform.kubernetes.accounts.cluster1.memory\" : \"1024Mi\",\"spring.cloud.dataflow.task.platform.kubernetes.accounts.cluster1.createDeployment\" : true }"
+    SPRING_APPLICATION_JSON="{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\"} } }, \"spring.cloud.dataflow.application-properties.stream.spring.cloud.stream.bindings.applicationMetrics.destination\": \"metrics\" }"
 fi
 
 RETRIES=20

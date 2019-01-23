@@ -16,6 +16,10 @@ spec:
           - name: MYSQL_ROOT_PASSWORD
             # Change this password!
             value: yourpassword
+            # scdf has been using been using `mysql` so keep as is for
+            # now and create another for skipper..
+          - name: MYSQL_DATABASE
+            value: skipper
         ports:
           - containerPort: 3306
             name: mysql

@@ -1,7 +1,16 @@
 #!/bin/bash
 
 function kubectl_create() {
+  kubectl create -f secret.yml --namespace $KUBERNETES_NAMESPACE
+
+  if [ "$BINDER" == "rabbit" ]; then
+    kubectl create -f skipper-config-rabbit.yml --namespace $KUBERNETES_NAMESPACE
+  elif [ "$BINDER" == "kafka" ]; then
+    kubectl create -f skipper-config-kafka.yml --namespace $KUBERNETES_NAMESPACE
+  fi
+
   kubectl create -f skipper.yml --namespace $KUBERNETES_NAMESPACE
+
   READY_FOR_TESTS=1
   for i in $( seq 1 "${RETRIES}" ); do
     SKIPPER_SERVER_URI=$(kubectl get svc skipper --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $4}')
@@ -47,17 +56,15 @@ spec:
         - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
           value: 'true'
         - name: SPRING_CLOUD_KUBERNETES_SECRETS_NAME
-          value: scdf-secrets
+          value: skipper-secrets
         - name: SPRING_CLOUD_KUBERNETES_CONFIG_NAME
-          value: scdf-config
+          value: skipper-config
         - name: KUBERNETES_NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: "metadata.namespace"
         - name: SERVER_PORT
           value: '7577'
-        - name: SPRING_APPLICATION_JSON
-          value: "{\"spring.cloud.skipper.server.enableLocalPlatform\" : false, \"spring.cloud.skipper.server.platform.kubernetes.accounts.cluster1.environmentVariables\" : \"SPRING_RABBITMQ_HOST=\${RABBITMQ_SERVICE_HOST},SPRING_RABBITMQ_PORT=\${RABBITMQ_SERVICE_PORT},SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=\${KAFKA_SERVICE_HOST}:\${KAFKA_SERVICE_PORT},SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES=\${KAFKA_SERVICE_HOST}:2181\",\"spring.cloud.skipper.server.platform.kubernetes.accounts.cluster1.memory\" : \"1024Mi\",\"spring.cloud.skipper.server.platform.kubernetes.accounts.cluster1.createDeployment\" : true}"
         - name: KUBERNETES_TRUST_CERTIFICATES
           value: 'true'
 
