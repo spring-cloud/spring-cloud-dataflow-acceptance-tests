@@ -8,6 +8,7 @@ buildscript {
 		db2JdbcDriverVersion = project.properties['db2JdbcDriverVersion'] ?: '4.19.26'
 		springCloudVersion = project.properties['springCloudVersion'] ?: 'Dalston.SR5'
 		springCloudDataflowVersion = project.properties['springCloudDataflowVersion'] ?: '1.7.4.BUILD-SNAPSHOT'
+		springCloudTaskVersion = project.properties['springCloudTaskVersion'] ?: '1.3.1.RELEASE'
 	}
 	repositories {
 		mavenCentral()
@@ -60,5 +61,8 @@ dependencyManagement {
 	imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 		mavenBom "org.springframework.cloud:spring-cloud-dataflow-dependencies:${springCloudDataflowVersion}"
+	}
+	dependencies {
+		dependency "org.springframework.cloud:spring-cloud-task-core:${springCloudTaskVersion}"
 	}
 }

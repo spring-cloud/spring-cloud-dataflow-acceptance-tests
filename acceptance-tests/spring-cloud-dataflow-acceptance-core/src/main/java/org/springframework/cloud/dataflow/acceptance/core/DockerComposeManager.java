@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public class DockerComposeManager {
 		}
 		throw new IllegalArgumentException("Id " + id + " not found");
 	}
-	
+
 	public void build(String classKey, String methodKey) {
 
 		ArrayList<OrderingWrapper> toStart = new ArrayList<>();
@@ -81,6 +81,7 @@ public class DockerComposeManager {
 			ArrayList<String> services = new ArrayList<>();
 			boolean start = true;
 			Integer order = Integer.MAX_VALUE;
+			String log = "";
 			for (DockerComposeData dockerComposeData : e.getValue()) {
 				locations.addAll(Arrays.asList(dockerComposeData.getLocations()));
 				services.addAll(Arrays.asList(dockerComposeData.getServices()));
@@ -90,13 +91,16 @@ public class DockerComposeManager {
 				if (dockerComposeData.getOrder() < order) {
 					order = dockerComposeData.getOrder();
 				}
+				if (dockerComposeData.getLog() != null && dockerComposeData.getLog().length() > 0) {
+					log = dockerComposeData.getLog();
+				}
 			}
 			Builder builder = DockerComposeRule.builder();
 			builder.files(DockerComposeFiles.from(locations.toArray(new String[0])));
 			for (String service : services) {
 				builder.waitingForService(service, toHaveAllPortsOpen());
 			}
-			builder.saveLogsTo("build/test-docker-logs/" + classKey + "-" + methodKey);
+			builder.saveLogsTo("build/test-docker-logs/" + log + classKey + "-" + methodKey);
 			DockerComposeRule rule = builder.build();
 			rules.put(key, rule);
 			if (start) {
@@ -111,6 +115,7 @@ public class DockerComposeManager {
 			ArrayList<String> services = new ArrayList<>();
 			boolean start = true;
 			Integer order = Integer.MAX_VALUE;
+			String log = "";
 			for (DockerComposeData dockerComposeData : e.getValue()) {
 				locations.addAll(Arrays.asList(dockerComposeData.getLocations()));
 				services.addAll(Arrays.asList(dockerComposeData.getServices()));
@@ -120,13 +125,16 @@ public class DockerComposeManager {
 				if (dockerComposeData.getOrder() < order) {
 					order = dockerComposeData.getOrder();
 				}
+				if (dockerComposeData.getLog() != null && dockerComposeData.getLog().length() > 0) {
+					log = dockerComposeData.getLog();
+				}
 			}
 			Builder builder = DockerComposeRule.builder();
 			builder.files(DockerComposeFiles.from(locations.toArray(new String[0])));
 			for (String service : services) {
 				builder.waitingForService(service, toHaveAllPortsOpen());
 			}
-			builder.saveLogsTo("build/test-docker-logs/" + classKey + "-" + methodKey);
+			builder.saveLogsTo("build/test-docker-logs/" + log + classKey + "-" + methodKey);
 			DockerComposeRule rule = builder.build();
 			rules.put(key, rule);
 			if (start) {
@@ -142,7 +150,7 @@ public class DockerComposeManager {
 				throw new RuntimeException(e);
 			}
 		}
-		
+
 	}
 
 	public void stop(String classKey, String methodKey) {

@@ -5,12 +5,14 @@ services:
     container_name: dataflow
     network_mode: bridge
     environment:
-      - ACCEPTANCE_TEST_START_WAIT=60
-      - SPRING_DATASOURCE_URL=jdbc:sqlserver://mssql:1433;databaseName=spring
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.microsoft.sqlserver.jdbc.SQLServerDriver
+      - ACCEPTANCE_TEST_START_WAIT=5
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/dataflow
       - SPRING_DATASOURCE_USERNAME=spring
       - SPRING_DATASOURCE_PASSWORD=spring
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=http://skipper:7577/api
     ports:
       - 9393
     external_links:
-      - mssql:mssql
+      - postgres:postgres
+      - skipper:skipper

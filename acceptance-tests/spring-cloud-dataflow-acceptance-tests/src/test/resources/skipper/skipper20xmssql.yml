@@ -1,7 +1,7 @@
 version: '3'
 services:
   skipper:
-    image: 'springsource-docker-private-local.jfrog.io/scdf/spring-cloud-skipper-acceptance-image-drivers20x'
+    image: 'springsource-docker-private-local.jfrog.io/scdf/spring-cloud-skipper-acceptance-image-legacy20x'
     container_name: skipper
     network_mode: bridge
     environment:
