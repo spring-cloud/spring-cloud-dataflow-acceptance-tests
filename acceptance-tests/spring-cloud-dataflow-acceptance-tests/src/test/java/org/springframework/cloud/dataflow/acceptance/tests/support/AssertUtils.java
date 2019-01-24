@@ -34,7 +34,7 @@ public abstract class AssertUtils {
 	private static final Logger log = LoggerFactory.getLogger(AssertUtils.class);
 
 	public static void assertDataflowServerRunning(String url) {
-		assertServerResponse("spring-cloud-starter-dataflow-server-local", url, 1, TimeUnit.SECONDS, 180,
+		assertServerResponse("Spring Cloud Data Flow", url, 1, TimeUnit.SECONDS, 180,
 				TimeUnit.SECONDS);
 	}
 

@@ -5,13 +5,14 @@ services:
     container_name: dataflow
     network_mode: bridge
     environment:
-      - ACCEPTANCE_TEST_SYSTEM_PROPERTIES=-Doracle.jdbc.timezoneAsRegion=false
       - ACCEPTANCE_TEST_START_WAIT=60
-      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:spring/spring@oracle:1521/ORCLPDB1
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=oracle.jdbc.OracleDriver
+      - SPRING_DATASOURCE_URL=jdbc:db2://db2:50000/spring
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.ibm.db2.jcc.DB2Driver
       - SPRING_DATASOURCE_USERNAME=spring
       - SPRING_DATASOURCE_PASSWORD=spring
+      - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=http://skipper:7577/api
     ports:
       - 9393
     external_links:
-      - oracle:oracle
+      - db2:db2
+      - skipper:skipper

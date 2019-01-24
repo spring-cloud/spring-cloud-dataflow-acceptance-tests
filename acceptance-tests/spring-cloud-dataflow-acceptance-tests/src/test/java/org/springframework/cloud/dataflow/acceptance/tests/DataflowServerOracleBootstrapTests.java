@@ -37,7 +37,7 @@ public class DataflowServerOracleBootstrapTests extends AbstractDataflowTests {
 	@Dataflow17x
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/oracle.yml" }, services = { "oracle" })
 	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper11xoracle.yml" }, services = { "skipper" })
-	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflow/dataflow17xoracle.yml" }, services = { "dataflow" })
+	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow17xoracle.yml" }, services = { "dataflow" })
 	public void testDataflow17xWithOracle(DockerComposeInfo dockerComposeInfo) throws Exception {
 		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
 	}
@@ -47,8 +47,20 @@ public class DataflowServerOracleBootstrapTests extends AbstractDataflowTests {
 	@Dataflow20x
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/oracle.yml" }, services = { "oracle" })
 	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper20xoracle.yml" }, services = { "skipper" })
-	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflow/dataflow20xoracle.yml" }, services = { "dataflow" })
+	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow20xoracle.yml" }, services = { "dataflow" })
 	public void testDataflow20xWithOracle(DockerComposeInfo dockerComposeInfo) throws Exception {
 		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
+	}
+
+	@Test
+	@Skipper20x
+	@Dataflow20x
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/oracle.yml" }, services = { "oracle" })
+	@DockerCompose(id = "dataflow", order = 1, locations = { "src/test/resources/dataflow/dataflow20xoracle.yml" }, services = { "dataflow" })
+	@DockerCompose(id = "skipper", order = 2, locations = { "src/test/resources/skipper/skipper20xoracle.yml" }, services = { "skipper" }, start = false)
+	public void testDataflow20xBeforeSkipperPostgres(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow", false);
+		start(dockerComposeInfo, "skipper");
+		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
 	}
 }

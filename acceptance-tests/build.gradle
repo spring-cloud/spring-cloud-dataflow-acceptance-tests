@@ -55,9 +55,15 @@ def getResolvedVersionOf(configuration, dependency) {
 	}.moduleArtifacts.first()
 }
 
-def dataflowLegacyProjects() {
+def dataflowLegacyProjects1x() {
 	subprojects.findAll { project ->
-		project.name.contains('spring-cloud-dataflow-acceptance-image-legacy')
+		project.name.contains('spring-cloud-dataflow-acceptance-image-legacy-1')
+	}
+}
+
+def dataflowLegacyProjects2x() {
+	subprojects.findAll { project ->
+		project.name.contains('spring-cloud-dataflow-acceptance-image-legacy-2')
 	}
 }
 
@@ -150,7 +156,7 @@ configure(dataflowDriversProjects()) { subproject ->
 	}
 }
 
-configure(dataflowLegacyProjects()) { subproject ->
+configure(dataflowLegacyProjects1x()) { subproject ->
 	def prefix = subproject.name.tokenize('-').last()
 	def val = rootProject.ext["springCloudDataflow" + prefix + "Version"]
 	apply plugin: 'com.palantir.docker'
@@ -165,6 +171,28 @@ configure(dataflowLegacyProjects()) { subproject ->
 		dockerfile file('../spring-cloud-dataflow-acceptance-image-template1/src/main/resources/Dockerfile')
 		files getResolvedVersionOf(configurations.compile, "spring-cloud-dataflow-server-local").file.absolutePath[0], '../spring-cloud-dataflow-acceptance-image-template1/src/main/resources/entrypoint.sh'
 		buildArgs(['JAR_FILE': getResolvedVersionOf(configurations.compile, "spring-cloud-dataflow-server-local").file.name[0], 'ENTRYPOINT_FILE': 'entrypoint.sh'])
+	}
+
+	if (project.hasProperty('artifactoryDockerPush') && artifactoryDockerPush.toBoolean()) {
+		build.dependsOn 'dockerPush'
+	}
+}
+
+configure(dataflowLegacyProjects2x()) { subproject ->
+	def prefix = subproject.name.tokenize('-').last()
+	def val = rootProject.ext["springCloudDataflow" + prefix + "Version"]
+	apply plugin: 'com.palantir.docker'
+
+	dependencies {
+		compile("org.springframework.cloud:spring-cloud-dataflow-server:${val}")
+	}
+
+	docker {
+		name "springsource-docker-private-local.jfrog.io/scdf/spring-cloud-dataflow-acceptance-image-legacy${prefix}"
+		tags "${val}"
+		dockerfile file('../spring-cloud-dataflow-acceptance-image-template1/src/main/resources/Dockerfile')
+		files getResolvedVersionOf(configurations.compile, "spring-cloud-dataflow-server").file.absolutePath[0], '../spring-cloud-dataflow-acceptance-image-template1/src/main/resources/entrypoint.sh'
+		buildArgs(['JAR_FILE': getResolvedVersionOf(configurations.compile, "spring-cloud-dataflow-server").file.name[0], 'ENTRYPOINT_FILE': 'entrypoint.sh'])
 	}
 
 	if (project.hasProperty('artifactoryDockerPush') && artifactoryDockerPush.toBoolean()) {
