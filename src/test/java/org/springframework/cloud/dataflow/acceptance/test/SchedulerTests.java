@@ -51,7 +51,7 @@ public class SchedulerTests extends AbstractTaskTests {
 			scheduleSet.add(createDefaultSchedule());
 		}
 		PagedResources<ScheduleInfoResource> pagedResources = listSchedules();
-		assertThat(pagedResources.getMetadata().getSize()).isEqualTo(ENTRY_COUNT);
+		assertThat(pagedResources.getMetadata().getTotalElements()).isEqualTo(ENTRY_COUNT);
 		Iterator<ScheduleInfoResource> iterator = pagedResources.getContent().iterator();
 		for(int i = 0; i < ENTRY_COUNT; i++) {
 			ScheduleInfoResource resource = iterator.next();
