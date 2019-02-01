@@ -392,11 +392,13 @@ jobs:
       params:
         BASE_PATH: ((base-path))
         DATAFLOW_INCLUDE_TAGS: postgres
+        REPORT_PATH: ((report-path))
+        REPORT_ID: postgres
       on_failure:
         aggregate:
         - put: acceptance-tests-reports
           params:
-            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+            file: ((report-path))/spring-cloud-dataflow-acceptance-tests-*.tar.gz
 
 - name: acceptance-tests-mysql
   serial: true
@@ -421,11 +423,13 @@ jobs:
       params:
         BASE_PATH: ((base-path))
         DATAFLOW_INCLUDE_TAGS: mysql
+        REPORT_PATH: ((report-path))
+        REPORT_ID: mysql
       on_failure:
         aggregate:
         - put: acceptance-tests-reports
           params:
-            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+            file: ((report-path))/spring-cloud-dataflow-acceptance-tests-*.tar.gz
 
 - name: acceptance-tests-mssql
   serial: true
@@ -450,11 +454,13 @@ jobs:
       params:
         BASE_PATH: ((base-path))
         DATAFLOW_INCLUDE_TAGS: mssql
+        REPORT_PATH: ((report-path))
+        REPORT_ID: mssql
       on_failure:
         aggregate:
         - put: acceptance-tests-reports
           params:
-            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+            file: ((report-path))/spring-cloud-dataflow-acceptance-tests-*.tar.gz
 
 - name: acceptance-tests-oracle
   serial: true
@@ -479,11 +485,13 @@ jobs:
       params:
         BASE_PATH: ((base-path))
         DATAFLOW_INCLUDE_TAGS: oracle
+        REPORT_PATH: ((report-path))
+        REPORT_ID: oracle
       on_failure:
         aggregate:
         - put: acceptance-tests-reports
           params:
-            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+            file: ((report-path))/spring-cloud-dataflow-acceptance-tests-*.tar.gz
 
 - name: acceptance-tests-db2
   serial: true
@@ -508,8 +516,10 @@ jobs:
       params:
         BASE_PATH: ((base-path))
         DATAFLOW_INCLUDE_TAGS: db2
+        REPORT_PATH: ((report-path))
+        REPORT_ID: db2
       on_failure:
         aggregate:
         - put: acceptance-tests-reports
           params:
-            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+            file: ((report-path))/spring-cloud-dataflow-acceptance-tests-*.tar.gz

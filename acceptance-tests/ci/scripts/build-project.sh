@@ -3,7 +3,7 @@ set -e
 
 n=0
 source $(dirname $0)/common.sh
-repository=$(pwd)/distribution-repository
+repository=$(pwd)/$REPORT_PATH
 triggers=$(pwd)/triggers
 buildversion=`date '+%Y-%m-%d-%H-%M-%S'`
 
@@ -18,7 +18,7 @@ echo $ARTIFACTORY_PASSWORD | docker login -u $ARTIFACTORY_USERNAME --password-st
   ${EXTRA_GRADLE_CMDLINE} \
   || n=1
 touch ${triggers}/trigger1-${buildversion}
-tar -zc --ignore-failed-read --file ${repository}/spring-cloud-dataflow-acceptance-tests-${buildversion}.tar.gz spring-cloud-dataflow-acceptance-tests/build/test-docker-logs
+tar -zc --ignore-failed-read --file ${repository}/spring-cloud-dataflow-acceptance-tests-$REPORT_ID-${buildversion}.tar.gz spring-cloud-dataflow-acceptance-tests/build/test-docker-logs
 popd > /dev/null
 popd > /dev/null
 
