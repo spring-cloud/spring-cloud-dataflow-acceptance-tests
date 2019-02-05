@@ -60,7 +60,11 @@ cat << EOF >> ./scdf-manifest.yml
     SPRING_APPLICATION_JSON: $SPRING_APPLICATION_JSON
 EOF
 fi
-
+if [ "$noAutoreconfiguration" ]; then
+cat << EOF >> ./scdf-manifest.yml
+    JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
+EOF
+fi
 if [ "$schedulesEnabled" ]; then
     cat << EOF >> ./scdf-manifest.yml
     SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES,$SCHEDULES_INSTANCE_NAME

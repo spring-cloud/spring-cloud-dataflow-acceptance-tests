@@ -35,6 +35,7 @@ Flags:
     -av | --appsVersion - set the stream app version to test (e.g. Celsius.SR2). Apps should be accessible via maven repo or docker hub.
     -tv | --tasksVersion - set the task app version to test (e.g. Clark.RELEASE). Tasks should be accessible via maven repo or docker hub.
     -se | --schedulesEnabled - installs scheduling infrastructure and configures SCDF to use the service.
+    -na | --noAutoreconfiguration - tell the buildpack to disable spring autoreconfiguration
 
 [*] = Required arguments
 
@@ -304,6 +305,9 @@ case ${key} in
  ;;
  -se|--schedulesEnabled)
  schedulesEnabled="true"
+ ;;
+ -na|--noAutoreconfiguration)
+ noAutoreconfiguration="true"
  ;;
  --help)
  print_usage
