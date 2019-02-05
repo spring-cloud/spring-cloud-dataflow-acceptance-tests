@@ -37,7 +37,7 @@ cat << EOF >> ./skipper-manifest.yml
     SPRING_APPLICATION_JSON: '{ "spring": { "cloud": { "skipper": { "server": { "enableLocalPlatform": "false"} } } } }'
 EOF
 if [ "$noAutoreconfiguration" ]; then
-cat << EOF >> ./scdf-manifest.yml
+cat << EOF >> ./skipper-manifest.yml
     JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
 EOF
 fi
