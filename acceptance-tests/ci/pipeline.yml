@@ -75,7 +75,7 @@ resources:
   type: s3
   source:
     bucket: ((spr-artifacts-s3-bucket-name))
-    regexp: distribution-repository/spring-cloud-dataflow-acceptance-tests-(.*).tar.gz
+    regexp: ((report-path))/spring-cloud-dataflow-acceptance-tests-(.*).tar.gz
     access_key_id: ((spr-s3-access-key-id))
     secret_access_key: ((spr-s3-secret-access-key))
     region_name: us-west-1
@@ -398,7 +398,7 @@ jobs:
         aggregate:
         - put: acceptance-tests-reports
           params:
-            file: ((report-path))/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
 
 - name: acceptance-tests-mysql
   serial: true
@@ -429,7 +429,7 @@ jobs:
         aggregate:
         - put: acceptance-tests-reports
           params:
-            file: ((report-path))/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
 
 - name: acceptance-tests-mssql
   serial: true
@@ -460,7 +460,7 @@ jobs:
         aggregate:
         - put: acceptance-tests-reports
           params:
-            file: ((report-path))/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
 
 - name: acceptance-tests-oracle
   serial: true
@@ -491,7 +491,7 @@ jobs:
         aggregate:
         - put: acceptance-tests-reports
           params:
-            file: ((report-path))/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
 
 - name: acceptance-tests-db2
   serial: true
@@ -522,4 +522,4 @@ jobs:
         aggregate:
         - put: acceptance-tests-reports
           params:
-            file: ((report-path))/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz

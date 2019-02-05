@@ -3,7 +3,7 @@ set -e
 
 n=0
 source $(dirname $0)/common.sh
-repository=$(pwd)/$REPORT_PATH
+repository=$(pwd)/distribution-repository
 triggers=$(pwd)/triggers
 buildversion=`date '+%Y-%m-%d-%H-%M-%S'`
 
