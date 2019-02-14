@@ -46,8 +46,7 @@ public class SkipperServerMigrationTests extends AbstractDataflowTests {
 	@DockerCompose(id = "skipper11x", order = 1, locations = { "src/test/resources/skipper/skipper11xpostgres.yml" }, services = { "skipper" }, log = "skipper11x/")
 	@DockerCompose(id = "skipper20x", order = 1, locations = { "src/test/resources/skipper/skipper20xpostgres.yml" }, services = { "skipper" }, start = false, log = "skipper20x/")
 	public void testMigrationFrom11xToLatestWithPostgres(DockerComposeInfo dockerComposeInfo) throws Exception {
-		assertSkipperServerRunning(dockerComposeInfo, "skipper11x", "skipper");
-		upgradeSkipper(dockerComposeInfo, "skipper11x", "skipper20x", "skipper");
+		migrationAsserts(dockerComposeInfo);
 	}
 
 	@Test
@@ -57,8 +56,7 @@ public class SkipperServerMigrationTests extends AbstractDataflowTests {
 	@DockerCompose(id = "skipper11x", order = 1, locations = { "src/test/resources/skipper/skipper11xmysql.yml" }, services = { "skipper" }, log = "skipper11x/")
 	@DockerCompose(id = "skipper20x", order = 1, locations = { "src/test/resources/skipper/skipper20xmysql.yml" }, services = { "skipper" }, start = false, log = "skipper20x/")
 	public void testMigrationFrom11xToLatestWithMysql(DockerComposeInfo dockerComposeInfo) throws Exception {
-		assertSkipperServerRunning(dockerComposeInfo, "skipper11x", "skipper");
-		upgradeSkipper(dockerComposeInfo, "skipper11x", "skipper20x", "skipper");
+		migrationAsserts(dockerComposeInfo);
 	}
 
 	@Test
@@ -68,8 +66,7 @@ public class SkipperServerMigrationTests extends AbstractDataflowTests {
 	@DockerCompose(id = "skipper11x", order = 1, locations = { "src/test/resources/skipper/skipper11xoracle.yml" }, services = { "skipper" }, log = "skipper11x/")
 	@DockerCompose(id = "skipper20x", order = 1, locations = { "src/test/resources/skipper/skipper20xoracle.yml" }, services = { "skipper" }, start = false, log = "skipper20x/")
 	public void testMigrationFrom11xToLatestWithOracle(DockerComposeInfo dockerComposeInfo) throws Exception {
-		assertSkipperServerRunning(dockerComposeInfo, "skipper11x", "skipper");
-		upgradeSkipper(dockerComposeInfo, "skipper11x", "skipper20x", "skipper");
+		migrationAsserts(dockerComposeInfo);
 	}
 
 
@@ -80,8 +77,7 @@ public class SkipperServerMigrationTests extends AbstractDataflowTests {
 	@DockerCompose(id = "skipper11x", order = 1, locations = { "src/test/resources/skipper/skipper11xmssql.yml" }, services = { "skipper" }, log = "skipper11x/")
 	@DockerCompose(id = "skipper20x", order = 1, locations = { "src/test/resources/skipper/skipper20xmssql.yml" }, services = { "skipper" }, start = false, log = "skipper20x/")
 	public void testMigrationFrom11xToLatestWithMsSql(DockerComposeInfo dockerComposeInfo) throws Exception {
-		assertSkipperServerRunning(dockerComposeInfo, "skipper11x", "skipper");
-		upgradeSkipper(dockerComposeInfo, "skipper11x", "skipper20x", "skipper");
+		migrationAsserts(dockerComposeInfo);
 	}
 
 
@@ -92,6 +88,10 @@ public class SkipperServerMigrationTests extends AbstractDataflowTests {
 	@DockerCompose(id = "skipper11x", order = 1, locations = { "src/test/resources/skipper/skipper11xdb2.yml" }, services = { "skipper" }, log = "skipper11x/")
 	@DockerCompose(id = "skipper20x", order = 1, locations = { "src/test/resources/skipper/skipper20xdb2.yml" }, services = { "skipper" }, start = false, log = "skipper20x/")
 	public void testMigrationFrom11xToLatestWithDb2(DockerComposeInfo dockerComposeInfo) throws Exception {
+		migrationAsserts(dockerComposeInfo);
+	}
+
+	private void migrationAsserts(DockerComposeInfo dockerComposeInfo) {
 		assertSkipperServerRunning(dockerComposeInfo, "skipper11x", "skipper");
 		upgradeSkipper(dockerComposeInfo, "skipper11x", "skipper20x", "skipper");
 	}

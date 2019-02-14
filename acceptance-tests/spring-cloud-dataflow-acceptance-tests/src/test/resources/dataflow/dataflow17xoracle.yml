@@ -2,7 +2,7 @@ version: '3'
 services:
   dataflow:
     image: 'springsource-docker-private-local.jfrog.io/scdf/spring-cloud-dataflow-acceptance-image-drivers17x'
-    container_name: dataflow
+    container_name: dataflow17x
     network_mode: bridge
     environment:
       - ACCEPTANCE_TEST_SYSTEM_PROPERTIES=-Doracle.jdbc.timezoneAsRegion=false

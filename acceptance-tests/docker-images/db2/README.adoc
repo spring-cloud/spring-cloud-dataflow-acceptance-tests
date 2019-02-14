@@ -71,6 +71,12 @@ DB20000I  The ACTIVATE DATA
  SQL authorization ID   = DB2INST1
  Local database alias   = SPRING
 
+[db2inst1@f07afbc6e1c3 ~]$ db2 create bufferpool springpool size 2000 pagesize 16k
+DB20000I  The SQL command completed successfully.
+
+[db2inst1@f07afbc6e1c3 ~]$ db2 create system temporary tablespace temppace16 pagesize 16k bufferpool springpool
+DB20000I  The SQL command completed successfully.
+
 [db2inst1@f07afbc6e1c3 ~]$ db2 grant dbadm with dataaccess with accessctrl on database to user spring
 DB20000I  The SQL command completed successfully.
 
@@ -84,12 +90,12 @@ docker stop -t 30 db2-build
 
 Commit it:
 ```
-docker commit -m "Image with prebuilt spring database" db2-build ibmcom/database-prebuilt-commit:10.5.0.5-3.10.0
+docker commit -m "Image with prebuilt spring database" db2-build ibmcom/database-prebuilt:10.5.0.5-3.10.0
 ```
 
 Check that it comes up:
 ```
-docker run --name db2-build-prebuilt -p 50000:50000 ibmcom/database-prebuilt-commit:10.5.0.5-3.10.0
+docker run --name db2-build-prebuilt -p 50000:50000 ibmcom/database-prebuilt:10.5.0.5-3.10.0
 ```
 
 Push to registry:
@@ -98,10 +104,10 @@ docker login springsource-docker-private-local.jfrog.io
 
 docker images
 REPOSITORY                                                            TAG                 IMAGE ID            CREATED             SIZE
-ibmcom/database-prebuilt-commit                                       10.5.0.5-3.10.0     67826abcf7fd        About a minute ago   1.89GB
+ibmcom/database-prebuilt                                              10.5.0.5-3.10.0     67826abcf7fd        About a minute ago   1.89GB
 
 
-docker tag 67826abcf7fd springsource-docker-private-local.jfrog.io/ibmcom/database-prebuilt-commit:10.5.0.5-3.10.0
-docker push springsource-docker-private-local.jfrog.io/ibmcom/database-prebuilt-commit:10.5.0.5-3.10.0
+docker tag 67826abcf7fd springsource-docker-private-local.jfrog.io/ibmcom/database-prebuilt:10.5.0.5-3.10.0
+docker push springsource-docker-private-local.jfrog.io/ibmcom/database-prebuilt:10.5.0.5-3.10.0
 ```
 
