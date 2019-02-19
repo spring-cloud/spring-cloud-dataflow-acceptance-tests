@@ -15,6 +15,11 @@
  */
 package org.springframework.cloud.dataflow.acceptance.tests;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.cloud.dataflow.acceptance.core.DockerCompose;
@@ -58,9 +63,31 @@ public class DataflowServerMsSqlBootstrapTests extends AbstractDataflowTests {
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mssql.yml" }, services = { "mssql" })
 	@DockerCompose(id = "dataflow", order = 1, locations = { "src/test/resources/dataflow/dataflow20xmssql.yml" }, services = { "dataflow" })
 	@DockerCompose(id = "skipper", order = 2, locations = { "src/test/resources/skipper/skipper20xmssql.yml" }, services = { "skipper" }, start = false)
-	public void testDataflow20xBeforeSkipperPostgres(DockerComposeInfo dockerComposeInfo) throws Exception {
+	public void testDataflow20xBeforeSkipperMsSql(DockerComposeInfo dockerComposeInfo) throws Exception {
 		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow", false);
 		start(dockerComposeInfo, "skipper");
 		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
+	}
+
+	@Test
+	@Skipper11x
+	@Dataflow17x
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mssql.yml" }, services = { "mssql" })
+	@DockerCompose(id = "dataflow17x", order = 2, locations = { "src/test/resources/dataflow/dataflow17xmssql.yml" }, services = { "dataflow" }, log = "dataflow17x/")
+	@DockerCompose(id = "dataflow20x", order = 3, locations = { "src/test/resources/dataflow/dataflow20xmssql.yml" }, services = { "dataflow" }, start = false, log = "dataflow20x/")
+	@Tag("xxx")
+	public void testDataflow20xAfter17xWithMsSql(DockerComposeInfo dockerComposeInfo) throws Exception {
+		// github.com/spring-cloud/spring-cloud-dataflow/issues/2903
+		assertDataflowServerRunning(dockerComposeInfo, "dataflow17x", "dataflow", false);
+
+		List<String> initialRegisterApps = registerApps(dockerComposeInfo, "dataflow17x", "dataflow");
+		assertThat(initialRegisterApps.size()).isGreaterThan(0);
+
+		List<String> initialRegisterStreams = registerStreamDefs(dockerComposeInfo, "dataflow17x", "dataflow");
+		assertThat(initialRegisterStreams.size()).isGreaterThan(0);
+
+		stop(dockerComposeInfo, "dataflow17x");
+		start(dockerComposeInfo, "dataflow20x");
+		assertDataflowServerRunning(dockerComposeInfo, "dataflow20x", "dataflow", false);
 	}
 }
