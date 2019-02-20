@@ -1,27 +1,32 @@
-#!/usr/bin/env bash
+#!/bin/bash
+
+MAX_COUNT=250
+
+MSG_COLOR=
+ERR_COLOR=
+RESET_COLOR=
+if [[ "$TERM" == xterm-*color ]]; then
+  MSG_COLOR='\033[48;5;2;38;5;0m'   # black on green
+  ERR_COLOR='\033[38;5;7;48;5;1m'   # white on red
+  RESET_COLOR='\033[0m'
+fi
 
 function timestamp() {
   date +"%Y-%m-%d %T"
 }
 
 function msg() {
-  echo -en "\033[38;5;0m"       # black foreground
-  echo -en '\033[48;5;2m'       # green backround
-  echo -n "--- [$(timestamp)] $@"
-  echo -en '\033[0m'            # reset
-  echo
+  echo -e "${MSG_COLOR}--- [$(timestamp)] $@${RESET_COLOR}"
 }
 
 function err() {
-  echo -en "\033[38;5;7m"       # white foreground
-  echo -en '\033[48;5;1m'       # red background
-  echo -n "!!! [$(timestamp)] $@"
-  echo -en '\033[0m'            # reset
-  echo
+  echo -e "${ERR_COLOR}!!! [$(timestamp)] $@${RESET_COLOR}"
 }
 
 die() {
-  err $@
+  if [ -n "$@" ]; then
+    err $@
+  fi
   exit 1
 }
 
@@ -44,13 +49,17 @@ function create_service() {
       die "cannot create service $service; it is in the process of being deleted"
     fi
     count=$((count+1))
+    if [ $count -gt $MAX_COUNT ]; then
+      die "maximum retries exceeded ($MAX_COUNT)"
+    fi
     if [[ $service_info == *"create in progress"* ]]; then
       msg "waiting for service $service to be created ($count)"
-    else
-      err "unhandled status:"
-      echo $service_info
+      sleep 1
+      continue
     fi
-    sleep 1
+    err "unhandled status:"
+    echo $service_info
+    die
   done
 }
 
@@ -71,13 +80,17 @@ function destroy_service() {
       die "cannot delete service $service; it is in the process of being created"
     fi
     count=$((count+1))
+    if [ $count -gt $MAX_COUNT ]; then
+      die "maximum retries exceeded ($MAX_COUNT)"
+    fi
     if [[ $service_info == *"delete in progress"* ]]; then
       msg "waiting for service $service to be deleted ($count)"
-    else
-      err "unhandled status:"
-      echo $service_info
+      sleep 1
+      continue
     fi
-    sleep 1
+    err "unhandled status:"
+    echo $service_info
+    die
   done
 }
 
