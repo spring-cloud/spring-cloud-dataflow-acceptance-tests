@@ -93,5 +93,3 @@ function destroy_service() {
     die
   done
 }
-
-# vim: et sw=2 sts=2
