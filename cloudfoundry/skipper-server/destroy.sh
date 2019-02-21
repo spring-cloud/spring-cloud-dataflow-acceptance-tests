@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
  if (cf apps | grep "skipper-server"); then
     SKIPPER_NAME=$(cf apps | grep skipper-server- | awk '{print $1}' | sed 's:,::g')

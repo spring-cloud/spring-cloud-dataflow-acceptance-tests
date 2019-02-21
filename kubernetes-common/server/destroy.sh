@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 kubectl delete rc/scdf --namespace $KUBERNETES_NAMESPACE || true
 kubectl delete svc/scdf --namespace $KUBERNETES_NAMESPACE || true

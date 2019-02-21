@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function java_jar() {
     APP_JAVA_PATH=$PWD

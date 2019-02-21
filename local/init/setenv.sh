@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 [ -z "$JAVA_HOME" ] && { echo "Environment variable JAVA_HOME must be set"; exit 1; }
 
