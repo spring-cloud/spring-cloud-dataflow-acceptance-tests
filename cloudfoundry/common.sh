@@ -94,4 +94,8 @@ function destroy_service() {
   done
 }
 
+function uuid() {
+  uuidgen | tr '[:upper:]' '[:lower:]'
+}
+
 # vim: et sw=2 sts=2

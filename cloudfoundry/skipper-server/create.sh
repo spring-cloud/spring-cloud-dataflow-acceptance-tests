@@ -5,7 +5,8 @@ function generate_manifest() {
 cat << EOF > ./skipper-manifest.yml
 
 applications:
-- name: skipper-server-$RANDOM
+- name: skipper-server
+  host: skipper-server-$(uuid)
   timeout: 120
   path: ./skipper-server.jar
   memory: 1G

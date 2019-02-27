@@ -4,10 +4,10 @@ function generate_manifest() {
 # NOTE: In classic mode the app-names are prefixed with the <SCDF-Name>-<Stream Name>- prefix.
 # The random suffix in the SCDF name ensures that in classic mode the app-name's route paths are randomized and wouldn't
 # interfere with acceptance tests run in different CF spaces.
-SCDF_RANDOM_SUFFIX=$RANDOM
 cat << EOF > ./scdf-manifest.yml
 applications:
-- name: dataflow-server-$SCDF_RANDOM_SUFFIX
+- name: dataflow-server
+  host: dataflow-server-$(uuid)
   timeout: 120
   path: ./scdf-server.jar
   memory: 1G
