@@ -16,13 +16,21 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.Before;
@@ -70,6 +78,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Vinicius Carvalho
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
+ * @author Chris Cheetham
  */
 @SpringBootTest(classes = { RedisTestConfiguration.class, RedisAutoConfiguration.class })
 @RunWith(SpringRunner.class)
@@ -135,7 +144,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				if (isKubernetesPlatform()) {
 					platformHelper = new KubernetesPlatformHelper(runtimeOperations);
 				}
-				else if (configurationProperties.getPlatformType().equals(PlatformTypes.LOCAL.getValue())) {
+				else if (isLocalPlatform()) {
 					platformHelper = new LocalPlatformHelper(runtimeOperations);
 				}
 				else {
@@ -355,11 +364,10 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		logger.info("Looking for '" + StringUtils.arrayToCommaDelimitedString(entries) + "' in logfile for "
 				+ app.getDefinition());
 		final long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
-		boolean exists = false;
-		String instance = "?";
-		Map<String, String> logData = new HashMap<>();
+		List<Log> logs = new ArrayList<>();
+		LogRetriever logRetriever = isCloudFoundry() ? new CloudFoundryLogRetriever(app) : new DefaultLogRetriever(app);
 
-		while (!exists && System.currentTimeMillis() < timeout) {
+		while (System.currentTimeMillis() < timeout) {
 			try {
 				Thread.sleep(configurationProperties.getDeployPauseTime() * 1000);
 			}
@@ -367,42 +375,43 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				Thread.currentThread().interrupt();
 				throw new IllegalStateException(e.getMessage(), e);
 			}
-			for (String appInstance : app.getInstanceUrls().keySet()) {
-				if (!exists) {
-					logger.info("Requesting log for app " + appInstance);
-					String log = getLog(app.getInstanceUrls().get(appInstance));
-					logData.put(appInstance, log);
-					if (log != null) {
-						if (Stream.of(entries).allMatch(log::contains)) {
-							exists = true;
-							instance = appInstance;
-						}
-					}
-					else {
-						logger.info("Polling to get log file. Remaining poll time = "
-								+ Long.toString((timeout - System.currentTimeMillis()) / 1000) + " seconds.");
-					}
+			logs = logRetriever.retrieveLogs();
+			for (Log log : logs) {
+				if (log.getContent() != null && Stream.of(entries).allMatch(log.getContent()::contains)) {
+					logger.info("Matched all '" + StringUtils.arrayToCommaDelimitedString(entries)
+							+ "' in logfile for app " + app.getDefinition() + " (source " + log.getSource() + ")");
+					return true;
 				}
 			}
+			logger.info("Polling to get log file. Remaining poll time = "
+					+ Long.toString((timeout - System.currentTimeMillis()) / 1000) + " seconds.");
 		}
-		if (exists) {
-			logger.info("Matched all '" + StringUtils.arrayToCommaDelimitedString(entries)
-					+ "' in logfile for instance " + instance + " of app " + app.getDefinition());
+
+		logger.error("ERROR: Couldn't find '" + StringUtils.arrayToCommaDelimitedString(entries) + "; details below");
+		if (logs.isEmpty()) {
+			logger.error("ERROR: No logs retrieved");
 		}
 		else {
-			logger.error("ERROR: Couldn't find '" + StringUtils.arrayToCommaDelimitedString(entries)
-					+ "' in logfiles for " + app.getDefinition() + ". Dumping log files.\n\n");
-			for (Map.Entry<String, String> entry : logData.entrySet()) {
+			logger.error("ERROR: Dumping most recent log files.\n\n");
+			for (Log log : logs) {
 				logger.error("<logFile> =================");
-				logger.error("Log File for " + entry.getValue() + "\n" + entry.getValue());
+				logger.error("Log File for " + log.getSource() + "\n" + log.getContent());
 				logger.error("</logFile> ================\n");
 			}
 		}
-		return exists;
+		return false;
 	}
 
 	protected DataFlowOperations dataFlowOperations() {
 		return dataFlowOperations;
+	}
+
+	private boolean isLocalPlatform() {
+		return configurationProperties.getPlatformType().equals(PlatformTypes.LOCAL.getValue());
+	}
+
+	private boolean isCloudFoundry() {
+		return configurationProperties.getPlatformType().equals(PlatformTypes.CLOUDFOUNDRY.getValue());
 	}
 
 	private boolean isKubernetesPlatform() {
@@ -431,4 +440,110 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			return value;
 		}
 	}
+
+	private class Log {
+
+		private final String source;
+
+		private final String content;
+
+		private Log(String source, String content) {
+		    this.source = source;
+		    this.content = content;
+		}
+
+		private String getSource() { return source; }
+
+		private String getContent() { return content; }
+	}
+
+	private abstract class LogRetriever {
+
+		final Application app;
+
+		LogRetriever(Application app) {
+			this.app = app;
+		}
+
+		abstract List<Log> retrieveLogs();
+	}
+
+	private class DefaultLogRetriever extends LogRetriever {
+
+		public DefaultLogRetriever(Application app) {
+			super(app);
+		}
+
+		@Override
+		List<Log> retrieveLogs() {
+		    List<Log> logs = new ArrayList<>();
+			for (String appInstance : app.getInstanceUrls().keySet()) {
+				logger.info("Requesting log for app " + appInstance);
+				String content = getLog(app.getInstanceUrls().get(appInstance));
+				Log log = new Log(appInstance, content);
+				logs.add(log);
+			}
+			return logs;
+		}
+	}
+
+	private class CloudFoundryLogRetriever extends LogRetriever {
+
+		public CloudFoundryLogRetriever(Application app) {
+			super(app);
+		}
+
+		@Override
+		List<Log> retrieveLogs() {
+			final int maxWait = configurationProperties.getMaxWaitTime();
+			String logSource;
+			String logContent = null;
+			try {
+				logSource = new URL(app.getUrl()).getHost().split("\\.")[0];
+			} catch (MalformedURLException e) {
+				throw new IllegalArgumentException("Malformed url: " + app.getUrl(), e);
+			}
+			String[] cfCommand = {"cf", "logs", "--recent", logSource};
+			logger.info("Running system command: " + String.join(" ", cfCommand));
+			ProcessBuilder procBuilder = new ProcessBuilder(cfCommand);
+			Process proc;
+			try  {
+				proc = procBuilder.start();
+			} catch (IOException e) {
+				throw new IllegalStateException("Can't find 'cf' command", e);
+			}
+			boolean exited;
+			try {
+				exited = proc.waitFor(maxWait, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new IllegalStateException(e.getMessage(), e);
+			}
+			if (exited) {
+				int rc = proc.exitValue();
+				if (rc == 0) {
+					logContent = readStringFromInputStream(proc.getInputStream());
+				} else {
+					logger.error("ERROR: running system command [rc=" + rc + "]: " + readStringFromInputStream(proc.getErrorStream()));
+				}
+			} else {
+				logger.error("ERROR: system command exceeded maximum wait time (" + maxWait + "s)");
+			}
+			List<Log> logs = new ArrayList<>();
+			logs.add(new Log(logSource, logContent));
+			return logs;
+		}
+
+		private String readStringFromInputStream(InputStream input) {
+		    final String newline = System.getProperty("line.separator");
+			try (BufferedReader buffer = new BufferedReader(new InputStreamReader(input))) {
+				return buffer.lines().collect(Collectors.joining(newline));
+			}
+			catch (IOException e) {
+				logger.error("ERROR: reading command output: " + e.getMessage());
+			}
+			return null;
+		}
+	}
+
 }
