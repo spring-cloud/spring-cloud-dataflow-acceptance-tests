@@ -24,7 +24,11 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -313,6 +317,9 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		}
 		catch (HttpClientErrorException e) {
 			logger.info("Failed to access logfile from '" + logFileUrl + "' due to : " + e.getMessage());
+		}
+		catch (Exception e) {
+			logger.warn("Error while trying to access logfile from '" + logFileUrl + "' due to : " + e);
 		}
 		return log;
 	}
