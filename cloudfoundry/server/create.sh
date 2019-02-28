@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function generate_manifest() {
 # NOTE: In classic mode the app-names are prefixed with the <SCDF-Name>-<Stream Name>- prefix.

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function kubectl_create() {
   kubectl create -f secret.yml --namespace $KUBERNETES_NAMESPACE

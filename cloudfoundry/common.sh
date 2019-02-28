@@ -1,6 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-MAX_COUNT=250
+SCDFAT_RETRY_SLEEP=${SCDFAT_RETRY_SLEEP:-5}
+SCDFAT_RETRY_MAX=${SCDFAT_RETRY_MAX:-100}      # set to <0 for no max (infinite)
 
 MSG_COLOR=
 ERR_COLOR=
@@ -49,12 +50,12 @@ function create_service() {
       die "cannot create service $service; it is in the process of being deleted"
     fi
     count=$((count+1))
-    if [ $count -gt $MAX_COUNT ]; then
-      die "maximum retries exceeded ($MAX_COUNT)"
+    if [ $SCDFAT_RETRY_MAX -ge 0 ] && [ $count -gt $SCDFAT_RETRY_MAX ]; then
+      die "maximum retries exceeded ($SCDFAT_RETRY_MAX)"
     fi
     if [[ $service_info == *"create in progress"* ]]; then
-      msg "waiting for service $service to be created ($count)"
-      sleep 1
+      msg "waiting for service $service to be created, sleeping ${SCDFAT_RETRY_SLEEP}s ($count of $SCDFAT_RETRY_MAX)"
+      sleep $SCDFAT_RETRY_SLEEP
       continue
     fi
     err "unhandled status:"
@@ -80,12 +81,12 @@ function destroy_service() {
       die "cannot delete service $service; it is in the process of being created"
     fi
     count=$((count+1))
-    if [ $count -gt $MAX_COUNT ]; then
-      die "maximum retries exceeded ($MAX_COUNT)"
+    if [ $SCDFAT_RETRY_MAX -ge 0 ] && [ $count -gt $SCDFAT_RETRY_MAX ]; then
+      die "maximum retries exceeded ($SCDFAT_RETRY_MAX)"
     fi
     if [[ $service_info == *"delete in progress"* ]]; then
-      msg "waiting for service $service to be deleted ($count)"
-      sleep 1
+      msg "waiting for service $service to be deleted, sleeping ${SCDFAT_RETRY_SLEEP}s ($count of $SCDFAT_RETRY_MAX)"
+      sleep $SCDFAT_RETRY_SLEEP
       continue
     fi
     err "unhandled status:"

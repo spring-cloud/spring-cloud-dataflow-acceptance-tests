@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.acceptance.test;
 
+import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -22,10 +23,12 @@ import org.springframework.analytics.rest.domain.CounterResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
 import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
+import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.stream.app.test.redis.RedisTestSupport;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeThat;
 
 /**
  * Executes acceptance test for the analytics functionality
@@ -41,6 +44,10 @@ public class AnalyticsTests extends AbstractStreamTests {
 
 	@Test
 	public void analyticsTest() {
+		AboutResource aboutResource = this.dataFlowOperations.aboutOperation().get();
+		String implementation = aboutResource.getVersionInfo().getImplementation().getName();
+		assumeThat("Skipping test", "spring-cloud-dataflow-server",
+				Matchers.not(implementation));
 		if (!configurationProperties.getPlatformType().equals(PlatformTypes.LOCAL.getValue())) {
 			return;
 		}

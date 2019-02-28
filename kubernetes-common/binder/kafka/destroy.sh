@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 kubectl delete rc/kafka --namespace $KUBERNETES_NAMESPACE
 kubectl delete svc/kafka --namespace $KUBERNETES_NAMESPACE
