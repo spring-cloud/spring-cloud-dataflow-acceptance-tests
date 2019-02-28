@@ -375,18 +375,13 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				Thread.currentThread().interrupt();
 				throw new IllegalStateException(e.getMessage(), e);
 			}
-			try {
-				logs = logRetriever.retrieveLogs();
-				for (Log log : logs) {
-					if (log.content != null && Stream.of(entries).allMatch(log.content::contains)) {
-						logger.info("Matched all '" + StringUtils.arrayToCommaDelimitedString(entries)
-								+ "' in logfile for app " + app.getDefinition() + " (source " + log.source + ")");
-						return true;
-					}
+			logs = logRetriever.retrieveLogs();
+			for (Log log : logs) {
+				if (log.content != null && Stream.of(entries).allMatch(log.content::contains)) {
+					logger.info("Matched all '" + StringUtils.arrayToCommaDelimitedString(entries)
+							+ "' in logfile for app " + app.getDefinition() + " (source " + log.source + ")");
+					return true;
 				}
-			}
-			catch (IOException e) {
-				logger.error("ERROR: " + e.getMessage());
 			}
 			logger.info("Polling to get log file. Remaining poll time = "
 					+ Long.toString((timeout - System.currentTimeMillis()) / 1000) + " seconds.");
@@ -459,7 +454,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			this.app = app;
 		}
 
-		abstract List<Log> retrieveLogs() throws IOException;
+		abstract List<Log> retrieveLogs();
 	}
 
 	private class DefaultLogRetriever extends LogRetriever {
@@ -489,7 +484,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		}
 
 		@Override
-		List<Log> retrieveLogs() throws IOException {
+		List<Log> retrieveLogs() {
 			final int maxWait = configurationProperties.getMaxWaitTime();
 			Log log = new Log();
 			try {
@@ -500,7 +495,12 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			String[] cfCommand = {"cf", "logs", "--recent", log.source};
 			logger.info("Running system command: " + String.join(" ", cfCommand));
 			ProcessBuilder procBuilder = new ProcessBuilder(cfCommand);
-			Process proc = procBuilder.start();
+			Process proc = null;
+			try  {
+				proc = procBuilder.start();
+			} catch (IOException e) {
+				throw new IllegalStateException("Can't find 'cf' command", e);
+			}
 			boolean exited;
 			try {
 				exited = proc.waitFor(maxWait, TimeUnit.SECONDS);
@@ -523,11 +523,15 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			return logs;
 		}
 
-		private String readStringFromInputStream(InputStream input) throws IOException {
+		private String readStringFromInputStream(InputStream input) {
 		    final String newline = System.getProperty("line.separator");
 			try (BufferedReader buffer = new BufferedReader(new InputStreamReader(input))) {
 				return buffer.lines().collect(Collectors.joining(newline));
 			}
+			catch (IOException e) {
+				logger.error("ERROR: reading command output: " + e.getMessage());
+			}
+			return null;
 		}
 	}
 
