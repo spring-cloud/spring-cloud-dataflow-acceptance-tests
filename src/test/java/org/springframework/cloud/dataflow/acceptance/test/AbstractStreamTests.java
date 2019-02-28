@@ -24,9 +24,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -364,7 +364,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		logger.info("Looking for '" + StringUtils.arrayToCommaDelimitedString(entries) + "' in logfile for "
 				+ app.getDefinition());
 		final long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
-		List<Log> logs = null;
+		List<Log> logs = new ArrayList<>(0);
 		LogRetriever logRetriever = isCloudFoundry() ? new CloudFoundryLogRetriever(app) : new DefaultLogRetriever(app);
 
 		while (System.currentTimeMillis() < timeout) {
@@ -393,7 +393,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		}
 
 		logger.error("ERROR: Couldn't find '" + StringUtils.arrayToCommaDelimitedString(entries) + "; details below");
-		if (logs == null || logs.size() == 0) {
+		if (logs.isEmpty()) {
 			logger.error("ERROR: No logs retrieved");
 		}
 		else {
@@ -470,7 +470,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 		@Override
 		List<Log> retrieveLogs() {
-		    List<Log> logs = new LinkedList<>();
+		    List<Log> logs = new ArrayList<>(1);
 			for (String appInstance : app.getInstanceUrls().keySet()) {
 				logger.info("Requesting log for app " + appInstance);
 				Log log = new Log();
@@ -518,7 +518,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			} else {
 				logger.error("ERROR: system command exceeded maximum wait time (" + maxWait + "s)");
 			}
-			List<Log> logs = new LinkedList<>();
+			List<Log> logs = new ArrayList<>(1);
 			logs.add(log);
 			return logs;
 		}
