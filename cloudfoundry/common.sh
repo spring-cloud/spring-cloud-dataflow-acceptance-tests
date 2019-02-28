@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 SCDFAT_RETRY_SLEEP=${SCDFAT_RETRY_SLEEP:-5}
 SCDFAT_RETRY_MAX=${SCDFAT_RETRY_MAX:-100}      # set to <0 for no max (infinite)

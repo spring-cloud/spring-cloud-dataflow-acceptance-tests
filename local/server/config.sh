@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 export APPLICATION_ARGS="$APPLICATION_ARGS"
 SERVER_URI="http://localhost:9393"
