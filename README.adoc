@@ -116,7 +116,7 @@ you have that installed and configured properly.
 When cleaning up, the script will only remove docker images, if you are using a local service like redis or mysql
 the script will not do anything to it
 
-== Cloudfoundry
+== CloudFoundry
 
 === Pre-requisites
 On Cloudfoundry, make sure you have the following environment variables exported. We will not include them on any files
@@ -137,6 +137,14 @@ You can override service names and plans by either exporting or changing the fol
 * RABBIT_PLAN_NAME
 * REDIS_SERVICE_NAME
 * REDIS_PLAN_NAME
+
+The creation and deletion of services are implemented as blocking functions, i.e. a test job will wait, for instance,
+during setup until a service is created before continuing.  After requesting CloudFoundry to create or delete a service, these functions
+periodically poll until the request has been fully met.  The defaults for the  number of polls and the delay between
+polling can be overridden using the following properties:
+
+* SCDFAT_RETRY_MAX _(default 100, set to <0 for no max)_
+* SCDFAT_RETRY_SLEEP _(in seconds, default 5)_
 
 == Kubernetes (GKE)
 
