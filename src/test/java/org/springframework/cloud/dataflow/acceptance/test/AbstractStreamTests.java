@@ -441,7 +441,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		}
 	}
 
-	class Log {
+	private class Log {
 		String source;
 		String content;
 	}
