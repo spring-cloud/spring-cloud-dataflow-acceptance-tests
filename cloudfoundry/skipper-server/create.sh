@@ -6,7 +6,7 @@ cat << EOF > ./skipper-manifest.yml
 
 applications:
 - name: skipper-server
-  host: skipper-server-$(uuid)
+  host: skipper-server-$RANDOM
   timeout: 120
   path: ./skipper-server.jar
   memory: 1G

@@ -7,7 +7,7 @@ function generate_manifest() {
 cat << EOF > ./scdf-manifest.yml
 applications:
 - name: dataflow-server
-  host: dataflow-server-$(uuid)
+  host: dataflow-server-$RANDOM
   timeout: 120
   path: ./scdf-server.jar
   memory: 1G
