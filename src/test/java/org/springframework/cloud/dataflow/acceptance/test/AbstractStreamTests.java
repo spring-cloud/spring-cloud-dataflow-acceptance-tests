@@ -364,7 +364,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		logger.info("Looking for '" + StringUtils.arrayToCommaDelimitedString(entries) + "' in logfile for "
 				+ app.getDefinition());
 		final long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
-		List<Log> logs = new ArrayList<>(0);
+		List<Log> logs = new ArrayList<>();
 		LogRetriever logRetriever = isCloudFoundry() ? new CloudFoundryLogRetriever(app) : new DefaultLogRetriever(app);
 
 		while (System.currentTimeMillis() < timeout) {
@@ -465,7 +465,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 		@Override
 		List<Log> retrieveLogs() {
-		    List<Log> logs = new ArrayList<>(1);
+		    List<Log> logs = new ArrayList<>();
 			for (String appInstance : app.getInstanceUrls().keySet()) {
 				logger.info("Requesting log for app " + appInstance);
 				Log log = new Log();
@@ -518,7 +518,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			} else {
 				logger.error("ERROR: system command exceeded maximum wait time (" + maxWait + "s)");
 			}
-			List<Log> logs = new ArrayList<>(1);
+			List<Log> logs = new ArrayList<>();
 			logs.add(log);
 			return logs;
 		}
