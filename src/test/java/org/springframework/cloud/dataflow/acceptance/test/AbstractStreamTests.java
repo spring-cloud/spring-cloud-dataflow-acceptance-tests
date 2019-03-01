@@ -377,9 +377,9 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			}
 			logs = logRetriever.retrieveLogs();
 			for (Log log : logs) {
-				if (log.content != null && Stream.of(entries).allMatch(log.content::contains)) {
+				if (log.getContent() != null && Stream.of(entries).allMatch(log.getContent()::contains)) {
 					logger.info("Matched all '" + StringUtils.arrayToCommaDelimitedString(entries)
-							+ "' in logfile for app " + app.getDefinition() + " (source " + log.source + ")");
+							+ "' in logfile for app " + app.getDefinition() + " (source " + log.getSource() + ")");
 					return true;
 				}
 			}
@@ -395,7 +395,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			logger.error("ERROR: Dumping most recent log files.\n\n");
 			for (Log log : logs) {
 				logger.error("<logFile> =================");
-				logger.error("Log File for " + log.source + "\n" + log.content);
+				logger.error("Log File for " + log.getSource() + "\n" + log.getContent());
 				logger.error("</logFile> ================\n");
 			}
 		}
@@ -442,8 +442,19 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	}
 
 	private class Log {
-		String source;
-		String content;
+
+		private final String source;
+
+		private final String content;
+
+		private Log(String source, String content) {
+		    this.source = source;
+		    this.content = content;
+		}
+
+		private String getSource() { return source; }
+
+		private String getContent() { return content; }
 	}
 
 	private abstract class LogRetriever {
@@ -468,9 +479,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		    List<Log> logs = new ArrayList<>();
 			for (String appInstance : app.getInstanceUrls().keySet()) {
 				logger.info("Requesting log for app " + appInstance);
-				Log log = new Log();
-				log.source = appInstance;
-				log.content = getLog(app.getInstanceUrls().get(appInstance));
+				String content = getLog(app.getInstanceUrls().get(appInstance));
+				Log log = new Log(appInstance, content);
 				logs.add(log);
 			}
 			return logs;
@@ -486,16 +496,17 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		@Override
 		List<Log> retrieveLogs() {
 			final int maxWait = configurationProperties.getMaxWaitTime();
-			Log log = new Log();
+			String logSource;
+			String logContent = null;
 			try {
-				log.source = new URL(app.getUrl()).getHost().split("\\.")[0];
+				logSource = new URL(app.getUrl()).getHost().split("\\.")[0];
 			} catch (MalformedURLException e) {
 				throw new IllegalArgumentException("Malformed url: " + app.getUrl(), e);
 			}
-			String[] cfCommand = {"cf", "logs", "--recent", log.source};
+			String[] cfCommand = {"cf", "logs", "--recent", logSource};
 			logger.info("Running system command: " + String.join(" ", cfCommand));
 			ProcessBuilder procBuilder = new ProcessBuilder(cfCommand);
-			Process proc = null;
+			Process proc;
 			try  {
 				proc = procBuilder.start();
 			} catch (IOException e) {
@@ -511,7 +522,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			if (exited) {
 				int rc = proc.exitValue();
 				if (rc == 0) {
-					log.content = readStringFromInputStream(proc.getInputStream());
+					logContent = readStringFromInputStream(proc.getInputStream());
 				} else {
 					logger.error("ERROR: running system command [rc=" + rc + "]: " + readStringFromInputStream(proc.getErrorStream()));
 				}
@@ -519,7 +530,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				logger.error("ERROR: system command exceeded maximum wait time (" + maxWait + "s)");
 			}
 			List<Log> logs = new ArrayList<>();
-			logs.add(log);
+			logs.add(new Log(logSource, logContent));
 			return logs;
 		}
 
