@@ -42,7 +42,7 @@ function create_kafka_docker_compose_file(){
       ports:
         - "2181:2181"
     kafka:
-      image: wurstmeister/kafka:0.10.2.1
+      image: wurstmeister/kafka:2.11-0.11.0.3
       ports:
         - "9092:9092"
       environment:
