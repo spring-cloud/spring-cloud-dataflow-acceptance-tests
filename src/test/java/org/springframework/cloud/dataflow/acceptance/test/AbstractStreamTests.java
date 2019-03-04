@@ -172,6 +172,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 		// Specific to Boot 2.x applications, also allows access without authentication
 		streamProperties.put("app.*.management.endpoints.web.exposure.include", "*");
+		streamProperties.put("app.*.spring.cloud.streamapp.security.enabled", "false");
 
 		platformHelper.addDeploymentProperties(stream, streamProperties);
 
