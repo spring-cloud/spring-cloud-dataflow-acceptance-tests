@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.acceptance.test;
 
 import org.hamcrest.Matchers;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
@@ -78,6 +79,7 @@ public class TickTockTests extends AbstractStreamTests {
 	}
 
 	@Test
+	@Ignore
 	public void tickTockTestsFromConfigServer() {
 		String platformType = System.getProperty("PLATFORM_TYPE", "");
 		String skipCloudConfig = System.getProperty("SKIP_CLOUD_CONFIG", "false");

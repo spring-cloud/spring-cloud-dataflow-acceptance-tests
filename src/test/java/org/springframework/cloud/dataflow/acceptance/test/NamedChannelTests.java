@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
@@ -66,6 +67,7 @@ public class NamedChannelTests extends AbstractStreamTests {
 	}
 
 	@Test
+	@Ignore
 	public void directedGraphTest() throws Exception {
 		StreamDefinition fooLogStream = deployLog("DIRECTED-GRAPH-DESTINATION1",
 				":foo > transform --expression=payload+'-foo' | log");
