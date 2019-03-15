@@ -292,7 +292,7 @@ jobs:
         BASE_PATH: ((base-path))
         APP_VERSION: 20x
         APP_TEMPLATE: dataflow-server-with-drivers-template2
-        DATAFLOW_VERSION: 2.0.0.BUILD-SNAPSHOT
+        DATAFLOW_VERSION: 2.0.2.BUILD-SNAPSHOT
   - task: aggregate-build-skipper-server-with-drivers
     config:
       platform: linux
