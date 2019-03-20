@@ -12,7 +12,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=spring
       - SPRING_DATASOURCE_PASSWORD=spring
       - SPRING_CLOUD_DATAFLOW_FEATURES_SKIPPER_ENABLED=true
-      - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=http://skipper:7577/api
+      - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=https://skipper:7577/api
     ports:
       - 9393
     external_links:
