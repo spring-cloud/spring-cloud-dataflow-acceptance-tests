@@ -58,13 +58,13 @@ public class PlatformHelperTests {
 		AppStatusResource logStatus = new AppStatusResource(STREAM_NAME + "-log", "deployed");
 		logStatus.setInstances(new Resources<>(Collections.singletonList(
 				new AppInstanceStatusResource(STREAM_NAME + "-log", "deployed",
-						Collections.singletonMap("url", "http://log"))),
+						Collections.singletonMap("url", "https://log"))),
 				(Link[]) (new Link[0])));
 		appStatusResources.add(logStatus);
 		AppStatusResource timeStatus = new AppStatusResource(STREAM_NAME + "-time", "deployed");
 		timeStatus.setInstances(new Resources<>(Collections.singletonList(
 				new AppInstanceStatusResource(STREAM_NAME + "-time", "deployed",
-						Collections.singletonMap("url", "http://time"))),
+						Collections.singletonMap("url", "https://time"))),
 				(Link[]) (new Link[0])));
 		appStatusResources.add(timeStatus);
 		PagedResources<AppStatusResource> resources = new PagedResources<>(appStatusResources, null, new Link("test"));
@@ -76,8 +76,8 @@ public class PlatformHelperTests {
 		PlatformHelper platformHelper = new DefaultPlatformHelper(runtimeOperations);
 		assertEquals("test.log", platformHelper.getLogfileName());
 		assertTrue(platformHelper.setUrlsForStream(stream));
-		assertEquals("http://log", stream.getApplication("log").getUrl());
-		assertEquals("http://time", stream.getApplication("time").getUrl());
+		assertEquals("https://log", stream.getApplication("log").getUrl());
+		assertEquals("https://time", stream.getApplication("time").getUrl());
 	}
 
 	@Test
@@ -92,8 +92,8 @@ public class PlatformHelperTests {
 		PlatformHelper platformHelper = new KubernetesPlatformHelper(runtimeOperations);
 		assertEquals("test.log", platformHelper.getLogfileName());
 		assertTrue(platformHelper.setUrlsForStream(stream));
-		assertEquals("http://log", stream.getApplication("log").getUrl());
-		assertEquals("http://time", stream.getApplication("time").getUrl());
+		assertEquals("https://log", stream.getApplication("log").getUrl());
+		assertEquals("https://time", stream.getApplication("time").getUrl());
 	}
 
 }

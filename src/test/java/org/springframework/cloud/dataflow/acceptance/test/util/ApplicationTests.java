@@ -27,7 +27,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class ApplicationTests {
 
-	public static final String DEFAULT_URI = "http://myURI";
+	public static final String DEFAULT_URI = "https://myURI";
 
 	@Test
 	public void testApplication() {
