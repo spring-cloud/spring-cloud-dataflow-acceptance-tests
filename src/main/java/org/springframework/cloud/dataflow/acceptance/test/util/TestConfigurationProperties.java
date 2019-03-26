@@ -42,9 +42,9 @@ public class TestConfigurationProperties {
 
 	private String platformSuffix = "local.pcfdev.io";
 
-	private String streamRegistrationResource = "http://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-rabbit-maven";
+	private String streamRegistrationResource = "https://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-rabbit-maven";
 
-	private String taskRegistrationResource = "http://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-maven";
+	private String taskRegistrationResource = "https://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-maven";
 
 	public int getMaxWaitTime() {
 		return maxWaitTime;
