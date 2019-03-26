@@ -42,9 +42,9 @@ public class TestConfigurationProperties {
 
 	private String platformSuffix = "local.pcfdev.io";
 
-	private String streamRegistrationResource = "http://repo.spring.io/libs-snapshot/org/springframework/cloud/stream/app/spring-cloud-stream-app-descriptor/Celsius.BUILD-SNAPSHOT/spring-cloud-stream-app-descriptor-Celsius.BUILD-SNAPSHOT.stream-apps-rabbit-maven";
+	private String streamRegistrationResource = "https://repo.spring.io/libs-snapshot/org/springframework/cloud/stream/app/spring-cloud-stream-app-descriptor/Celsius.BUILD-SNAPSHOT/spring-cloud-stream-app-descriptor-Celsius.BUILD-SNAPSHOT.stream-apps-rabbit-maven";
 
-	private String taskRegistrationResource = "http://repo.spring.io/libs-snapshot/org/springframework/cloud/task/app/spring-cloud-task-app-descriptor/Clark.BUILD-SNAPSHOT/spring-cloud-task-app-descriptor-Clark.BUILD-SNAPSHOT.task-apps-maven";
+	private String taskRegistrationResource = "https://repo.spring.io/libs-snapshot/org/springframework/cloud/task/app/spring-cloud-task-app-descriptor/Clark.BUILD-SNAPSHOT/spring-cloud-task-app-descriptor-Clark.BUILD-SNAPSHOT.task-apps-maven";
 
 	public int getMaxWaitTime() {
 		return maxWaitTime;
