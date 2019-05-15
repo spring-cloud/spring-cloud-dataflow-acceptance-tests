@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,6 @@ import org.junit.jupiter.api.Tag;
 
 @Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
-@Dataflow173
-@Dataflow17x
-@Dataflow20x
-@Dataflow21x
-@Tag("dataflowall")
-public @interface DataflowAll {
+@Tag("dataflow21x")
+public @interface Dataflow21x {
 }
