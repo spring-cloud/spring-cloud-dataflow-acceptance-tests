@@ -250,7 +250,7 @@ jobs:
         BASE_PATH: ((base-path))
         APP_VERSION: 20x
         APP_TEMPLATE: skipper-server-with-drivers-template3
-        SKIPPER_VERSION: 2.0.0.BUILD-SNAPSHOT
+        SKIPPER_VERSION: 2.0.3.BUILD-SNAPSHOT
     - task: build-dataflow-server-with-drivers173
       privileged: true
       timeout: 30m
@@ -293,6 +293,20 @@ jobs:
         APP_VERSION: 20x
         APP_TEMPLATE: dataflow-server-with-drivers-template2
         DATAFLOW_VERSION: 2.0.2.BUILD-SNAPSHOT
+    - task: build-dataflow-server-with-drivers21x
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-dataflow-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-dataflow21x
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 21x
+        APP_TEMPLATE: dataflow-server-with-drivers-template2
+        DATAFLOW_VERSION: 2.1.0.BUILD-SNAPSHOT
   - task: aggregate-build-skipper-server-with-drivers
     config:
       platform: linux
@@ -314,6 +328,7 @@ jobs:
       - name: distribution-repository-dataflow173
       - name: distribution-repository-dataflow17x
       - name: distribution-repository-dataflow20x
+      - name: distribution-repository-dataflow21x
       outputs:
       - name: distribution-repository
       run:

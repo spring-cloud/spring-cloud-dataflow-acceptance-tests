@@ -36,6 +36,8 @@ buildscript {
 		springCloudDataflow17xVersion = "${springCloudDataflow17xVersionTag}.BUILD-SNAPSHOT"
 		springCloudDataflow20xVersionTag = '2.0.0'
 		springCloudDataflow20xVersion = "${springCloudDataflow20xVersionTag}.BUILD-SNAPSHOT"
+		springCloudDataflow21xVersionTag = '2.1.0'
+		springCloudDataflow21xVersion = "${springCloudDataflow21xVersionTag}.BUILD-SNAPSHOT"
 	}
 	repositories {
 		mavenCentral()

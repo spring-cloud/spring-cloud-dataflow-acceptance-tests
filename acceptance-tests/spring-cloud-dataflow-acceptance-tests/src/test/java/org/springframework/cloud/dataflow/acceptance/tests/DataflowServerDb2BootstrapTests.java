@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.cloud.dataflow.acceptance.core.DockerCompose;
@@ -75,7 +74,7 @@ public class DataflowServerDb2BootstrapTests extends AbstractDataflowTests {
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/db2.yml" }, services = { "db2" })
 	@DockerCompose(id = "dataflow17x", order = 2, locations = { "src/test/resources/dataflow/dataflow17xdb2.yml" }, services = { "dataflow" }, log = "dataflow17x/")
 	@DockerCompose(id = "dataflow20x", order = 3, locations = { "src/test/resources/dataflow/dataflow20xdb2.yml" }, services = { "dataflow" }, start = false, log = "dataflow20x/")
-	@Tag("xxx")
+	@DockerCompose(id = "dataflow21x", order = 4, locations = { "src/test/resources/dataflow/dataflow21xdb2.yml" }, services = { "dataflow" }, start = false, log = "dataflow21x/")
 	public void testDataflow20xAfter17xWithDb2(DockerComposeInfo dockerComposeInfo) throws Exception {
 		// github.com/spring-cloud/spring-cloud-dataflow/issues/2903
 		assertDataflowServerRunning(dockerComposeInfo, "dataflow17x", "dataflow", false);
@@ -89,5 +88,9 @@ public class DataflowServerDb2BootstrapTests extends AbstractDataflowTests {
 		stop(dockerComposeInfo, "dataflow17x");
 		start(dockerComposeInfo, "dataflow20x");
 		assertDataflowServerRunning(dockerComposeInfo, "dataflow20x", "dataflow", false);
+
+		stop(dockerComposeInfo, "dataflow20x");
+		start(dockerComposeInfo, "dataflow21x");
+		assertDataflowServerRunning(dockerComposeInfo, "dataflow21x", "dataflow", false);
 	}
 }
