@@ -42,5 +42,6 @@ spring-*/src/main/java/META-INF/MANIFEST.MF
 *.ipr
 *.iws
 .idea/*
+.vscode/
 rebel.xml
 !acceptance-tests/gradle/wrapper/gradle-wrapper.jar

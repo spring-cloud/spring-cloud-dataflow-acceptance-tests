@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.acceptance.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,9 +52,16 @@ public class DataflowServerMysqlBootstrapTests extends AbstractDataflowTests {
 	@Dataflow20x
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql.yml" }, services = { "mysql" })
 	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper20xmysql.yml" }, services = { "skipper" })
-	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow20xmysql.yml" }, services = { "dataflow" })
+	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow21xmysql.yml" }, services = { "dataflow" })
 	public void testDataflow20xWithMysql(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
 		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
+
+		registerBatchApp(dockerComposeInfo, "dataflow", "dataflow");
+		registerBatchTaskDefs(dockerComposeInfo, "dataflow", "dataflow");
+		launchTask(dockerComposeInfo, "dataflow", "dataflow", "fakebatch");
+		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
+				TimeUnit.SECONDS);
 	}
 
 	@Test

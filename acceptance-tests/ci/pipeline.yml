@@ -307,6 +307,20 @@ jobs:
         APP_VERSION: 21x
         APP_TEMPLATE: dataflow-server-with-drivers-template2
         DATAFLOW_VERSION: 2.1.0.BUILD-SNAPSHOT
+    - task: build-timestamp-batch-with-drivers21x
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-timestamp-batch-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-timestampbatch21x
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 21x
+        APP_TEMPLATE: timestamp-batch-with-drivers-template1
+        TASK_APP_VERSION: 2.1.1.BUILD-SNAPSHOT
   - task: aggregate-build-skipper-server-with-drivers
     config:
       platform: linux
@@ -329,6 +343,7 @@ jobs:
       - name: distribution-repository-dataflow17x
       - name: distribution-repository-dataflow20x
       - name: distribution-repository-dataflow21x
+      - name: distribution-repository-timestampbatch21x
       outputs:
       - name: distribution-repository
       run:
@@ -354,7 +369,7 @@ jobs:
     passed:
       - "spring-cloud-dataflow-ci-images"
   - get: git-repo
-    trigger: false    
+    trigger: false
   - get: artifactory-repo-dataflow
     params:
       download_artifacts: false
