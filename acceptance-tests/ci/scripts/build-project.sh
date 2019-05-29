@@ -18,7 +18,7 @@ echo $ARTIFACTORY_PASSWORD | docker login -u $ARTIFACTORY_USERNAME --password-st
   ${EXTRA_GRADLE_CMDLINE} \
   || n=1
 touch ${triggers}/trigger1-${buildversion}
-tar -zc --ignore-failed-read --file ${repository}/spring-cloud-dataflow-acceptance-tests-$REPORT_ID-${buildversion}.tar.gz spring-cloud-dataflow-acceptance-tests/build/test-docker-logs
+tar -zc --ignore-failed-read --file ${repository}/spring-cloud-dataflow-acceptance-tests-$REPORT_ID-${buildversion}.tar.gz spring-cloud-dataflow-acceptance-tests/build/test-docker-logs spring-cloud-dataflow-acceptance-tests/build/reports spring-cloud-dataflow-acceptance-tests/build/test-results
 popd > /dev/null
 popd > /dev/null
 
