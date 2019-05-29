@@ -113,6 +113,18 @@ public abstract class AbstractDataflowTests {
 		return registeredApps(dockerComposeInfo, id, container);
 	}
 
+	protected static List<String> registerBatchApp(DockerComposeInfo dockerComposeInfo, String id, String container) {
+		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/apps/task/timestamp-batch-task";
+		RestTemplate template = new RestTemplate();
+
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
+		values.add("uri", "maven://org.springframework.cloud.task.acceptance.app:timestamp-batch-with-drivers21x:2.1.1.BUILD-SNAPSHOT");
+		template.postForLocation(url, values);
+
+		return registeredApps(dockerComposeInfo, id, container);
+	}
+
 	protected static List<String> registerStreamDefs(DockerComposeInfo dockerComposeInfo, String id, String container) {
 		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
 		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/streams/definitions";
@@ -147,6 +159,18 @@ public abstract class AbstractDataflowTests {
 		return registeredTaskDefs(dockerComposeInfo, id, container);
 	}
 
+	protected static List<String> registerBatchTaskDefs(DockerComposeInfo dockerComposeInfo, String id, String container) {
+		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/definitions";
+		RestTemplate template = new RestTemplate();
+
+		MultiValueMap<String, Object> uriVariables = new LinkedMultiValueMap<>();
+		uriVariables.add("name", "fakebatch");
+		uriVariables.add("definition", "timestamp-batch-task");
+		template.postForObject(url, uriVariables, String.class);
+		return registeredTaskDefs(dockerComposeInfo, id, container);
+	}
+
 	protected static List<String> registeredTaskDefs(DockerComposeInfo dockerComposeInfo, String id, String container) {
 		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
 		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/definitions?size=2000";
@@ -174,6 +198,13 @@ public abstract class AbstractDataflowTests {
 		template.postForObject(url, new HashMap<String, String>(), Object.class);
 	}
 
+	protected static void launchTask(DockerComposeInfo dockerComposeInfo, String id, String container, String task) {
+		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/executions?name=" + task;
+		RestTemplate template = new RestTemplate();
+		template.postForObject(url, new HashMap<String, String>(), Object.class);
+	}
+
 	protected static void waitStream(DockerComposeInfo dockerComposeInfo, String id, String container, String stream,
 			String responseContains, long pollInterval, TimeUnit pollTimeUnit, long awaitInterval, TimeUnit awaitTimeUnit) {
 		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
@@ -190,6 +221,39 @@ public abstract class AbstractDataflowTests {
 					String json = template.getForObject(url, String.class);
 					String status = JsonPath.read(json, "$.status");
 					return ObjectUtils.nullSafeEquals(status, responseContains);
+				});
+	}
+
+	protected static void waitBatchJobExecution(DockerComposeInfo dockerComposeInfo, String id, String container,
+			String responseContains, long pollInterval, TimeUnit pollTimeUnit, long awaitInterval,
+			TimeUnit awaitTimeUnit) {
+		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+		RestTemplate template = new RestTemplate();
+
+		String url1 = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/executions";
+		with()
+			.pollInterval(pollInterval, pollTimeUnit)
+			.and()
+			.await()
+				.ignoreExceptions()
+				.atMost(awaitInterval, awaitTimeUnit)
+				.until(() -> {
+					String json = template.getForObject(url1, String.class);
+					List<Object> executions = JsonPath.read(json, "$._embedded.taskExecutionResourceList[?(@.taskName == 'fakebatch')]");
+					return executions.size() == 1;
+				});
+
+		String url2 = "http://" + port.getIp() + ":" + port.getExternalPort() + "/jobs/thinexecutions";
+		with()
+			.pollInterval(pollInterval, pollTimeUnit)
+			.and()
+			.await()
+				.ignoreExceptions()
+				.atMost(awaitInterval, awaitTimeUnit)
+				.until(() -> {
+					String json = template.getForObject(url2, String.class);
+					List<Object> executions = JsonPath.read(json, "$._embedded.jobExecutionThinResourceList[?(@.status == 'COMPLETED')]");
+					return executions.size() == 2;
 				});
 	}
 

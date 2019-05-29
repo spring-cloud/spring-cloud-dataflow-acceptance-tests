@@ -10,7 +10,7 @@ buildscript {
 		springCloudSkipper100VersionTag = '1.0.0'
 		springCloudSkipper100Version = "${springCloudSkipper100VersionTag}.RELEASE"
 		springCloudSkipper101VersionTag = '1.0.1'
-		springCloudSkipper101Version = "${springCloudSkipper101VersionTag}.RELEASE"		
+		springCloudSkipper101Version = "${springCloudSkipper101VersionTag}.RELEASE"
 		springCloudSkipper102VersionTag = '1.0.2'
 		springCloudSkipper102Version = "${springCloudSkipper102VersionTag}.RELEASE"
 		springCloudSkipper103VersionTag = '1.0.3'
@@ -27,7 +27,7 @@ buildscript {
 		springCloudSkipper112Version = "${springCloudSkipper112VersionTag}.RELEASE"
 		springCloudSkipper11xVersionTag = '1.1.3'
 		springCloudSkipper11xVersion = "${springCloudSkipper11xVersionTag}.BUILD-SNAPSHOT"
-		springCloudSkipper20xVersionTag = '2.0.0'
+		springCloudSkipper20xVersionTag = '2.0.3'
 		springCloudSkipper20xVersion = "${springCloudSkipper20xVersionTag}.BUILD-SNAPSHOT"
 		// dataflow versions
 		springCloudDataflow173VersionTag = '1.7.3'
@@ -36,7 +36,7 @@ buildscript {
 		springCloudDataflow17xVersion = "${springCloudDataflow17xVersionTag}.BUILD-SNAPSHOT"
 		springCloudDataflow20xVersionTag = '2.0.0'
 		springCloudDataflow20xVersion = "${springCloudDataflow20xVersionTag}.BUILD-SNAPSHOT"
-		springCloudDataflow21xVersionTag = '2.1.0'
+		springCloudDataflow21xVersionTag = '2.1.1'
 		springCloudDataflow21xVersion = "${springCloudDataflow21xVersionTag}.BUILD-SNAPSHOT"
 	}
 	repositories {
@@ -256,7 +256,7 @@ configure(subprojects) { subproject ->
 	jar {
 		enabled = true
 	}
-	
+
 	test {
 		testLogging {
 			events 'STARTED', 'PASSED', 'FAILED', 'SKIPPED'
