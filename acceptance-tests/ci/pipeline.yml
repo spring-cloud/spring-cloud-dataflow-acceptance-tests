@@ -306,7 +306,7 @@ jobs:
         BASE_PATH: ((base-path))
         APP_VERSION: 21x
         APP_TEMPLATE: dataflow-server-with-drivers-template2
-        DATAFLOW_VERSION: 2.1.0.BUILD-SNAPSHOT
+        DATAFLOW_VERSION: 2.1.1.BUILD-SNAPSHOT
     - task: build-timestamp-batch-with-drivers21x
       privileged: true
       timeout: 30m
