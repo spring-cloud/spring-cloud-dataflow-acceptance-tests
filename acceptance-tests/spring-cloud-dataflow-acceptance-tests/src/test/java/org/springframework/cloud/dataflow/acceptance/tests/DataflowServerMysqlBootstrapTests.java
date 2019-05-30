@@ -29,6 +29,9 @@ import org.springframework.cloud.dataflow.acceptance.tests.support.Bootstrap;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow17x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow20x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Mysql;
+import org.springframework.cloud.dataflow.acceptance.tests.support.Mysql_5_6;
+import org.springframework.cloud.dataflow.acceptance.tests.support.Mysql_5_7;
+import org.springframework.cloud.dataflow.acceptance.tests.support.Mysql_8_0;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper11x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper20x;
 
@@ -40,20 +43,22 @@ public class DataflowServerMysqlBootstrapTests extends AbstractDataflowTests {
 	@Test
 	@Skipper11x
 	@Dataflow17x
-	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql.yml" }, services = { "mysql" })
+	@Mysql_5_6
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql_5_6.yml" }, services = { "mysql" })
 	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper11xmysql.yml" }, services = { "skipper" })
 	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow17xmysql.yml" }, services = { "dataflow" })
-	public void testDataflow17xWithMysql(DockerComposeInfo dockerComposeInfo) throws Exception {
+	public void testDataflow17xWithMysql56(DockerComposeInfo dockerComposeInfo) throws Exception {
 		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
 	}
 
 	@Test
 	@Skipper20x
 	@Dataflow20x
-	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql.yml" }, services = { "mysql" })
+	@Mysql_5_6
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql_5_6.yml" }, services = { "mysql" })
 	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper20xmysql.yml" }, services = { "skipper" })
 	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow21xmysql.yml" }, services = { "dataflow" })
-	public void testDataflow20xWithMysql(DockerComposeInfo dockerComposeInfo) throws Exception {
+	public void testDataflow20xWithMysql56(DockerComposeInfo dockerComposeInfo) throws Exception {
 		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
 		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
 
@@ -67,10 +72,47 @@ public class DataflowServerMysqlBootstrapTests extends AbstractDataflowTests {
 	@Test
 	@Skipper20x
 	@Dataflow20x
-	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql.yml" }, services = { "mysql" })
+	@Mysql_5_7
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql_5_7.yml" }, services = { "mysql" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper20xmysql.yml" }, services = { "skipper" })
+	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow21xmysql.yml" }, services = { "dataflow" })
+	public void testDataflow20xWithMysql57(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
+		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
+
+		registerBatchApp(dockerComposeInfo, "dataflow", "dataflow");
+		registerBatchTaskDefs(dockerComposeInfo, "dataflow", "dataflow");
+		launchTask(dockerComposeInfo, "dataflow", "dataflow", "fakebatch");
+		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
+				TimeUnit.SECONDS);
+	}
+
+	@Test
+	@Skipper20x
+	@Dataflow20x
+	@Mysql_8_0
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql_8_0.yml" }, services = { "mysql" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper20xmysql.yml" }, services = { "skipper" })
+	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow21xmysql.yml" }, services = { "dataflow" })
+	public void testDataflow20xWithMysql80(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
+		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
+
+		registerBatchApp(dockerComposeInfo, "dataflow", "dataflow");
+		registerBatchTaskDefs(dockerComposeInfo, "dataflow", "dataflow");
+		launchTask(dockerComposeInfo, "dataflow", "dataflow", "fakebatch");
+		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
+				TimeUnit.SECONDS);
+	}
+
+	@Test
+	@Skipper20x
+	@Dataflow20x
+	@Mysql_5_6
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql_5_6.yml" }, services = { "mysql" })
 	@DockerCompose(id = "dataflow", order = 1, locations = { "src/test/resources/dataflow/dataflow20xmysql.yml" }, services = { "dataflow" })
 	@DockerCompose(id = "skipper", order = 2, locations = { "src/test/resources/skipper/skipper20xmysql.yml" }, services = { "skipper" }, start = false)
-	public void testDataflow20xBeforeSkipperMysql(DockerComposeInfo dockerComposeInfo) throws Exception {
+	public void testDataflow20xBeforeSkipperMysql56(DockerComposeInfo dockerComposeInfo) throws Exception {
 		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow", false);
 		start(dockerComposeInfo, "skipper");
 		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
@@ -79,11 +121,12 @@ public class DataflowServerMysqlBootstrapTests extends AbstractDataflowTests {
 	@Test
 	@Skipper11x
 	@Dataflow17x
-	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql.yml" }, services = { "mysql" })
+	@Mysql_5_6
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql_5_6.yml" }, services = { "mysql" })
 	@DockerCompose(id = "dataflow17x", order = 2, locations = { "src/test/resources/dataflow/dataflow17xmysql.yml" }, services = { "dataflow" }, log = "dataflow17x/")
 	@DockerCompose(id = "dataflow20x", order = 3, locations = { "src/test/resources/dataflow/dataflow20xmysql.yml" }, services = { "dataflow" }, start = false, log = "dataflow20x/")
 	@DockerCompose(id = "dataflow21x", order = 4, locations = { "src/test/resources/dataflow/dataflow21xmysql.yml" }, services = { "dataflow" }, start = false, log = "dataflow21x/")
-	public void testDataflow20xAfter17xWithMysql(DockerComposeInfo dockerComposeInfo) throws Exception {
+	public void testDataflow20xAfter17xWithMysql56(DockerComposeInfo dockerComposeInfo) throws Exception {
 		// github.com/spring-cloud/spring-cloud-dataflow/issues/2903
 		assertDataflowServerRunning(dockerComposeInfo, "dataflow17x", "dataflow", false);
 

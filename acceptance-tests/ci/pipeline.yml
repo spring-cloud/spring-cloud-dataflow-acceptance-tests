@@ -430,7 +430,7 @@ jobs:
           params:
             file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
 
-- name: acceptance-tests-mysql
+- name: acceptance-tests-mysql-5-6
   serial: true
   public: false
   plan:
@@ -452,9 +452,71 @@ jobs:
       file: git-repo/((base-path))/ci/tasks/build-project.yml
       params:
         BASE_PATH: ((base-path))
-        DATAFLOW_INCLUDE_TAGS: mysql
+        DATAFLOW_INCLUDE_TAGS: mysql_5_6
         REPORT_PATH: ((report-path))
-        REPORT_ID: mysql
+        REPORT_ID: mysql56
+      on_failure:
+        aggregate:
+        - put: acceptance-tests-reports
+          params:
+            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+
+- name: acceptance-tests-mysql-5-7
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-dataflow-ci-image
+    trigger: true
+    passed:
+      - "spring-cloud-dataflow-ci-images"
+  - get: git-repo
+    trigger: false
+  - get: acceptance-tests-trigger1
+    trigger: true
+    passed:
+      - "build-docker-servers"
+  - do:
+    - task: build-project
+      privileged: true
+      timeout: 90m
+      image: spring-cloud-dataflow-ci-image
+      file: git-repo/((base-path))/ci/tasks/build-project.yml
+      params:
+        BASE_PATH: ((base-path))
+        DATAFLOW_INCLUDE_TAGS: mysql_5_7
+        REPORT_PATH: ((report-path))
+        REPORT_ID: mysql57
+      on_failure:
+        aggregate:
+        - put: acceptance-tests-reports
+          params:
+            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+
+- name: acceptance-tests-mysql-8-0
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-dataflow-ci-image
+    trigger: true
+    passed:
+      - "spring-cloud-dataflow-ci-images"
+  - get: git-repo
+    trigger: false
+  - get: acceptance-tests-trigger1
+    trigger: true
+    passed:
+      - "build-docker-servers"
+  - do:
+    - task: build-project
+      privileged: true
+      timeout: 90m
+      image: spring-cloud-dataflow-ci-image
+      file: git-repo/((base-path))/ci/tasks/build-project.yml
+      params:
+        BASE_PATH: ((base-path))
+        DATAFLOW_INCLUDE_TAGS: mysql_8_0
+        REPORT_PATH: ((report-path))
+        REPORT_ID: mysql80
       on_failure:
         aggregate:
         - put: acceptance-tests-reports
@@ -553,3 +615,157 @@ jobs:
         - put: acceptance-tests-reports
           params:
             file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+
+- name: acceptance-tests-mariadb-10-1
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-dataflow-ci-image
+    trigger: true
+    passed:
+      - "spring-cloud-dataflow-ci-images"
+  - get: git-repo
+    trigger: false
+  - get: acceptance-tests-trigger1
+    trigger: true
+    passed:
+      - "build-docker-servers"
+  - do:
+    - task: build-project
+      privileged: true
+      timeout: 90m
+      image: spring-cloud-dataflow-ci-image
+      file: git-repo/((base-path))/ci/tasks/build-project.yml
+      params:
+        BASE_PATH: ((base-path))
+        DATAFLOW_INCLUDE_TAGS: mariadb_10_1
+        REPORT_PATH: ((report-path))
+        REPORT_ID: mariadb101
+      on_failure:
+        aggregate:
+        - put: acceptance-tests-reports
+          params:
+            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+
+- name: acceptance-tests-mariadb-10-2
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-dataflow-ci-image
+    trigger: true
+    passed:
+      - "spring-cloud-dataflow-ci-images"
+  - get: git-repo
+    trigger: false
+  - get: acceptance-tests-trigger1
+    trigger: true
+    passed:
+      - "build-docker-servers"
+  - do:
+    - task: build-project
+      privileged: true
+      timeout: 90m
+      image: spring-cloud-dataflow-ci-image
+      file: git-repo/((base-path))/ci/tasks/build-project.yml
+      params:
+        BASE_PATH: ((base-path))
+        DATAFLOW_INCLUDE_TAGS: mariadb_10_2
+        REPORT_PATH: ((report-path))
+        REPORT_ID: mariadb102
+      on_failure:
+        aggregate:
+        - put: acceptance-tests-reports
+          params:
+            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+
+- name: acceptance-tests-mariadb-10-3
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-dataflow-ci-image
+    trigger: true
+    passed:
+      - "spring-cloud-dataflow-ci-images"
+  - get: git-repo
+    trigger: false
+  - get: acceptance-tests-trigger1
+    trigger: true
+    passed:
+      - "build-docker-servers"
+  - do:
+    - task: build-project
+      privileged: true
+      timeout: 90m
+      image: spring-cloud-dataflow-ci-image
+      file: git-repo/((base-path))/ci/tasks/build-project.yml
+      params:
+        BASE_PATH: ((base-path))
+        DATAFLOW_INCLUDE_TAGS: mariadb_10_3
+        REPORT_PATH: ((report-path))
+        REPORT_ID: mariadb103
+      on_failure:
+        aggregate:
+        - put: acceptance-tests-reports
+          params:
+            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+
+- name: acceptance-tests-mariadb-10-4
+  serial: true
+  public: false
+  plan:
+  - get: spring-cloud-dataflow-ci-image
+    trigger: true
+    passed:
+      - "spring-cloud-dataflow-ci-images"
+  - get: git-repo
+    trigger: false
+  - get: acceptance-tests-trigger1
+    trigger: true
+    passed:
+      - "build-docker-servers"
+  - do:
+    - task: build-project
+      privileged: true
+      timeout: 90m
+      image: spring-cloud-dataflow-ci-image
+      file: git-repo/((base-path))/ci/tasks/build-project.yml
+      params:
+        BASE_PATH: ((base-path))
+        DATAFLOW_INCLUDE_TAGS: mariadb_10_4
+        REPORT_PATH: ((report-path))
+        REPORT_ID: mariadb104
+      on_failure:
+        aggregate:
+        - put: acceptance-tests-reports
+          params:
+            file: distribution-repository/spring-cloud-dataflow-acceptance-tests-*.tar.gz
+
+groups:
+- name: DB2
+  jobs:
+  - acceptance-tests-db2
+- name: MsSql
+  jobs:
+  - acceptance-tests-mssql
+- name: MySql
+  jobs:
+  - acceptance-tests-mysql-5-6
+  - acceptance-tests-mysql-5-7
+  - acceptance-tests-mysql-8-0
+- name: Oracle
+  jobs:
+  - acceptance-tests-oracle
+- name: Postgres
+  jobs:
+  - acceptance-tests-postgres
+- name: MariaDb
+  jobs:
+  - acceptance-tests-mariadb-10-1
+  - acceptance-tests-mariadb-10-2
+  - acceptance-tests-mariadb-10-3
+  - acceptance-tests-mariadb-10-4
+- name: Images
+  jobs:
+  - spring-cloud-dataflow-ci-images
+  - build-servers-with-drivers
+  - build-docker-servers
