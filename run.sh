@@ -216,12 +216,12 @@ function tear_down() {
 
 function log_scdf_versions() {
   echo "SCDF SERVER ABOUT:"
-  wget -q -O - stdout $SERVER_URI/about | python -m json.tool
+  wget -O - $SERVER_URI/about | python -m json.tool
 }
 
 function log_skipper_versions() {
   echo "SKIPPER SERVER ABOUT:"
-  wget -q -O - stdout $SKIPPER_SERVER_URI/api/about | python -m json.tool
+  wget -O - $SKIPPER_SERVER_URI/api/about | python -m json.tool
 }
 
 function run_tests() {
