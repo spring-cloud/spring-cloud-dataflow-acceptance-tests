@@ -23,7 +23,6 @@ import org.springframework.cloud.dataflow.acceptance.core.DockerComposeInfo;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Db2;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Migration;
 import org.springframework.cloud.dataflow.acceptance.tests.support.MsSql;
-import org.springframework.cloud.dataflow.acceptance.tests.support.Mysql;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Mysql_5_6;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Mysql_5_7;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Mysql_8_0;
@@ -80,8 +79,8 @@ public class SkipperServerMigrationTests extends AbstractDataflowTests {
 	@Mysql_8_0
 	@SkipperAll
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql_8_0.yml" }, services = { "mysql" })
-	@DockerCompose(id = "skipper11x", order = 1, locations = { "src/test/resources/skipper/skipper11xmysql.yml" }, services = { "skipper" }, log = "skipper11x/")
-	@DockerCompose(id = "skipper20x", order = 1, locations = { "src/test/resources/skipper/skipper20xmysql.yml" }, services = { "skipper" }, start = false, log = "skipper20x/")
+	@DockerCompose(id = "skipper11x", order = 1, locations = { "src/test/resources/skipper/skipper11xmysqlwithmysqldriver.yml" }, services = { "skipper" }, log = "skipper11x/")
+	@DockerCompose(id = "skipper20x", order = 1, locations = { "src/test/resources/skipper/skipper20xmysqlwithmysqldriver.yml" }, services = { "skipper" }, start = false, log = "skipper20x/")
 	public void testMigrationFrom11xToLatestWithMysql80(DockerComposeInfo dockerComposeInfo) throws Exception {
 		migrationAsserts(dockerComposeInfo);
 	}

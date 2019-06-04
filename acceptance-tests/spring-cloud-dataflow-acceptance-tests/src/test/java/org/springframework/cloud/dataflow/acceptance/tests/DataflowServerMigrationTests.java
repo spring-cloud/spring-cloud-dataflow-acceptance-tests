@@ -29,7 +29,6 @@ import org.springframework.cloud.dataflow.acceptance.tests.support.DataflowAll;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Db2;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Migration;
 import org.springframework.cloud.dataflow.acceptance.tests.support.MsSql;
-import org.springframework.cloud.dataflow.acceptance.tests.support.Mysql;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Mysql_5_6;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Mysql_5_7;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Mysql_8_0;

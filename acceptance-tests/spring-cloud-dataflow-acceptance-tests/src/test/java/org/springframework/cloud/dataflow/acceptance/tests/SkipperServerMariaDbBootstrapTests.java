@@ -55,7 +55,7 @@ public class SkipperServerMariaDbBootstrapTests extends AbstractDataflowTests {
 	@Skipper20x
     @MariaDb_10_3
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mariadb_10_3.yml" }, services = { "mariadb" })
-	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper20xmariadb.yml" }, services = { "skipper" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper20xmariadbwitholddialect.yml" }, services = { "skipper" })
 	public void testSkipper20xWithMariaDb103(DockerComposeInfo dockerComposeInfo) throws Exception {
 		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
 	}
@@ -64,7 +64,7 @@ public class SkipperServerMariaDbBootstrapTests extends AbstractDataflowTests {
 	@Skipper20x
     @MariaDb_10_4
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mariadb_10_4.yml" }, services = { "mariadb" })
-	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper20xmariadb.yml" }, services = { "skipper" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper20xmariadbwitholddialect.yml" }, services = { "skipper" })
 	public void testSkipper20xWithMariaDb104(DockerComposeInfo dockerComposeInfo) throws Exception {
 		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
 	}

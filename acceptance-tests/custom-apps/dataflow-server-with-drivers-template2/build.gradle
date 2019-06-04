@@ -6,6 +6,7 @@ buildscript {
 		oracleJdbcDriverVersion = project.properties['oracleJdbcDriverVersion'] ?: '12.2.0.1'
 		mssqlJdbcDriverVersion = project.properties['mssqlJdbcDriverVersion'] ?: '7.0.0.jre8'
 		db2JdbcDriverVersion = project.properties['db2JdbcDriverVersion'] ?: '4.19.26'
+		mysqlJdbcDriverVersion = project.properties['mysqlJdbcDriverVersion'] ?: '8.0.16'
 		springCloudVersion = project.properties['springCloudVersion'] ?: 'Greenwich.RC1'
 		springCloudDataflowVersion = project.properties['springCloudDataflowVersion'] ?: '2.0.0.BUILD-SNAPSHOT'
 	}
@@ -52,6 +53,7 @@ repositories {
 dependencies {
 	compile('org.springframework.cloud:spring-cloud-starter-dataflow-server')
 	runtime("com.oracle.jdbc:ojdbc8:${oracleJdbcDriverVersion}")
+	runtime("mysql:mysql-connector-java:${mysqlJdbcDriverVersion}")
 	runtime("com.ibm.db2:db2jcc4:${db2JdbcDriverVersion}")
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }

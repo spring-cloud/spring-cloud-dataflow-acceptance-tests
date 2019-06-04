@@ -64,7 +64,7 @@ public class SkipperServerMysqlBootstrapTests extends AbstractDataflowTests {
 	@Skipper20x
 	@Mysql_8_0
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql_8_0.yml" }, services = { "mysql" })
-	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper20xmysql.yml" }, services = { "skipper" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper20xmysqlwithmysqldriver.yml" }, services = { "skipper" })
 	public void testSkipper20xWithMysql80(DockerComposeInfo dockerComposeInfo) throws Exception {
 		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
 	}
