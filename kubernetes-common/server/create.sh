@@ -73,6 +73,8 @@ spec:
           value: '$SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED'
         - name: SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI
           value: '$SKIPPER_SERVER_URI/api'
+        - name: SPRING_CLOUD_DATAFLOW_SERVER_URI
+          value: 'http://\${SCDF_SERVICE_HOST}:\${SCDF_SERVICE_PORT}'
           # Add Maven repo for metadata artifact resolution plus set metrics destination for all stream apps
         - name: SPRING_APPLICATION_JSON
           value: '$SPRING_APPLICATION_JSON'

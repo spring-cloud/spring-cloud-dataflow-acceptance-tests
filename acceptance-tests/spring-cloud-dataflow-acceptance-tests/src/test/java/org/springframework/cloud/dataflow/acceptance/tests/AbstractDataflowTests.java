@@ -34,7 +34,7 @@ import com.palantir.docker.compose.connection.DockerPort;
 public abstract class AbstractDataflowTests {
 
 	private final static String STREAM_APPS_URI = "https://repo.spring.io/libs-release-local/org/springframework/cloud/stream/app/spring-cloud-stream-app-descriptor/Celsius.SR3/spring-cloud-stream-app-descriptor-Celsius.SR3.stream-apps-rabbit-maven";
-	private final static String TASK_APPS_URI = "https://repo.spring.io/libs-release/org/springframework/cloud/task/app/spring-cloud-task-app-descriptor/Clark.SR1/spring-cloud-task-app-descriptor-Clark.SR1.task-apps-maven";
+	private final static String TASK_APPS_URI = "https://repo.spring.io/libs-release/org/springframework/cloud/task/app/spring-cloud-task-app-descriptor/Elston.RELEASE/spring-cloud-task-app-descriptor-Elston.RELEASE.task-apps-maven";
 
 	protected static void start(DockerComposeInfo dockerComposeInfo, String id) {
 		dockerComposeInfo.id(id).start();

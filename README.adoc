@@ -25,7 +25,7 @@ Flags:
     -sv | --skipperVersion - set the skipper version to test (e.g. 1.0.4.BUILD-SNAPSHOT)
     -dv | --dataflowVersion - set the dataflow version to test (e.g. 1.5.0.BUILD-SNAPSHOT)
     -av | --appsVersion - set the stream app version to test (e.g. Celsius.SR2). Apps should be accessible via maven repo or docker hub.
-    -tv | --tasksVersion - set the task app version to test (e.g. Clark.RELEASE). Tasks should be accessible via maven repo or docker hub.
+    -tv | --tasksVersion - set the task app version to test (e.g. Elston.RELEASE). Tasks should be accessible via maven repo or docker hub.
     -se | --schedulesEnabled - installs scheduling infrastructure and configures SCDF to use the service.
     -na | --noAutoreconfiguration - tell the buildpack to disable spring autoreconfiguration
 
@@ -126,6 +126,25 @@ to prevent it to be leaked into github repos with credentials.
 * SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN
 * SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME
 * SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD
+* SPRING_APPLICATION_JSON with the following properties:
+** maven.remote-repositories.repo1
+** spring.cloud.dataflow.task.platform
+** Cloud Foundry _connection.url_
+** Cloud Foundry _org_
+** Cloud Foundry _space_
+** Cloud Foundry _domain_
+** Cloud Foundry _username_
+** Cloud Foundry _password_
+** Cloud Foundry _skipSSLValidation_
+** Cloud Foundry _deployment.memory_
+** Cloud Foundry _deployment.disk_
+** Cloud Foundry _services_
+** Cloud Foundry _deleteRoutes_
+** For example:
+
+```
+SPRING_APPLICATION_JSON="'{ \"maven\": { \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\" } } }, \"spring\": { \"cloud\": { \"dataflow\": { \"task\": { \"platform\": { \"cloudfoundry\": { \"accounts\": { \"default\": { \"connection\": { \"url\": \"https://mycfurl\", \"org\": \"myorg\", \"space\": \"myspace\", \"domain\": \"apps.mydomain.springapps.io\", \"username\": \"admin\", \"password\": \"mypass\", \"skipSslValidation\": true }, \"deployment\": { \"memory\": \"2048m\", \"disk\": \"2048m\", \"services\": \"mysql,atscheduler\", \"deleteRoutes\": false } } } } } } } } } }'"
+```
 
 === Configuration
 

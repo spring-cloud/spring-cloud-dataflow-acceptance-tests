@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.acceptance.test;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -39,8 +40,10 @@ import org.springframework.cloud.dataflow.acceptance.test.util.LogTestNameRule;
 import org.springframework.cloud.dataflow.acceptance.test.util.TestConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
+import org.springframework.cloud.dataflow.rest.client.JobOperations;
 import org.springframework.cloud.dataflow.rest.client.SchedulerOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
+import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
@@ -75,6 +78,8 @@ public abstract class AbstractTaskTests implements InitializingBean {
 
 	protected TaskOperations taskOperations;
 
+	protected JobOperations jobOperations;
+
 	protected SchedulerOperations schedulerOperations;
 
 	protected AppRegistryOperations appRegistryOperations;
@@ -82,8 +87,11 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	@Autowired
 	TestConfigurationProperties configurationProperties;
 
+	protected List<String> composedTasksToBeDestroyed;
+
 	@Before
 	public void setup() {
+		composedTasksToBeDestroyed = new ArrayList<>();
 		if (tasksRegistered) {
 			return;
 		}
@@ -103,13 +111,21 @@ public abstract class AbstractTaskTests implements InitializingBean {
 			}
 		}
 
-		PagedResources<TaskDefinitionResource> taskExecutionResources = taskOperations.list();
-		Iterator<TaskDefinitionResource> taskDefinitionResourceIterator = taskExecutionResources.iterator();
-		TaskDefinitionResource taskDefinitionResource;
+		// Clean up composed tasks independently, because they have their own cleanup cycle.
+		if (composedTasksToBeDestroyed.size() > 0) {
+			for (String taskName : composedTasksToBeDestroyed) {
+				this.taskOperations.destroy(taskName);
+			}
+		}
+		else {
+			PagedResources<TaskDefinitionResource> taskExecutionResources = taskOperations.list();
+			Iterator<TaskDefinitionResource> taskDefinitionResourceIterator = taskExecutionResources.iterator();
+			TaskDefinitionResource taskDefinitionResource;
 
-		while (taskDefinitionResourceIterator.hasNext()) {
-			taskDefinitionResource = taskDefinitionResourceIterator.next();
-			taskOperations.destroy(taskDefinitionResource.getName());
+			while (taskDefinitionResourceIterator.hasNext()) {
+				taskDefinitionResource = taskDefinitionResourceIterator.next();
+				taskOperations.destroy(taskDefinitionResource.getName());
+			}
 		}
 	}
 
@@ -123,6 +139,33 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	protected String taskLaunch(String definition) {
 		return taskLaunch(definition, Collections.EMPTY_MAP,
 				Collections.EMPTY_LIST);
+	}
+
+	/**
+	 * Creates a unique composed task definition name from a UUID and launches the task based
+	 * on the definition specified.
+	 *
+	 * @param definition The composed task definition to test;
+	 * @return The name of the task associated with this launch.
+	 */
+	protected String composedTaskLaunch(String definition) {
+		return composedTaskLaunch(definition, Collections.EMPTY_MAP,
+				Collections.EMPTY_LIST);
+	}
+
+	/**
+	 * Creates a unique composed task definition name from a UUID and launches the task based
+	 * on the definition specified.
+	 *
+	 * @param definition The composed task definition to test;
+	 * @return The name of the task associated with this launch.
+	 */
+	protected String composedTaskLaunch(String definition, Map<String, String> properties,
+			List<String> arguments) {
+		String taskName = taskLaunch(definition, properties,
+				arguments);
+		composedTasksToBeDestroyed.add(taskName);
+		return taskName;
 	}
 
 	/**
@@ -195,6 +238,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 				taskOperations = dataFlowOperationsTemplate.taskOperations();
 				schedulerOperations = dataFlowOperationsTemplate.schedulerOperations();
 				appRegistryOperations = dataFlowOperationsTemplate.appRegistryOperations();
+				this.jobOperations = dataFlowOperationsTemplate.jobOperations();
 			}
 			catch (URISyntaxException uriException) {
 				throw new IllegalStateException(uriException);
@@ -281,8 +325,8 @@ public abstract class AbstractTaskTests implements InitializingBean {
 
 	protected boolean verifyScheduleExists(String scheduleName) {
 		boolean result = false;
-		for(ScheduleInfoResource resource : this.schedulerOperations.list()) {
-			if(resource.getScheduleName().equals(scheduleName)){
+		for (ScheduleInfoResource resource : this.schedulerOperations.list()) {
+			if (resource.getScheduleName().equals(scheduleName)) {
 				result = true;
 				break;
 			}
@@ -292,14 +336,17 @@ public abstract class AbstractTaskTests implements InitializingBean {
 
 	/**
 	 * Asserts that the {@link ScheduleInfoResource} contains the expected data.
-	 * @param scheduleInfoResource the {@link ScheduleInfoResource} that needs to be interrogated.
+	 * @param scheduleInfoResource the {@link ScheduleInfoResource} that needs to be
+	 *     interrogated.
 	 * @param scheduleName The expected name of the schedule.
 	 * @param cronExpression The expected expression.
 	 */
-	protected void verifyScheduleIsValid(ScheduleInfoResource scheduleInfoResource, String scheduleName, String cronExpression) {
+	protected void verifyScheduleIsValid(ScheduleInfoResource scheduleInfoResource, String scheduleName,
+			String cronExpression) {
 		assertThat(scheduleInfoResource.getScheduleName()).isEqualTo(scheduleName);
 		assertThat(scheduleInfoResource.getScheduleProperties().containsKey(DEFAULT_CRON_EXPRESSION_KEY)).isTrue();
-		assertThat(scheduleInfoResource.getScheduleProperties().get(DEFAULT_CRON_EXPRESSION_KEY)).isEqualTo(cronExpression);
+		assertThat(scheduleInfoResource.getScheduleProperties().get(DEFAULT_CRON_EXPRESSION_KEY))
+				.isEqualTo(cronExpression);
 	}
 
 	/**
@@ -310,9 +357,10 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	}
 
 	/**
-	 * Retrieves a {@link PagedResources} of the existing {@link ScheduleInfoResource}s that are
-	 * associated with the task definition name.
-	 * @param taskDefinitionName The name of the task definition that the schedules should be associated.
+	 * Retrieves a {@link PagedResources} of the existing {@link ScheduleInfoResource}s that
+	 * are associated with the task definition name.
+	 * @param taskDefinitionName The name of the task definition that the schedules should be
+	 *     associated.
 	 */
 	protected PagedResources<ScheduleInfoResource> listSchedules(String taskDefinitionName) {
 		return this.schedulerOperations.list(taskDefinitionName);
@@ -325,6 +373,12 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 */
 	protected void unschedule(String scheduleName) {
 		this.schedulerOperations.unschedule(scheduleName);
+	}
+
+	protected Collection<JobExecutionResource> getJobExecutionByTaskName(String taskName) {
+		PagedResources<JobExecutionResource> jobExecutionPagedResources = this.jobOperations
+				.executionListByJobName(taskName);
+		return jobExecutionPagedResources.getContent();
 	}
 
 	public enum TaskTestTypes {

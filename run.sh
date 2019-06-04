@@ -33,7 +33,7 @@ Flags:
     -sv | --skipperVersion - set the skipper version to test (e.g. 1.0.5.BUILD-SNAPSHOT)
     -dv | --dataflowVersion - set the dataflow version to test (e.g. 1.5.1.BUILD-SNAPSHOT)
     -av | --appsVersion - set the stream app version to test (e.g. Celsius.SR2). Apps should be accessible via maven repo or docker hub.
-    -tv | --tasksVersion - set the task app version to test (e.g. Clark.RELEASE). Tasks should be accessible via maven repo or docker hub.
+    -tv | --tasksVersion - set the task app version to test (e.g. Elston.RELEASE). Tasks should be accessible via maven repo or docker hub.
     -se | --schedulesEnabled - installs scheduling infrastructure and configures SCDF to use the service.
     -na | --noAutoreconfiguration - tell the buildpack to disable spring autoreconfiguration
 
@@ -326,7 +326,7 @@ done
 [[ -z "${PLATFORM}" ]] && PLATFORM=local
 [[ -z "${BINDER}" ]] && BINDER=rabbit
 [[ -z "${STREAM_APPS_VERSION}" ]] && STREAM_APPS_VERSION=Celsius.SR3
-[[ -z "${TASKS_VERSION}" ]] && TASKS_VERSION=Clark.RELEASE
+[[ -z "${TASKS_VERSION}" ]] && TASKS_VERSION=Elston.RELEASE
 WAIT_TIME="${WAIT_TIME:-5}"
 RETRIES="${RETRIES:-60}"
 JAVA_PATH_TO_BIN="${JAVA_HOME}/bin/"
