@@ -52,6 +52,7 @@ repositories {
 
 dependencies {
 	compile('org.springframework.cloud:spring-cloud-starter-dataflow-server')
+	compile('org.flywaydb:flyway-core:5.2.4')
 	runtime("com.oracle.jdbc:ojdbc8:${oracleJdbcDriverVersion}")
 	runtime("mysql:mysql-connector-java:${mysqlJdbcDriverVersion}")
 	runtime("com.ibm.db2:db2jcc4:${db2JdbcDriverVersion}")
