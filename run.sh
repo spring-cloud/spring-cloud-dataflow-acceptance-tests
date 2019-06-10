@@ -333,8 +333,8 @@ done
 # ======================================= DEFAULTS ============================================
 [[ -z "${PLATFORM}" ]] && PLATFORM=local
 [[ -z "${BINDER}" ]] && BINDER=rabbit
-[[ -z "${STREAM_APPS_VERSION}" ]] && STREAM_APPS_VERSION=Celsius.SR3
-[[ -z "${TASKS_VERSION}" ]] && TASKS_VERSION=Elston.RELEASE
+[[ -z "${STREAM_APPS_VERSION}" ]] && STREAM_APPS_VERSION=latest
+[[ -z "${TASKS_VERSION}" ]] && TASKS_VERSION=latest
 WAIT_TIME="${WAIT_TIME:-5}"
 RETRIES="${RETRIES:-60}"
 JAVA_PATH_TO_BIN="${JAVA_HOME}/bin/"
