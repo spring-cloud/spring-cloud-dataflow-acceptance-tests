@@ -36,7 +36,7 @@ Flags:
     -tv | --tasksVersion - set the task app version to test (e.g. Elston.RELEASE). Tasks should be accessible via maven repo or docker hub.
     -se | --schedulesEnabled - installs scheduling infrastructure and configures SCDF to use the service.
     -na | --noAutoreconfiguration - tell the buildpack to disable spring autoreconfiguration
-
+    -rd | --redisDisabled - disable redis setup and usage
 [*] = Required arguments
 
 EOF
@@ -109,7 +109,9 @@ function setup() {
     pushd "binder"
       run_scripts $BINDER "create.sh"
     popd
-    run_scripts "redis" "create.sh"
+    if [ ! "$redisDisabled" == "true" ]; then
+      run_scripts "redis" "create.sh"
+    fi
     if [ "$schedulesEnabled" ]; then
         run_scripts "scheduler" "create.sh"
         export SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED=true
@@ -199,7 +201,9 @@ function tear_down() {
     if [  ! -z "$skipperMode" ]; then
       run_scripts "skipper-server" "destroy.sh"
     fi
-    run_scripts "redis" "destroy.sh"
+    if [ ! "$redisDisabled" == "true" ]; then
+      run_scripts "redis" "destroy.sh"
+    fi
     run_scripts "mysql" "destroy.sh"
     if [ "$schedulesEnabled" ]; then
         run_scripts "scheduler" "destroy.sh"
@@ -308,6 +312,9 @@ case ${key} in
  ;;
  -na|--noAutoreconfiguration)
  noAutoreconfiguration="true"
+ ;;
+ -rd|--redisDisabled)
+ redisDisabled="true"
  ;;
  --help)
  print_usage

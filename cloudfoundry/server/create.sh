@@ -14,8 +14,12 @@ applications:
   buildpack: $JAVA_BUILDPACK
   services:
     - mysql
+EOF
+if [ ! "$redisDisabled" == "true" ]; then
+    cat << EOF >> ./scdf-manifest.yml
     - redis
 EOF
+fi
 if [ $LOG_SERVICE_NAME ]; then
     cat << EOF >> ./scdf-manifest.yml
     - $LOG_SERVICE_NAME
