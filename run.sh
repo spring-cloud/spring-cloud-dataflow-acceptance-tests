@@ -59,6 +59,7 @@ function test_port() {
   nc -w1 ${1} $2 >/dev/null
 }
 
+
 function netcat_port() {
     local READY_FOR_TESTS=1
     for i in $( seq 1 "${RETRIES}" ); do
@@ -134,7 +135,7 @@ function setup() {
     echo "Running Config Server test"
     SERVER_URI=$(cf apps | grep dataflow-server- | awk '{print $6}' | sed 's:,::g')
     SERVER_URI="http://$SERVER_URI"
-    wget $SERVER_URI/about -O about.txt
+    wget --no-check-certificate $SERVER_URI/about -O about.txt
         # Asserts that the streamsEnabled is false as it was configured in ./scdf-server-cloud1.properties
         if grep -q "\"streamsEnabled\":false,\"tasksEnabled\":true" about.txt
             then
@@ -220,12 +221,12 @@ function tear_down() {
 
 function log_scdf_versions() {
   echo "SCDF SERVER ABOUT:"
-  wget -O - $SERVER_URI/about | python -m json.tool
+  wget --no-check-certificate -O - $SERVER_URI/about | python -m json.tool
 }
 
 function log_skipper_versions() {
   echo "SKIPPER SERVER ABOUT:"
-  wget -O - $SKIPPER_SERVER_URI/api/about | python -m json.tool
+  wget --no-check-certificate -O - $SKIPPER_SERVER_URI/api/about | python -m json.tool
 }
 
 function run_tests() {
