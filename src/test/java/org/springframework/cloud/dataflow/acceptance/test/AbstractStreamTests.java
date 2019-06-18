@@ -504,19 +504,21 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			} catch (MalformedURLException e) {
 				throw new IllegalArgumentException("Malformed url: " + app.getUrl(), e);
 			}
-			String[] cfCommand = {"cf", "logs", "--recent", logSource};
-			logger.info("Running system command: " + String.join(" ", cfCommand));
-			ProcessBuilder procBuilder = new ProcessBuilder(cfCommand);
-			Process proc;
-			try  {
-				proc = procBuilder.start();
-			} catch (IOException e) {
-				throw new IllegalStateException("Can't find 'cf' command", e);
-			}
-			boolean exited;
             for (int i = 0; i < 3; i++) {
+                String[] cfCommand = {"cf", "logs", "--recent", logSource};
+                logger.info("Running system command: " + String.join(" ", cfCommand));
+                ProcessBuilder procBuilder = new ProcessBuilder(cfCommand);
+                Process proc;
+                try  {
+                    proc = procBuilder.start();
+                } catch (IOException e) {
+                    throw new IllegalStateException("Can't find 'cf' command", e);
+                }
+                boolean exited;
+
 
                 try {
+                    logContent = readStringFromInputStream(proc.getInputStream());
                     logger.info("Waiting to cf log command to exit");
                     exited = proc.waitFor(maxWaitInSeconds, TimeUnit.SECONDS);
                 } catch (InterruptedException e) {
@@ -525,9 +527,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
                 }
                 if (exited) {
                     int rc = proc.exitValue();
-                    if (rc == 0) {
-                        logContent = readStringFromInputStream(proc.getInputStream());
-                    } else {
+                    if (rc != 0) {
                         logger.error("ERROR: running system command [rc=" + rc + "]: " + readStringFromInputStream(proc.getErrorStream()));
                     }
                     break;
