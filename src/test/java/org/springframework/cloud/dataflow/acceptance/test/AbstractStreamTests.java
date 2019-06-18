@@ -504,38 +504,37 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			} catch (MalformedURLException e) {
 				throw new IllegalArgumentException("Malformed url: " + app.getUrl(), e);
 			}
-            for (int i = 0; i < 3; i++) {
-                String[] cfCommand = {"cf", "logs", "--recent", logSource};
-                logger.info("Running system command: " + String.join(" ", cfCommand));
-                ProcessBuilder procBuilder = new ProcessBuilder(cfCommand);
-                Process proc;
-                try  {
-                    proc = procBuilder.start();
-                } catch (IOException e) {
-                    throw new IllegalStateException("Can't find 'cf' command", e);
-                }
-                boolean exited;
 
-
-                try {
-                    logContent = readStringFromInputStream(proc.getInputStream());
-                    logger.info("Waiting to cf log command to exit");
-                    exited = proc.waitFor(maxWaitInSeconds, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new IllegalStateException(e.getMessage(), e);
-                }
-                if (exited) {
-                    int rc = proc.exitValue();
-                    if (rc != 0) {
-                        logger.error("ERROR: running system command [rc=" + rc + "]: " + readStringFromInputStream(proc.getErrorStream()));
-                    }
-                    break;
-                } else {
-                    logger.error("ERROR: system command exceeded maximum wait time (" + maxWaitInSeconds + "s)");
-                }
+            String[] cfCommand = {"cf", "logs", "--recent", logSource};
+            logger.info("Running system command: " + String.join(" ", cfCommand));
+            ProcessBuilder procBuilder = new ProcessBuilder(cfCommand);
+            Process proc;
+            try  {
+                proc = procBuilder.start();
+            } catch (IOException e) {
+                throw new IllegalStateException("Can't find 'cf' command", e);
             }
-			List<Log> logs = new ArrayList<>();
+            boolean exited;
+
+
+            try {
+                logContent = readStringFromInputStream(proc.getInputStream());
+                logger.info("Waiting to cf log command to exit");
+                exited = proc.waitFor(maxWaitInSeconds, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException(e.getMessage(), e);
+            }
+            if (exited) {
+                int rc = proc.exitValue();
+                if (rc != 0) {
+                    logger.error("ERROR: running system command [rc=" + rc + "]: " + readStringFromInputStream(proc.getErrorStream()));
+                }
+            } else {
+                logger.error("ERROR: system command exceeded maximum wait time (" + maxWaitInSeconds + "s)");
+            }
+
+            List<Log> logs = new ArrayList<>();
 			logs.add(new Log(logSource, logContent));
 			return logs;
 		}
