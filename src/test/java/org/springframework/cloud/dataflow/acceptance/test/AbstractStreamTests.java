@@ -496,7 +496,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 		@Override
 		List<Log> retrieveLogs() {
-			final int maxWait = configurationProperties.getMaxWaitTime();
+			final int maxWaitInSeconds = 30;
 			String logSource;
 			String logContent = null;
 			try {
@@ -514,22 +514,27 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				throw new IllegalStateException("Can't find 'cf' command", e);
 			}
 			boolean exited;
-			try {
-				exited = proc.waitFor(maxWait, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				throw new IllegalStateException(e.getMessage(), e);
-			}
-			if (exited) {
-				int rc = proc.exitValue();
-				if (rc == 0) {
-					logContent = readStringFromInputStream(proc.getInputStream());
-				} else {
-					logger.error("ERROR: running system command [rc=" + rc + "]: " + readStringFromInputStream(proc.getErrorStream()));
-				}
-			} else {
-				logger.error("ERROR: system command exceeded maximum wait time (" + maxWait + "s)");
-			}
+            for (int i = 0; i < 3; i++) {
+
+                try {
+                    logger.info("Waiting to cf log command to exit");
+                    exited = proc.waitFor(maxWaitInSeconds, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException(e.getMessage(), e);
+                }
+                if (exited) {
+                    int rc = proc.exitValue();
+                    if (rc == 0) {
+                        logContent = readStringFromInputStream(proc.getInputStream());
+                    } else {
+                        logger.error("ERROR: running system command [rc=" + rc + "]: " + readStringFromInputStream(proc.getErrorStream()));
+                    }
+                    break;
+                } else {
+                    logger.error("ERROR: system command exceeded maximum wait time (" + maxWaitInSeconds + "s)");
+                }
+            }
 			List<Log> logs = new ArrayList<>();
 			logs.add(new Log(logSource, logContent));
 			return logs;
