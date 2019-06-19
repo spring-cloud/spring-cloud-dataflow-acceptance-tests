@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -30,37 +31,38 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Executes acceptance tests for the composed tasks.
+ *
  * @author Glenn Renfro
+ * @author Ilayaperumal Gopinathan
  */
 public class ComposedTaskTests extends AbstractTaskTests {
 
 	@Test
 	public void ctrLaunch() {
 		String taskDefinitionName = composedTaskLaunch("a: timestamp && b:timestamp");
-		assertTaskExecutions(taskDefinitionName, 0, 1, 1);
+		assertTaskExecutions(taskDefinitionName, 0, 1);
 	}
 
 	@Test
 	public void ctrMultipleLaunch() {
 		String taskDefinitionName = composedTaskLaunch("a: timestamp && b:timestamp");
-		assertTaskExecutions(taskDefinitionName, 0, 1, 1);
+		assertTaskExecutions(taskDefinitionName, 0, 1);
 		launchExistingTask(taskDefinitionName);
 		assertParentTaskExecution(taskDefinitionName, 0, 2, 1);
 	}
 
 	@Test
-	public void ctrMultipleLaunchWithProperties() {
-		Map<String, String> properties = new HashMap<>();
-		properties.put("app.composed-task-runner.increment-instance-enabled", "true");
-		properties.put("app.composed-task-runner.interval-time-between-checks", "1");
-		String taskDefinitionName = composedTaskLaunch("a: timestamp && b:timestamp", properties, Collections.EMPTY_LIST);
-		assertTaskExecutions(taskDefinitionName, 0, 1, 1);
-		launchExistingTask(taskDefinitionName, properties, Collections.EMPTY_LIST);
+	public void ctrMultipleLaunchWithArguments() {
+		List<String> arguments = new ArrayList<>();
+        arguments.add("--increment-instance-enabled=true");
+		String taskDefinitionName = composedTaskLaunch("a: timestamp && b:timestamp", Collections.EMPTY_MAP, arguments);
+		assertTaskExecutions(taskDefinitionName, 0, 1);
+		launchExistingTask(taskDefinitionName, Collections.EMPTY_MAP, arguments);
 		assertParentTaskExecution(taskDefinitionName, 0, 2, 2);
 	}
 
 	private void assertTaskExecutions(String taskDefinitionName,
-			int expectedExitCode, int expectedCount, int expectJobCount) {
+			int expectedExitCode, int expectedCount) {
 		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
 		assertTrue(waitForTaskToComplete(taskDefinitionName, expectedCount));
 		assertTrue(waitForTaskToComplete(taskDefinitionName + "-a", expectedCount));
