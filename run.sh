@@ -164,13 +164,13 @@ function setup() {
       if [ "$PLATFORM" == "cloudfoundry" ];
       then
       SKIPPER_SERVER_URI=$(cf apps | grep skipper-server- | awk '{print $6}' | sed 's:,::g')
-      export SKIPPER_SERVER_URI="https://$SKIPPER_SERVER_URI"
+      export SKIPPER_SERVER_URI="http://$SKIPPER_SERVER_URI"
       echo "SKIPPER SERVER URI: $SKIPPER_SERVER_URI"
       fi
       if [[ "$PLATFORM" == "gke" || "$PLATFORM" == "pks" ]];
       then
       SKIPPER_SERVER_URI=$(kubectl get svc skipper --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $4}')
-      export SKIPPER_SERVER_URI="https://$SKIPPER_SERVER_URI:7577"
+      export SKIPPER_SERVER_URI="http://$SKIPPER_SERVER_URI:7577"
       echo "SKIPPER SERVER URI: $SKIPPER_SERVER_URI"
       fi
     fi
