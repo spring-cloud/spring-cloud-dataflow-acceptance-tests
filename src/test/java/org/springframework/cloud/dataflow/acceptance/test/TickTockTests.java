@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.acceptance.test;
 
 import org.hamcrest.Matchers;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
