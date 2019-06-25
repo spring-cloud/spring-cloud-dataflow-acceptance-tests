@@ -10,15 +10,9 @@ function kubectl_create() {
   fi
 
   kubectl create -f scdf.yml --namespace $KUBERNETES_NAMESPACE
-  READY_FOR_TESTS=1
-  for i in $( seq 1 "${RETRIES}" ); do
-    SERVER_URI=$(kubectl get svc scdf --namespace $KUBERNETES_NAMESPACE | grep scdf | awk '{print $4}')
-    [ '<pending>' != $SERVER_URI ] && READY_FOR_TESTS=0 && break
-    echo "Waiting for server external ip. Attempt  #$i/${RETRIES}... will try again in [${WAIT_TIME}] seconds" >&2
-    sleep "${WAIT_TIME}"
-  done
-  SERVER_URI=$(kubectl get svc scdf --namespace $KUBERNETES_NAMESPACE | grep scdf | awk '{print $4}')
-  $(netcat_port ${SERVER_URI} 80)
+
+  SERVER_URI=$(kubectl get ingress --namespace $KUBERNETES_NAMESPACE | grep scdf | awk '{print $2}')
+  $(wait_for_200 https://${SERVER_URI}/about)
   return 0
 }
 
@@ -72,9 +66,9 @@ spec:
         - name: SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED
           value: '$SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED'
         - name: SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI
-          value: '$SKIPPER_SERVER_URI/api'
+          value: 'http://\${SKIPPER_SERVICE_HOST}:\${SKIPPER_SERVICE_PORT}/api'
         - name: SPRING_CLOUD_DATAFLOW_SERVER_URI
-          value: 'https://\${SCDF_SERVICE_HOST}:\${SCDF_SERVICE_PORT}'
+          value: 'http://\${SCDF_SERVICE_HOST}:\${SCDF_SERVICE_PORT}'
           # Add Maven repo for metadata artifact resolution plus set metrics destination for all stream apps
         - name: SPRING_APPLICATION_JSON
           value: '$SPRING_APPLICATION_JSON'
@@ -89,9 +83,10 @@ metadata:
   name: scdf
   labels:
     spring-cloud-service: scdf
+    spring-deployment-id: scdf
 spec:
   # If you are running k8s on a local dev box, you can use type NodePort instead
-  type: LoadBalancer
+  type: NodePort
   ports:
     - port: 80
   selector:
@@ -110,6 +105,7 @@ fi
 
 RETRIES=20
 WAIT_TIME=15
+
 generate_manifest
 kubectl_create
 run_scripts "$PWD" "config.sh"

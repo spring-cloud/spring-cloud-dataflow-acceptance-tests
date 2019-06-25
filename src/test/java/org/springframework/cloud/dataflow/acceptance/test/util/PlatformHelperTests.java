@@ -87,13 +87,14 @@ public class PlatformHelperTests {
 		assertTrue(platformHelper.getLogfileName().contains("${PID}"));
 	}
 
-	@Test
-	public void testKubernetesPlatformHelper() {
-		PlatformHelper platformHelper = new KubernetesPlatformHelper(runtimeOperations);
-		assertEquals("test.log", platformHelper.getLogfileName());
-		assertTrue(platformHelper.setUrlsForStream(stream));
-		assertEquals("https://log", stream.getApplication("log").getUrl());
-		assertEquals("https://time", stream.getApplication("time").getUrl());
-	}
-
+    @Test
+    public void testKubernetesPlatformHelper() {
+        KubernetesPlatformHelper platformHelper = new KubernetesPlatformHelper(runtimeOperations, ".cluster.springapps.io");
+        assertEquals("test.log", platformHelper.getLogfileName());
+        assertTrue(platformHelper.setUrlsForStream(stream));
+        assertEquals("https://" + STREAM_NAME + "-log" + platformHelper.getApplicationHost(),
+            stream.getApplication("log").getUrl());
+        assertEquals("https://" + STREAM_NAME + "-time" + platformHelper.getApplicationHost(),
+            stream.getApplication("time").getUrl());
+    }
 }

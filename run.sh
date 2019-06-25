@@ -70,6 +70,21 @@ function netcat_port() {
     return ${READY_FOR_TESTS}
 }
 
+function wait_for_200 {
+  local READY_FOR_TESTS=1
+  for i in $( seq 1 "${RETRIES}" ); do
+    STATUS=$(curl -s -o /dev/null -w '%{http_code}' ${1})
+    if [ $STATUS -eq 200 ]; then
+      READY_FOR_TESTS=0
+      break
+    else
+      echo "Failed to connect to ${1} with status code: $STATUS. Attempt  #$i/${RETRIES}... will try again in [${WAIT_TIME}] seconds" >&2
+      sleep "${WAIT_TIME}"
+    fi
+  done
+  return ${READY_FOR_TESTS}
+}
+
 function download(){
   if [ -z "$doNotDownload" ] || [ ! -f $1/scdf-server.jar ]; then
     if [  ! -z "$doNotDownload" ]; then
@@ -169,9 +184,8 @@ function setup() {
       fi
       if [[ "$PLATFORM" == "gke" || "$PLATFORM" == "pks" ]];
       then
-      SKIPPER_SERVER_URI=$(kubectl get svc skipper --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $4}')
-      export SKIPPER_SERVER_URI="http://$SKIPPER_SERVER_URI:7577"
-      echo "SKIPPER SERVER URI: $SKIPPER_SERVER_URI"
+        export SKIPPER_SERVER_URI=$(kubectl get ingress --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $2}')
+        echo "SKIPPER SERVER URI: $SKIPPER_SERVER_URI"
       fi
     fi
     run_scripts "server" "create.sh"
@@ -237,7 +251,15 @@ function run_tests() {
   if [  -z "$skipCloudConfig" ]; then
     skipCloudConfig="false"
   fi
-  eval "./mvnw -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DSKIP_CLOUD_CONFIG=$skipCloudConfig test surefire-report:report"
+
+  APP_HOST=""
+
+  if [[ "$PLATFORM" == "gke" || "$PLATFORM" == "pks" ]];
+  then
+    APP_HOST=".${KUBERNETES_CLUSTER_NAME}.springapps.io"
+  fi
+
+  eval "./mvnw -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DSKIP_CLOUD_CONFIG=$skipCloudConfig -DAPP_HOST=$APP_HOST test surefire-report:report"
 }
 
 # ======================================= FUNCTIONS END =======================================

@@ -10,6 +10,8 @@ function pks_authenticate_and_target() {
   [ -z "$PKS_USERNAME" ] && { echo "Environment variable PKS_USERNAME must be set"; exit 1; }
   [ -z "$PKS_PASSWORD" ] && { echo "Environment variable PKS_PASSWORD must be set"; exit 1; }
 
+  export KUBERNETES_CLUSTER_NAME=$PKS_CLUSTER_NAME
+
   echo "Using PKS cluster: $PKS_CLUSTER_NAME"
 
   pks login -a $PKS_ENDPOINT -u $PKS_USERNAME -p $PKS_PASSWORD --skip-ssl-validation

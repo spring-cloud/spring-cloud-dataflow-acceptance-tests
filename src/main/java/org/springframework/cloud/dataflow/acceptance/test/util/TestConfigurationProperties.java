@@ -46,6 +46,8 @@ public class TestConfigurationProperties {
 
 	private String taskRegistrationResource = "https://repo.spring.io/libs-release/org/springframework/cloud/task/app/spring-cloud-task-app-descriptor/Elston.RELEASE/spring-cloud-task-app-descriptor-Elston.RELEASE.task-apps-maven";
 
+    private String appHost;
+
 	public int getMaxWaitTime() {
 		return maxWaitTime;
 	}
@@ -117,4 +119,12 @@ public class TestConfigurationProperties {
 	public void setTaskRegistrationResource(String taskRegistrationResource) {
 		this.taskRegistrationResource = taskRegistrationResource;
 	}
+
+    public void setAppHost(String appHost) {
+        this.appHost = appHost;
+    }
+
+    public String getAppHost() {
+        return appHost;
+    }
 }

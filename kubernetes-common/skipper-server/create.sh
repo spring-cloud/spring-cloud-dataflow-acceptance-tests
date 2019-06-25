@@ -13,13 +13,13 @@ function kubectl_create() {
 
   READY_FOR_TESTS=1
   for i in $( seq 1 "${RETRIES}" ); do
-    SKIPPER_SERVER_URI=$(kubectl get svc skipper --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $4}')
+    SKIPPER_SERVER_URI=$(kubectl get ingress --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $2}')
     [ '<pending>' != $SKIPPER_SERVER_URI ] && READY_FOR_TESTS=0 && break
     echo "Waiting for skipper server external ip. Attempt  #$i/${RETRIES}... will try again in [${WAIT_TIME}] seconds" >&2
     sleep "${WAIT_TIME}"
   done
-  SKIPPER_SERVER_URI=$(kubectl get svc skipper --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $4}')
-  $(netcat_port ${SKIPPER_SERVER_URI} 7577)
+  SKIPPER_SERVER_URI=$(kubectl get ingress --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $2}')
+  $(wait_for_200 https://${SKIPPER_SERVER_URI}/api)
   return 0
 }
 
@@ -44,7 +44,7 @@ spec:
         image: springcloud/spring-cloud-skipper-server:$SKIPPER_VERSION
         imagePullPolicy: Always
         ports:
-        - containerPort: 7577
+        - containerPort: 80
         resources:
           limits:
             cpu: 1.0
@@ -64,7 +64,7 @@ spec:
             fieldRef:
               fieldPath: "metadata.namespace"
         - name: SERVER_PORT
-          value: '7577'
+          value: '80'
         - name: KUBERNETES_TRUST_CERTIFICATES
           value: 'true'
           # SAJ for 1.7.x compat as the configmap by name SPRING_CLOUD_KUBERNETES_CONFIG_NAME is
@@ -80,11 +80,12 @@ metadata:
   name: skipper
   labels:
     spring-cloud-service: skipper
+    spring-deployment-id: skipper
 spec:
   # If you are running k8s on a local dev box, you can use type NodePort instead
-  type: LoadBalancer
+  type: NodePort
   ports:
-    - port: 7577
+    - port: 80
   selector:
     name: skipper
 EOF

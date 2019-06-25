@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-SERVER_URI=$(kubectl get svc scdf --namespace $KUBERNETES_NAMESPACE | grep scdf | awk '{print $4}')
+SERVER_URI=$(kubectl get ingress --namespace $KUBERNETES_NAMESPACE | grep scdf | awk '{print $2}')
 SERVER_URI="https://$SERVER_URI"
 echo "SCDF SERVER URI: $SERVER_URI"
 export SERVER_URI

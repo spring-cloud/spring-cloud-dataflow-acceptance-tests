@@ -10,6 +10,8 @@ function gcp_authenticate_and_target() {
   [ -z "$GCLOUD_COMPUTE_ZONE" ] && { echo "Environment variable GCLOUD_COMPUTE_ZONE must be set"; exit 1; }
   [ -z "$GCLOUD_CONTAINER_CLUSTER" ] && { echo "Environment variable GCLOUD_CONTAINER_CLUSTER must be set"; exit 1; }
 
+  export KUBERNETES_CLUSTER_NAME=$GCLOUD_CONTAINER_CLUSTER
+
   gcloud config set compute/zone $GCLOUD_COMPUTE_ZONE
   gcloud config set container/cluster $GCLOUD_CONTAINER_CLUSTER
   gcloud container clusters get-credentials $GCLOUD_CONTAINER_CLUSTER --zone $GCLOUD_COMPUTE_ZONE --project $GCLOUD_PROJECT

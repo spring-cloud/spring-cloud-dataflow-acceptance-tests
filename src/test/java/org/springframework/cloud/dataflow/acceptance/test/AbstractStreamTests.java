@@ -142,7 +142,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				runtimeOperations = dataFlowOperations.runtimeOperations();
 				appRegistryOperations = dataFlowOperations.appRegistryOperations();
 				if (isKubernetesPlatform()) {
-					platformHelper = new KubernetesPlatformHelper(runtimeOperations);
+					platformHelper = new KubernetesPlatformHelper(runtimeOperations,
+                                                                    configurationProperties.getAppHost());
 				}
 				else if (isLocalPlatform()) {
 					platformHelper = new LocalPlatformHelper(runtimeOperations);
