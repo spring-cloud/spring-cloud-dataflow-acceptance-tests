@@ -5,6 +5,7 @@ buildscript {
 		springBootVersion = project.properties['springBootVersion'] ?: '1.5.9.RELEASE'
 		springCloudSkipperVersion = project.properties['springCloudSkipperVersion'] ?: '1.0.0.BUILD-SNAPSHOT'
 		oracleJdbcDriverVersion = project.properties['oracleJdbcDriverVersion'] ?: '12.2.0.1'
+		mysqlJdbcDriverVersion = project.properties['mysqlJdbcDriverVersion'] ?: '8.0.16'
 		flywayVersion = project.properties['flywayVersion'] ?: '5.0.5'
 	}
 	repositories {
@@ -48,5 +49,6 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter')
 	runtime("com.oracle.jdbc:ojdbc8:${oracleJdbcDriverVersion}")
     runtime("org.flywaydb:flyway-core:${flywayVersion}")
+	runtime("mysql:mysql-connector-java:${mysqlJdbcDriverVersion}")
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }

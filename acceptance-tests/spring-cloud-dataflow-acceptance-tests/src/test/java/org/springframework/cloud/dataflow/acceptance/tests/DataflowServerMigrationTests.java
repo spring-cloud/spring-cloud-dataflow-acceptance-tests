@@ -90,9 +90,9 @@ public class DataflowServerMigrationTests extends AbstractDataflowTests {
 	@Mysql_8_0
 	@DataflowAll
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql_8_0.yml" }, services = { "mysql" })
-	@DockerCompose(id = "dataflow17x", order = 1, locations = { "src/test/resources/dataflow/dataflow17xmysql.yml" }, services = { "dataflow" }, log = "dataflow17x/")
-	@DockerCompose(id = "dataflow20x", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow20xmysql.yml" }, services = { "dataflow" }, start = false, log = "dataflow20x/")
-	@DockerCompose(id = "skipper", order = 3, locations = { "src/test/resources/skipper/skipper20xmysql.yml" }, services = { "skipper" }, start = false)
+	@DockerCompose(id = "dataflow17x", order = 1, locations = { "src/test/resources/dataflow/dataflow17xmysqlwithmysqldriver.yml" }, services = { "dataflow" }, log = "dataflow17x/")
+	@DockerCompose(id = "dataflow20x", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow20xmysqlwithmysqldriver.yml" }, services = { "dataflow" }, start = false, log = "dataflow20x/")
+	@DockerCompose(id = "skipper", order = 3, locations = { "src/test/resources/skipper/skipper20xmysqlwithmysqldriver.yml" }, services = { "skipper" }, start = false)
 	public void testMigrationFrom173ToLatestWithMysql80(DockerComposeInfo dockerComposeInfo) throws Exception {
 		migrationAsserts(dockerComposeInfo);
 	}
