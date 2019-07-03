@@ -34,7 +34,7 @@ buildscript {
 		springCloudDataflow173Version = "${springCloudDataflow173VersionTag}.RELEASE"
 		springCloudDataflow17xVersionTag = '1.7.4'
 		springCloudDataflow17xVersion = "${springCloudDataflow17xVersionTag}.BUILD-SNAPSHOT"
-		springCloudDataflow20xVersionTag = '2.0.0'
+		springCloudDataflow20xVersionTag = '2.0.2'
 		springCloudDataflow20xVersion = "${springCloudDataflow20xVersionTag}.BUILD-SNAPSHOT"
 		springCloudDataflow21xVersionTag = '2.1.1'
 		springCloudDataflow21xVersion = "${springCloudDataflow21xVersionTag}.BUILD-SNAPSHOT"
