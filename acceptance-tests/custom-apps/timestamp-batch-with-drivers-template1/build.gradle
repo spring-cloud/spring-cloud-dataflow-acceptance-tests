@@ -5,6 +5,7 @@ buildscript {
 		springBootVersion = project.properties['springBootVersion'] ?: '2.1.1.RELEASE'
 		oracleJdbcDriverVersion = project.properties['oracleJdbcDriverVersion'] ?: '12.2.0.1'
 		db2JdbcDriverVersion = project.properties['db2JdbcDriverVersion'] ?: '4.19.26'
+		mysqlJdbcDriverVersion = project.properties['mysqlJdbcDriverVersion'] ?: '8.0.16'
 		springCloudTaskAppVersion = project.properties['springCloudTaskAppVersion'] ?: '2.1.1.BUILD-SNAPSHOT'
 	}
 	repositories {
@@ -49,6 +50,7 @@ dependencies {
 	compile('org.springframework.cloud:spring-cloud-starter-config')
 	compile('org.springframework.cloud.task.app:spring-cloud-starter-task-timestamp-batch')
 	runtime("com.oracle.jdbc:ojdbc8:${oracleJdbcDriverVersion}")
+	runtime("mysql:mysql-connector-java:${mysqlJdbcDriverVersion}")
 	runtime("com.ibm.db2:db2jcc4:${db2JdbcDriverVersion}")
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
