@@ -29,6 +29,7 @@ import org.springframework.cloud.dataflow.acceptance.tests.support.Bootstrap;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow17x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow20x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow21x;
+import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow22x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Oracle;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper11x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper20x;
@@ -54,7 +55,7 @@ public class DataflowServerOracleBootstrapTests extends AbstractDataflowTests {
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/oracle.yml" }, services = { "oracle" })
 	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper20xoracle.yml" }, services = { "skipper" })
 	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow21xoracle.yml" }, services = { "dataflow" })
-	public void testDataflow20xWithOracle(DockerComposeInfo dockerComposeInfo) throws Exception {
+	public void testDataflow21xWithOracle(DockerComposeInfo dockerComposeInfo) throws Exception {
 		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
 		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
 
@@ -63,6 +64,26 @@ public class DataflowServerOracleBootstrapTests extends AbstractDataflowTests {
 		launchTask(dockerComposeInfo, "dataflow", "dataflow", "fakebatch");
 		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
 				TimeUnit.SECONDS);
+	}
+
+	@Test
+	@Skipper20x
+	@Dataflow22x
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/oracle.yml" }, services = { "oracle" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper20xoracle.yml" }, services = { "skipper" })
+	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow22xoracle.yml" }, services = { "dataflow" })
+	public void testDataflow22xWithOracle(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
+		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
+
+		registerBatchApp(dockerComposeInfo, "dataflow", "dataflow");
+		registerBatchTaskDefs(dockerComposeInfo, "dataflow", "dataflow");
+		launchTask(dockerComposeInfo, "dataflow", "dataflow", "fakebatch");
+		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
+				TimeUnit.SECONDS);
+		deleteBatchJobExecutions(dockerComposeInfo, "dataflow", "dataflow");
+		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
+				TimeUnit.SECONDS, 0, 0);
 	}
 
 	@Test

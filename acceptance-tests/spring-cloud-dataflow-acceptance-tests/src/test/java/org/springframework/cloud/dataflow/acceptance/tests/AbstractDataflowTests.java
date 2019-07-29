@@ -26,6 +26,7 @@ import org.springframework.cloud.dataflow.acceptance.tests.support.AssertUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import com.jayway.jsonpath.JsonPath;
@@ -227,6 +228,13 @@ public abstract class AbstractDataflowTests {
 	protected static void waitBatchJobExecution(DockerComposeInfo dockerComposeInfo, String id, String container,
 			String responseContains, long pollInterval, TimeUnit pollTimeUnit, long awaitInterval,
 			TimeUnit awaitTimeUnit) {
+		waitBatchJobExecution(dockerComposeInfo, id, container, responseContains, pollInterval, pollTimeUnit,
+				awaitInterval, awaitTimeUnit, 1, 2);
+	}
+
+	protected static void waitBatchJobExecution(DockerComposeInfo dockerComposeInfo, String id, String container,
+			String responseContains, long pollInterval, TimeUnit pollTimeUnit, long awaitInterval,
+			TimeUnit awaitTimeUnit, int count1, int count2) {
 		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
 		RestTemplate template = new RestTemplate();
 
@@ -240,7 +248,7 @@ public abstract class AbstractDataflowTests {
 				.until(() -> {
 					String json = template.getForObject(url1, String.class);
 					List<Object> executions = JsonPath.read(json, "$._embedded.taskExecutionResourceList[?(@.taskName == 'fakebatch')]");
-					return executions.size() == 1;
+					return executions.size() == count1;
 				});
 
 		String url2 = "http://" + port.getIp() + ":" + port.getExternalPort() + "/jobs/thinexecutions";
@@ -253,8 +261,21 @@ public abstract class AbstractDataflowTests {
 				.until(() -> {
 					String json = template.getForObject(url2, String.class);
 					List<Object> executions = JsonPath.read(json, "$._embedded.jobExecutionThinResourceList[?(@.status == 'COMPLETED')]");
-					return executions.size() == 2;
+					return executions.size() == count2;
 				});
+	}
+
+	protected static void deleteBatchJobExecutions(DockerComposeInfo dockerComposeInfo, String id, String container) {
+		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+		RestTemplate template = new RestTemplate();
+
+		String url1 = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/executions";
+		String json = template.getForObject(url1, String.class);
+		List<Integer> executionIds = JsonPath.read(json, "$._embedded.taskExecutionResourceList[?(@.taskName == 'fakebatch')].executionId");
+
+		for (Integer executionId : executionIds) {
+			template.delete(url1 + "/" + executionId + "?action=REMOVE_DATA");
+		}
 	}
 
 	protected static void unDeployStream(DockerComposeInfo dockerComposeInfo, String id, String container, String stream) {
