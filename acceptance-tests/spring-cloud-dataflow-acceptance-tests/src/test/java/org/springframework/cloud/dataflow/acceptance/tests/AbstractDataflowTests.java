@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.acceptance.tests;
 
 import static com.jayway.awaitility.Awaitility.with;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -247,7 +248,11 @@ public abstract class AbstractDataflowTests {
 				.atMost(awaitInterval, awaitTimeUnit)
 				.until(() -> {
 					String json = template.getForObject(url1, String.class);
-					List<Object> executions = JsonPath.read(json, "$._embedded.taskExecutionResourceList[?(@.taskName == 'fakebatch')]");
+					List<Object> executions = new ArrayList<>();
+					try {
+						executions = JsonPath.read(json, "$._embedded.taskExecutionResourceList[?(@.taskName == 'fakebatch')]");
+					} catch (Exception e) {
+					}
 					return executions.size() == count1;
 				});
 
@@ -260,7 +265,11 @@ public abstract class AbstractDataflowTests {
 				.atMost(awaitInterval, awaitTimeUnit)
 				.until(() -> {
 					String json = template.getForObject(url2, String.class);
-					List<Object> executions = JsonPath.read(json, "$._embedded.jobExecutionThinResourceList[?(@.status == 'COMPLETED')]");
+					List<Object> executions = new ArrayList<>();
+					try {
+						executions = JsonPath.read(json, "$._embedded.jobExecutionThinResourceList[?(@.status == 'COMPLETED')]");
+					} catch (Exception e) {
+					}
 					return executions.size() == count2;
 				});
 	}
@@ -276,6 +285,9 @@ public abstract class AbstractDataflowTests {
 		for (Integer executionId : executionIds) {
 			template.delete(url1 + "/" + executionId + "?action=REMOVE_DATA");
 		}
+		json = template.getForObject(url1, String.class);
+		executionIds = JsonPath.read(json, "$._embedded.taskExecutionResourceList[?(@.taskName == 'fakebatch')].executionId");
+
 	}
 
 	protected static void unDeployStream(DockerComposeInfo dockerComposeInfo, String id, String container, String stream) {
