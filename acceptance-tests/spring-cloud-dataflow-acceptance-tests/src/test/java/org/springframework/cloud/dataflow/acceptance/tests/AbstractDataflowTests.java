@@ -280,14 +280,15 @@ public abstract class AbstractDataflowTests {
 
 		String url1 = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/executions";
 		String json = template.getForObject(url1, String.class);
-		List<Integer> executionIds = JsonPath.read(json, "$._embedded.taskExecutionResourceList[?(@.taskName == 'fakebatch')].executionId");
+		List<Integer> executionIds = new ArrayList<>();
+		try {
+			executionIds = JsonPath.read(json, "$._embedded.taskExecutionResourceList[?(@.taskName == 'fakebatch')].executionId");
+		} catch (Exception e) {
+		}
 
 		for (Integer executionId : executionIds) {
 			template.delete(url1 + "/" + executionId + "?action=REMOVE_DATA");
 		}
-		json = template.getForObject(url1, String.class);
-		executionIds = JsonPath.read(json, "$._embedded.taskExecutionResourceList[?(@.taskName == 'fakebatch')].executionId");
-
 	}
 
 	protected static void unDeployStream(DockerComposeInfo dockerComposeInfo, String id, String container, String stream) {
