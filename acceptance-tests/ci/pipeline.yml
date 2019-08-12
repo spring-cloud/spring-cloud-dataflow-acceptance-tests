@@ -263,7 +263,7 @@ jobs:
       params:
         BASE_PATH: ((base-path))
         APP_VERSION: 22x
-        APP_TEMPLATE: skipper-server-with-drivers-template3
+        APP_TEMPLATE: skipper-server-with-drivers-template4
         SKIPPER_VERSION: 2.2.0.BUILD-SNAPSHOT
     - task: build-dataflow-server-with-drivers173
       privileged: true
@@ -347,7 +347,7 @@ jobs:
       params:
         BASE_PATH: ((base-path))
         APP_VERSION: 23x
-        APP_TEMPLATE: dataflow-server-with-drivers-template2
+        APP_TEMPLATE: dataflow-server-with-drivers-template3
         DATAFLOW_VERSION: 2.3.0.BUILD-SNAPSHOT
     - task: build-timestamp-batch-with-drivers21x
       privileged: true
