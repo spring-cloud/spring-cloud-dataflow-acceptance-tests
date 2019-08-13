@@ -1,0 +1,17 @@
+version: '3'
+services:
+  skipper:
+    image: 'springsource-docker-private-local.jfrog.io/scdf/spring-cloud-skipper-acceptance-image-legacy22x'
+    container_name: skipper
+    network_mode: bridge
+    environment:
+      - ACCEPTANCE_TEST_START_WAIT=5
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/dataflow?useMysqlMetadata=true
+      - SPRING_DATASOURCE_USERNAME=spring
+      - SPRING_DATASOURCE_PASSWORD=spring
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MariaDB102Dialect
+    ports:
+      - 7577
+    external_links:
+      - mariadb:mariadb

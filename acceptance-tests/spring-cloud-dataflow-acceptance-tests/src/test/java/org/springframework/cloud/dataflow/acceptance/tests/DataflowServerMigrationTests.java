@@ -57,6 +57,7 @@ public class DataflowServerMigrationTests extends AbstractDataflowTests {
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/postgres.yml" }, services = { "postgres" })
 	@DockerCompose(id = "dataflow17x", order = 1, locations = { "src/test/resources/dataflow/dataflow17xpostgres.yml" }, services = { "dataflow" }, log = "dataflow17x/")
 	@DockerCompose(id = "dataflow20x", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow20xpostgres.yml" }, services = { "dataflow" }, start = false, log = "dataflow20x/")
+	@DockerCompose(id = "dataflow23x", order = 3, locations = { "src/test/resources/dataflowandskipper/dataflow23xpostgres.yml" }, services = { "dataflow" }, start = false, log = "dataflow23x/")
 	@DockerCompose(id = "skipper", order = 3, locations = { "src/test/resources/skipper/skipper20xpostgres.yml" }, services = { "skipper" }, start = false)
 	public void testMigrationFrom173ToLatestWithPostgres(DockerComposeInfo dockerComposeInfo) throws Exception {
 		migrationAsserts(dockerComposeInfo);
@@ -70,6 +71,7 @@ public class DataflowServerMigrationTests extends AbstractDataflowTests {
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql_5_6.yml" }, services = { "mysql" })
 	@DockerCompose(id = "dataflow17x", order = 1, locations = { "src/test/resources/dataflow/dataflow17xmysql.yml" }, services = { "dataflow" }, log = "dataflow17x/")
 	@DockerCompose(id = "dataflow20x", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow20xmysql.yml" }, services = { "dataflow" }, start = false, log = "dataflow20x/")
+	@DockerCompose(id = "dataflow23x", order = 3, locations = { "src/test/resources/dataflowandskipper/dataflow23xmysql.yml" }, services = { "dataflow" }, start = false, log = "dataflow23x/")
 	@DockerCompose(id = "skipper", order = 3, locations = { "src/test/resources/skipper/skipper20xmysql.yml" }, services = { "skipper" }, start = false)
 	public void testMigrationFrom173ToLatestWithMysql56(DockerComposeInfo dockerComposeInfo) throws Exception {
 		migrationAsserts(dockerComposeInfo);
@@ -81,6 +83,7 @@ public class DataflowServerMigrationTests extends AbstractDataflowTests {
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql_5_7.yml" }, services = { "mysql" })
 	@DockerCompose(id = "dataflow17x", order = 1, locations = { "src/test/resources/dataflow/dataflow17xmysql.yml" }, services = { "dataflow" }, log = "dataflow17x/")
 	@DockerCompose(id = "dataflow20x", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow20xmysql.yml" }, services = { "dataflow" }, start = false, log = "dataflow20x/")
+	@DockerCompose(id = "dataflow23x", order = 3, locations = { "src/test/resources/dataflowandskipper/dataflow23xmysql.yml" }, services = { "dataflow" }, start = false, log = "dataflow23x/")
 	@DockerCompose(id = "skipper", order = 3, locations = { "src/test/resources/skipper/skipper20xmysql.yml" }, services = { "skipper" }, start = false)
 	public void testMigrationFrom173ToLatestWithMysql57(DockerComposeInfo dockerComposeInfo) throws Exception {
 		migrationAsserts(dockerComposeInfo);
@@ -92,6 +95,7 @@ public class DataflowServerMigrationTests extends AbstractDataflowTests {
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql_8_0.yml" }, services = { "mysql" })
 	@DockerCompose(id = "dataflow17x", order = 1, locations = { "src/test/resources/dataflow/dataflow17xmysqlwithmysqldriver.yml" }, services = { "dataflow" }, log = "dataflow17x/")
 	@DockerCompose(id = "dataflow20x", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow20xmysqlwithmysqldriver.yml" }, services = { "dataflow" }, start = false, log = "dataflow20x/")
+	@DockerCompose(id = "dataflow23x", order = 3, locations = { "src/test/resources/dataflowandskipper/dataflow23xmysqlwithmysqldriver.yml" }, services = { "dataflow" }, start = false, log = "dataflow23x/")
 	@DockerCompose(id = "skipper", order = 3, locations = { "src/test/resources/skipper/skipper20xmysqlwithmysqldriver.yml" }, services = { "skipper" }, start = false)
 	public void testMigrationFrom173ToLatestWithMysql80(DockerComposeInfo dockerComposeInfo) throws Exception {
 		migrationAsserts(dockerComposeInfo);
@@ -105,6 +109,7 @@ public class DataflowServerMigrationTests extends AbstractDataflowTests {
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/oracle.yml" }, services = { "oracle" })
 	@DockerCompose(id = "dataflow17x", order = 1, locations = { "src/test/resources/dataflow/dataflow17xoracle.yml" }, services = { "dataflow" }, log = "dataflow17x/")
 	@DockerCompose(id = "dataflow20x", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow20xoracle.yml" }, services = { "dataflow" }, start = false, log = "dataflow20x/")
+	@DockerCompose(id = "dataflow23x", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow23xoracle.yml" }, services = { "dataflow" }, start = false, log = "dataflow23x/")
 	@DockerCompose(id = "skipper", order = 3, locations = { "src/test/resources/skipper/skipper20xoracle.yml" }, services = { "skipper" }, start = false)
 	public void testMigrationFrom173ToLatestWithOracle(DockerComposeInfo dockerComposeInfo) throws Exception {
 		migrationAsserts(dockerComposeInfo);
@@ -118,6 +123,7 @@ public class DataflowServerMigrationTests extends AbstractDataflowTests {
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mssql.yml" }, services = { "mssql" })
 	@DockerCompose(id = "dataflow17x", order = 1, locations = { "src/test/resources/dataflow/dataflow17xmssql.yml" }, services = { "dataflow" }, log = "dataflow17x/")
 	@DockerCompose(id = "dataflow20x", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow20xmssql.yml" }, services = { "dataflow" }, start = false, log = "dataflow20x/")
+	@DockerCompose(id = "dataflow23x", order = 3, locations = { "src/test/resources/dataflowandskipper/dataflow23xmssql.yml" }, services = { "dataflow" }, start = false, log = "dataflow23x/")
 	@DockerCompose(id = "skipper", order = 3, locations = { "src/test/resources/skipper/skipper20xmssql.yml" }, services = { "skipper" }, start = false)
 	public void testMigrationFrom173ToLatestWithMsSql(DockerComposeInfo dockerComposeInfo) throws Exception {
 		migrationAsserts(dockerComposeInfo);
@@ -131,6 +137,7 @@ public class DataflowServerMigrationTests extends AbstractDataflowTests {
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/db2.yml" }, services = { "db2" })
 	@DockerCompose(id = "dataflow17x", order = 1, locations = { "src/test/resources/dataflow/dataflow17xdb2.yml" }, services = { "dataflow" }, log = "dataflow17x/")
 	@DockerCompose(id = "dataflow20x", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow20xdb2.yml" }, services = { "dataflow" }, start = false, log = "dataflow20x/")
+	@DockerCompose(id = "dataflow23x", order = 3, locations = { "src/test/resources/dataflowandskipper/dataflow23xdb2.yml" }, services = { "dataflow" }, start = false, log = "dataflow23x/")
 	@DockerCompose(id = "skipper", order = 3, locations = { "src/test/resources/skipper/skipper20xdb2.yml" }, services = { "skipper" }, start = false)
 	public void testMigrationFrom173ToLatestWithDb2(DockerComposeInfo dockerComposeInfo) throws Exception {
 		migrationAsserts(dockerComposeInfo);
@@ -164,6 +171,11 @@ public class DataflowServerMigrationTests extends AbstractDataflowTests {
 		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
 		start(dockerComposeInfo, "dataflow20x");
 		assertDataflowServerRunning(dockerComposeInfo, "dataflow20x", "dataflow");
+
+		// upgrade to 23x and check running
+		stop(dockerComposeInfo, "dataflow20x");
+		start(dockerComposeInfo, "dataflow23x");
+		assertDataflowServerRunning(dockerComposeInfo, "dataflow23x", "dataflow");
 
 		// we upgraded from 17x classic to 20x
 
