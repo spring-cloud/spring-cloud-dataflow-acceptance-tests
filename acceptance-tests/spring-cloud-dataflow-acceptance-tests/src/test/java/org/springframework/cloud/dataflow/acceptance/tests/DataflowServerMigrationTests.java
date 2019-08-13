@@ -180,37 +180,37 @@ public class DataflowServerMigrationTests extends AbstractDataflowTests {
 		// we upgraded from 17x classic to 20x
 
 		// check we still have same apps after upgrade
-		List<String> migratedRegisterApps = registeredApps(dockerComposeInfo, "dataflow20x", "dataflow");
+		List<String> migratedRegisterApps = registeredApps(dockerComposeInfo, "dataflow23x", "dataflow");
 		assertThat(migratedRegisterApps.size()).isGreaterThan(0);
 		assertThat(initialRegisterApps).containsExactlyInAnyOrderElementsOf(migratedRegisterApps);
 
 		// check migrated stream defs
-		List<String> migratedRegisterStreams = registeredStreamDefs(dockerComposeInfo, "dataflow20x", "dataflow");
+		List<String> migratedRegisterStreams = registeredStreamDefs(dockerComposeInfo, "dataflow23x", "dataflow");
 		assertThat(migratedRegisterStreams.size()).isGreaterThan(0);
 		assertThat(initialRegisterStreams).containsExactlyInAnyOrderElementsOf(migratedRegisterStreams);
 
 		// check migrated task defs
-		List<String> migratedRegisterTasks = registeredTaskDefs(dockerComposeInfo, "dataflow20x", "dataflow");
+		List<String> migratedRegisterTasks = registeredTaskDefs(dockerComposeInfo, "dataflow23x", "dataflow");
 		assertThat(migratedRegisterTasks.size()).isGreaterThan(0);
 		assertThat(initialRegisterTasks).containsExactlyInAnyOrderElementsOf(migratedRegisterTasks);
 
 		// check migrated audit records
-		List<String> migratedAuditRecords = auditRecords(dockerComposeInfo, "dataflow20x", "dataflow");
+		List<String> migratedAuditRecords = auditRecords(dockerComposeInfo, "dataflow23x", "dataflow");
 		assertThat(migratedAuditRecords.size()).isGreaterThan(0);
 		assertThat(initialAuditRecords).containsExactlyInAnyOrderElementsOf(migratedAuditRecords);
 
 		// register app manually and check that we got new registration
 		// mostly to check that all the crazyness around hibernate_sequence works
-		List<String> newRegisterApps = registerApp(dockerComposeInfo, "dataflow20x", "dataflow");
+		List<String> newRegisterApps = registerApp(dockerComposeInfo, "dataflow23x", "dataflow");
 		assertThat(newRegisterApps.size()).isGreaterThan(migratedRegisterApps.size());
 
 		// check that ticktock stream deploy registered before migration
 		// doesn't throw error
-		deployStream(dockerComposeInfo, "dataflow20x", "dataflow", "ticktock");
-		waitStream(dockerComposeInfo, "dataflow20x", "dataflow", "ticktock", "deployed", 1, TimeUnit.SECONDS, 180,
+		deployStream(dockerComposeInfo, "dataflow23x", "dataflow", "ticktock");
+		waitStream(dockerComposeInfo, "dataflow23x", "dataflow", "ticktock", "deployed", 1, TimeUnit.SECONDS, 180,
 				TimeUnit.SECONDS);
-		unDeployStream(dockerComposeInfo, "dataflow20x", "dataflow", "ticktock");
-		waitStream(dockerComposeInfo, "dataflow20x", "dataflow", "ticktock", "undeployed", 1, TimeUnit.SECONDS, 180,
+		unDeployStream(dockerComposeInfo, "dataflow23x", "dataflow", "ticktock");
+		waitStream(dockerComposeInfo, "dataflow23x", "dataflow", "ticktock", "undeployed", 1, TimeUnit.SECONDS, 180,
 				TimeUnit.SECONDS);
 	}
 }
