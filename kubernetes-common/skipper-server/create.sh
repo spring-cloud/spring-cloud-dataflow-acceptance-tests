@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-helm delete scdf --purge
+helm delete scdf --purge || true
 
 # sleep a few to give things a chance to fully terminate
 sleep 60
