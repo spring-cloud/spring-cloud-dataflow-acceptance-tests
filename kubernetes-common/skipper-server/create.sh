@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+helm delete scdf --purge
+
+# sleep a few to give things a chance to fully terminate
+sleep 60
+
 if [ -z "$DATAFLOW_SERVER_NAME" ]; then
   DATAFLOW_SERVER_NAME="spring-cloud-dataflow-server-kubernetes"
 fi
