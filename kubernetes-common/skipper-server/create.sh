@@ -1,99 +1,27 @@
 #!/usr/bin/env bash
 
-function kubectl_create() {
-  kubectl create -f secret.yml --namespace $KUBERNETES_NAMESPACE
+if [ -z "$DATAFLOW_SERVER_NAME" ]; then
+  DATAFLOW_SERVER_NAME="spring-cloud-dataflow-server-kubernetes"
+fi
 
-  if [ "$BINDER" == "rabbit" ]; then
-    kubectl create -f skipper-config-rabbit.yml --namespace $KUBERNETES_NAMESPACE
-  elif [ "$BINDER" == "kafka" ]; then
-    kubectl create -f skipper-config-kafka.yml --namespace $KUBERNETES_NAMESPACE
-  fi
+HELM_PARAMS="--set server.image=springcloud/$DATAFLOW_SERVER_NAME --set server.version=$DATAFLOW_VERSION \
+--set skipper.version=$SKIPPER_VERSION --set server.service.labels.spring-deployment-id=scdf \
+--set skipper.service.labels.spring-deployment-id=skipper --set skipper.trustCerts=true \
+--set server.trustCerts=true"
 
-  kubectl create -f skipper.yml --namespace $KUBERNETES_NAMESPACE
+if [ "$BINDER" == "kafka" ]; then
+  HELM_PARAMS="$HELM_PARAMS --set kafka.enabled=true,rabbitmq.enabled=false"
+fi
 
-  READY_FOR_TESTS=1
-  for i in $( seq 1 "${RETRIES}" ); do
-    SKIPPER_SERVER_URI=$(kubectl get ingress --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $2}')
-    [ '<pending>' != $SKIPPER_SERVER_URI ] && READY_FOR_TESTS=0 && break
-    echo "Waiting for skipper server external ip. Attempt  #$i/${RETRIES}... will try again in [${WAIT_TIME}] seconds" >&2
-    sleep "${WAIT_TIME}"
-  done
-  SKIPPER_SERVER_URI=$(kubectl get ingress --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $2}')
-  $(wait_for_200 https://${SKIPPER_SERVER_URI}/api)
-  return 0
-}
+helm repo update
+helm install --name scdf stable/spring-cloud-data-flow ${HELM_PARAMS} --namespace $KUBERNETES_NAMESPACE
 
+WAIT_TIME=10
+SKIPPER_SERVER_URI=$(kubectl get ingress --namespace $KUBERNETES_NAMESPACE | grep data-flow-skipper | awk '{print $2}')
+$(wait_for_200 https://${SKIPPER_SERVER_URI}/api)
 
-function generate_manifest() {
-cat << EOF > ./skipper.yml
-apiVersion: v1
-kind: ReplicationController
-metadata:
-  name: skipper
-spec:
-  replicas: 1
-  selector:
-    name: skipper
-  template:
-    metadata:
-      labels:
-        name: skipper
-    spec:
-      containers:
-      - name: skipper
-        image: springcloud/spring-cloud-skipper-server:$SKIPPER_VERSION
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 80
-        resources:
-          limits:
-            cpu: 1.0
-            memory: 2048Mi
-          requests:
-            cpu: 0.5
-            memory: 1024Mi
-        env:
-        - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
-          value: 'true'
-        - name: SPRING_CLOUD_KUBERNETES_SECRETS_NAME
-          value: skipper-secrets
-        - name: SPRING_CLOUD_KUBERNETES_CONFIG_NAME
-          value: skipper-config
-        - name: KUBERNETES_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: "metadata.namespace"
-        - name: SERVER_PORT
-          value: '80'
-        - name: KUBERNETES_TRUST_CERTIFICATES
-          value: 'true'
-          # SAJ for 1.7.x compat as the configmap by name SPRING_CLOUD_KUBERNETES_CONFIG_NAME is
-          # only loaded in skipper 2.0 as it includes the spring-cloud-kubernetes dep
-        - name: SPRING_APPLICATION_JSON
-          value: "{\"spring.cloud.skipper.server.enableLocalPlatform\" : false, \"spring.cloud.skipper.server.platform.kubernetes.accounts.default.environmentVariables\" : \"SPRING_RABBITMQ_HOST=\${RABBITMQ_SERVICE_HOST},SPRING_RABBITMQ_PORT=\${RABBITMQ_SERVICE_PORT},SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=\${KAFKA_SERVICE_HOST}:\${KAFKA_SERVICE_PORT},SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES=\${KAFKA_SERVICE_HOST}:2181\",\"spring.cloud.skipper.server.platform.kubernetes.accounts.default.memory\" : \"1024Mi\"}"
-
----
-
-kind: Service
-apiVersion: v1
-metadata:
-  name: skipper
-  labels:
-    spring-cloud-service: skipper
-    spring-deployment-id: skipper
-spec:
-  # If you are running k8s on a local dev box, you can use type NodePort instead
-  type: NodePort
-  ports:
-    - port: 80
-  selector:
-    name: skipper
-EOF
-
-}
-
-RETRIES=20
-WAIT_TIME=15
-generate_manifest
-kubectl_create
-run_scripts "$PWD" "config.sh"
+SKIPPER_SERVER_URI=$(kubectl get svc skipper --namespace $KUBERNETES_NAMESPACE | grep data-flow-skipper | awk '{print $4}')
+SKIPPER_SERVER_URI="https://$SKIPPER_SERVER_URI:7577"
+echo "SKIPPER SERVER IMAGE: springcloud/spring-cloud-skipper-server:$SKIPPER_VERSION"
+echo "SKIPPER SERVER URI: $SKIPPER_SERVER_URI"
+export SKIPPER_SERVER_URI

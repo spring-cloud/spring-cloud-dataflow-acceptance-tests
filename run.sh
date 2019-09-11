@@ -111,11 +111,23 @@ function download_skipper(){
   fi
 }
 
-function run_scripts()
-{
-  pushd $1
-   . $2
-  popd
+function run_scripts() {
+  SCRIPT_DIR=${1}
+  SCRIPT_FILE=${2}
+
+  if [[ -d "${SCRIPT_DIR}" ]]; then
+    pushd "${SCRIPT_DIR}"
+
+    if [[ -f "${SCRIPT_FILE}" ]]; then
+      . ${SCRIPT_FILE}
+    else
+      echo "Not running non-existent script: ${SCRIPT_DIR}/${SCRIPT_FILE}"
+    fi
+
+    popd
+  else
+    echo "Not running scripts for non-existent script directory: ${SCRIPT_DIR}"
+  fi
 }
 
 function setup() {
@@ -184,7 +196,7 @@ function setup() {
       fi
       if [[ "$PLATFORM" == "gke" || "$PLATFORM" == "pks" ]];
       then
-        export SKIPPER_SERVER_URI="https://$(kubectl get ingress --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $2}')"
+        export SKIPPER_SERVER_URI="https://$(kubectl get ingress --namespace $KUBERNETES_NAMESPACE | grep data-flow-skipper | awk '{print $2}')"
         echo "SKIPPER SERVER URI: $SKIPPER_SERVER_URI"
       fi
     fi

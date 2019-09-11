@@ -9,4 +9,3 @@ fi
 if [[ $TASKS_VERSION == *"latest"* ]]; then
   TASK_REGISTRATION_RESOURCE=https://dataflow.spring.io/task-docker-latest
 fi
-kubectl create -f rabbitmq.yml --namespace $KUBERNETES_NAMESPACE
