@@ -196,7 +196,7 @@ function setup() {
       fi
       if [[ "$PLATFORM" == "gke" || "$PLATFORM" == "pks" ]];
       then
-        export SKIPPER_SERVER_URI="https://$(kubectl get ingress --namespace $KUBERNETES_NAMESPACE | grep data-flow-skipper | awk '{print $2}')"
+        export SKIPPER_SERVER_URI="https://$(kubectl get ingress --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $2}')"
         echo "SKIPPER SERVER URI: $SKIPPER_SERVER_URI"
       fi
     fi
