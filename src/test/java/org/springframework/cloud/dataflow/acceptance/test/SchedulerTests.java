@@ -83,7 +83,7 @@ public class SchedulerTests extends AbstractTaskTests {
 		String[] scheduleNames = new String[ENTRY_COUNT];
 		for(int i = 0; i < ENTRY_COUNT; i++) {
 			taskNames[i] = taskCreate("timestamp");
-			scheduleNames[i] = createDefaultSchedule(taskNames[i]);
+            scheduleNames[i] = "scdf-" + taskNames[i] + "-" + createDefaultSchedule(taskNames[i]);
 		}
 		for(int i = 0; i < ENTRY_COUNT; i++) {
 			PagedResources<ScheduleInfoResource> pagedResources = listSchedules(taskNames[i]);
@@ -100,7 +100,8 @@ public class SchedulerTests extends AbstractTaskTests {
 	}
 
 	private String createDefaultSchedule() {
-		return createDefaultSchedule(taskCreate("timestamp"));
+		String taskDefinitionName = taskCreate("timestamp");
+		return "scdf-" + taskDefinitionName + "-" + createDefaultSchedule(taskDefinitionName);
 	}
 
 	private String createDefaultSchedule(String taskName) {
