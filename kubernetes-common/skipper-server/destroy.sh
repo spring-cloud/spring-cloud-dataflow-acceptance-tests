@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
-helm delete scdf --purge
+if [ -z "$USE_DISTRO_FILES" ]; then
+  helm delete scdf --purge || true
+fi
