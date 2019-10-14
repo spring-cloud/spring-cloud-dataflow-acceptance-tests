@@ -26,6 +26,7 @@ Flags:
     -s  | --skipSetup - skip setup phase
     -t  | --skipTests - skip test phase
     -c  | --skipCleanup - skip the clean up phase
+    -sc | --serverCleanup - run the cleanup for the SCDF/Skipper (along with the applications deployed but excluding the DB, message broker)
     -d  | --doNotDownload - skip the downloading of the SCDF/Skipper servers
     -m  | --skipperMode - specify if skipper mode should be enabled
     -cc | --skipCloudConfig - skip Cloud Config server tests for CF
@@ -224,10 +225,7 @@ function command_exists() {
 function tear_down() {
   echo "Clean up, clean up, everybody everywhere; clean up clean up, everybody do your share!"
   pushd $PLATFORM
-    run_scripts "server" "destroy.sh"
-    if [  ! -z "$skipperMode" ]; then
-      run_scripts "skipper-server" "destroy.sh"
-    fi
+    tear_down_servers
     if [ ! "$redisDisabled" == "true" ]; then
       run_scripts "redis" "destroy.sh"
     fi
@@ -238,6 +236,20 @@ function tear_down() {
     pushd "binder"
       run_scripts $BINDER "destroy.sh"
     popd
+    if [ "$PLATFORM" == "cloudfoundry" ];
+    then
+      cf delete-orphaned-routes -f
+    fi
+  popd
+}
+
+function tear_down_servers() {
+  echo "Clean up servers"
+  pushd $PLATFORM
+    run_scripts "server" "destroy.sh"
+    if [  ! -z "$skipperMode" ]; then
+      run_scripts "skipper-server" "destroy.sh"
+    fi
     if [ "$PLATFORM" == "cloudfoundry" ];
     then
       cf delete-orphaned-routes -f
@@ -333,6 +345,9 @@ case ${key} in
  -c|--skipCleanup)
  skipCleanup="true"
  ;;
+  -sc|--serverCleanup)
+ serverCleanup="true"
+ ;;
  -d|--doNotDownload)
  doNotDownload="false"
  ;;
@@ -406,6 +421,9 @@ else
 fi
 if [ -z "$skipTests" ]; then
   run_tests
+fi
+if [ "$serverCleanup" ]; then
+  tear_down_servers
 fi
 if [ -z "$skipCleanup" ]; then
   tear_down
