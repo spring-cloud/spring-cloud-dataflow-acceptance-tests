@@ -245,7 +245,6 @@ function tear_down() {
 
 function tear_down_servers() {
   echo "Clean up servers"
-  pushd $PLATFORM
     run_scripts "server" "destroy.sh"
     if [  ! -z "$skipperMode" ]; then
       run_scripts "skipper-server" "destroy.sh"
@@ -254,7 +253,6 @@ function tear_down_servers() {
     then
       cf delete-orphaned-routes -f
     fi
-  popd
 }
 
 function log_scdf_versions() {
