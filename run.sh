@@ -421,7 +421,9 @@ if [ -z "$skipTests" ]; then
   run_tests
 fi
 if [ "$serverCleanup" ]; then
-  tear_down_servers
+  pushd $PLATFORM
+   tear_down_servers
+  popd
 fi
 if [ -z "$skipCleanup" ]; then
   tear_down
