@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 function use_helm() {
+  # cleanup any failed distro file deployments if needed
+  distro_files_object_delete
+
   helm delete scdf --purge || true
 
   echo "Waiting for cleanup"
@@ -25,9 +28,6 @@ function use_helm() {
 function distro_files_install() {
   distro_files_object_delete
 
-  echo "Waiting for cleanup"
-  sleep 60
-
   distro_files_clone_repo
 
   pushd spring-cloud-dataflow > /dev/null
@@ -50,6 +50,9 @@ function distro_files_object_delete() {
   kubectl delete role scdf-role --namespace $KUBERNETES_NAMESPACE || true
   kubectl delete rolebinding scdf-rb --namespace $KUBERNETES_NAMESPACE || true
   kubectl delete serviceaccount scdf-sa --namespace $KUBERNETES_NAMESPACE || true
+
+  echo "Waiting for cleanup"
+  sleep 60
 }
 
 function distro_files_install_binder() {
