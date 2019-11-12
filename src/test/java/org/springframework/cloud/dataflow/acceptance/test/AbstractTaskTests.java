@@ -179,7 +179,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 */
 	protected String taskLaunch(String definition,
 			Map<String, String> properties, List<String> arguments) {
-		String taskDefinitionName = "task-" + UUID.randomUUID().toString().substring(0, 10);
+		String taskDefinitionName = "task-" + UUID.randomUUID().toString();
 		taskOperations.create(taskDefinitionName, definition);
 		taskOperations.launch(taskDefinitionName, properties, arguments);
 		return taskDefinitionName;
@@ -192,7 +192,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 * @return The name of the task associated with this launch.
 	 */
 	protected String taskCreate(String definition) {
-		String taskDefinitionName = "task-" + UUID.randomUUID().toString().substring(0, 10);
+		String taskDefinitionName = "task-" + UUID.randomUUID().toString();
 		taskOperations.create(taskDefinitionName, definition);
 		return taskDefinitionName;
 	}
@@ -312,7 +312,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 */
 	protected String schedule(String taskDefinitionName,
 			Map<String, String> properties, List<String> arguments) {
-		String scheduleName = "schedule-" + UUID.randomUUID().toString().substring(0, 10);
+		String scheduleName = "schedule-" + UUID.randomUUID().toString();
 		this.schedulerOperations.schedule(scheduleName, taskDefinitionName, properties, arguments);
 		return scheduleName;
 	}
