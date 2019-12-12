@@ -20,6 +20,7 @@ function use_helm() {
 
   helm repo update
   helm install --name scdf stable/spring-cloud-data-flow ${HELM_PARAMS} --namespace $KUBERNETES_NAMESPACE
+  helm list
 }
 
 # functions prefixed with distro_ replicate how in-tree k8s files are deployed
