@@ -15,7 +15,7 @@
  apps=`cf apps | awk 'FNR > 3 {print $1}'`
  for app in $apps
  do
-    if [[ $app != 'No' ]]; then
+     if [[ $app != 'No' && $app != 'name' ]]; then
         echo "Deleting the app: $app"
         cf delete $app -f -r
     fi

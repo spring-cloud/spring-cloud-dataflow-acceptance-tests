@@ -1,91 +1,99 @@
 = Spring Cloud Data Flow Acceptance Tests =
 
-This project bootstraps a dataflow server on a target platform, executes a series of tests by creating a series of streams and tasks and then cleans up after its done.
+This project bootstraps a dataflow server on a target platform (certified local, kubernetes, cloudfoundry environments), executes a series of tests by creating a series of streams and tasks and then cleans up after its done.
 
 == How to run it
 
-The main script is called `run.sh` and supports a few flags:
+The main script is called `run.sh` and is a wrapper to run tasks for three phases:
+
+* Setup: The link:scripts/setup.adoc[setup] phase will traverse each folder and call `create.sh` scripts.
+At the end of this phase you should expect to have an environment available with the Spring Cloud Data Flow server with a verified `SERVER_URI` and `SKIPPER_SERVER_URI`, along with the services required for it to run.
+* Test: The link:scripts/tests.adoc[test] phase will invoke the `mvn test`. The Junit test fixtures deploy test apps, using the `DataFlowTemplate`, into the configured environment and verify that the streams and tasks complete as expected.
+* Clean: The link:scripts/clean.adoc[clean] phase will undeploy the server and remove any services.
+
+NOTE: For convenience, `test` includes `clean` after by default. You can set `--skipClean` to disable this.
 
 ```
-USAGE: run.sh -p <PLATFORM> -b <BINDER> [-s -t -c]
-  The default mode will setup, run tests and clean up, you can control which stage you want to
-  have executed by toggling the flags (-s, -t, -c)
-
-Flags:
-
-[*] -p  | --platform - define the target platform to run
-    -b  | --binder - define the binder (i.e. rabbit, kafka) defaults to rabbit
-    -tests - comma separated list of tests to run. Wildcards such as *http* are allowed. (e.g. -tests TickTockTests#tickTockTests)
-    -s  | --skipSetup - skip setup phase
-    -t  | --skipTests - skip test phase
-    -c  | --skipCleanup - skip the clean up phase
-    -d  | --doNotDownload - skip the downloading of the server
-    -m  | --skipperMode - specify if skipper mode should be enabled
-    -cc | --skipCloudConfig - skip Cloud Config server tests for CF
-    -sv | --skipperVersion - set the skipper version to test (e.g. 1.0.4.BUILD-SNAPSHOT)
-    -dv | --dataflowVersion - set the dataflow version to test (e.g. 1.5.0.BUILD-SNAPSHOT)
-    -av | --appsVersion - set the stream app version to test (e.g. Celsius.SR2). Apps should be accessible via maven repo or docker hub.
-    -tv | --tasksVersion - set the task app version to test (e.g. Elston.RELEASE). Tasks should be accessible via maven repo or docker hub.
-    -se | --schedulesEnabled - installs scheduling infrastructure and configures SCDF to use the service.
-    -na | --noAutoreconfiguration - tell the buildpack to disable spring autoreconfiguration
-
-[*] = Required arguments
+USAGE: run.sh <phase> <phase-args>
 ```
 
-The first option is to choose a *PLATFORM*, available options `cloudfoundry`, `local`, `gke` (kubernetes) and `pks` (kubernetes).  The scripts for each platform are located in folders of the same name in the main directory.
-
-By default the script will execute three main phases:
-
-* Setup: The setup phase will traverse each folder and call `create.sh` scripts.  At the end of this phase you should expect to have an environment available with the Spring Cloud Data Flow server along with the services required for it to run.
-* Test: The test phase will invoke the `mvn test` and deploy apps into the environment and run tests.
-* Clean: The clean up phase will undeploy the server and remove any services.
-
-Each phase can be toggled by setting the appropriate flag (-s, -t, -c)
-
-The services created in the setup phase are `mysql` and `redis`.  Depending on the binder selected, it will create a Rabbit or Kafka service.
+The first option is to choose a *PLATFORM*, available options `cloudfoundry`, `kubernetes`, and `local`.
+The scripts specific to each platform are located in directories named for the corresponding platform.
 
 == Examples
 
-To run the tests locally cleaning up services using Rabbit (the default binder)
+=== To run the tests on kubernetes:
 
-`./run.sh -p local`
+```
+#The kubernetes config location, e.g., ~/.kube/config
+export KUBECONFIG=config location
+export CLUSTER_NAME=<cluster-name>
+#By default the setup will perform a helm install. Uncomment to install directly from the git repo.
+#export USE_DISTRO_FILES=true
 
-To run the tests locally cleaning up services using Kafka
+run.sh clean -p kubernetes -se #schedules enabled
+run.sh setup -p kubernetes -b rabbit -se -dv 2.5.0.BUILD-SNAPSHOT -sv 2.3.0.BUILD-SNAPSHOT
+run.sh tests -p kubernetes -b rabbit -se -dv 2.5.0.BUILD-SNAPSHOT
+```
 
-`./run.sh -p local -b kafka`
+NOTE: The commands require settings to be repeated, to avoid this, you can use environment variables for common options:
 
-To run the tests locally and keep the Data Flow Server, Kafka, and other services running afterwards
+```
+export KUBECONFIG=config location
+export CLUSTER_NAME=<cluster-name>
+export PLATFORM=kubernetes
+export BINDER=rabbit
+export DATAFLOW_VERSION=2.5.0.BUILD-SNAPSHOT
+export SKIPPER_VERSION=2.3.0.BUILD-SNAPSHOT
 
-`./run.sh -p local -b kafka -c`
+run.sh clean -se
+run.sh setup -se
+run.sh tests -se
+```
 
 
-To run the tests on cloudfoundry, cleaning up services and using Rabbit (the default binder)
+=== To run the tests on cloudfoundry:
 
-`./run.sh -p cloudfoundry`
+```
+export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL=https://api...
+export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG=<org>>
+export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE=<space>
+export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN=apps....
+export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME=<username,email>
+export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD=<password>
+export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION=true
+export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_SERVICES=rabbit
+#If schedules enabled
+export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES=mysql,ci-scheduler
+export MYSQL_SERVICE_NAME=<mysql service name>
+export MYSQL_PLAN_NAME=<service plan name
+export RABBIT_SERVICE_NAME=<rabbit service name>
+export RABBIT_PLAN_NAME=<rabbit plan name>
+#export DEPLOY_PAUSE_TIME=10
+#export TRUST_CERTS=<trust cert domain>
+#export CF_DIAL_TIMEOUT=600
+export JAVA_BUILDPACK=java_buildpack_offline
+export SCHEDULES_URL=https://scheduler.apps...
 
-To setup a Data Flow Server and services on CloudFoundry, but not run tests
-
-`./run.sh -p cloudfoundry -c -t`
-
+run.sh clean -p cloudfoundry
+run.sh setup -p cloudfoundry -b rabbit -se -dv 2.5.0.BUILD-SNAPSHOT -sv 2.3.0.BUILD-SNAPSHOT -cc
+run.sh tests -p cloudfoundry -b rabbit -dv 2.5.0.BUILD-SNAPSHOT
+```
 
 = General configuration
 
 Make sure you have `JAVA_HOME` configured correctly in your environment. 
 
-Each platform will have a file named `env.properties` located on `init/env.properties`, change those to reflect your
-environment. Each platform has different flags, but the global ones should be:
+Each platform has different flags, but the global ones should be:
 
 * RETRIES : Number of times to test for a port when checking a service status (6 by default)
 * WAIT_TIME: How long to wait for another port test (5s by default)
-* SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL: Location of the dataflow jar file to be downloaded.
-
-= Required environment variables when skipping setup
-
-If you want to point to an already running Data Flow server, set the environment variables
-
-* SERVER_URI - default is http://localhost:9393
-* STREAM_REGISTRATION_RESOURCE - default is  maven + rabbit based apps
-* TASK_REGISTRATION_RESOURCE - default is maven + rabbit based tasks
+* SPRING_CLOUD_DATAFLOW_SERVER_DOWNLOAD_URL: Location of the dataflow jar file to be downloaded (optional).
+* DATAFLOW_VERSION: The Dataflow version
+* SKIPPER_VERSION: The Skipper version
+* PLATFORM: the platform type (local, kubernetes, cloudfoundry)
+* BINDER: the binder (rabbit, kafka)
+* DEBUG: Log debug output
 
 To point to where your server is located and also specify which artifacts you want to register with the server.
 
@@ -107,13 +115,10 @@ NOTE: Currently Spring Cloud Data Flow Cloud Foundry and Kubernetes are the only
 
 * `$DOCKER_SERVER` environment variable properly set.  Defaults to localhost, which works on unix.  For MacOS `192.168.99.100` should work.
 
-The local deployment will always try to connect to a service running on your local machine. So if you have
-a local redis we will use it.
-
 If a local service is not found, the script will try to deploy using `docker-compose` so it's important that
 you have that installed and configured properly.
 
-When cleaning up, the script will only remove docker images, if you are using a local service like redis or mysql
+When cleaning up, the script will only remove docker images, if you are using a local service like mysql
 the script will not do anything to it
 
 == CloudFoundry
@@ -126,36 +131,18 @@ to prevent it to be leaked into github repos with credentials.
 * SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN
 * SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME
 * SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD
-* SPRING_APPLICATION_JSON with the following properties:
-** maven.remote-repositories.repo1
-** spring.cloud.dataflow.task.platform
-** Cloud Foundry _connection.url_
-** Cloud Foundry _org_
-** Cloud Foundry _space_
-** Cloud Foundry _domain_
-** Cloud Foundry _username_
-** Cloud Foundry _password_
-** Cloud Foundry _skipSSLValidation_
-** Cloud Foundry _deployment.memory_
-** Cloud Foundry _deployment.disk_
-** Cloud Foundry _services_
-** Cloud Foundry _deleteRoutes_
-** For example:
-
-```
-SPRING_APPLICATION_JSON="'{ \"maven\": { \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\" } } }, \"spring\": { \"cloud\": { \"dataflow\": { \"task\": { \"platform\": { \"cloudfoundry\": { \"accounts\": { \"default\": { \"connection\": { \"url\": \"https://mycfurl\", \"org\": \"myorg\", \"space\": \"myspace\", \"domain\": \"apps.mydomain.springapps.io\", \"username\": \"admin\", \"password\": \"mypass\", \"skipSslValidation\": true }, \"deployment\": { \"memory\": \"2048m\", \"disk\": \"2048m\", \"services\": \"mysql,atscheduler\", \"deleteRoutes\": false } } } } } } } } } }'"
-```
+* SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION
+* SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_SERVICES=rabbit
+* SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES=mysql
 
 === Configuration
 
-You can override service names and plans by either exporting or changing the following properties:
+You can set service names and plans by either exporting or changing the following properties:
 
 * MYSQL_SERVICE_NAME
 * MYSQL_PLAN_NAME
 * RABBIT_SERVICE_NAME
 * RABBIT_PLAN_NAME
-* REDIS_SERVICE_NAME
-* REDIS_PLAN_NAME
 
 The creation and deletion of services are implemented as blocking functions, i.e. a test job will wait, for instance,
 during setup until a service is created before continuing.  After requesting CloudFoundry to create or delete a service, these functions
@@ -177,8 +164,7 @@ The following environment variables must be set:
 
 * KUBECONFIG - the path to the kube config file to use
 * CLUSTER_NAME - the name of the cluster to target (must be present in KUBECONFIG)
-
-NOTE: You can also set a KUBERNETES_NAMESPACE environment variable that specifies an existing namespace to use for the testing. If this is not specified, the 'default' namespace will be used.
+* KUBERNETES_NAMESPACE environment variable that specifies an existing namespace to use for the testing. If this is not specified, the 'default' namespace will be used.
 
 === Code formatting guidelines
 

@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
-
+. ../common.sh
 function use_helm() {
-  # cleanup any failed distro file deployments if needed
-  distro_files_object_delete
-
-  helm delete scdf --purge || true
-
-  echo "Waiting for cleanup"
-  sleep 60
-
-  HELM_PARAMS="--set server.image=springcloud/$DATAFLOW_SERVER_NAME \
-    --set server.version=$DATAFLOW_VERSION --set skipper.version=$SKIPPER_VERSION \
+  if [ -z "$SKIPPER_VERSION" ]; then
+    echo "SKIPPER_VERSION must be defined"
+    exit 1
+  fi
+  if [ -z "$DATAFLOW_VERSION" ]; then
+    echo "DATAFLOW_VERSION must be defined"
+    exit 1
+  fi
+  HELM_PARAMS="--set server.version=$DATAFLOW_VERSION --set skipper.version=$SKIPPER_VERSION \
     --set skipper.service.type=LoadBalancer --set skipper.imagePullPolicy=Always \
     --set server.imagePullPolicy=Always --set deployer.readinessProbe.initialDelaySeconds=0 \
     --set deployer.livenessProbe.initialDelaySeconds=0"
@@ -34,11 +33,9 @@ function use_helm() {
 # per the user guide for the base install. changes to the user guide and visa versa
 # should be in sync.
 function distro_files_install() {
-  distro_files_object_delete
-
   distro_files_clone_repo
 
-  pushd spring-cloud-dataflow > /dev/null
+  pushd spring-cloud-dataflow
 
   distro_files_install_binder
   distro_files_install_database
@@ -46,22 +43,9 @@ function distro_files_install() {
   distro_files_install_skipper
   distro_files_install_scdf
 
-  popd > /dev/null
+  popd
 }
 
-function distro_files_object_delete() {
-  kubectl delete all -l app=rabbitmq --namespace $KUBERNETES_NAMESPACE || true
-  kubectl delete all,pvc,secrets -l app=mysql --namespace $KUBERNETES_NAMESPACE || true
-  kubectl delete all,cm -l app=skipper --namespace $KUBERNETES_NAMESPACE || true
-  kubectl delete all -l app=kafka --namespace $KUBERNETES_NAMESPACE || true
-  kubectl delete all,cm -l app=scdf-server --namespace $KUBERNETES_NAMESPACE || true
-  kubectl delete role scdf-role --namespace $KUBERNETES_NAMESPACE || true
-  kubectl delete rolebinding scdf-rb --namespace $KUBERNETES_NAMESPACE || true
-  kubectl delete serviceaccount scdf-sa --namespace $KUBERNETES_NAMESPACE || true
-
-  echo "Waiting for cleanup"
-  sleep 60
-}
 
 function distro_files_install_binder() {
   if [ "$BINDER" == "kafka" ]; then
@@ -74,7 +58,7 @@ function distro_files_install_binder() {
 function distro_files_clone_repo() {
   rm -rf spring-cloud-dataflow
   git clone https://github.com/spring-cloud/spring-cloud-dataflow.git
-  pushd spring-cloud-dataflow > /dev/null
+  pushd spring-cloud-dataflow
   git fetch --all --tags
 
   REPO_VERSION="origin/master"
@@ -84,9 +68,10 @@ function distro_files_clone_repo() {
     REPO_VERSION="$DISTRO_FILES_REPO_VERSION"
   fi
 
+  echo
+  DEBUG "checking out $REPO_VERSION"
   git checkout $REPO_VERSION -b $REPO_VERSION
-
-  popd > /dev/null
+  popd
 }
 
 function distro_files_install_database() {
@@ -123,19 +108,8 @@ function distro_files_install_scdf() {
   kubectl create -f src/kubernetes/server/server-deployment.yaml --namespace $KUBERNETES_NAMESPACE
 }
 
-function wait_for_skipper() {
-  WAIT_TIME=10
-
-  export SKIPPER_SERVER_URI=http://$(kubectl get svc --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $4}')
-  $(wait_for_200 ${SKIPPER_SERVER_URI}/api)
-
-  echo "SKIPPER SERVER IMAGE: springcloud/spring-cloud-skipper-server:$SKIPPER_VERSION"
-  echo "SKIPPER SERVER URI: $SKIPPER_SERVER_URI"
-}
-
-if [ -z "$DATAFLOW_SERVER_NAME" ]; then
-  DATAFLOW_SERVER_NAME="spring-cloud-dataflow-server-kubernetes"
-fi
+helm_delete
+distro_files_object_delete
 
 if [ -n "$USE_DISTRO_FILES" ]; then
   distro_files_install
@@ -143,5 +117,5 @@ else
   use_helm
 fi
 
-wait_for_skipper
+. ./server-uri.sh
 

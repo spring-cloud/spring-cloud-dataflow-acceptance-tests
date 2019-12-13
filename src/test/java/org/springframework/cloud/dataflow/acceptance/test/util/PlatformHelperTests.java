@@ -28,9 +28,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -56,18 +56,16 @@ public class PlatformHelperTests {
 		MockitoAnnotations.initMocks(this);
 		List<AppStatusResource> appStatusResources = new ArrayList<>();
 		AppStatusResource logStatus = new AppStatusResource(STREAM_NAME + "-log", "deployed");
-		logStatus.setInstances(new Resources<>(Collections.singletonList(
+		logStatus.setInstances(new CollectionModel<>(Collections.singletonList(
 				new AppInstanceStatusResource(STREAM_NAME + "-log", "deployed",
-						Collections.singletonMap("url", "http://log"))),
-				(Link[]) (new Link[0])));
+						Collections.singletonMap("url", "https://log")))));
 		appStatusResources.add(logStatus);
 		AppStatusResource timeStatus = new AppStatusResource(STREAM_NAME + "-time", "deployed");
-		timeStatus.setInstances(new Resources<>(Collections.singletonList(
+		timeStatus.setInstances(new CollectionModel<>(Collections.singletonList(
 				new AppInstanceStatusResource(STREAM_NAME + "-time", "deployed",
-						Collections.singletonMap("url", "http://time"))),
-				(Link[]) (new Link[0])));
+						Collections.singletonMap("url", "https://time"))), (new Link[0])));
 		appStatusResources.add(timeStatus);
-		PagedResources<AppStatusResource> resources = new PagedResources<>(appStatusResources, null, new Link("test"));
+		PagedModel<AppStatusResource> resources = new PagedModel<>(appStatusResources, null, new Link("test"));
 		when(this.runtimeOperations.status()).thenReturn(resources);
 	}
 
@@ -76,8 +74,8 @@ public class PlatformHelperTests {
 		PlatformHelper platformHelper = new DefaultPlatformHelper(runtimeOperations);
 		assertEquals("test.log", platformHelper.getLogfileName());
 		assertTrue(platformHelper.setUrlsForStream(stream));
-		assertEquals("http://log", stream.getApplication("log").getUrl());
-		assertEquals("http://time", stream.getApplication("time").getUrl());
+		assertEquals("https://log", stream.getApplication("log").getUrl());
+		assertEquals("https://time", stream.getApplication("time").getUrl());
 	}
 
 	@Test
@@ -92,8 +90,8 @@ public class PlatformHelperTests {
 		PlatformHelper platformHelper = new KubernetesPlatformHelper(runtimeOperations);
 		assertEquals("test.log", platformHelper.getLogfileName());
 		assertTrue(platformHelper.setUrlsForStream(stream));
-		assertEquals("http://log", stream.getApplication("log").getUrl());
-		assertEquals("http://time", stream.getApplication("time").getUrl());
+		assertEquals("https://log", stream.getApplication("log").getUrl());
+		assertEquals("https://time", stream.getApplication("time").getUrl());
 	}
 
 }

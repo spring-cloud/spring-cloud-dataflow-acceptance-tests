@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,15 +35,16 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.RunWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.acceptance.test.util.Application;
+import org.springframework.cloud.dataflow.acceptance.test.util.DataFlowTemplateConfigurer;
 import org.springframework.cloud.dataflow.acceptance.test.util.DefaultPlatformHelper;
 import org.springframework.cloud.dataflow.acceptance.test.util.KubernetesPlatformHelper;
 import org.springframework.cloud.dataflow.acceptance.test.util.LocalPlatformHelper;
@@ -55,7 +54,6 @@ import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
 import org.springframework.cloud.dataflow.acceptance.test.util.TestConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
-import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
@@ -80,7 +78,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Ilayaperumal Gopinathan
  * @author Chris Cheetham
  */
-@SpringBootTest(classes = { RedisTestConfiguration.class, RedisAutoConfiguration.class })
+@SpringBootTest
 @RunWith(SpringRunner.class)
 @EnableConfigurationProperties(TestConfigurationProperties.class)
 public abstract class AbstractStreamTests implements InitializingBean {
@@ -92,7 +90,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	@Rule
 	public LogTestNameRule logTestName = new LogTestNameRule();
 
-	protected RestTemplate restTemplate;
+	protected RestTemplate restTemplate = new RestTemplate();
 
 	@Autowired
 	protected TestConfigurationProperties configurationProperties;
@@ -134,28 +132,19 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * used for the acceptance test.
 	 */
 	public void afterPropertiesSet() {
-		if (restTemplate == null) {
-			try {
-				dataFlowOperations = new DataFlowTemplate(new URI(
-						configurationProperties.getServerUri()));
-				streamOperations = dataFlowOperations.streamOperations();
-				runtimeOperations = dataFlowOperations.runtimeOperations();
-				appRegistryOperations = dataFlowOperations.appRegistryOperations();
-				if (isKubernetesPlatform()) {
-					platformHelper = new KubernetesPlatformHelper(runtimeOperations);
-				}
-				else if (isLocalPlatform()) {
-					platformHelper = new LocalPlatformHelper(runtimeOperations);
-				}
-				else {
-					platformHelper = new DefaultPlatformHelper(runtimeOperations);
-				}
-			}
-			catch (URISyntaxException uriException) {
-				throw new IllegalStateException(uriException);
-			}
-			restTemplate = new RestTemplate();
-
+		dataFlowOperations = DataFlowTemplateConfigurer.create(configurationProperties.getServerUri())
+				.configure();
+		streamOperations = dataFlowOperations.streamOperations();
+		runtimeOperations = dataFlowOperations.runtimeOperations();
+		appRegistryOperations = dataFlowOperations.appRegistryOperations();
+		if (isKubernetesPlatform()) {
+			platformHelper = new KubernetesPlatformHelper(runtimeOperations);
+		}
+		else if (isLocalPlatform()) {
+			platformHelper = new LocalPlatformHelper(runtimeOperations);
+		}
+		else {
+			platformHelper = new DefaultPlatformHelper(runtimeOperations);
 		}
 	}
 
@@ -165,7 +154,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 */
 	protected void deployStream(StreamDefinition stream) {
 		logger.info("Creating stream '" + stream.getName() + "'");
-		streamOperations.createStream(stream.getName(), stream.getDefinition(), false);
+		streamOperations.createStream(stream.getName(), stream.getDefinition(), stream.getName(), false);
 		Map<String, String> streamProperties = new HashMap<>();
 		streamProperties.put("app.*.logging.file", platformHelper.getLogfileName());
 		streamProperties.put("app.*.endpoints.logfile.sensitive", "false");
@@ -193,7 +182,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(properties,
 					null, 0);
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			throw new RuntimeException(e.getMessage());
 		}
 		String streamName = stream.getName();
@@ -220,7 +209,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @return the available StreamDefinition REST resource.
 	 */
 	protected StreamDefinitionResource rollbackStream(StreamDefinition stream, int streamVersion) {
-		logger.info("Rolling back the stream '" + stream.getName() + "' to the version "+ streamVersion);
+		logger.info("Rolling back the stream '" + stream.getName() + "' to the version " + streamVersion);
 		this.streamOperations.rollbackStream(stream.getName(), streamVersion);
 		return streamAvailable(stream);
 	}
@@ -329,17 +318,20 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 	private String getLogFileUrl(String url) {
 		String logFileUrl = null;
-		// check if this is a boot 2.x application, and if so, follow 2.x url conventions to access log file.
+		// check if this is a boot 2.x application, and if so, follow 2.x url conventions to
+		// access log file.
 		String actuatorUrl = String.format("%s/actuator", url);
 		ResponseEntity<String> responseEntity = null;
 		try {
 			responseEntity = restTemplate.exchange(actuatorUrl, HttpMethod.GET, null, String.class);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 
 		}
 		if (responseEntity != null && responseEntity.getStatusCode() == HttpStatus.OK) {
 			logFileUrl = String.format("%s/actuator/logfile", url);
-		} else {
+		}
+		else {
 			logFileUrl = String.format("%s/logfile", url);
 		}
 		return logFileUrl;
@@ -379,6 +371,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				throw new IllegalStateException(e.getMessage(), e);
 			}
 			logs = logRetriever.retrieveLogs();
+
 			for (Log log : logs) {
 				if (log.getContent() != null && Stream.of(entries).allMatch(log.getContent()::contains)) {
 					logger.info("Matched all '" + StringUtils.arrayToCommaDelimitedString(entries)
@@ -437,13 +430,13 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		CLOUDFOUNDRY("cloudfoundry"),
 		KUBERNETES("kubernetes");
 
-		private String value;
+		private final String value;
 
 		PlatformTypes(String value) {
 			this.value = value;
 		}
 
-		public String getValue() {
+		public final String getValue() {
 			return value;
 		}
 
@@ -452,7 +445,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		}
 
 		@Override
-		public String toString() {
+		public final String toString() {
 			return value;
 		}
 	}
@@ -464,13 +457,17 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		private final String content;
 
 		private Log(String source, String content) {
-		    this.source = source;
-		    this.content = content;
+			this.source = source;
+			this.content = content;
 		}
 
-		private String getSource() { return source; }
+		private String getSource() {
+			return source;
+		}
 
-		private String getContent() { return content; }
+		private String getContent() {
+			return content;
+		}
 	}
 
 	private abstract class LogRetriever {
@@ -492,7 +489,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 		@Override
 		List<Log> retrieveLogs() {
-		    List<Log> logs = new ArrayList<>();
+			List<Log> logs = new ArrayList<>();
 			for (String appInstance : app.getInstanceUrls().keySet()) {
 				logger.info("Requesting log for app " + appInstance);
 				String content = getLog(app.getInstanceUrls().get(appInstance));

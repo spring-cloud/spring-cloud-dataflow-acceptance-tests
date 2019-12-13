@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,24 @@
 
 package org.springframework.cloud.dataflow.acceptance.test.util;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.SchedulerOperations;
-import org.springframework.cloud.scheduler.spi.junit.AbstractExternalResourceTestSupport;
+import org.springframework.cloud.stream.test.junit.AbstractExternalResourceTestSupport;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.util.Assert;
 
 /**
  * Verifies that the Spring Cloud Data Flow Scheduler is available.
  *
  * @author Glenn Renfro
+ * @author David Turanski
  */
 public class SchedulerRule extends AbstractExternalResourceTestSupport<DataFlowTemplate> {
 
@@ -50,7 +50,7 @@ public class SchedulerRule extends AbstractExternalResourceTestSupport<DataFlowT
 
 	@Override
 	protected void obtainResource() throws Exception {
-		context = new SpringApplicationBuilder(Config.class).web(false).run();
+		context = new SpringApplicationBuilder(Config.class).web(WebApplicationType.NONE).run();
 		resource = context.getBean(DataFlowTemplate.class);
 
 		SchedulerOperations schedulerOperations = resource.schedulerOperations();
@@ -63,21 +63,15 @@ public class SchedulerRule extends AbstractExternalResourceTestSupport<DataFlowT
 
 		@Bean
 		@ConfigurationProperties
-		public TestConfigurationProperties cloudFoundryConnectionProperties() {
+		@Primary
+		public TestConfigurationProperties cloudFoundryTestConfigurationProperties() {
 			return new TestConfigurationProperties();
 		}
 
 		@Bean
 		public DataFlowTemplate dataFlowTemplate(TestConfigurationProperties configurationProperties) {
-			DataFlowTemplate dataFlowOperationsTemplate = null;
-			try {
-				dataFlowOperationsTemplate = new DataFlowTemplate(
-						new URI(configurationProperties.getServerUri()));
-			}
-			catch (URISyntaxException uriException) {
-				throw new IllegalStateException(uriException);
-			}
-			return dataFlowOperationsTemplate;
+			return DataFlowTemplateConfigurer.create(configurationProperties.getServerUri())
+					.configure();
 		}
 
 	}

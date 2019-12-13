@@ -1,0 +1,63 @@
+# Prerequisites:
+
+## Run Locally:
+
+Mysql 5.7 server running and database `test` initialized.
+
+## Run in Kubernetes
+
+Use Dataflow deployed in K8s:
+
+```bash
+dataflow>app register --name batch-remote-partition --type task --uri "docker://springcloud/batch-remote-partition:0.0.1-SNAPSHOT
+dataflow>task create batch-remote-partition --definition batch-remote-partition
+dataflow>task launch batch-remote-partition --properties "deployer.*.kubernetes.deploymentServiceAccountName=scdf-data-flow" --arguments "--platform=kubernetes --artifact=docker://springcloud/batch-remote-partition"
+```
+
+### Build image to minikube registry
+```
+eval $(minikube docker-env)
+./mvnw clean package jib:dockerBuild
+```
+
+### Publish updated docker image to `springcloud`:
+
+```bash
+$./mvnw clean package jib:build -Djib.to.auth.username= -Djib.to.auth.password=
+```
+
+## Run in Cloudfoundry
+
+### Publish updated jar to `repo.spring.io`
+
+Set the credentials in ~/.m2/settings.xml
+
+```xml
+<settings>
+	<servers>
+    <server>
+      <id>spring-snapshots</id>
+      <username>...</username>
+      <password>...</password>
+    </server>
+  </servers>
+</settings>
+```
+
+```bash
+$./mvnw clean deploy
+```
+
+Use Dataflow deployed in Cloudfoundry:
+
+In this case we need to provide the internal CloudFoundry Deployer instance with the same CF environment configuration that SCDF uses.
+Setting these properties on the task definition will end up as environment variables in the app container.
+
+```bash
+dataflow:>app register --name batch-remote-partition --type task --uri maven://org.springframework.cloud.dataflow.acceptence.tests:batch-remote-partition:0.0.1-SNAPSHOT
+dataflow:>task create batch-remote-partition --definition "batch-remote-partition --spring.cloud.deployer.cloudfoundry.password=***** --spring.cloud.deployer.cloudfoundry.username=<username> --spring.cloud.deployer.cloudfoundry.org=<org> --spring.cloud.deployer.cloudfoundry.space=<space> --spring.cloud.deployer.cloudfoundry.url=<url> --spring.cloud.deployer.cloudfoundry.skipSslValidation=true"
+# Default artifact will work here.
+dataflow:>task launch batch-remote-partition --arguments "--platform=cloudfoundry"
+```
+
+
