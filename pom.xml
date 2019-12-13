@@ -27,6 +27,7 @@
 		<dataflow.version>1.7.0.BUILD-SNAPSHOT</dataflow.version>
 		<app.starters.support.version>1.3.3.RELEASE</app.starters.support.version>
 		<spring.web.version>4.3.4.RELEASE</spring.web.version>
+        <spring-cloud-deployer-cloudfoundry.version>2.1.1.RELEASE</spring-cloud-deployer-cloudfoundry.version>
 	</properties>
 
 	<dependencies>
@@ -74,6 +75,12 @@
 			<artifactId>spring-cloud-dataflow-core</artifactId>
 			<version>${dataflow.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-deployer-cloudfoundry</artifactId>
+            <version>${spring-cloud-deployer-cloudfoundry.version}</version>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 
 	<build>

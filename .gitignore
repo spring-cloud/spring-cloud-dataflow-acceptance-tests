@@ -46,3 +46,4 @@ spring-*/src/main/java/META-INF/MANIFEST.MF
 .vscode/
 rebel.xml
 !acceptance-tests/gradle/wrapper/gradle-wrapper.jar
+.DS_Store/
