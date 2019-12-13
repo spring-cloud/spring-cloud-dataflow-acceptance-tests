@@ -11,25 +11,17 @@ function java_jar() {
     echo "[$1] process pid is [$pid]"
     echo "System props are [$2]"
     echo "Logs are under [$APP_JAVA_PATH/scdf-server.log] or from nohup [$APP_JAVA_PATH/nohup.log]"
-    $(netcat_port localhost 9393)
+    . ./server-uri.sh
     return 0
 }
 
 run_scripts "$PWD" "config.sh"
-if [  ! -z "$skipperMode" ]; then
- APPLICATION_ARGS="$APPLICATION_ARGS --spring.cloud.dataflow.features.skipper-enabled=true"
-fi
 
-if [  -z "$skipperMode" ]; then
- APP_LOG_PATH=$PWD/app-logs
- rm -rf $APP_LOG_PATH
- mkdir $APP_LOG_PATH
- APPLICATION_ARGS="$APPLICATION_ARGS --spring.cloud.deployer.local.workingDirectoriesRoot=$APP_LOG_PATH"
-fi
-
-if [ "$schedulesEnabled" ]; then
- APPLICATION_ARGS="$APPLICATION_ARGS --spring.cloud.dataflow.features.schedules-enabled=true"
-fi
-
+APP_LOG_PATH=$PWD/app-logs
+rm -rf $APP_LOG_PATH
+mkdir $APP_LOG_PATH
+APPLICATION_ARGS="$APPLICATION_ARGS --spring.cloud.deployer.local.workingDirectoriesRoot=$APP_LOG_PATH"
 download $PWD
 java_jar $PWD
+
+

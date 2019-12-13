@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import org.junit.After;
 import org.junit.Before;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.acceptance.test.util.DataFlowTemplateConfigurer;
 import org.springframework.cloud.dataflow.acceptance.test.util.LogTestNameRule;
 import org.springframework.cloud.dataflow.acceptance.test.util.TestConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
@@ -47,7 +49,8 @@ import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
@@ -60,16 +63,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Glenn Renfro
  * @author Thomas Risberg
+ * @author David Turanski
  */
 @RunWith(SpringRunner.class)
-@EnableConfigurationProperties(TestConfigurationProperties.class)
+@EnableConfigurationProperties({ TestConfigurationProperties.class })
 public abstract class AbstractTaskTests implements InitializingBean {
 
 	protected static final String DEFAULT_CRON_EXPRESSION_KEY = "spring.cloud.scheduler.cron.expression";
 
-	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskTests.class);
+	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private static boolean tasksRegistered = false;
+	protected static boolean tasksRegistered = false;
 
 	@Rule
 	public LogTestNameRule logTestName = new LogTestNameRule();
@@ -92,16 +96,13 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	@Before
 	public void setup() {
 		composedTasksToBeDestroyed = new ArrayList<>();
-		if (tasksRegistered) {
-			return;
-		}
 		registerTasks();
 	}
 
 	@After
 	public void teardown() {
 		if (schedulerOperations != null) {
-			PagedResources<ScheduleInfoResource> scheduleInfoResources = schedulerOperations.list();
+			PagedModel<ScheduleInfoResource> scheduleInfoResources = schedulerOperations.list();
 			Iterator<ScheduleInfoResource> scheduleInfoResourceIterator = scheduleInfoResources.iterator();
 			ScheduleInfoResource scheduleInfoResource;
 
@@ -118,7 +119,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 			}
 		}
 		else {
-			PagedResources<TaskDefinitionResource> taskExecutionResources = taskOperations.list();
+			PagedModel<TaskDefinitionResource> taskExecutionResources = taskOperations.list();
 			Iterator<TaskDefinitionResource> taskDefinitionResourceIterator = taskExecutionResources.iterator();
 			TaskDefinitionResource taskDefinitionResource;
 
@@ -180,8 +181,8 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	protected String taskLaunch(String definition,
 			Map<String, String> properties, List<String> arguments) {
 		String taskDefinitionName = "task-" + UUID.randomUUID().toString().substring(0, 10);
-		taskOperations.create(taskDefinitionName, definition);
-		taskOperations.launch(taskDefinitionName, properties, arguments);
+		taskOperations.create(taskDefinitionName, definition, taskDefinitionName);
+		taskOperations.launch(taskDefinitionName, properties, arguments, null);
 		return taskDefinitionName;
 	}
 
@@ -193,7 +194,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 */
 	protected String taskCreate(String definition) {
 		String taskDefinitionName = "task-" + UUID.randomUUID().toString().substring(0, 10);
-		taskOperations.create(taskDefinitionName, definition);
+		taskOperations.create(taskDefinitionName, definition, taskDefinitionName);
 		return taskDefinitionName;
 	}
 
@@ -213,13 +214,16 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 */
 	protected void launchExistingTask(String taskDefinitionName, Map<String, String> properties,
 			List<String> arguments) {
-		taskOperations.launch(taskDefinitionName, properties, arguments);
+		taskOperations.launch(taskDefinitionName, properties, arguments, null);
 	}
 
 	/**
 	 * Imports the proper apps required for the acceptance tests.
 	 */
 	protected void registerTasks() {
+		if (tasksRegistered) {
+			return;
+		}
 		logger.info(String.format("Importing task apps from uri resource: %s",
 				configurationProperties.getTaskRegistrationResource()));
 		appRegistryOperations.importFromResource(configurationProperties.getTaskRegistrationResource(), true);
@@ -232,19 +236,31 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 */
 	public void afterPropertiesSet() {
 		if (restTemplate == null) {
-			try {
-				DataFlowTemplate dataFlowOperationsTemplate = new DataFlowTemplate(
-						new URI(configurationProperties.getServerUri()));
-				taskOperations = dataFlowOperationsTemplate.taskOperations();
-				schedulerOperations = dataFlowOperationsTemplate.schedulerOperations();
-				appRegistryOperations = dataFlowOperationsTemplate.appRegistryOperations();
-				this.jobOperations = dataFlowOperationsTemplate.jobOperations();
-			}
-			catch (URISyntaxException uriException) {
-				throw new IllegalStateException(uriException);
-			}
-			restTemplate = new RestTemplate();
+			configureRestTemplate();
+			DataFlowTemplate dataFlowOperationsTemplate = DataFlowTemplateConfigurer
+						.create(configurationProperties.getServerUri()).configure();
+			taskOperations = dataFlowOperationsTemplate.taskOperations();
+			schedulerOperations = dataFlowOperationsTemplate.schedulerOperations();
+			appRegistryOperations = dataFlowOperationsTemplate.appRegistryOperations();
+			jobOperations = dataFlowOperationsTemplate.jobOperations();
+			restTemplate = dataFlowOperationsTemplate.getRestTemplate();
 		}
+	}
+
+	/**
+	 * Configure RestTemplate to skip ssl validation
+	 */
+	protected void configureRestTemplate() {
+		HttpClientConfigurer httpClientConfigurer = null;
+		try {
+			httpClientConfigurer = HttpClientConfigurer.create(
+					new URI(configurationProperties.getServerUri()))
+					.skipTlsCertificateVerification(true);
+		} catch (URISyntaxException e) {
+			throw new IllegalStateException(e);
+		}
+		restTemplate = new RestTemplate();
+		restTemplate.setRequestFactory(httpClientConfigurer.buildClientHttpRequestFactory());
 	}
 
 	/**
@@ -257,7 +273,8 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 */
 	protected boolean waitForTaskToComplete(String taskDefinitionName, int taskExecutionCount) {
 		long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
-		boolean isComplete = false;
+		boolean isComplete = isTaskComplete(taskDefinitionName, taskExecutionCount);
+		logger.info("Waiting for task: {}", taskDefinitionName);
 		while (!isComplete && System.currentTimeMillis() < timeout) {
 			try {
 				Thread.sleep(configurationProperties.getDeployPauseTime() * 1000);
@@ -267,14 +284,20 @@ public abstract class AbstractTaskTests implements InitializingBean {
 				throw new IllegalStateException(e.getMessage(), e);
 			}
 
-			List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
-			if (taskExecutionResources.size() >= taskExecutionCount) {
-				isComplete = true;
-				for (TaskExecutionResource taskExecutionResource : taskExecutionResources) {
-					isComplete = (taskExecutionResource != null && taskExecutionResource.getEndTime() != null);
-					if (!isComplete) {
-						break;
-					}
+			isComplete =  isTaskComplete(taskDefinitionName,  taskExecutionCount);
+		}
+		return isComplete;
+	}
+
+	private  boolean isTaskComplete(String taskDefinitionName, int taskExecutionCount) {
+		boolean isComplete = false;
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
+		if (taskExecutionResources.size() >= taskExecutionCount) {
+			isComplete = true;
+			for (TaskExecutionResource taskExecutionResource : taskExecutionResources) {
+				isComplete = (taskExecutionResource != null && taskExecutionResource.getEndTime() != null);
+				if (!isComplete) {
+					break;
 				}
 			}
 		}
@@ -295,11 +318,17 @@ public abstract class AbstractTaskTests implements InitializingBean {
 
 		while (taskExecutionIterator.hasNext()) {
 			taskExecutionResource = taskExecutionIterator.next();
-			if (taskExecutionResource.getTaskName().equals(taskDefinitionName)) {
-				result.add(taskExecutionResource);
+			if (taskExecutionResource.getTaskName() != null) {
+				if (taskExecutionResourceTaskNameMatcher(taskDefinitionName).test(taskExecutionResource)) {
+					result.add(taskExecutionResource);
+				}
 			}
 		}
 		return result;
+	}
+
+	protected Predicate<TaskExecutionResource> taskExecutionResourceTaskNameMatcher(String taskName) {
+		return r -> r.getTaskName().equals(taskName);
 	}
 
 	/**
@@ -350,19 +379,19 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	}
 
 	/**
-	 * Retrieves a {@link PagedResources} of the existing schedules.
+	 * Retrieves a {@link org.springframework.hateoas.PagedModel} of the existing schedules.
 	 */
-	protected PagedResources<ScheduleInfoResource> listSchedules() {
+	protected PagedModel<ScheduleInfoResource> listSchedules() {
 		return this.schedulerOperations.list();
 	}
 
 	/**
-	 * Retrieves a {@link PagedResources} of the existing {@link ScheduleInfoResource}s that
+	 * Retrieves a {@link PagedModel} of the existing {@link ScheduleInfoResource}s that
 	 * are associated with the task definition name.
 	 * @param taskDefinitionName The name of the task definition that the schedules should be
 	 *     associated.
 	 */
-	protected PagedResources<ScheduleInfoResource> listSchedules(String taskDefinitionName) {
+	protected PagedModel<ScheduleInfoResource> listSchedules(String taskDefinitionName) {
 		return this.schedulerOperations.list(taskDefinitionName);
 	}
 
@@ -376,7 +405,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	}
 
 	protected Collection<JobExecutionResource> getJobExecutionByTaskName(String taskName) {
-		PagedResources<JobExecutionResource> jobExecutionPagedResources = this.jobOperations
+		PagedModel<JobExecutionResource> jobExecutionPagedResources = this.jobOperations
 				.executionListByJobName(taskName);
 		return jobExecutionPagedResources.getContent();
 	}
@@ -385,5 +414,4 @@ public abstract class AbstractTaskTests implements InitializingBean {
 		TIMESTAMP,
 		CORE
 	}
-
 }

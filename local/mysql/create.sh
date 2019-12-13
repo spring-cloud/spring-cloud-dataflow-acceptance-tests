@@ -15,7 +15,7 @@ mysql:
 EOF
 
 echo "cleaning up any previous mysql docker containers..."
-docker ps -q --filter ancestor="mysql:5.7" | xargs -r docker stop
+docker_stop "mysql:5.7"
 echo "done cleaning up."
 create "mysql" 3306
 echo "Service host is $SERVICE_HOST"

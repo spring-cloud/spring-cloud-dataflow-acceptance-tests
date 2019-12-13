@@ -56,7 +56,7 @@ public class TickTockTests extends AbstractStreamTests {
 		String implementation = aboutResource.getVersionInfo().getImplementation().getName();
 		if (!implementation.equals("spring-cloud-dataflow-server")) {
 			assumeThat("Skipping test", "true",
-					Matchers.equalToIgnoringCase(String.valueOf(aboutResource.getFeatureInfo().isSkipperEnabled())));
+					Matchers.equalToIgnoringCase(String.valueOf(aboutResource.getFeatureInfo().isStreamsEnabled())));
 		}
 		this.dataFlowOperations.streamOperations().destroyAll();
 		StreamDefinition stream = StreamDefinition.builder("TICKTOCK")

@@ -35,12 +35,8 @@ cat << EOF >> ./skipper-manifest.yml
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_ENABLE_RANDOM_APP_NAME_PREFIX: false
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_APP_NAME_PREFIX: $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE
     SPRING_APPLICATION_JSON: '{ "spring": { "cloud": { "skipper": { "server": { "enableLocalPlatform": "false"} } } } }'
-EOF
-if [ "$noAutoreconfiguration" ]; then
-cat << EOF >> ./skipper-manifest.yml
     JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
 EOF
-fi
 }
 
 function push_application() {

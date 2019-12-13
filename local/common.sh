@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-
-
 # ======================================= FUNCTIONS START =======================================
 
 function stop_docker_container() {
@@ -30,6 +28,14 @@ function deploy_docker_container() {
 
   echo "$PROCESS_NAME running on $DOCKER_SERVER:$SERVER_PORT"
   SERVICE_HOST=$DOCKER_SERVER
+}
+
+function docker_stop() {
+    if [ "$(uname)" ==  "Darwin" ]; then
+      docker ps -q --filter ancestor="$1" | xargs docker stop
+    else
+      docker ps -q --filter ancestor="$1" | xargs -r docker stop
+    fi
 }
 
 function create_kafka_docker_compose_file(){
@@ -62,7 +68,6 @@ function create() {
   SERVER_PORT=$2
   $(test_port "127.0.0.1" $SERVER_PORT)
   service_running=$?
-
 
   if [[ "$service_running" == 1 ]]; then
     echo "Could not find a local $PROCESS_NAME server, trying docker."

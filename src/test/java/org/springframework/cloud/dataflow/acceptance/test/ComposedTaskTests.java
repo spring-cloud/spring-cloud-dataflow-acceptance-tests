@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
+ * @author David Turanski
  */
 public class ComposedTaskTests extends AbstractTaskTests {
 
@@ -42,11 +43,12 @@ public class ComposedTaskTests extends AbstractTaskTests {
 	}
 
 	@Test
-	public void ctrMultipleLaunch() {
+	public void ctrMultipleLaunchShouldFailIfBatchParametersDoNotChange() {
 		String taskDefinitionName = composedTaskLaunch("a: timestamp && b:timestamp");
+		logger.info("Launched composed task: {}", taskDefinitionName);
 		assertTaskExecutions(taskDefinitionName, 0, 1);
 		launchExistingTask(taskDefinitionName);
-		assertParentTaskExecution(taskDefinitionName, 0, 2, 1);
+		assertLastParentTaskExecution(taskDefinitionName, 1);
 	}
 
 	@Test
@@ -61,23 +63,45 @@ public class ComposedTaskTests extends AbstractTaskTests {
 
 	private void assertTaskExecutions(String taskDefinitionName,
 			int expectedExitCode, int expectedCount) {
-		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
-		assertTrue(waitForTaskToComplete(taskDefinitionName, expectedCount));
 		assertTrue(waitForTaskToComplete(taskDefinitionName + "-a", expectedCount));
 		assertTrue(waitForTaskToComplete(taskDefinitionName + "-b", expectedCount));
+		assertTrue(waitForTaskToComplete(taskDefinitionName, expectedCount));
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
+		for (TaskExecutionResource taskExecutionResource : taskExecutionResources) {
+			logger.info("task name: {} end time: {} exit code: {}",
+					taskExecutionResource.getTaskName(),
+					taskExecutionResource.getEndTime(),
+					taskExecutionResource.getExitCode());
+			assertEquals(expectedExitCode, (int) taskExecutionResource.getExitCode());
+		}
+	}
+
+	private void assertLastParentTaskExecution(String taskDefinitionName, int expectedExitCode) {
+		assertTrue(waitForTaskToComplete(taskDefinitionName, 1));
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
+
+		TaskExecutionResource lastExecution = taskExecutionResources.get(0);
 
 		for (TaskExecutionResource taskExecutionResource : taskExecutionResources) {
-			assertEquals(expectedExitCode, taskExecutionResource.getExitCode());
+			if (taskExecutionResource.getEndTime().compareTo(lastExecution.getEndTime()) > 0) {
+				lastExecution = taskExecutionResource;
+			}
 		}
+		assertEquals(expectedExitCode, (int) lastExecution.getExitCode());
 	}
 
 	private void assertParentTaskExecution(String taskDefinitionName,
 			int expectedExitCode, int expectedCount, int expectJobCount) {
-		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
+
 		assertTrue(waitForTaskToComplete(taskDefinitionName, expectedCount));
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
 
 		for (TaskExecutionResource taskExecutionResource : taskExecutionResources) {
-			assertEquals(expectedExitCode, taskExecutionResource.getExitCode());
+			logger.info("task name: {} end time: {} exit code: {}",
+					taskExecutionResource.getTaskName(),
+					taskExecutionResource.getEndTime(),
+					taskExecutionResource.getExitCode());
+			assertEquals(expectedExitCode, (int) taskExecutionResource.getExitCode());
 		}
 		assertEquals(expectJobCount, getJobExecutionByTaskName(taskDefinitionName).size());
 	}

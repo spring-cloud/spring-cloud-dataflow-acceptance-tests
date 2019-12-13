@@ -42,12 +42,11 @@ public class TestConfigurationProperties {
 
 	private String platformSuffix = "local.pcfdev.io";
 
-	private String namespace = "default";
+	private String namespace="default";
 
-	private String streamRegistrationResource = "https://repo.spring.io/libs-snapshot/org/springframework/cloud/stream/app/spring-cloud-stream-app-descriptor/Celsius.BUILD-SNAPSHOT/spring-cloud-stream-app-descriptor-Celsius.BUILD-SNAPSHOT.stream-apps-rabbit-maven";
+	private String streamRegistrationResource = "https://https://dataflow.spring.io/rabbitmq-maven-latest";
 
-	private String taskRegistrationResource = "https://repo.spring.io/libs-release/org/springframework/cloud/task/app/spring-cloud-task-app-descriptor/Elston.RELEASE/spring-cloud-task-app-descriptor-Elston.RELEASE.task-apps-maven";
-
+	private String taskRegistrationResource = "https://dataflow.spring.io/task-maven-latest";
 	public int getMaxWaitTime() {
 		return maxWaitTime;
 	}

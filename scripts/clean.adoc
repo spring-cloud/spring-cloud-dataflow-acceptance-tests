@@ -1,0 +1,31 @@
+= Spring Cloud Data Flow Acceptance Tests - Clean =
+
+Cleaning the AT environment undeploys the Data Flow and Skipper servers and any remaining test apps.
+This script also removes any dependent resources.
+You have the option to keep dependent services, e.g., message broker and mysql, to save time if they can be used for subsequent test runs.
+
+== How to run it
+
+`clean.sh`  must be run from the project root. The easiest way is:
+
+```
+./run.sh clean <args>
+```
+
+which simply invokes `clean.sh` with the given args.
+Alternately, you can run it standalone from the project root:
+```
+./scripts/clean.sh <args>
+```
+
+```
+USAGE: clean.sh -p <PLATFORM> -b <BINDER> [--schedulesEnabled]
+  This will cleanup any existing resources on the platform
+
+Flags:
+-p  | --platform - define the target platform to clean, defaults to local
+-b  | --binder - define the binder to clean (i.e. RABBIT, KAFKA) defaults to RABBIT
+-sc | --serverCleanup - run the cleanup for the SCDF/Skipper (along with the applications deployed but excluding the DB, message broker)
+-se | --schedulesEnabled - cleans scheduling infrastructure if installed.
+```
+
