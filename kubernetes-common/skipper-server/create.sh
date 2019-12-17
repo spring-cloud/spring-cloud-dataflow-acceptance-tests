@@ -18,6 +18,10 @@ function use_helm() {
     HELM_PARAMS="$HELM_PARAMS --set kafka.enabled=true,rabbitmq.enabled=false"
   fi
 
+  if [ ! -z "$HELM_CHART_VERSION" ]; then
+    HELM_PARAMS="$HELM_PARAMS --version $HELM_CHART_VERSION"
+  fi
+
   helm repo update
   helm install --name scdf stable/spring-cloud-data-flow ${HELM_PARAMS} --namespace $KUBERNETES_NAMESPACE
   helm list
