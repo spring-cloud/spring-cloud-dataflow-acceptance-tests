@@ -31,10 +31,12 @@ import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow20x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow21x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow22x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow23x;
+import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow24x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Postgres;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper11x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper20x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper22x;
+import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper23x;
 
 @ExtendWith(DockerComposeExtension.class)
 @Postgres
@@ -95,6 +97,26 @@ public class DataflowServerPostgresBootstrapTests extends AbstractDataflowTests 
 	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper22xpostgres.yml" }, services = { "skipper" })
 	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow23xpostgres.yml" }, services = { "dataflow" })
 	public void testDataflow23xWithPostgres(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
+		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
+
+		registerBatchApp(dockerComposeInfo, "dataflow", "dataflow");
+		registerBatchTaskDefs(dockerComposeInfo, "dataflow", "dataflow");
+		launchTask(dockerComposeInfo, "dataflow", "dataflow", "fakebatch");
+		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
+				TimeUnit.SECONDS);
+		deleteBatchJobExecutions(dockerComposeInfo, "dataflow", "dataflow");
+		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
+				TimeUnit.SECONDS, 0, 0);
+	}
+
+	@Test
+	@Skipper23x
+	@Dataflow24x
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/postgres.yml" }, services = { "postgres" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper23xpostgres.yml" }, services = { "skipper" })
+	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow24xpostgres.yml" }, services = { "dataflow" })
+	public void testDataflow24xWithPostgres(DockerComposeInfo dockerComposeInfo) throws Exception {
 		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
 		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
 
