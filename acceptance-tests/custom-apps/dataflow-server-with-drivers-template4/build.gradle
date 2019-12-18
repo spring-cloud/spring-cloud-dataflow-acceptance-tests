@@ -1,0 +1,70 @@
+buildscript {
+	ext {
+		jarPostfix = project.properties['jarPostfix'] ?: '24x'
+		projectBuildVersion = project.properties['projectBuildVersion'] ?: '2.4.0.BUILD-SNAPSHOT'
+		springBootVersion = project.properties['springBootVersion'] ?: '2.2.1.RELEASE'
+		oracleJdbcDriverVersion = project.properties['oracleJdbcDriverVersion'] ?: '12.2.0.1'
+		mssqlJdbcDriverVersion = project.properties['mssqlJdbcDriverVersion'] ?: '7.0.0.jre8'
+		db2JdbcDriverVersion = project.properties['db2JdbcDriverVersion'] ?: '4.19.26'
+		mysqlJdbcDriverVersion = project.properties['mysqlJdbcDriverVersion'] ?: '8.0.16'
+		springCloudDataflowVersion = project.properties['springCloudDataflowVersion'] ?: '2.4.0.BUILD-SNAPSHOT'
+		springSecurityOauth2Version = project.properties['springSecurityOauth2Version'] ?: '2.3.7.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+		maven { url 'https://repo.springsource.org/plugins-release' }
+		maven { url 'https://repo.springsource.org/plugins-snapshot' }
+	}
+	dependencies {
+		classpath("io.spring.gradle:propdeps-plugin:0.0.8")
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'org.springframework.boot'
+
+group = 'org.springframework.cloud.dataflow.acceptance.app'
+version = "${projectBuildVersion}"
+sourceCompatibility = 1.8
+
+jar {
+	archivesBaseName = "dataflow-server-with-drivers${jarPostfix}"
+}
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+	maven { url "https://repo.springsource.org/libs-snapshot" }
+	maven { url "https://repo.springsource.org/libs-release" }
+	maven { url "https://repo.springsource.org/libs-milestone" }
+	maven {
+		url "https://repo.springsource.org/ext-private-local"
+		credentials {
+			username = System.getenv('ARTIFACTORY_USERNAME') ?: artifactoryUsername
+			password = System.getenv('ARTIFACTORY_PASSWORD') ?: artifactoryPassword
+		}
+	}
+
+}
+
+dependencies {
+	compile('org.springframework.cloud:spring-cloud-starter-dataflow-server')
+	compile('org.flywaydb:flyway-core:5.2.4')
+	runtime("com.oracle.jdbc:ojdbc8:${oracleJdbcDriverVersion}")
+	runtime("mysql:mysql-connector-java:${mysqlJdbcDriverVersion}")
+	runtime("com.ibm.db2:db2jcc4:${db2JdbcDriverVersion}")
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dataflow-dependencies:${springCloudDataflowVersion}"
+	}
+	dependencies {
+		dependency "org.springframework.security.oauth:spring-security-oauth2:${springSecurityOauth2Version}"
+	}
+}
