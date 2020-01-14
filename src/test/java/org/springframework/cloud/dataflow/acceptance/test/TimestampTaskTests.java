@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.acceptance.test;
 
 import java.util.List;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
@@ -32,6 +31,7 @@ import static org.junit.Assert.assertTrue;
  * @author Thomas Risberg
  */
 public class TimestampTaskTests extends AbstractTaskTests {
+
 	@Test
 	public void timeStampTests() {
 		String taskDefinitionName = taskLaunch("timestamp");
