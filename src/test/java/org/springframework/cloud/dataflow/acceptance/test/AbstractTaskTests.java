@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import java.util.function.Predicate;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -61,9 +61,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Glenn Renfro
  * @author Thomas Risberg
+ * @author David Turanski
  */
 @RunWith(SpringRunner.class)
-@EnableConfigurationProperties({TestConfigurationProperties.class})
+@EnableConfigurationProperties({ TestConfigurationProperties.class })
 public abstract class AbstractTaskTests implements InitializingBean {
 
 	protected static final String DEFAULT_CRON_EXPRESSION_KEY = "spring.cloud.scheduler.cron.expression";
@@ -297,17 +298,17 @@ public abstract class AbstractTaskTests implements InitializingBean {
 		while (taskExecutionIterator.hasNext()) {
 			taskExecutionResource = taskExecutionIterator.next();
 			if (taskExecutionResource.getTaskName() != null) {
-                if (taskExecutionResourceTaskNameMatcher(taskDefinitionName).test(taskExecutionResource)) {
-                    result.add(taskExecutionResource);
-                }
-            }
+				if (taskExecutionResourceTaskNameMatcher(taskDefinitionName).test(taskExecutionResource)) {
+					result.add(taskExecutionResource);
+				}
+			}
 		}
 		return result;
 	}
 
 	protected Predicate<TaskExecutionResource> taskExecutionResourceTaskNameMatcher(String taskName) {
-	    return r-> r.getTaskName().equals(taskName);
-    }
+		return r -> r.getTaskName().equals(taskName);
+	}
 
 	/**
 	 * Creates a unique schedule name from a UUID from an existing task definition.

@@ -16,16 +16,12 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import java.util.function.Predicate;
-import org.junit.Before;
-import org.junit.BeforeClass;
+
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,67 +36,69 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Executes acceptance tests for the batch remote partition task.
+ *
  * @author David Turanski
  */
-@EnableConfigurationProperties({BatchRemotePartitionTests.CFConnectionProperties.class})
+@EnableConfigurationProperties({ BatchRemotePartitionTests.CFConnectionProperties.class })
 public class BatchRemotePartitionTests extends AbstractTaskTests {
 
-    private static final String SCDF_DATA_FLOW_SA = "scdf-data-flow";
+	private static final String SCDF_DATA_FLOW_SA = "scdf-data-flow";
 
 	@Autowired
 	private TestConfigurationProperties testConfigurationProperties;
 
-    @Autowired
-    private  CFConnectionProperties cfConnectionProperties;
+	@Autowired
+	private CFConnectionProperties cfConnectionProperties;
 
-	private static final String TASKNAME="batch-remote-partition";
+	private static final String TASKNAME = "batch-remote-partition";
 
 	@Override
-    protected void registerTasks() {
-	    appRegistryOperations.register(TASKNAME, ApplicationType.task, artifactUriForPlatformType(),null, true);
-        logger.info("Registered " + TASKNAME + " as " + artifactUriForPlatformType());
-        tasksRegistered = true;
-    }
+	protected void registerTasks() {
+		appRegistryOperations.register(TASKNAME, ApplicationType.task, artifactUriForPlatformType(), null, true);
+		logger.info("Registered " + TASKNAME + " as " + artifactUriForPlatformType());
+		tasksRegistered = true;
+	}
 
 	@Test
 	public void runBatchRemotePartitionJob() {
 		String taskDefinitionName = taskLaunch(
-		    getTaskDefinitionForPlatformType(),
-            getDeploymentPropertiesForPlatformType(),
-            getArgumentsForPlatformType());
+				getTaskDefinitionForPlatformType(),
+				getDeploymentPropertiesForPlatformType(),
+				getArgumentsForPlatformType());
 
 		assertTrue(waitForTaskToComplete(taskDefinitionName, 4));
 	}
 
 	@Override
-    protected Predicate<TaskExecutionResource> taskExecutionResourceTaskNameMatcher(String taskName) {
-         return r-> {
-             return r.getTaskName().startsWith(taskName);
-         };
+	protected Predicate<TaskExecutionResource> taskExecutionResourceTaskNameMatcher(String taskName) {
+		return r -> r.getTaskName().startsWith(taskName);
+	}
 
-    }
+	private String getTaskDefinitionForPlatformType() {
+		Map<String, String> properties = new HashMap<>();
+		if (platformForPlatformType().equals("cloudfoundry")) {
+			properties = new HashMap<>();
+			properties.put(CFConnectionProperties.CLOUDFOUNDRY_PROPERTIES + ".username",
+					cfConnectionProperties.getUsername());
+			properties.put(CFConnectionProperties.CLOUDFOUNDRY_PROPERTIES + ".password",
+					cfConnectionProperties.getPassword());
+			properties.put(CFConnectionProperties.CLOUDFOUNDRY_PROPERTIES + ".org", cfConnectionProperties.getOrg());
+			properties.put(CFConnectionProperties.CLOUDFOUNDRY_PROPERTIES + ".space",
+					cfConnectionProperties.getSpace());
+			properties.put(CFConnectionProperties.CLOUDFOUNDRY_PROPERTIES + ".url",
+					cfConnectionProperties.getUrl().toString());
+			properties.put(CFConnectionProperties.CLOUDFOUNDRY_PROPERTIES + ".skipSslValidation",
+					String.valueOf(cfConnectionProperties.isSkipSslValidation()));
+		}
 
-    private String getTaskDefinitionForPlatformType() {
-	    Map<String, String> properties = new HashMap<>();
-	    if (platformForPlatformType().equals("cloudfoundry")) {
-	        properties = new HashMap<>();
-	        properties.put(CFConnectionProperties.CLOUDFOUNDRY_PROPERTIES + ".username", cfConnectionProperties.getUsername());
-            properties.put(CFConnectionProperties.CLOUDFOUNDRY_PROPERTIES + ".password", cfConnectionProperties.getPassword());
-            properties.put(CFConnectionProperties.CLOUDFOUNDRY_PROPERTIES + ".org", cfConnectionProperties.getOrg());
-            properties.put(CFConnectionProperties.CLOUDFOUNDRY_PROPERTIES + ".space", cfConnectionProperties.getSpace());
-            properties.put(CFConnectionProperties.CLOUDFOUNDRY_PROPERTIES + ".url", cfConnectionProperties.getUrl().toString());
-            properties.put(CFConnectionProperties.CLOUDFOUNDRY_PROPERTIES + ".skipSslValidation",
-                String.valueOf(cfConnectionProperties.isSkipSslValidation()));
-        }
+		String taskDefinition = TASKNAME;
+		for (Map.Entry<String, String> prop : properties.entrySet()) {
+			taskDefinition += (String.format(" --%s=%s", prop.getKey(), prop.getValue()));
+		}
+		return taskDefinition;
+	}
 
-        String taskDefinition = TASKNAME;
-	    for (Map.Entry<String,String> prop : properties.entrySet()) {
-	        taskDefinition += (String.format(" --%s=%s", prop.getKey(), prop.getValue()));
-        }
-	    return taskDefinition;
-    }
-
-    private Map<String, String> getDeploymentPropertiesForPlatformType() {
+	private Map<String, String> getDeploymentPropertiesForPlatformType() {
 		Map<String, String> deploymentProperties = new HashMap<>();
 		String genericPlatform = platformForPlatformType();
 		if (genericPlatform.equals("kubernetes")) {
@@ -120,10 +118,10 @@ public class BatchRemotePartitionTests extends AbstractTaskTests {
 	}
 
 	private String artifactUriForPlatformType() {
-        return  "kubernetes".equals(platformForPlatformType()) ?
-            "docker://springcloud/batch-remote-partition:0.0.1-SNAPSHOT" :
-            "maven://org.springframework.cloud.dataflow.acceptence.tests:batch-remote-partition:0.0.1-SNAPSHOT";
-    }
+		return "kubernetes".equals(platformForPlatformType())
+				? "docker://springcloud/batch-remote-partition:0.0.1-SNAPSHOT"
+				: "maven://org.springframework.cloud.dataflow.acceptence.tests:batch-remote-partition:0.0.1-SNAPSHOT";
+	}
 
 	private String platformForPlatformType() {
 		switch (testConfigurationProperties.getPlatformType()) {
@@ -135,8 +133,7 @@ public class BatchRemotePartitionTests extends AbstractTaskTests {
 		}
 	}
 
-
 	@ConfigurationProperties(CloudFoundryConnectionProperties.CLOUDFOUNDRY_PROPERTIES)
 	static class CFConnectionProperties extends CloudFoundryConnectionProperties {
-    }
+	}
 }

@@ -55,16 +55,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Disabled("This test has a circular dependency on the built artifact for this app.")
 class BatchRemotePartitionApplicationTests {
 
-    @RegisterExtension
-    MysqlLocalRunning mysqlLocalRunning = new MysqlLocalRunning();
+	@RegisterExtension
+	MysqlLocalRunning mysqlLocalRunning = new MysqlLocalRunning();
 
 	@Test
 	void partitionedJobRuns() throws InterruptedException, ExecutionException, TimeoutException {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 
 		Future<?> result = executor.submit(() -> {
-            new SpringApplicationBuilder(BatchRemotePartitionTestConfiguration.class).
-                web(WebApplicationType.NONE).run();
+			new SpringApplicationBuilder(BatchRemotePartitionTestConfiguration.class).web(WebApplicationType.NONE)
+					.run();
 		});
 		result.get(60, TimeUnit.SECONDS);
 	}
@@ -108,32 +108,34 @@ class BatchRemotePartitionApplicationTests {
 
 	static class MysqlLocalRunning implements ExecutionCondition {
 
-        @Override
-        public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext extensionContext) {
-            ConfigurableApplicationContext context =  new SpringApplicationBuilder(TestConfiguration.class).
-            web(WebApplicationType.NONE).run("--spring.profiles.active=test");
-            DataSource dataSource = context.getBean(DataSource.class);
-            try {
-                dataSource.getConnection();
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return ConditionEvaluationResult.disabled(
-                    "This test requires a persistent JDBC data source, cannot connect to the configured data source: " + context.getEnvironment().getProperty("spring.datasource.url"));
-            }
-            return ConditionEvaluationResult.enabled("connected to JDBC data source: " + context.getEnvironment().getProperty("spring.datasource.url"));
+		@Override
+		public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext extensionContext) {
+			ConfigurableApplicationContext context = new SpringApplicationBuilder(TestConfiguration.class)
+					.web(WebApplicationType.NONE).run("--spring.profiles.active=test");
+			DataSource dataSource = context.getBean(DataSource.class);
+			try {
+				dataSource.getConnection();
+			}
+			catch (SQLException e) {
+				e.printStackTrace();
+				return ConditionEvaluationResult.disabled(
+						"This test requires a persistent JDBC data source, cannot connect to the configured data source: "
+								+ context.getEnvironment().getProperty("spring.datasource.url"));
+			}
+			return ConditionEvaluationResult.enabled(
+					"connected to JDBC data source: " + context.getEnvironment().getProperty("spring.datasource.url"));
 
+		}
+	}
 
-        }
-    }
-
-    @Configuration
-    @Profile("test")
-    static class TestConfiguration {
-	   @Bean
-       DataSource testDataSource(@Value("spring.datasource.url") String url,
-                                 @Value("spring.datasource.username") String username,
-                                 @Value("spring.datasource.password") String password){
-	       return new SimpleDriverDataSource(new Driver(), url, username, password);
-       }
-    }
+	@Configuration
+	@Profile("test")
+	static class TestConfiguration {
+		@Bean
+		DataSource testDataSource(@Value("spring.datasource.url") String url,
+				@Value("spring.datasource.username") String username,
+				@Value("spring.datasource.password") String password) {
+			return new SimpleDriverDataSource(new Driver(), url, username, password);
+		}
+	}
 }

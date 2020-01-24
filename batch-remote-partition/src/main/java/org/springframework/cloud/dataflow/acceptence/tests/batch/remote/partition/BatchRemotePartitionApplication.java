@@ -35,10 +35,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ResourceLoader;
 
-
 /**
- * Disable default boot autoconfiguration since we depend on all the deployers to enable this app for any platform.
- * We explicitly enable  the deployer corresponding to the `platform` property value.
+ * Disable default boot autoconfiguration since we depend on all the deployers to enable
+ * this app for any platform. We explicitly enable the deployer corresponding to the
+ * `platform` property value.
  *
  * @author David Turanski
  */
@@ -51,38 +51,38 @@ public class BatchRemotePartitionApplication {
 
 	public static void main(String[] args) {
 
-	    new SpringApplicationBuilder(BatchRemotePartitionApplication.class)
-            .web(WebApplicationType.NONE)
-            .run(args);
+		new SpringApplicationBuilder(BatchRemotePartitionApplication.class)
+				.web(WebApplicationType.NONE)
+				.run(args);
 	}
 
-    @Configuration
-    @ConditionalOnProperty(value = "platform", havingValue = "cloudfoundry")
-    @Import(CloudFoundryDeployerAutoConfiguration.class)
-    static class CFDeployerConfiguration {
-    }
+	@Configuration
+	@ConditionalOnProperty(value = "platform", havingValue = "cloudfoundry")
+	@Import(CloudFoundryDeployerAutoConfiguration.class)
+	static class CFDeployerConfiguration {
+	}
 
-    @Configuration
-    @ConditionalOnProperty(value = "platform", havingValue = "kubernetes")
-    @Import(KubernetesAutoConfiguration.class)
-    static class K8sDeployerConfiguration {
-    }
+	@Configuration
+	@ConditionalOnProperty(value = "platform", havingValue = "kubernetes")
+	@Import(KubernetesAutoConfiguration.class)
+	static class K8sDeployerConfiguration {
+	}
 
-    @Configuration
-    @ConditionalOnProperty(value = "platform", havingValue = "local", matchIfMissing = true)
-    @Import(LocalDeployerAutoConfiguration.class)
-    static class LocalDeployerConfiguration {
-    }
+	@Configuration
+	@ConditionalOnProperty(value = "platform", havingValue = "local", matchIfMissing = true)
+	@Import(LocalDeployerAutoConfiguration.class)
+	static class LocalDeployerConfiguration {
+	}
 
-    // This config is needed to resolve `docker://` URL protocol.
-    // A maven aware resource loader is configured by default.
-    @Bean
-    public DelegatingResourceLoader delegatingResourceLoader(MavenProperties mavenProperties) {
-        DockerResourceLoader dockerLoader = new DockerResourceLoader();
-        MavenResourceLoader mavenResourceLoader = new MavenResourceLoader(mavenProperties);
-        Map<String, ResourceLoader> loaders = new HashMap<>();
-        loaders.put("docker", dockerLoader);
-        loaders.put("maven", mavenResourceLoader);
-        return new DelegatingResourceLoader(loaders);
-    }
+	// This config is needed to resolve `docker://` URL protocol.
+	// A maven aware resource loader is configured by default.
+	@Bean
+	public DelegatingResourceLoader delegatingResourceLoader(MavenProperties mavenProperties) {
+		DockerResourceLoader dockerLoader = new DockerResourceLoader();
+		MavenResourceLoader mavenResourceLoader = new MavenResourceLoader(mavenProperties);
+		Map<String, ResourceLoader> loaders = new HashMap<>();
+		loaders.put("docker", dockerLoader);
+		loaders.put("maven", mavenResourceLoader);
+		return new DelegatingResourceLoader(loaders);
+	}
 }
