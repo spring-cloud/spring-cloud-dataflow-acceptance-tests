@@ -38,6 +38,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.batch.partition.CommandLineArgsProvider;
@@ -110,12 +111,22 @@ public class BatchConfiguration {
 
 	@Bean
 	@Profile("!worker")
-	public SimpleCommandLineArgsProvider commandLineArgsProvider() {
+	public SimpleCommandLineArgsProvider commandLineArgsProvider(@Value("${platform:local}") String platform,
+																 DataSourceProperties dataSourceProperties) {
+
 		List<String> commandLineArgs = new ArrayList<>();
 		commandLineArgs.add("--spring.profiles.active=worker");
 		commandLineArgs.add("--spring.cloud.task.initialize.enable=false");
 		commandLineArgs.add("--spring.batch.initializer.enabled=false");
 		commandLineArgs.add("--spring.datasource.initialize=false");
+
+		if (platform.equals("local")) {
+			commandLineArgs.add("--spring.datasource.url=" + dataSourceProperties.getUrl());
+			commandLineArgs.add("--spring.datasource.password=" + dataSourceProperties.getPassword());
+			commandLineArgs.add("--spring.datasource.username=" + dataSourceProperties.getUsername());
+			commandLineArgs.add("--spring.datasource.driverClassName=" + dataSourceProperties.getDriverClassName());
+			commandLineArgs.add("--spring.datasource.platform=" + dataSourceProperties.getPlatform());
+		}
 		/*
 		 * Avoid passing the current task execution id as it will result in a duplicate.
 		 */
@@ -187,7 +198,10 @@ public class BatchConfiguration {
 			return super.getCommandLineArgs(executionContext)
 					.stream()
 					.filter(
-							arg -> !blackList.contains(arg.substring(0, arg.indexOf("=")).replaceAll("^--", "")))
+							arg -> {
+								System.out.println(arg);
+								return !blackList.contains(arg.substring(0, arg.indexOf("=")).replaceAll("^--", ""));
+							})
 					.collect(Collectors.toList());
 		}
 	}

@@ -63,8 +63,12 @@ class BatchRemotePartitionApplicationTests {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 
 		Future<?> result = executor.submit(() -> {
+			String[] args = {
+					"--logging.level.org.springframework.cloud.deployer.local=DEBUG"
+			};
+
 			new SpringApplicationBuilder(BatchRemotePartitionTestConfiguration.class).web(WebApplicationType.NONE)
-					.run();
+					.run(args);
 		});
 		result.get(60, TimeUnit.SECONDS);
 	}

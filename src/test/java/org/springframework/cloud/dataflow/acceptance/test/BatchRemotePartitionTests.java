@@ -25,12 +25,15 @@ import java.util.function.Predicate;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.acceptance.test.util.TestConfigurationProperties;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
 
 import static org.junit.Assert.assertTrue;
 
@@ -39,7 +42,7 @@ import static org.junit.Assert.assertTrue;
  *
  * @author David Turanski
  */
-@EnableConfigurationProperties({ BatchRemotePartitionTests.CFConnectionProperties.class })
+@ContextConfiguration(classes = BatchRemotePartitionTests.ConditionalCloudFoundryTestConfiguration.class)
 public class BatchRemotePartitionTests extends AbstractTaskTests {
 
 	private static final String SCDF_DATA_FLOW_SA = "scdf-data-flow";
@@ -47,7 +50,7 @@ public class BatchRemotePartitionTests extends AbstractTaskTests {
 	@Autowired
 	private TestConfigurationProperties testConfigurationProperties;
 
-	@Autowired
+	@Autowired(required = false)
 	private CFConnectionProperties cfConnectionProperties;
 
 	private static final String TASKNAME = "batch-remote-partition";
@@ -135,5 +138,11 @@ public class BatchRemotePartitionTests extends AbstractTaskTests {
 
 	@ConfigurationProperties(CloudFoundryConnectionProperties.CLOUDFOUNDRY_PROPERTIES)
 	static class CFConnectionProperties extends CloudFoundryConnectionProperties {
+	}
+
+	@Configuration
+	@ConditionalOnProperty(value = "platformType", havingValue = "cloudfoundry")
+	@EnableConfigurationProperties({ BatchRemotePartitionTests.CFConnectionProperties.class })
+	static class ConditionalCloudFoundryTestConfiguration {
 	}
 }

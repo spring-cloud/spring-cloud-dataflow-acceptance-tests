@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +44,7 @@ import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.acceptance.test.util.Application;
+import org.springframework.cloud.dataflow.acceptance.test.util.DataFlowTemplateConfigurer;
 import org.springframework.cloud.dataflow.acceptance.test.util.DefaultPlatformHelper;
 import org.springframework.cloud.dataflow.acceptance.test.util.KubernetesPlatformHelper;
 import org.springframework.cloud.dataflow.acceptance.test.util.LocalPlatformHelper;
@@ -135,28 +134,20 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 */
 	public void afterPropertiesSet() {
 		if (restTemplate == null) {
-			try {
-				dataFlowOperations = new DataFlowTemplate(new URI(
-						configurationProperties.getServerUri()));
-				streamOperations = dataFlowOperations.streamOperations();
-				runtimeOperations = dataFlowOperations.runtimeOperations();
-				appRegistryOperations = dataFlowOperations.appRegistryOperations();
-				if (isKubernetesPlatform()) {
-					platformHelper = new KubernetesPlatformHelper(runtimeOperations,
-                                                                    configurationProperties.getAppHost());
-				}
-				else if (isLocalPlatform()) {
-					platformHelper = new LocalPlatformHelper(runtimeOperations);
-				}
-				else {
-					platformHelper = new DefaultPlatformHelper(runtimeOperations);
-				}
+			dataFlowOperations = DataFlowTemplateConfigurer.create(configurationProperties.getServerUri())
+					.configure();
+			streamOperations = dataFlowOperations.streamOperations();
+			runtimeOperations = dataFlowOperations.runtimeOperations();
+			appRegistryOperations = dataFlowOperations.appRegistryOperations();
+			if (isKubernetesPlatform()) {
+				platformHelper = new KubernetesPlatformHelper(runtimeOperations,
+						configurationProperties.getAppHost());
+			} else if (isLocalPlatform()) {
+				platformHelper = new LocalPlatformHelper(runtimeOperations);
+			} else {
+				platformHelper = new DefaultPlatformHelper(runtimeOperations);
 			}
-			catch (URISyntaxException uriException) {
-				throw new IllegalStateException(uriException);
-			}
-			restTemplate = new RestTemplate();
-
+			restTemplate = ((DataFlowTemplate) dataFlowOperations).getRestTemplate();
 		}
 	}
 

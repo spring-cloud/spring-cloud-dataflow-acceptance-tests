@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.acceptance.test.util;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -34,6 +31,7 @@ import org.springframework.util.Assert;
  * Verifies that the Spring Cloud Data Flow Scheduler is available.
  *
  * @author Glenn Renfro
+ * @author David Turanski
  */
 public class SchedulerRule extends AbstractExternalResourceTestSupport<DataFlowTemplate> {
 
@@ -69,15 +67,8 @@ public class SchedulerRule extends AbstractExternalResourceTestSupport<DataFlowT
 
 		@Bean
 		public DataFlowTemplate dataFlowTemplate(TestConfigurationProperties configurationProperties) {
-			DataFlowTemplate dataFlowOperationsTemplate = null;
-			try {
-				dataFlowOperationsTemplate = new DataFlowTemplate(
-						new URI(configurationProperties.getServerUri()));
-			}
-			catch (URISyntaxException uriException) {
-				throw new IllegalStateException(uriException);
-			}
-			return dataFlowOperationsTemplate;
+			return DataFlowTemplateConfigurer.create(configurationProperties.getServerUri())
+				.configure();
 		}
 
 	}
