@@ -9,10 +9,10 @@ function use_helm() {
   echo "Waiting for cleanup"
   sleep 60
 
-  HELM_PARAMS="--set server.image=springcloud/$DATAFLOW_SERVER_NAME --set server.version=$DATAFLOW_VERSION \
-    --set skipper.version=$SKIPPER_VERSION --set server.service.labels.spring-deployment-id=scdf \
-    --set skipper.service.labels.spring-deployment-id=skipper --set skipper.trustCerts=true \
-    --set server.trustCerts=true --set skipper.imagePullPolicy=Always --set server.imagePullPolicy=Always"
+  HELM_PARAMS="--set server.image=springcloud/$DATAFLOW_SERVER_NAME \
+    --set server.version=$DATAFLOW_VERSION --set skipper.version=$SKIPPER_VERSION \
+    --set skipper.service.type=LoadBalancer --set skipper.imagePullPolicy=Always \
+    --set server.imagePullPolicy=Always"
 
   if [ "$BINDER" == "kafka" ]; then
     HELM_PARAMS="$HELM_PARAMS --set kafka.enabled=true,rabbitmq.enabled=false"
@@ -23,7 +23,9 @@ function use_helm() {
   fi
 
   helm repo update
+
   helm install --name scdf stable/spring-cloud-data-flow ${HELM_PARAMS} --namespace $KUBERNETES_NAMESPACE
+  
   helm list
 }
 
@@ -116,11 +118,8 @@ function distro_files_install_scdf() {
 function wait_for_skipper() {
   WAIT_TIME=10
 
-  SKIPPER_SERVER_URI=$(kubectl get ingress --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $2}')
-  $(wait_for_200 https://${SKIPPER_SERVER_URI}/api)
-
-  SKIPPER_SERVER_URI=$(kubectl get svc skipper --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $4}')
-  export SKIPPER_SERVER_URI="https://$SKIPPER_SERVER_URI:7577"
+  export SKIPPER_SERVER_URI=http://$(kubectl get svc --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $4}')
+  $(wait_for_200 ${SKIPPER_SERVER_URI}/api)
 
   echo "SKIPPER SERVER IMAGE: springcloud/spring-cloud-skipper-server:$SKIPPER_VERSION"
   echo "SKIPPER SERVER URI: $SKIPPER_SERVER_URI"

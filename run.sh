@@ -60,7 +60,6 @@ function test_port() {
   nc -w1 ${1} $2 >/dev/null
 }
 
-
 function netcat_port() {
     local READY_FOR_TESTS=1
     for i in $( seq 1 "${RETRIES}" ); do
@@ -195,9 +194,9 @@ function setup() {
       export SKIPPER_SERVER_URI="http://$SKIPPER_SERVER_URI"
       echo "SKIPPER SERVER URI: $SKIPPER_SERVER_URI"
       fi
-      if [[ "$PLATFORM" == "gke" || "$PLATFORM" == "pks" ]];
+      if [ "$PLATFORM" == "kubernetes" ];
       then
-        export SKIPPER_SERVER_URI="https://$(kubectl get ingress --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $2}')"
+        export SKIPPER_SERVER_URI=$(kubectl get svc --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $4}')
         echo "SKIPPER SERVER URI: $SKIPPER_SERVER_URI"
       fi
     fi
@@ -273,15 +272,7 @@ function run_tests() {
   if [  -z "$skipCloudConfig" ]; then
     skipCloudConfig="false"
   fi
-
-  APP_HOST=""
-
-  if [[ "$PLATFORM" == "gke" || "$PLATFORM" == "pks" ]];
-  then
-    APP_HOST=".${KUBERNETES_CLUSTER_NAME}.springapps.io"
-  fi
-
-  eval "./mvnw -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DSKIP_CLOUD_CONFIG=$skipCloudConfig -DAPP_HOST=$APP_HOST test surefire-report:report"
+  eval "./mvnw -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DSKIP_CLOUD_CONFIG=$skipCloudConfig test surefire-report:report"
 }
 
 # ======================================= FUNCTIONS END =======================================

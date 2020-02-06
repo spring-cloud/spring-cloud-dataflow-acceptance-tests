@@ -165,43 +165,18 @@ polling can be overridden using the following properties:
 * SCDFAT_RETRY_MAX _(default 100, set to <0 for no max)_
 * SCDFAT_RETRY_SLEEP _(in seconds, default 5)_
 
-== Kubernetes (GKE)
-
-=== Pre-requisites
-
-_Google Cloud SDK_ installed with the `kubectl` component enabled.
-
-=== Configuration
-
-The following environment variables must be set:
-
-* GCLOUD_PROJECT
-* GCLOUD_COMPUTE_ZONE
-* GCLOUD_CONTAINER_CLUSTER
-
-NOTE: You can also set a KUBERNETES_NAMESPACE environment variable that specifies an existing namespace to use for the testing. If this is not specified, the 'default' namespace will be used.
-
-If you use a service account make sure to set the GOOGLE_APPLICATION_CREDENTIALS environment variable to point to your service account key file and to use the following to authenticate:
-
-```
-gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
-```
-
-== Kubernetes (PKS)
+== Kubernetes (vSphere)
 
 === Pre-requisites
 
 * The `kubectl` command line tool needs to be installed. Installation information can be found at: https://kubernetes.io/docs/tasks/tools/install-kubectl/
-* The PKS command line tool needs to be installed and can be obtained from: https://network.pivotal.io/products/pivotal-container-service
 
 === Configuration
 
 The following environment variables must be set:
 
-* PKS_CLUSTER_NAME
-* PKS_ENDPOINT
-* PKS_USERNAME
-* PKS_PASSWORD
+* KUBECONFIG - the path to the kube config file to use
+* CLUSTER_NAME - the name of the cluster to target (must be present in KUBECONFIG)
 
 NOTE: You can also set a KUBERNETES_NAMESPACE environment variable that specifies an existing namespace to use for the testing. If this is not specified, the 'default' namespace will be used.
 

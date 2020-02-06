@@ -142,8 +142,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				runtimeOperations = dataFlowOperations.runtimeOperations();
 				appRegistryOperations = dataFlowOperations.appRegistryOperations();
 				if (isKubernetesPlatform()) {
-					platformHelper = new KubernetesPlatformHelper(runtimeOperations,
-                                                                    configurationProperties.getAppHost());
+					platformHelper = new KubernetesPlatformHelper(runtimeOperations);
 				}
 				else if (isLocalPlatform()) {
 					platformHelper = new LocalPlatformHelper(runtimeOperations);
@@ -417,15 +416,13 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	}
 
 	private boolean isKubernetesPlatform() {
-		return configurationProperties.getPlatformType().equals(PlatformTypes.GKE.getValue()) ||
-				configurationProperties.getPlatformType().equals(PlatformTypes.PKS.getValue());
+		return configurationProperties.getPlatformType().equals(PlatformTypes.KUBERNETES.getValue());
 	}
 
 	public enum PlatformTypes {
 		LOCAL("local"),
 		CLOUDFOUNDRY("cloudfoundry"),
-		GKE("gke"),
-		PKS("pks");
+		KUBERNETES("kubernetes");
 
 		private String value;
 
