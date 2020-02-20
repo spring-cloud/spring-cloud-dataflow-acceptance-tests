@@ -6,6 +6,7 @@ function kubernetes_authenticate_and_target() {
   [[ -z "${KUBECONFIG}" ]] && { echo "Environment variable KUBECONFIG must be set"; exit 1; }
   [[ -z "${CLUSTER_NAME}" ]] && { echo "Environment variable CLUSTER_NAME must be set"; exit 1; }
 
+  kubectl config use-context ${CLUSTER_NAME}
   kubectl config set-context ${CLUSTER_NAME} --namespace ${KUBERNETES_NAMESPACE}
 }
 
