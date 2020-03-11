@@ -33,6 +33,8 @@ buildscript {
 		springCloudSkipper22xVersion = "${springCloudSkipper22xVersionTag}.BUILD-SNAPSHOT"
 		springCloudSkipper23xVersionTag = '2.3.0'
 		springCloudSkipper23xVersion = "${springCloudSkipper23xVersionTag}.BUILD-SNAPSHOT"
+		springCloudSkipper24xVersionTag = '2.4.0'
+		springCloudSkipper24xVersion = "${springCloudSkipper24xVersionTag}.BUILD-SNAPSHOT"
 		// dataflow versions
 		springCloudDataflow173VersionTag = '1.7.3'
 		springCloudDataflow173Version = "${springCloudDataflow173VersionTag}.RELEASE"
@@ -48,6 +50,8 @@ buildscript {
 		springCloudDataflow23xVersion = "${springCloudDataflow23xVersionTag}.BUILD-SNAPSHOT"
 		springCloudDataflow24xVersionTag = '2.4.0'
 		springCloudDataflow24xVersion = "${springCloudDataflow24xVersionTag}.BUILD-SNAPSHOT"
+		springCloudDataflow25xVersionTag = '2.5.0'
+		springCloudDataflow25xVersion = "${springCloudDataflow25xVersionTag}.BUILD-SNAPSHOT"
 	}
 	repositories {
 		mavenCentral()
