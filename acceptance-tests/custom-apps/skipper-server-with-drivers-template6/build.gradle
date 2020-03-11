@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		jarPostfix = project.properties['jarPostfix'] ?: '23x'
+		jarPostfix = project.properties['jarPostfix'] ?: '24x'
 		projectBuildVersion = project.properties['projectBuildVersion'] ?: '2.4.0.BUILD-SNAPSHOT'
 		springBootVersion = project.properties['springBootVersion'] ?: '2.2.5.RELEASE'
 		oracleJdbcDriverVersion = project.properties['oracleJdbcDriverVersion'] ?: '12.2.0.1'
