@@ -345,27 +345,6 @@ public class DataflowServerMysqlBootstrapTests extends AbstractDataflowTests {
 	@Test
 	@Skipper24x
 	@Dataflow25x
-	@Mysql_5_6
-	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql_5_6.yml" }, services = { "mysql" })
-	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper24xmysql.yml" }, services = { "skipper" })
-	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow25xmysql.yml" }, services = { "dataflow" })
-	public void testDataflow25xWithMysql56(DockerComposeInfo dockerComposeInfo) throws Exception {
-		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
-		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
-
-		registerBatchApp(dockerComposeInfo, "dataflow", "dataflow");
-		registerBatchTaskDefs(dockerComposeInfo, "dataflow", "dataflow");
-		launchTask(dockerComposeInfo, "dataflow", "dataflow", "fakebatch");
-		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
-				TimeUnit.SECONDS);
-		deleteBatchJobExecutions(dockerComposeInfo, "dataflow", "dataflow");
-		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
-				TimeUnit.SECONDS, 0, 0);
-	}
-
-	@Test
-	@Skipper24x
-	@Dataflow25x
 	@Mysql_5_7
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mysql_5_7.yml" }, services = { "mysql" })
 	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper24xmysql.yml" }, services = { "skipper" })
