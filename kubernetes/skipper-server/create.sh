@@ -12,7 +12,8 @@ function use_helm() {
   HELM_PARAMS="--set server.image=springcloud/$DATAFLOW_SERVER_NAME \
     --set server.version=$DATAFLOW_VERSION --set skipper.version=$SKIPPER_VERSION \
     --set skipper.service.type=LoadBalancer --set skipper.imagePullPolicy=Always \
-    --set server.imagePullPolicy=Always"
+    --set server.imagePullPolicy=Always --set deployer.readinessProbe.initialDelaySeconds=0 \
+    --set deployer.livenessProbe.initialDelaySeconds=0"
 
   if [ "$BINDER" == "kafka" ]; then
     HELM_PARAMS="$HELM_PARAMS --set kafka.enabled=true,rabbitmq.enabled=false"
@@ -100,9 +101,16 @@ function distro_files_install_rbac() {
 
 function distro_files_install_skipper() {
   if [ "$BINDER" == "kafka" ]; then
-    kubectl create -f src/kubernetes/skipper/skipper-config-kafka.yaml --namespace $KUBERNETES_NAMESPACE
+    # Remove the configured probe delays
+    cat src/kubernetes/skipper/skipper-config-kafka.yaml | sed -e '/readinessProbeDelay:/d' -e '/livenessProbeDelay:/d' \
+     | kubectl create -f - --namespace $KUBERNETES_NAMESPACE
+    #kubectl create -f src/kubernetes/skipper/skipper-config-kafka.yaml --namespace $KUBERNETES_NAMESPACE
   else
-    kubectl create -f src/kubernetes/skipper/skipper-config-rabbit.yaml --namespace $KUBERNETES_NAMESPACE
+     # Remove the configured probe delays
+    cat src/kubernetes/skipper/skipper-config-rabbit.yaml | sed -e '/readinessProbeDelay:/d' -e '/livenessProbeDelay:/d' \
+    | kubectl create -f - --namespace $KUBERNETES_NAMESPACE
+
+    #kubectl create -f src/kubernetes/skipper/skipper-config-rabbit.yaml --namespace $KUBERNETES_NAMESPACE
   fi
 
   kubectl create -f src/kubernetes/skipper/skipper-deployment.yaml --namespace $KUBERNETES_NAMESPACE
