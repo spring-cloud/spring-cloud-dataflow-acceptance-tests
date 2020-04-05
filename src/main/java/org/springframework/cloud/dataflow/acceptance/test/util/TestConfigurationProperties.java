@@ -42,6 +42,8 @@ public class TestConfigurationProperties {
 
 	private String platformSuffix = "local.pcfdev.io";
 
+	private String namespace = "default";
+
 	private String streamRegistrationResource = "https://repo.spring.io/libs-snapshot/org/springframework/cloud/stream/app/spring-cloud-stream-app-descriptor/Celsius.BUILD-SNAPSHOT/spring-cloud-stream-app-descriptor-Celsius.BUILD-SNAPSHOT.stream-apps-rabbit-maven";
 
 	private String taskRegistrationResource = "https://repo.spring.io/libs-release/org/springframework/cloud/task/app/spring-cloud-task-app-descriptor/Elston.RELEASE/spring-cloud-task-app-descriptor-Elston.RELEASE.task-apps-maven";
@@ -116,5 +118,13 @@ public class TestConfigurationProperties {
 
 	public void setTaskRegistrationResource(String taskRegistrationResource) {
 		this.taskRegistrationResource = taskRegistrationResource;
+	}
+
+	public String getNamespace() {
+		return namespace;
+	}
+
+	public void setNamespace(String namespace) {
+		this.namespace = namespace;
 	}
 }

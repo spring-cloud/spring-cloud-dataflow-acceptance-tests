@@ -272,7 +272,7 @@ function run_tests() {
   if [  -z "$skipCloudConfig" ]; then
     skipCloudConfig="false"
   fi
-  eval "./mvnw -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DSKIP_CLOUD_CONFIG=$skipCloudConfig test surefire-report:report"
+  eval "./mvnw -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DNAMESPACE=$KUBERNETES_NAMESPACE -DSKIP_CLOUD_CONFIG=$skipCloudConfig test surefire-report:report"
 }
 
 # ======================================= FUNCTIONS END =======================================

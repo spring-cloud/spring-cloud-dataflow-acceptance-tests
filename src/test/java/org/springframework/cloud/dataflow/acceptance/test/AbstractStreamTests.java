@@ -261,9 +261,11 @@ public abstract class AbstractStreamTests implements InitializingBean {
 					break;
 				}
 			}
-			attempt++;
-			logger.info("Sleeping to check status of Stream=" + stream.getName());
-			deploymentPause();
+			if (!streamStarted) {
+				attempt++;
+				logger.info("Sleeping to check status of Stream=" + stream.getName());
+				deploymentPause();
+			}
 		}
 		if (streamStarted) {
 			logger.info(String.format("Stream '%s' started with status: %s", stream.getName(), status));
@@ -366,7 +368,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				+ app.getDefinition());
 		final long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
 		List<Log> logs = new ArrayList<>();
-		LogRetriever logRetriever = isCloudFoundry() ? new CloudFoundryLogRetriever(app) : new DefaultLogRetriever(app);
+		LogRetriever logRetriever = logRetriever(app);
 
 		while (System.currentTimeMillis() < timeout) {
 			try {
@@ -419,6 +421,17 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		return configurationProperties.getPlatformType().equals(PlatformTypes.KUBERNETES.getValue());
 	}
 
+	private LogRetriever logRetriever(Application application) {
+		switch (PlatformTypes.of(configurationProperties.getPlatformType())) {
+			case CLOUDFOUNDRY:
+				return new CloudFoundryLogRetriever(application);
+			case KUBERNETES:
+				return new KubernetesLogRetriever(application);
+			default:
+				return new DefaultLogRetriever(application);
+		}
+	}
+
 	public enum PlatformTypes {
 		LOCAL("local"),
 		CLOUDFOUNDRY("cloudfoundry"),
@@ -432,6 +445,10 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 		public String getValue() {
 			return value;
+		}
+
+		static PlatformTypes of(String value){
+			return PlatformTypes.valueOf(value.toUpperCase());
 		}
 
 		@Override
@@ -486,59 +503,50 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		}
 	}
 
-	private class CloudFoundryLogRetriever extends LogRetriever {
-
-		public CloudFoundryLogRetriever(Application app) {
+	private abstract class AbstractCommandLogRetriever extends  LogRetriever {
+		AbstractCommandLogRetriever(Application app) {
 			super(app);
 		}
 
-		@Override
-		List<Log> retrieveLogs() {
+		protected Log doRetrieveLog(String logSource, String ... command) {
+			String logContent;
 			final int maxWaitInSeconds = 30;
-			String logSource;
-			String logContent = null;
+			logger.info("Running system command: " + String.join(" ", command));
+			ProcessBuilder procBuilder = new ProcessBuilder(command);
+			Process proc;
 			try {
-				logSource = new URL(app.getUrl()).getHost().split("\\.")[0];
-			} catch (MalformedURLException e) {
-				throw new IllegalArgumentException("Malformed url: " + app.getUrl(), e);
+			proc = procBuilder.start();
 			}
+				catch (IOException e) {
+				throw new IllegalStateException("Can't execute command", e);
+			}
+			boolean exited;
 
-            String[] cfCommand = {"cf", "logs", "--recent", logSource};
-            logger.info("Running system command: " + String.join(" ", cfCommand));
-            ProcessBuilder procBuilder = new ProcessBuilder(cfCommand);
-            Process proc;
-            try  {
-                proc = procBuilder.start();
-            } catch (IOException e) {
-                throw new IllegalStateException("Can't find 'cf' command", e);
-            }
-            boolean exited;
+			try {
+			logContent = readStringFromInputStream(proc.getInputStream());
+			logger.info("Waiting for command to exit");
+			exited = proc.waitFor(maxWaitInSeconds, TimeUnit.SECONDS);
+		}
+			catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+			if (exited) {
+			int rc = proc.exitValue();
+			if (rc != 0) {
+				logger.error("ERROR: running system command [rc=" + rc + "]: "
+						+ readStringFromInputStream(proc.getErrorStream()));
+			}
+		}
+			else {
+			logger.error("ERROR: system command exceeded maximum wait time (" + maxWaitInSeconds + "s)");
+		}
 
-
-            try {
-                logContent = readStringFromInputStream(proc.getInputStream());
-                logger.info("Waiting to cf log command to exit");
-                exited = proc.waitFor(maxWaitInSeconds, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new IllegalStateException(e.getMessage(), e);
-            }
-            if (exited) {
-                int rc = proc.exitValue();
-                if (rc != 0) {
-                    logger.error("ERROR: running system command [rc=" + rc + "]: " + readStringFromInputStream(proc.getErrorStream()));
-                }
-            } else {
-                logger.error("ERROR: system command exceeded maximum wait time (" + maxWaitInSeconds + "s)");
-            }
-
-            List<Log> logs = new ArrayList<>();
-			logs.add(new Log(logSource, logContent));
-			return logs;
+			return new Log(logSource, logContent);
 		}
 
 		private String readStringFromInputStream(InputStream input) {
-		    final String newline = System.getProperty("line.separator");
+			final String newline = System.getProperty("line.separator");
 			try (BufferedReader buffer = new BufferedReader(new InputStreamReader(input))) {
 				return buffer.lines().collect(Collectors.joining(newline));
 			}
@@ -549,4 +557,43 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		}
 	}
 
+	private class KubernetesLogRetriever extends AbstractCommandLogRetriever {
+
+		KubernetesLogRetriever(Application app) {
+			super(app);
+		}
+
+		@Override
+		List<Log> retrieveLogs() {
+			List<Log> logs = new ArrayList<>();
+			for (String appInstance : app.getInstanceUrls().keySet()) {
+				logs.add(doRetrieveLog(appInstance,"kubectl", "logs", "-n",
+						configurationProperties.getNamespace(), appInstance));
+			}
+			return logs;
+		}
+	}
+
+	private class CloudFoundryLogRetriever extends AbstractCommandLogRetriever {
+
+		public CloudFoundryLogRetriever(Application app) {
+			super(app);
+		}
+
+		@Override
+		List<Log> retrieveLogs() {
+			List<Log> logs = new ArrayList<>();
+			String logSource = null;
+			try {
+				logSource = new URL(app.getUrl()).getHost().split("\\.")[0];
+			}
+			catch (MalformedURLException e) {
+				throw new IllegalArgumentException("Malformed url: " + app.getUrl(), e);
+			}
+
+			logs.add(doRetrieveLog(logSource,"cf", "logs", logSource));
+
+			return logs;
+		}
+	}
 }
