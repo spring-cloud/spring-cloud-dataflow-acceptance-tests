@@ -588,7 +588,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				throw new IllegalArgumentException("Malformed url: " + app.getUrl(), e);
 			}
 
-			logs.add(doRetrieveLog(logSource,"cf", "logs", logSource));
+			logs.add(doRetrieveLog(logSource,"cf", "logs", "--recent", logSource));
 
 			return logs;
 		}
