@@ -7,11 +7,15 @@ function distro_files_object_delete() {
   kubectl delete role scdf-role --namespace $KUBERNETES_NAMESPACE --wait || true
   kubectl delete rolebinding scdf-rb --namespace $KUBERNETES_NAMESPACE --wait || true
   kubectl delete serviceaccount scdf-sa --namespace $KUBERNETES_NAMESPACE --wait || true
+  # Clean up any stray apps
+  kubectl delete all -l role=spring-app --namespace $KUBERNETES_NAMESPACE
 }
 
 function helm_delete() {
   helm delete scdf --purge || true
   wait_clean_for_label "all" "release=scdf"
+  # Clean up any stray apps
+  kubectl delete all -l role=spring-app --namespace $KUBERNETES_NAMESPACE
 }
 
 function wait_clean_for_label() {
