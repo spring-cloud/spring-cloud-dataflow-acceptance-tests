@@ -28,10 +28,12 @@ USAGE: tests.sh -p <PLATFORM> -b <BINDER> [-d -cc -dv --tests]
 Flags:
     -p  | --platform - define the target platform to run, defaults to local
     -b  | --binder - define the binder (i.e. RABBIT, KAFKA) defaults to RABBIT
-    -dv | --dataflowVersion - set the dataflow client version to the same as the dataflow server (e.g. 2.5.0.BUILD-SNAPSHOT)
     --tests - comma separated list of tests to run. Wildcards such as *http* are allowed (e.g. --tests TickTockTests#tickTockTests)
-    -cc | --skipCloudConfig - skip the config server tests
-    -se | --schedulesEnabled - includes schedule tests.
+    --rerunFailingTestsCount - the number of times to rerun failing tests (default is 1)
+    --skipAfterFailureCount - skip after number of tests fail (default is 1)
+    -cc | --skipCloudConfig - skip Cloud Config server tests for CF
+    -se | --schedulesEnabled - run scheduling tests.
+    -dv | --dataflowVersion - set the dataflow client version to the same as the dataflow server (e.g. 2.5.0.BUILD-SNAPSHOT)
     -c  | --skipCleanup - skip the clean up phase
     -sc | --serverCleanup - run the cleanup for only SCDF and Skipper, along with the applications deployed but excluding the DB, message broker.
 ```

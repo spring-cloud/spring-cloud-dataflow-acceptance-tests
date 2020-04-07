@@ -11,6 +11,8 @@ Flags:
     -p  | --platform - define the target platform to run, defaults to local
     -b  | --binder - define the binder (i.e. RABBIT, KAFKA) defaults to RABBIT
     --tests - comma separated list of tests to run. Wildcards such as *http* are allowed (e.g. --tests TickTockTests#tickTockTests)
+    --rerunFailingTestsCount - the number of times to rerun failing tests (default is 1)
+    --skipAfterFailureCount - skip after number of tests fail (default is 1)
     -cc | --skipCloudConfig - skip Cloud Config server tests for CF
     -se | --schedulesEnabled - run scheduling tests.
     -dv | --dataflowVersion - set the dataflow client version to the same as the dataflow server (e.g. 2.5.0.BUILD-SNAPSHOT)
@@ -35,11 +37,18 @@ function run_tests() {
 
   log_skipper_versions
 
-  eval "./mvnw -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DNAMESPACE=$KUBERNETES_NAMESPACE \\
+  eval "./mvnw -B -Dspring.profiles.active=blah -Dtest=$TESTS -Dsurefire.rerunFailingTestsCount=$rerunFailingTestsCount \\
+  -Dsurefire.skipAfterFailureCount=$skipAfterFailureCount -DPLATFORM_TYPE=$PLATFORM -DNAMESPACE=$KUBERNETES_NAMESPACE \\
   -Ddataflow.version=$DATAFLOW_VERSION -DSKIP_CLOUD_CONFIG=$skipCloudConfig test surefire-report:report"
 }
 
 echo "Starting $(basename $BASH_SOURCE) $@"
+
+# Rerun failing tests 1 time
+rerunFailingTestsCount=1
+# Skip after one test fails
+skipAfterFailureCount=1
+
 
 if [[ $1 == "--help" || $1 == "-h" ]] ; then
     print_usage
@@ -64,6 +73,14 @@ case ${key} in
  ;;
  --tests)
  TESTS="$2"
+ shift
+ ;;
+--skipAfterFailureCount)
+ skipAfterFailureCount="$2"
+ shift
+ ;;
+--rerunFailingTestsCount)
+ rerunFailingTestsCount="$2"
  shift
  ;;
  -cc|--skipCloudConfig)
