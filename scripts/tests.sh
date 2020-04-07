@@ -11,11 +11,11 @@ Flags:
     -p  | --platform - define the target platform to run, defaults to local
     -b  | --binder - define the binder (i.e. RABBIT, KAFKA) defaults to RABBIT
     --tests - comma separated list of tests to run. Wildcards such as *http* are allowed (e.g. --tests TickTockTests#tickTockTests)
-    --rerunFailingTestsCount - the number of times to rerun failing tests (default is 1)
-    --skipAfterFailureCount - skip after number of tests fail (default is 1)
     -cc | --skipCloudConfig - skip Cloud Config server tests for CF
     -se | --schedulesEnabled - run scheduling tests.
     -dv | --dataflowVersion - set the dataflow client version to the same as the dataflow server (e.g. 2.5.0.BUILD-SNAPSHOT)
+    -av | --appsVersion - set the stream app version to test (e.g. Celsius.SR2). Apps should be accessible via maven repo or docker hub.
+    -tv | --tasksVersion - set the task app version to test (e.g. Elston.RELEASE). Tasks should be accessible via maven repo or docker hub.
     -c  | --skipCleanup - skip the clean up phase
     -sc | --serverCleanup - run the cleanup for only SCDF and Skipper, along with the applications deployed but excluding the DB, message broker.
 [*] = Required arguments
@@ -37,8 +37,7 @@ function run_tests() {
 
   log_skipper_versions
 
-  eval "./mvnw -B -Dspring.profiles.active=blah -Dtest=$TESTS -Dsurefire.rerunFailingTestsCount=$rerunFailingTestsCount \\
-  -Dsurefire.skipAfterFailureCount=$skipAfterFailureCount -DPLATFORM_TYPE=$PLATFORM -DNAMESPACE=$KUBERNETES_NAMESPACE \\
+  eval "./mvnw -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DNAMESPACE=$KUBERNETES_NAMESPACE \\
   -Ddataflow.version=$DATAFLOW_VERSION -DSKIP_CLOUD_CONFIG=$skipCloudConfig test surefire-report:report"
 }
 
@@ -63,6 +62,14 @@ case ${key} in
  PLATFORM="$2"
  shift
  ;;
+-av|--appsVersion)
+ STREAM_APPS_VERSION="$2"
+ shift
+ ;;
+ -tv|--tasksVersion)
+ TASK_APPS_VERSION="$2"
+ shift
+ ;;
 -b|--binder)
  BINDER="$2"
  shift
@@ -73,14 +80,6 @@ case ${key} in
  ;;
  --tests)
  TESTS="$2"
- shift
- ;;
---skipAfterFailureCount)
- skipAfterFailureCount="$2"
- shift
- ;;
---rerunFailingTestsCount)
- rerunFailingTestsCount="$2"
  shift
  ;;
  -cc|--skipCloudConfig)
