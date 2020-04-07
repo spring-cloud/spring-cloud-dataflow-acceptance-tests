@@ -16,6 +16,8 @@ Flags:
     -cc | --skipCloudConfig - skip Cloud Config server tests for CF
     -se | --schedulesEnabled - run scheduling tests.
     -dv | --dataflowVersion - set the dataflow client version to the same as the dataflow server (e.g. 2.5.0.BUILD-SNAPSHOT)
+    -av | --appsVersion - set the stream app version to test (e.g. Celsius.SR2). Apps should be accessible via maven repo or docker hub.
+    -tv | --tasksVersion - set the task app version to test (e.g. Elston.RELEASE). Tasks should be accessible via maven repo or docker hub.
     -c  | --skipCleanup - skip the clean up phase
     -sc | --serverCleanup - run the cleanup for only SCDF and Skipper, along with the applications deployed but excluding the DB, message broker.
 [*] = Required arguments
@@ -61,6 +63,14 @@ key="$1"
 case ${key} in
  -p|--platform)
  PLATFORM="$2"
+ shift
+ ;;
+-av|--appsVersion)
+ STREAM_APPS_VERSION="$2"
+ shift
+ ;;
+ -tv|--tasksVersion)
+ TASK_APPS_VERSION="$2"
  shift
  ;;
 -b|--binder)
