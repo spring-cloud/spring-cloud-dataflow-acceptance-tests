@@ -6,8 +6,7 @@
     do
        if [[ $server != 'No' ]]; then
           echo "Deleting the app: $server"
-          cf delete $server -f -r
-
+          cf delete $server -f -r || exit 0
        fi
     done
  fi
@@ -17,6 +16,6 @@
  do
      if [[ $app != 'No' && $app != 'name' ]]; then
         echo "Deleting the app: $app"
-        cf delete $app -f -r
+        cf delete $app -f -r || exit 0
     fi
  done
