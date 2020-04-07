@@ -21,10 +21,7 @@ APP_LOG_PATH=$PWD/app-logs
 rm -rf $APP_LOG_PATH
 mkdir $APP_LOG_PATH
 APPLICATION_ARGS="$APPLICATION_ARGS --spring.cloud.deployer.local.workingDirectoriesRoot=$APP_LOG_PATH"
-
-if [ "$schedulesEnabled" ]; then
- APPLICATION_ARGS="$APPLICATION_ARGS --spring.cloud.dataflow.features.schedules-enabled=true"
-fi
 download $PWD
 java_jar $PWD
+
 
