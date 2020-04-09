@@ -61,6 +61,7 @@ public class ComposedTaskTests extends AbstractTaskTests {
 		assertParentTaskExecution(taskDefinitionName, 0, 2, 2);
 	}
 
+
 	private void assertTaskExecutions(String taskDefinitionName,
 			int expectedExitCode, int expectedCount) {
 		assertTrue(waitForTaskToComplete(taskDefinitionName + "-a", expectedCount));
