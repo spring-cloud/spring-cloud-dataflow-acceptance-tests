@@ -265,6 +265,34 @@ jobs:
         APP_VERSION: 22x
         APP_TEMPLATE: skipper-server-with-drivers-template4
         SKIPPER_VERSION: 2.2.0.BUILD-SNAPSHOT
+    - task: build-skipper-server-with-drivers23x
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-skipper23x
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 23x
+        APP_TEMPLATE: skipper-server-with-drivers-template5
+        SKIPPER_VERSION: 2.3.0.BUILD-SNAPSHOT
+    - task: build-skipper-server-with-drivers24x
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-skipper24x
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 24x
+        APP_TEMPLATE: skipper-server-with-drivers-template6
+        SKIPPER_VERSION: 2.4.0.BUILD-SNAPSHOT
     - task: build-dataflow-server-with-drivers173
       privileged: true
       timeout: 30m
@@ -349,6 +377,34 @@ jobs:
         APP_VERSION: 23x
         APP_TEMPLATE: dataflow-server-with-drivers-template3
         DATAFLOW_VERSION: 2.3.0.BUILD-SNAPSHOT
+    - task: build-dataflow-server-with-drivers24x
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-dataflow-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-dataflow24x
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 24x
+        APP_TEMPLATE: dataflow-server-with-drivers-template4
+        DATAFLOW_VERSION: 2.4.0.BUILD-SNAPSHOT
+    - task: build-dataflow-server-with-drivers25x
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-dataflow-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-dataflow25x
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 25x
+        APP_TEMPLATE: dataflow-server-with-drivers-template5
+        DATAFLOW_VERSION: 2.5.0.BUILD-SNAPSHOT
     - task: build-timestamp-batch-with-drivers21x
       privileged: true
       timeout: 30m
@@ -382,12 +438,16 @@ jobs:
       - name: distribution-repository-skipper11x
       - name: distribution-repository-skipper20x
       - name: distribution-repository-skipper22x
+      - name: distribution-repository-skipper23x
+      - name: distribution-repository-skipper24x
       - name: distribution-repository-dataflow173
       - name: distribution-repository-dataflow17x
       - name: distribution-repository-dataflow20x
       - name: distribution-repository-dataflow21x
       - name: distribution-repository-dataflow22x
       - name: distribution-repository-dataflow23x
+      - name: distribution-repository-dataflow24x
+      - name: distribution-repository-dataflow25x
       - name: distribution-repository-timestampbatch21x
       outputs:
       - name: distribution-repository

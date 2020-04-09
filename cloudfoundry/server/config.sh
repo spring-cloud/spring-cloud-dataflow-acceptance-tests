@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 
 function config_application() {
-  SERVER_URI=$(cf apps | grep dataflow-server- | awk '{print $6}' | sed 's:,::g')
-  SERVER_URI="https://$SERVER_URI"
-  echo "SCDF SERVER URI: $SERVER_URI"
-  export SERVER_URI
+  . ./server-uri.sh
   export PLATFORM_SUFFIX=$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN
 }
 

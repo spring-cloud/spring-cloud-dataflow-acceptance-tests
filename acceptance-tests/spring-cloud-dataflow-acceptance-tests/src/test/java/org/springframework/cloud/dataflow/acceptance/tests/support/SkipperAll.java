@@ -33,6 +33,9 @@ import org.junit.jupiter.api.Tag;
 @Skipper110
 @Skipper11x
 @Skipper20x
+@Skipper22x
+@Skipper23x
+@Skipper24x
 @Tag("skipperall")
 public @interface SkipperAll {
 }

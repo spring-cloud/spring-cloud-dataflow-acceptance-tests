@@ -15,11 +15,6 @@ applications:
   services:
     - mysql
 EOF
-if [ ! "$redisDisabled" == "true" ]; then
-    cat << EOF >> ./scdf-manifest.yml
-    - redis
-EOF
-fi
 if [ $LOG_SERVICE_NAME ]; then
     cat << EOF >> ./scdf-manifest.yml
     - $LOG_SERVICE_NAME
@@ -54,20 +49,43 @@ cat << EOF >> ./scdf-manifest.yml
     SPRING_CLOUD_CONFIG_NAME: scdf-server
     SPRING_CLOUD_COMMON_SECURITY_ENABLED: $SPRING_CLOUD_COMMON_SECURITY_ENABLED
     SPRING_CLOUD_DATAFLOW_SERVER_URI: https://dataflow-server-$SCDF_RANDOM_SUFFIX.$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN
+    JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
 EOF
 
 if [ -z "$SPRING_APPLICATION_JSON" ]; then
 cat << EOF >> ./scdf-manifest.yml
-    SPRING_APPLICATION_JSON:  '{ "maven": { "remote-repositories": { "repo1": { "url": "$MAVEN_REMOTE_REPOSITORIES_REPO1_URL" } } }}'
+    SPRING_APPLICATION_JSON: |-
+        {
+           "maven" : {
+               "remoteRepositories" : {
+                  "repo1" : {
+                    "url" : "https://repo.spring.io/libs-snapshot"
+                  }
+               }
+           },
+           "spring.cloud.dataflow" : {
+                "task.platform.cloudfoundry.accounts" : {
+                    "default" : {
+                        "connection" : {
+                            "url" : "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL",
+                            "domain" : "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN",
+                            "org" : "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG",
+                            "space" : "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE",
+                            "username" : "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME",
+                            "password" : "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD",
+                            "skipSsValidation" : true
+                        },
+                        "deployment" : {
+                          "services" : "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES"
+                        }
+                    }
+                }
+           }
+        }
 EOF
 else
 cat << EOF >> ./scdf-manifest.yml
     SPRING_APPLICATION_JSON: $SPRING_APPLICATION_JSON
-EOF
-fi
-if [ "$noAutoreconfiguration" ]; then
-cat << EOF >> ./scdf-manifest.yml
-    JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
 EOF
 fi
 if [ "$schedulesEnabled" ]; then

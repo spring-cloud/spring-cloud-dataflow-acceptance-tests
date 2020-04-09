@@ -30,6 +30,8 @@ import org.junit.jupiter.api.Tag;
 @Dataflow21x
 @Dataflow22x
 @Dataflow23x
+@Dataflow24x
+@Dataflow25x
 @Tag("dataflowall")
 public @interface DataflowAll {
 }

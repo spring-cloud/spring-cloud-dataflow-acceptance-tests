@@ -29,7 +29,7 @@ app-logs/
 **/skipper-manifest.yml
 **/scdf.yml
 **/skipper.yml
-kubernetes-common/skipper-server/spring-cloud-dataflow/
+kubernetes/skipper-server/spring-cloud-dataflow/
 
 # Eclipse artifacts, including WTP generated manifests
 .classpath
@@ -46,3 +46,4 @@ spring-*/src/main/java/META-INF/MANIFEST.MF
 .vscode/
 rebel.xml
 !acceptance-tests/gradle/wrapper/gradle-wrapper.jar
+.DS_Store/

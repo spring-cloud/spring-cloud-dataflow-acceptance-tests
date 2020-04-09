@@ -31,10 +31,14 @@ import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow20x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow21x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow22x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow23x;
+import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow24x;
+import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow25x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.MsSql;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper11x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper20x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper22x;
+import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper23x;
+import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper24x;
 
 @ExtendWith(DockerComposeExtension.class)
 @MsSql
@@ -95,6 +99,46 @@ public class DataflowServerMsSqlBootstrapTests extends AbstractDataflowTests {
 	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper22xmssql.yml" }, services = { "skipper" })
 	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow23xmssql.yml" }, services = { "dataflow" })
 	public void testDataflow23xWithMsSql(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
+		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
+
+		registerBatchApp(dockerComposeInfo, "dataflow", "dataflow");
+		registerBatchTaskDefs(dockerComposeInfo, "dataflow", "dataflow");
+		launchTask(dockerComposeInfo, "dataflow", "dataflow", "fakebatch");
+		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
+				TimeUnit.SECONDS);
+		deleteBatchJobExecutions(dockerComposeInfo, "dataflow", "dataflow");
+		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
+				TimeUnit.SECONDS, 0, 0);
+	}
+
+	@Test
+	@Skipper23x
+	@Dataflow24x
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mssql.yml" }, services = { "mssql" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper23xmssql.yml" }, services = { "skipper" })
+	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow24xmssql.yml" }, services = { "dataflow" })
+	public void testDataflow24xWithMsSql(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
+		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
+
+		registerBatchApp(dockerComposeInfo, "dataflow", "dataflow");
+		registerBatchTaskDefs(dockerComposeInfo, "dataflow", "dataflow");
+		launchTask(dockerComposeInfo, "dataflow", "dataflow", "fakebatch");
+		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
+				TimeUnit.SECONDS);
+		deleteBatchJobExecutions(dockerComposeInfo, "dataflow", "dataflow");
+		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
+				TimeUnit.SECONDS, 0, 0);
+	}
+
+	@Test
+	@Skipper24x
+	@Dataflow25x
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/mssql.yml" }, services = { "mssql" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper24xmssql.yml" }, services = { "skipper" })
+	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow25xmssql.yml" }, services = { "dataflow" })
+	public void testDataflow25xWithMsSql(DockerComposeInfo dockerComposeInfo) throws Exception {
 		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
 		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
 
