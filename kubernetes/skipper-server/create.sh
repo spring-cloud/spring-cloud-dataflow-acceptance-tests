@@ -9,9 +9,9 @@ function use_helm() {
     echo "DATAFLOW_VERSION must be defined"
     exit 1
   fi
-  HELM_PARAMS="--set server.version=$DATAFLOW_VERSION --set skipper.version=$SKIPPER_VERSION \\
-    --set skipper.service.type=LoadBalancer --set skipper.imagePullPolicy=Always \\
-    --set server.imagePullPolicy=Always --set deployer.readinessProbe.initialDelaySeconds=0 \\
+  HELM_PARAMS="--set server.version=$DATAFLOW_VERSION --set skipper.version=$SKIPPER_VERSION \
+    --set skipper.service.type=LoadBalancer --set skipper.imagePullPolicy=Always \
+    --set server.imagePullPolicy=Always --set deployer.readinessProbe.initialDelaySeconds=0 \
     --set deployer.livenessProbe.initialDelaySeconds=0 --set serviceAccount.name=$DATAFLOW_SERVICE_ACCOUNT_NAME"
 
   if [ "$BINDER" == "kafka" ]; then
@@ -25,7 +25,7 @@ function use_helm() {
   helm repo update
 
   helm install --name scdf stable/spring-cloud-data-flow ${HELM_PARAMS} --namespace $KUBERNETES_NAMESPACE
-  
+
   helm list
 }
 
