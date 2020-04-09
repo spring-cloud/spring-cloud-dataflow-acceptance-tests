@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author Glenn Renfro
  * @author Thomas Risberg
+ * @author David Turanski
  */
 @ConfigurationProperties
 public class TestConfigurationProperties {
@@ -41,6 +42,8 @@ public class TestConfigurationProperties {
 	private String platformType = "local";
 
 	private String platformSuffix = "local.pcfdev.io";
+
+	private String dataflowServiceAccountName;
 
 	private String namespace="default";
 
@@ -125,5 +128,13 @@ public class TestConfigurationProperties {
 
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
+	}
+
+	public String getDataflowServiceAccountName() {
+		return dataflowServiceAccountName;
+	}
+
+	public void setDataflowServiceAccountName(String dataflowServiceAccountName) {
+		this.dataflowServiceAccountName = dataflowServiceAccountName;
 	}
 }

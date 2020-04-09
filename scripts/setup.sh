@@ -114,24 +114,6 @@ function setup() {
     run_scripts "server" "create.sh"
   popd
 }
-
-function config() {
-  pushd $PLATFORM
-    run_scripts "init" "setenv.sh"
-    pushd "binder"
-      run_scripts $BINDER "config.sh"
-    popd
-
-    run_scripts "skipper-server" "config.sh"
-
-    run_scripts "server" "config.sh"
-  popd
-}
-
-function command_exists() {
-  type "$1" &> /dev/null ;
-}
-
 # ======================================= FUNCTIONS END =======================================
 # ======================================= Main =======================================
 

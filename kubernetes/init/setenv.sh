@@ -18,7 +18,10 @@ fi
 if [[ -z "${KUBERNETES_NAMESPACE}" ]]; then
   export KUBERNETES_NAMESPACE='default'
 fi
-
+if [[ -z "${DATAFLOW_SERVICE_ACCOUNT_NAME}" ]]; then
+  export DATAFLOW_SERVICE_ACCOUNT_NAME=scdf-data-flow
+fi
 echo "Connecting to kubernetes cluster: ${CLUSTER_NAME} in namespace ${KUBERNETES_NAMESPACE}"
 
 kubernetes_authenticate_and_target
+

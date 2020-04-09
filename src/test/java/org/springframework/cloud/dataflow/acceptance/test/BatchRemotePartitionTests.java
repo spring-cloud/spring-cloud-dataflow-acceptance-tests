@@ -45,8 +45,6 @@ import static org.junit.Assert.assertTrue;
 @ContextConfiguration(classes = BatchRemotePartitionTests.ConditionalCloudFoundryTestConfiguration.class)
 public class BatchRemotePartitionTests extends AbstractTaskTests {
 
-	private static final String SCDF_DATA_FLOW_SA = "scdf-data-flow";
-
 	@Autowired
 	private TestConfigurationProperties testConfigurationProperties;
 
@@ -104,7 +102,8 @@ public class BatchRemotePartitionTests extends AbstractTaskTests {
 		Map<String, String> deploymentProperties = new HashMap<>();
 		String genericPlatform = platformForPlatformType();
 		if (genericPlatform.equals("kubernetes")) {
-			deploymentProperties.put("deployer.*.kubernetes.deployment-service-account-name", SCDF_DATA_FLOW_SA);
+			deploymentProperties.put("deployer.*.kubernetes.deployment-service-account-name",
+					testConfigurationProperties.getDataflowServiceAccountName());
 		}
 		return deploymentProperties;
 	}

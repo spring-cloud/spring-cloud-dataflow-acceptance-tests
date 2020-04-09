@@ -9,10 +9,10 @@ function use_helm() {
     echo "DATAFLOW_VERSION must be defined"
     exit 1
   fi
-  HELM_PARAMS="--set server.version=$DATAFLOW_VERSION --set skipper.version=$SKIPPER_VERSION \
-    --set skipper.service.type=LoadBalancer --set skipper.imagePullPolicy=Always \
-    --set server.imagePullPolicy=Always --set deployer.readinessProbe.initialDelaySeconds=0 \
-    --set deployer.livenessProbe.initialDelaySeconds=0"
+  HELM_PARAMS="--set server.version=$DATAFLOW_VERSION --set skipper.version=$SKIPPER_VERSION \\
+    --set skipper.service.type=LoadBalancer --set skipper.imagePullPolicy=Always \\
+    --set server.imagePullPolicy=Always --set deployer.readinessProbe.initialDelaySeconds=0 \\
+    --set deployer.livenessProbe.initialDelaySeconds=0 --set serviceAccount.name=$DATAFLOW_SERVICE_ACCOUNT_NAME"
 
   if [ "$BINDER" == "kafka" ]; then
     HELM_PARAMS="$HELM_PARAMS --set kafka.enabled=true,rabbitmq.enabled=false"
@@ -74,14 +74,27 @@ function distro_files_clone_repo() {
   popd
 }
 
+function extract_sa_name() {
+   OLD_SA_NAME=$(cat src/kubernetes/server/server-deployment.yaml | sed -n 's/^.*serviceAccountName: *//p')
+}
+
+function update_sa_name() {
+  if [[ -z "${OLD_SA_NAME}" ]]; then
+     extract_sa_name
+  fi
+  file=$1
+  DEBUG "replacing SA name [$OLD_SA_NAME]  with [$DATAFLOW_SERVICE_ACCOUNT_NAME] in $file"
+  cat $file | sed "s/$OLD_SA_NAME/$DATAFLOW_SERVICE_ACCOUNT_NAME/g"
+}
+
 function distro_files_install_database() {
   kubectl create -f src/kubernetes/mysql/ --namespace $KUBERNETES_NAMESPACE
 }
 
 function distro_files_install_rbac() {
   kubectl create -f src/kubernetes/server/server-roles.yaml --namespace $KUBERNETES_NAMESPACE
-  kubectl create -f src/kubernetes/server/server-rolebinding.yaml --namespace $KUBERNETES_NAMESPACE
-  kubectl create -f src/kubernetes/server/service-account.yaml --namespace $KUBERNETES_NAMESPACE
+  update_sa_name src/kubernetes/server/server-rolebinding.yaml | kubectl create -f - --namespace $KUBERNETES_NAMESPACE
+  update_sa_name src/kubernetes/server/service-account.yaml | kubectl create -f - --namespace $KUBERNETES_NAMESPACE
 }
 
 function distro_files_install_skipper() {
@@ -98,15 +111,16 @@ function distro_files_install_skipper() {
     #kubectl create -f src/kubernetes/skipper/skipper-config-rabbit.yaml --namespace $KUBERNETES_NAMESPACE
   fi
 
-  kubectl create -f src/kubernetes/skipper/skipper-deployment.yaml --namespace $KUBERNETES_NAMESPACE
+  update_sa_name src/kubernetes/skipper/skipper-deployment.yaml | kubectl create -f - --namespace $KUBERNETES_NAMESPACE
   kubectl create -f src/kubernetes/skipper/skipper-svc.yaml --namespace $KUBERNETES_NAMESPACE
 }
 
 function distro_files_install_scdf() {
   kubectl create -f src/kubernetes/server/server-config.yaml --namespace $KUBERNETES_NAMESPACE
   kubectl create -f src/kubernetes/server/server-svc.yaml --namespace $KUBERNETES_NAMESPACE
-  kubectl create -f src/kubernetes/server/server-deployment.yaml --namespace $KUBERNETES_NAMESPACE
+  update_sa_name src/kubernetes/server/server-deployment.yaml | kubectl create -f - --namespace $KUBERNETES_NAMESPACE
 }
+
 
 helm_delete
 distro_files_object_delete

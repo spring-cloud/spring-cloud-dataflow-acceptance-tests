@@ -6,7 +6,7 @@ function distro_files_object_delete() {
   kubectl delete all,cm -l app=scdf-server --namespace $KUBERNETES_NAMESPACE --wait || true
   kubectl delete role scdf-role --namespace $KUBERNETES_NAMESPACE --wait || true
   kubectl delete rolebinding scdf-rb --namespace $KUBERNETES_NAMESPACE --wait || true
-  kubectl delete serviceaccount scdf-sa --namespace $KUBERNETES_NAMESPACE --wait || true
+  kubectl delete serviceaccount $DATAFLOW_SERVICE_ACCOUNT_NAME --namespace $KUBERNETES_NAMESPACE --wait || true
   # Clean up any stray apps
   kubectl delete all -l role=spring-app --namespace $KUBERNETES_NAMESPACE
 }
