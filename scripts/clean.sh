@@ -6,7 +6,7 @@
 function print_usage() {
 cat <<EOF
 
-USAGE: clean.sh -p <PLATFORM> -b <BINDER> [--schedulesEnabled]
+USAGE: clean.sh -p <PLATFORM> -b <BINDER> [--schedulesEnabled --serverCleanup]
   This will cleanup any existing resources on the platform
 
 Flags:

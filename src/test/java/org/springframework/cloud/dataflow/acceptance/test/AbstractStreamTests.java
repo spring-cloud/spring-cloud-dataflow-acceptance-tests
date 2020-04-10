@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.RunWith;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,11 +60,14 @@ import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 /**
  * Abstract base class that is used by stream acceptance tests. This class contains
@@ -77,6 +79,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
  * @author Chris Cheetham
+ * @author David Turanski
  */
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -138,7 +141,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		runtimeOperations = dataFlowOperations.runtimeOperations();
 		appRegistryOperations = dataFlowOperations.appRegistryOperations();
 		if (isKubernetesPlatform()) {
-			platformHelper = new KubernetesPlatformHelper(runtimeOperations, configurationProperties.getAppHost());
+			platformHelper = new KubernetesPlatformHelper(runtimeOperations);
 		}
 		else if (isLocalPlatform()) {
 			platformHelper = new LocalPlatformHelper(runtimeOperations);
@@ -343,9 +346,16 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @param message the data to be sent to the app.
 	 */
 	protected void httpPostData(Application app, String message) {
-		restTemplate.postForObject(
-				String.format(app.getUrl()),
-				message, String.class);
+		logger.info("posting to {}", app.getUrl());
+		RequestEntity<String> requestEntity = RequestEntity
+					.post(new DefaultUriBuilderFactory(app.getUrl()).builder().build())
+					.contentType(MediaType.TEXT_PLAIN)
+					.body(message);
+
+		ResponseEntity<?> responseEntity = restTemplate.exchange(requestEntity, Object.class);
+		if (responseEntity.getStatusCode().isError()) {
+			throw new RuntimeException("HTTP POST " + message + "failed : Status code" + responseEntity.getStatusCode());
+		}
 	}
 
 	/**

@@ -33,7 +33,7 @@ export CLUSTER_NAME=<cluster-name>
 
 run.sh clean -p kubernetes -se #schedules enabled
 run.sh setup -p kubernetes -b rabbit -se -dv 2.5.0.BUILD-SNAPSHOT -sv 2.3.0.BUILD-SNAPSHOT
-run.sh tests -p kubernetes -b rabbit -se -dv 2.5.0.BUILD-SNAPSHOT
+run.sh tests -p kubernetes -b rabbit -se
 ```
 
 NOTE: The commands require settings to be repeated, to avoid this, you can use environment variables for common options:
@@ -77,7 +77,7 @@ export SCHEDULES_URL=https://scheduler.apps...
 
 run.sh clean -p cloudfoundry
 run.sh setup -p cloudfoundry -b rabbit -se -dv 2.5.0.BUILD-SNAPSHOT -sv 2.3.0.BUILD-SNAPSHOT -cc
-run.sh tests -p cloudfoundry -b rabbit -dv 2.5.0.BUILD-SNAPSHOT
+run.sh tests -p cloudfoundry -b rabbit
 ```
 
 = General configuration
@@ -164,7 +164,11 @@ The following environment variables must be set:
 
 * KUBECONFIG - the path to the kube config file to use
 * CLUSTER_NAME - the name of the cluster to target (must be present in KUBECONFIG)
+
+Optional settings:
+
 * KUBERNETES_NAMESPACE environment variable that specifies an existing namespace to use for the testing. If this is not specified, the 'default' namespace will be used.
+* DATAFLOW_SERVICE_ACCOUNT_NAME the service account name to create and configure for server access (defaults to `scdf-data-flow`)
 
 === Code formatting guidelines
 

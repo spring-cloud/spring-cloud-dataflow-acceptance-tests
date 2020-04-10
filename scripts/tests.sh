@@ -13,7 +13,6 @@ Flags:
     --tests - comma separated list of tests to run. Wildcards such as *http* are allowed (e.g. --tests TickTockTests#tickTockTests)
     -cc | --skipCloudConfig - skip Cloud Config server tests for CF
     -se | --schedulesEnabled - run scheduling tests.
-    -dv | --dataflowVersion - set the dataflow client version to the same as the dataflow server (e.g. 2.5.0.BUILD-SNAPSHOT)
     -av | --appsVersion - set the stream app version to test (e.g. Celsius.SR2). Apps should be accessible via maven repo or docker hub.
     -tv | --tasksVersion - set the task app version to test (e.g. Elston.RELEASE). Tasks should be accessible via maven repo or docker hub.
     -c  | --skipCleanup - skip the clean up phase
@@ -37,8 +36,8 @@ function run_tests() {
 
   log_skipper_versions
 
-  eval "./mvnw -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DNAMESPACE=$KUBERNETES_NAMESPACE \\
-  -Ddataflow.version=$DATAFLOW_VERSION -DSKIP_CLOUD_CONFIG=$skipCloudConfig test surefire-report:report"
+eval "./mvnw -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DNAMESPACE=$KUBERNETES_NAMESPACE \\
+  -DSKIP_CLOUD_CONFIG=$skipCloudConfig test surefire-report:report"
 }
 
 echo "Starting $(basename $BASH_SOURCE) $@"
@@ -74,10 +73,6 @@ case ${key} in
  BINDER="$2"
  shift
  ;;
--dv|--dataflowVersion)
- DATAFLOW_VERSION="$2"
- shift
- ;;
  --tests)
  TESTS="$2"
  shift
@@ -107,7 +102,6 @@ esac
 shift
 done
 
-[[ -z "$DATAFLOW_VERSION" ]] && { echo "$(basename $BASH_SOURCE)  'dataflowVersion' must be defined" ; exit 1; }
 [[ ! -d "$PLATFORM" ]] && { echo "$(basename $BASH_SOURCE)  $PLATFORM is an invalid platform"; exit 1; }
 [[ ! -d "$PLATFORM/binder/$BINDER" ]] && { echo "$(basename $BASH_SOURCE)  $BINDER is an invalid binder for $PLATFORM platform"; exit 1; }
 

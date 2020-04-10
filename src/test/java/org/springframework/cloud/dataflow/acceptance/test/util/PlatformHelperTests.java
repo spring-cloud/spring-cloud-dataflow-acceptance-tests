@@ -58,14 +58,12 @@ public class PlatformHelperTests {
 		AppStatusResource logStatus = new AppStatusResource(STREAM_NAME + "-log", "deployed");
 		logStatus.setInstances(new Resources<>(Collections.singletonList(
 				new AppInstanceStatusResource(STREAM_NAME + "-log", "deployed",
-						Collections.singletonMap("url", "https://log"))),
-				(Link[]) (new Link[0])));
+						Collections.singletonMap("url", "https://log")))));
 		appStatusResources.add(logStatus);
 		AppStatusResource timeStatus = new AppStatusResource(STREAM_NAME + "-time", "deployed");
 		timeStatus.setInstances(new Resources<>(Collections.singletonList(
 				new AppInstanceStatusResource(STREAM_NAME + "-time", "deployed",
-						Collections.singletonMap("url", "https://time"))),
-				(Link[]) (new Link[0])));
+						Collections.singletonMap("url", "https://time"))), (new Link[0])));
 		appStatusResources.add(timeStatus);
 		PagedResources<AppStatusResource> resources = new PagedResources<>(appStatusResources, null, new Link("test"));
 		when(this.runtimeOperations.status()).thenReturn(resources);
@@ -87,14 +85,13 @@ public class PlatformHelperTests {
 		assertTrue(platformHelper.getLogfileName().contains("${PID}"));
 	}
 
-    @Test
-    public void testKubernetesPlatformHelper() {
-        KubernetesPlatformHelper platformHelper = new KubernetesPlatformHelper(runtimeOperations, ".cluster.springapps.io");
-        assertEquals("test.log", platformHelper.getLogfileName());
-        assertTrue(platformHelper.setUrlsForStream(stream));
-        assertEquals("https://" + STREAM_NAME + "-log" + platformHelper.getApplicationHost(),
-            stream.getApplication("log").getUrl());
-        assertEquals("https://" + STREAM_NAME + "-time" + platformHelper.getApplicationHost(),
-            stream.getApplication("time").getUrl());
-    }
+	@Test
+	public void testKubernetesPlatformHelper() {
+		PlatformHelper platformHelper = new KubernetesPlatformHelper(runtimeOperations);
+		assertEquals("test.log", platformHelper.getLogfileName());
+		assertTrue(platformHelper.setUrlsForStream(stream));
+		assertEquals("https://log", stream.getApplication("log").getUrl());
+		assertEquals("https://time", stream.getApplication("time").getUrl());
+	}
+
 }

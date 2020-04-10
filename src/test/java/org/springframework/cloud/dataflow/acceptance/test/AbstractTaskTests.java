@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.junit.After;
 import org.junit.Before;
@@ -52,7 +53,10 @@ import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -128,6 +132,8 @@ public abstract class AbstractTaskTests implements InitializingBean {
 				taskOperations.destroy(taskDefinitionResource.getName());
 			}
 		}
+
+		cleanUpExecutions();
 	}
 
 	/**
@@ -181,9 +187,9 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	protected String taskLaunch(String definition,
 			Map<String, String> properties, List<String> arguments) {
 
-		String taskDefinitionName = "task-" + UUID.randomUUID().toString();
+		String taskDefinitionName = randomTaskName();
 		taskOperations.create(taskDefinitionName, definition);
-		taskOperations.launch(taskDefinitionName, properties, arguments);
+		taskOperations.launch(taskDefinitionName, properties, arguments, null);
 		return taskDefinitionName;
 	}
 
@@ -194,9 +200,13 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 * @return The name of the task associated with this launch.
 	 */
 	protected String taskCreate(String definition) {
-		String taskDefinitionName = "task-" + UUID.randomUUID().toString().substring(0, 10);
+		String taskDefinitionName = randomTaskName();
 		taskOperations.create(taskDefinitionName, definition);
 		return taskDefinitionName;
+	}
+
+	private String randomTaskName() {
+		return "task-" + UUID.randomUUID().toString().substring(0, 10);
 	}
 
 	/**
@@ -215,7 +225,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 */
 	protected void launchExistingTask(String taskDefinitionName, Map<String, String> properties,
 			List<String> arguments) {
-		taskOperations.launch(taskDefinitionName, properties, arguments);
+		taskOperations.launch(taskDefinitionName, properties, arguments, null);
 	}
 
 	/**
@@ -410,5 +420,49 @@ public abstract class AbstractTaskTests implements InitializingBean {
 				.executionListByJobName(taskName);
 		return jobExecutionPagedResources.getContent();
 	}
+
+	private void cleanUpExecutions() {
+		Collection<TaskExecutionResource> taskExecutionResources  = taskOperations.executionList().getContent();
+		List<Long> parentIds = taskExecutionResources.stream()
+				.filter(taskExecutionResource -> StringUtils.isEmpty(taskExecutionResource.getParentExecutionId()))
+				.map(taskExecution-> {
+					logger.info("deleting parent task execution task name: {} executionId: {} exit code: {} exit msg: {}",
+							taskExecution.getTaskName(),
+							taskExecution.getExecutionId(),
+							taskExecution.getExitCode(),
+							taskExecution.getErrorMessage());
+					return taskExecution;
+				})
+				.map(TaskExecutionResource::getExecutionId)
+				.collect(Collectors.toList());
+
+		cleanUpAndRemoveDataForTaskExecutions(parentIds);
+		//Clean up any remaining
+		cleanUpAndRemoveDataForTaskExecutions(taskOperations.executionList().getContent()
+				.stream().map(taskExecution-> {
+							logger.info("deleting task execution task name: {} executionId: {} exit code: {} exit msg: {}",
+									taskExecution.getTaskName(),
+									taskExecution.getExecutionId(),
+									taskExecution.getExitCode(),
+									taskExecution.getErrorMessage());
+							return taskExecution;
+						})
+						.map(TaskExecutionResource::getExecutionId).collect(Collectors.toList()));
+	}
+
+	private void cleanUpAndRemoveDataForTaskExecutions(List<Long> ids) {
+		if (CollectionUtils.isEmpty(ids)) {
+			return;
+		}
+		URI uri = new DefaultUriBuilderFactory(configurationProperties.getServerUri())
+				.builder()
+				.pathSegment("tasks","executions")
+				.pathSegment(StringUtils.collectionToCommaDelimitedString(ids))
+				.queryParam("action","CLEANUP,REMOVE_DATA")
+				.build();
+
+		restTemplate.delete(uri);
+	}
+
 
 }

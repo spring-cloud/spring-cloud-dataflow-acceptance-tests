@@ -22,7 +22,7 @@ Alternately, you can run it standalone from the project root:
 ```
 
 ```
-USAGE: tests.sh -p <PLATFORM> -b <BINDER> [-d -cc -dv --tests]
+USAGE: tests.sh -p <PLATFORM> -b <BINDER> [-se -cc -av- tv --tests ...]
   Run the acceptance tests.
 
 Flags:
@@ -31,7 +31,6 @@ Flags:
     --tests - comma separated list of tests to run. Wildcards such as *http* are allowed (e.g. --tests TickTockTests#tickTockTests)
     -cc | --skipCloudConfig - skip Cloud Config server tests for CF
     -se | --schedulesEnabled - run scheduling tests.
-    -dv | --dataflowVersion - set the dataflow client version to the same as the dataflow server (e.g. 2.5.0.BUILD-SNAPSHOT)
     -av | --appsVersion - set the stream app version to test (e.g. Celsius.SR2). Apps should be accessible via maven repo or docker hub.
     -tv | --tasksVersion - set the task app version to test (e.g. Elston.RELEASE). Tasks should be accessible via maven repo or docker hub.
     -c  | --skipCleanup - skip the clean up phase

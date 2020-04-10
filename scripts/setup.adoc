@@ -17,7 +17,7 @@ Alternately, you can run it standalone from the project root:
 ```
 
 ```
-USAGE: setup.sh -p <PLATFORM> -b <BINDER> [-d -cc -sv -dv -av -tv -se]
+USAGE: setup.sh -p <PLATFORM> -b <BINDER> [-d -cc -sv -dv -se]
   Set up the test environment.
 
 Flags:

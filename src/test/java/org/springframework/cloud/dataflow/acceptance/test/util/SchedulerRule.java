@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.acceptance.test.util;
 
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -49,7 +50,7 @@ public class SchedulerRule extends AbstractExternalResourceTestSupport<DataFlowT
 
 	@Override
 	protected void obtainResource() throws Exception {
-		context = new SpringApplicationBuilder(Config.class).web(false).run();
+		context = new SpringApplicationBuilder(Config.class).web(WebApplicationType.NONE).run();
 		resource = context.getBean(DataFlowTemplate.class);
 
 		SchedulerOperations schedulerOperations = resource.schedulerOperations();
