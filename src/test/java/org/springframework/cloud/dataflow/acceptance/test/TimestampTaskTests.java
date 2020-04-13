@@ -48,11 +48,12 @@ public class TimestampTaskTests extends AbstractTaskTests {
 
 	private void assertTaskExecutions(String taskDefinitionName,
 			int expectedExitCode, int expectedCount) {
-		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
+
 		assertTrue(waitForTaskToComplete(taskDefinitionName, expectedCount));
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
 
 		for (TaskExecutionResource taskExecutionResource : taskExecutionResources) {
-			assertEquals(expectedExitCode, taskExecutionResource.getExitCode());
+			assertEquals(expectedExitCode, (long) taskExecutionResource.getExitCode());
 		}
 	}
 

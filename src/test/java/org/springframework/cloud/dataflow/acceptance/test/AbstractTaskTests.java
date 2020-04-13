@@ -124,7 +124,11 @@ public abstract class AbstractTaskTests implements InitializingBean {
 
 			while (taskDefinitionResourceIterator.hasNext()) {
 				taskDefinitionResource = taskDefinitionResourceIterator.next();
-				taskOperations.destroy(taskDefinitionResource.getName());
+				try {
+					taskOperations.destroy(taskDefinitionResource.getName());
+				} catch (Exception e) {
+					logger.warn(e.getMessage(), e);
+				}
 			}
 		}
 	}

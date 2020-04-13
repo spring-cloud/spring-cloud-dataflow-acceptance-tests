@@ -24,7 +24,7 @@
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>
-		<dataflow.version>1.7.0.BUILD-SNAPSHOT</dataflow.version>
+		<dataflow.version>1.7.5.BUILD-SNAPSHOT</dataflow.version>
 		<app.starters.support.version>1.3.3.RELEASE</app.starters.support.version>
 		<spring.web.version>4.3.4.RELEASE</spring.web.version>
 	</properties>

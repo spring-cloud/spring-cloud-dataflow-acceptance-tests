@@ -42,11 +42,11 @@ public class ComposedTaskTests extends AbstractTaskTests {
 	}
 
 	@Test
-	public void ctrMultipleLaunch() {
+	public void ctrMultipleLaunchShouldFailIfBatchParametersDoNotChange() {
 		String taskDefinitionName = composedTaskLaunch("a: timestamp && b:timestamp");
 		assertTaskExecutions(taskDefinitionName, 0, 1);
 		launchExistingTask(taskDefinitionName);
-		assertParentTaskExecution(taskDefinitionName, 0, 2, 1);
+		assertLastParentTaskExecution(taskDefinitionName, 1);
 	}
 
 	@Test
@@ -61,24 +61,39 @@ public class ComposedTaskTests extends AbstractTaskTests {
 
 	private void assertTaskExecutions(String taskDefinitionName,
 			int expectedExitCode, int expectedCount) {
-		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
+
 		assertTrue(waitForTaskToComplete(taskDefinitionName, expectedCount));
 		assertTrue(waitForTaskToComplete(taskDefinitionName + "-a", expectedCount));
 		assertTrue(waitForTaskToComplete(taskDefinitionName + "-b", expectedCount));
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
 
 		for (TaskExecutionResource taskExecutionResource : taskExecutionResources) {
-			assertEquals(expectedExitCode, taskExecutionResource.getExitCode());
+			assertEquals(expectedExitCode, (long) taskExecutionResource.getExitCode());
 		}
 	}
 
 	private void assertParentTaskExecution(String taskDefinitionName,
 			int expectedExitCode, int expectedCount, int expectJobCount) {
-		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
-		assertTrue(waitForTaskToComplete(taskDefinitionName, expectedCount));
 
+		assertTrue(waitForTaskToComplete(taskDefinitionName, expectedCount));
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
 		for (TaskExecutionResource taskExecutionResource : taskExecutionResources) {
-			assertEquals(expectedExitCode, taskExecutionResource.getExitCode());
+			assertEquals(expectedExitCode, (long) taskExecutionResource.getExitCode());
 		}
 		assertEquals(expectJobCount, getJobExecutionByTaskName(taskDefinitionName).size());
+	}
+
+	private void assertLastParentTaskExecution(String taskDefinitionName, int expectedExitCode) {
+		assertTrue(waitForTaskToComplete(taskDefinitionName, 1));
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
+
+		TaskExecutionResource lastExecution = taskExecutionResources.get(0);
+
+		for (TaskExecutionResource taskExecutionResource : taskExecutionResources) {
+			if (taskExecutionResource.getEndTime().compareTo(lastExecution.getEndTime()) > 0) {
+				lastExecution = taskExecutionResource;
+			}
+		}
+		assertEquals(expectedExitCode, (long) lastExecution.getExitCode());
 	}
 }
