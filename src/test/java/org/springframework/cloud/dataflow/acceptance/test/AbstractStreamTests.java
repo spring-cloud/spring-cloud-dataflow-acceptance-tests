@@ -266,10 +266,14 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				deploymentPause();
 			}
 		}
+
 		if (streamStarted) {
 			logger.info(String.format("Stream '%s' started with status: %s", stream.getName(), status));
 			for (Application app : stream.getApplications()) {
 				logger.info("App '" + app.getName() + "' has instances: " + app.getInstanceUrls());
+				if (app.getInstanceUrls().isEmpty()) {
+					throw new IllegalStateException("App '" + app.getName() + "' returned no instances: ");
+				}
 			}
 		}
 		else {

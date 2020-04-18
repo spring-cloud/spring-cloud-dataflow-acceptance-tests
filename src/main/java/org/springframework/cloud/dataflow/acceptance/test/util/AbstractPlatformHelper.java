@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,21 @@ package org.springframework.cloud.dataflow.acceptance.test.util;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
-
 /**
  * @author Glenn Renfro
  * @author Thomas Risberg
  * @author Vinicius Carvalho
+ * @author David Turanski
  */
 public abstract class AbstractPlatformHelper implements PlatformHelper {
+
+	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	protected final String URL = "url";
 
@@ -45,6 +50,7 @@ public abstract class AbstractPlatformHelper implements PlatformHelper {
 		int numberOfAppsWithUrls = 0;
 		while (statsIterator.hasNext()) {
 			AppStatusResource appStatus = statsIterator.next();
+
 			for (Application application : stream.getApplications()) {
 				if (appStatus.getDeploymentId().toLowerCase().contains(stream.getName().toLowerCase())
 						&& extractName(appStatus.getDeploymentId()).endsWith(application.getName())) {
@@ -52,11 +58,15 @@ public abstract class AbstractPlatformHelper implements PlatformHelper {
 						return false;
 					}
 					else {
-						setInstanceUrlsForApplication(application, appStatus);
-						numberOfAppsWithUrls++;
+						if (setInstanceUrlsForApplication(application, appStatus)) {
+							numberOfAppsWithUrls++;
+						}
 					}
 				}
 			}
+		}
+		if (numberOfAppsWithUrls == 0) {
+			throw new IllegalStateException("Unable to get available urls for stream " + stream.getName() + "= " + stream.getDefinition());
 		}
 		if (numberOfAppsInStream == numberOfAppsWithUrls) {
 			return true;
@@ -114,16 +124,22 @@ public abstract class AbstractPlatformHelper implements PlatformHelper {
 	 *
 	 * @param application
 	 * @param appStatus
-	 * @return whether any url was set
 	 */
-	protected void setInstanceUrlsForApplication(Application application, AppStatusResource appStatus) {
+	protected boolean setInstanceUrlsForApplication(Application application, AppStatusResource appStatus) {
+		boolean instanceUrlsAdded = false;
 		Iterator<AppInstanceStatusResource> resourceIterator = appStatus.getInstances().iterator();
+		if (!resourceIterator.hasNext()) {
+			throw new IllegalStateException(appStatus.getDeploymentId() + " appStatus contains no instances");
+		}
+
 		while (resourceIterator.hasNext()) {
 			AppInstanceStatusResource resource = resourceIterator.next();
 			if (resource.getAttributes().containsKey(URL)) {
+				instanceUrlsAdded = true;
 				application.addInstanceUrl(resource.getInstanceId(), resource.getAttributes().get(URL));
 			}
 		}
+		return instanceUrlsAdded;
 	}
 
 }

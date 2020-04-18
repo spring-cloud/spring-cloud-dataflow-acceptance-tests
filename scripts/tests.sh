@@ -36,6 +36,9 @@ function run_tests() {
 
   log_skipper_versions
 
+#
+# Add -Dmaven.surefire.debug to enable remote debugging on port 5005.
+#
 eval "./mvnw -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DNAMESPACE=$KUBERNETES_NAMESPACE \\
   -DSKIP_CLOUD_CONFIG=$skipCloudConfig test surefire-report:report"
 }
