@@ -94,6 +94,7 @@ Each platform has different flags, but the global ones should be:
 * PLATFORM: the platform type (local, kubernetes, cloudfoundry)
 * BINDER: the binder (rabbit, kafka)
 * DEBUG: Log debug output
+* USE_HTTPS: Use https to post data to test streams
 
 To point to where your server is located and also specify which artifacts you want to register with the server.
 

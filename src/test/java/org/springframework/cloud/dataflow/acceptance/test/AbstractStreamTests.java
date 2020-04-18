@@ -43,12 +43,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.acceptance.test.util.Application;
-import org.springframework.cloud.dataflow.acceptance.test.util.DataFlowTemplateConfigurer;
+import org.springframework.cloud.dataflow.acceptance.test.util.DataFlowTemplateBuilder;
 import org.springframework.cloud.dataflow.acceptance.test.util.DefaultPlatformHelper;
+import org.springframework.cloud.dataflow.acceptance.test.util.HttpPoster;
 import org.springframework.cloud.dataflow.acceptance.test.util.KubernetesPlatformHelper;
 import org.springframework.cloud.dataflow.acceptance.test.util.LocalPlatformHelper;
 import org.springframework.cloud.dataflow.acceptance.test.util.LogTestNameRule;
 import org.springframework.cloud.dataflow.acceptance.test.util.PlatformHelper;
+import org.springframework.cloud.dataflow.acceptance.test.util.RestTemplateConfigurer;
 import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
 import org.springframework.cloud.dataflow.acceptance.test.util.TestConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
@@ -60,14 +62,13 @@ import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriBuilder;
 
 /**
  * Abstract base class that is used by stream acceptance tests. This class contains
@@ -93,8 +94,6 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	@Rule
 	public LogTestNameRule logTestName = new LogTestNameRule();
 
-	protected RestTemplate restTemplate = new RestTemplate();
-
 	@Autowired
 	protected TestConfigurationProperties configurationProperties;
 
@@ -107,6 +106,10 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	private RuntimeOperations runtimeOperations;
 
 	private PlatformHelper platformHelper;
+
+	protected RestTemplate restTemplate;
+
+	private HttpPoster httpPoster;
 
 	/**
 	 * Ensures that all streams are destroyed regardless if the test was successful or failed.
@@ -135,8 +138,9 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * used for the acceptance test.
 	 */
 	public void afterPropertiesSet() {
-		dataFlowOperations = DataFlowTemplateConfigurer.create(configurationProperties.getServerUri())
-				.configure();
+		restTemplate = new RestTemplateConfigurer().skipSslValidation(configurationProperties.isUseHttps()).configure();
+		dataFlowOperations = DataFlowTemplateBuilder.serverUri(configurationProperties.getServerUri())
+		.restTemplate(restTemplate).build();
 		streamOperations = dataFlowOperations.streamOperations();
 		runtimeOperations = dataFlowOperations.runtimeOperations();
 		appRegistryOperations = dataFlowOperations.appRegistryOperations();
@@ -149,6 +153,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		else {
 			platformHelper = new DefaultPlatformHelper(runtimeOperations);
 		}
+		httpPoster = new HttpPoster(restTemplate);
 	}
 
 	/**
@@ -164,7 +169,9 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 		// Specific to Boot 2.x applications, also allows access without authentication
 		streamProperties.put("app.*.management.endpoints.web.exposure.include", "*");
+
 		streamProperties.put("app.*.spring.cloud.streamapp.security.enabled", "false");
+
 
 		platformHelper.addDeploymentProperties(stream, streamProperties);
 
@@ -346,16 +353,11 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @param message the data to be sent to the app.
 	 */
 	protected void httpPostData(Application app, String message) {
-		logger.info("posting to {}", app.getUrl());
-		RequestEntity<String> requestEntity = RequestEntity
-					.post(new DefaultUriBuilderFactory(app.getUrl()).builder().build())
-					.contentType(MediaType.TEXT_PLAIN)
-					.body(message);
-
-		ResponseEntity<?> responseEntity = restTemplate.exchange(requestEntity, Object.class);
-		if (responseEntity.getStatusCode().isError()) {
-			throw new RuntimeException("HTTP POST " + message + "failed : Status code" + responseEntity.getStatusCode());
+		UriBuilder uriBuilder = new DefaultUriBuilderFactory(app.getUrl()).builder();
+		if (this.configurationProperties.isUseHttps()) {
+			uriBuilder.scheme("https");
 		}
+		httpPoster.httpPostData(uriBuilder.build(), message);
 	}
 
 	/**

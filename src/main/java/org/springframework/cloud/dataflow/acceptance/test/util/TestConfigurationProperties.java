@@ -50,7 +50,10 @@ public class TestConfigurationProperties {
 	private String streamRegistrationResource = "https://https://dataflow.spring.io/rabbitmq-maven-latest";
 
 	private String taskRegistrationResource = "https://dataflow.spring.io/task-maven-latest";
+
 	private String appHost;
+
+	private boolean useHttps;
 
 	public int getMaxWaitTime() {
 		return maxWaitTime;
@@ -146,5 +149,13 @@ public class TestConfigurationProperties {
 
 	public String getAppHost() {
 		return appHost;
+	}
+
+	public boolean isUseHttps() {
+		return useHttps;
+	}
+
+	public void setUseHttps(boolean useHttps) {
+		this.useHttps = useHttps;
 	}
 }

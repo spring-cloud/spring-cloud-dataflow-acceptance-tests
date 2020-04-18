@@ -44,12 +44,12 @@ public class SchedulerRule extends AbstractExternalResourceTestSupport<DataFlowT
 	}
 
 	@Override
-	protected void cleanupResource() throws Exception {
+	protected void cleanupResource() {
 		context.close();
 	}
 
 	@Override
-	protected void obtainResource() throws Exception {
+	protected void obtainResource()  {
 		context = new SpringApplicationBuilder(Config.class).web(WebApplicationType.NONE).run();
 		resource = context.getBean(DataFlowTemplate.class);
 
@@ -70,8 +70,8 @@ public class SchedulerRule extends AbstractExternalResourceTestSupport<DataFlowT
 
 		@Bean
 		public DataFlowTemplate dataFlowTemplate(TestConfigurationProperties configurationProperties) {
-			return DataFlowTemplateConfigurer.create(configurationProperties.getServerUri())
-					.configure();
+			return DataFlowTemplateBuilder.serverUri(configurationProperties.getServerUri())
+					.build();
 		}
 
 	}
