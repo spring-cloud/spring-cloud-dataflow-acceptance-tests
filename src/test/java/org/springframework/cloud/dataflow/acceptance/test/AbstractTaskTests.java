@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.acceptance.test;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,8 +37,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.acceptance.test.util.DataFlowTemplateConfigurer;
+import org.springframework.cloud.dataflow.acceptance.test.util.DataFlowTemplateBuilder;
 import org.springframework.cloud.dataflow.acceptance.test.util.LogTestNameRule;
+import org.springframework.cloud.dataflow.acceptance.test.util.RestTemplateConfigurer;
 import org.springframework.cloud.dataflow.acceptance.test.util.TestConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
@@ -50,7 +50,6 @@ import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
-import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.CollectionUtils;
@@ -246,32 +245,13 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 * Creates the task and app operations that will be used for the acceptance test.
 	 */
 	public void afterPropertiesSet() {
-		if (restTemplate == null) {
-			configureRestTemplate();
-			DataFlowTemplate dataFlowOperationsTemplate = DataFlowTemplateConfigurer
-						.create(configurationProperties.getServerUri()).configure();
-			taskOperations = dataFlowOperationsTemplate.taskOperations();
-			schedulerOperations = dataFlowOperationsTemplate.schedulerOperations();
-			appRegistryOperations = dataFlowOperationsTemplate.appRegistryOperations();
-			jobOperations = dataFlowOperationsTemplate.jobOperations();
-			restTemplate = dataFlowOperationsTemplate.getRestTemplate();
-		}
-	}
-
-	/**
-	 * Configure RestTemplate to skip ssl validation
-	 */
-	protected void configureRestTemplate() {
-		HttpClientConfigurer httpClientConfigurer = null;
-		try {
-			httpClientConfigurer = HttpClientConfigurer.create(
-					new URI(configurationProperties.getServerUri()))
-					.skipTlsCertificateVerification(true);
-		} catch (URISyntaxException e) {
-			throw new IllegalStateException(e);
-		}
-		restTemplate = new RestTemplate();
-		restTemplate.setRequestFactory(httpClientConfigurer.buildClientHttpRequestFactory());
+		restTemplate = new RestTemplateConfigurer().skipSslValidation(true).configure();
+		DataFlowTemplate dataFlowOperationsTemplate = DataFlowTemplateBuilder
+						.serverUri(configurationProperties.getServerUri()).restTemplate(restTemplate).build();
+		taskOperations = dataFlowOperationsTemplate.taskOperations();
+		schedulerOperations = dataFlowOperationsTemplate.schedulerOperations();
+		appRegistryOperations = dataFlowOperationsTemplate.appRegistryOperations();
+		jobOperations = dataFlowOperationsTemplate.jobOperations();
 	}
 
 	/**

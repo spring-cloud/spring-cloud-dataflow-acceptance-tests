@@ -21,18 +21,18 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
-import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 
 /**
  * @author David Turanski
  */
-public class DataFlowTemplateConfigurer {
+public class DataFlowTemplateBuilder {
 	private boolean skipSslValidation = true;
 	private final URI serverUri;
+	private RestTemplate restTemplate;
 
-	public static DataFlowTemplateConfigurer create(String serverUri) {
+	public static DataFlowTemplateBuilder serverUri(String serverUri) {
 		Assert.hasText(serverUri, "'serverUri' must contain text");
 		URI uri;
 		try {
@@ -40,30 +40,27 @@ public class DataFlowTemplateConfigurer {
 		} catch (URISyntaxException e) {
 			throw new IllegalStateException(e.getMessage());
 		}
-		return new DataFlowTemplateConfigurer(uri);
+		return new DataFlowTemplateBuilder(uri);
 	}
 
-	public DataFlowTemplateConfigurer skipSslValidation(boolean skipSslValidation) {
+	private DataFlowTemplateBuilder(URI serverUri) {
+		this.serverUri = serverUri;
+	}
+
+	public DataFlowTemplateBuilder skipSslValidation(boolean skipSslValidation) {
 		this.skipSslValidation = skipSslValidation;
 		return this;
 	}
 
-	private DataFlowTemplateConfigurer(URI uri) {
-		this.serverUri = uri;
+	public DataFlowTemplateBuilder restTemplate(RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
+		return this;
 	}
 
-
-	public DataFlowTemplate configure() {
-		RestTemplate restTemplate = new RestTemplate();
-		HttpClientConfigurer httpClientConfigurer  = HttpClientConfigurer.create(this.serverUri);
-
-		if (this.serverUri.getScheme().equals("https")) {
-				if (skipSslValidation) {
-					httpClientConfigurer.skipTlsCertificateVerification();
-				}
-			}
-			restTemplate.setRequestFactory(httpClientConfigurer
-					.buildClientHttpRequestFactory());
-		return new DataFlowTemplate(this.serverUri, restTemplate);
+	public DataFlowTemplate build() {
+		return new DataFlowTemplate(this.serverUri, this.restTemplate == null ?
+				new RestTemplateConfigurer().skipSslValidation(this.skipSslValidation)
+				.configure()
+				: this.restTemplate);
 	}
 }
