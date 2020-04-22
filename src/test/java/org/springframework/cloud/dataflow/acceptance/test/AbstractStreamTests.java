@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -140,7 +141,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	public void afterPropertiesSet() {
 		restTemplate = new RestTemplateConfigurer().skipSslValidation(configurationProperties.isUseHttps()).configure();
 		dataFlowOperations = DataFlowTemplateBuilder.serverUri(configurationProperties.getServerUri())
-		.restTemplate(restTemplate).build();
+				.restTemplate(restTemplate).build();
 		streamOperations = dataFlowOperations.streamOperations();
 		runtimeOperations = dataFlowOperations.runtimeOperations();
 		appRegistryOperations = dataFlowOperations.appRegistryOperations();
@@ -162,7 +163,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 */
 	protected void deployStream(StreamDefinition stream) {
 		logger.info("Creating stream '" + stream.getName() + "'");
-		streamOperations.createStream(stream.getName(), stream.getDefinition(),false);
+		streamOperations.createStream(stream.getName(), stream.getDefinition(), false);
 		Map<String, String> streamProperties = new HashMap<>();
 		streamProperties.put("app.*.logging.file", platformHelper.getLogfileName());
 		streamProperties.put("app.*.endpoints.logfile.sensitive", "false");
@@ -171,7 +172,6 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		streamProperties.put("app.*.management.endpoints.web.exposure.include", "*");
 
 		streamProperties.put("app.*.spring.cloud.streamapp.security.enabled", "false");
-
 
 		platformHelper.addDeploymentProperties(stream, streamProperties);
 
@@ -268,6 +268,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		}
 
 		if (streamStarted) {
+			sleep(Duration.ofSeconds(10));
 			logger.info(String.format("Stream '%s' started with status: %s", stream.getName(), status));
 			for (Application app : stream.getApplications()) {
 				logger.info("App '" + app.getName() + "' has instances: " + app.getInstanceUrls());
@@ -295,11 +296,15 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * attribute.
 	 */
 	protected void deploymentPause() {
+		sleep(Duration.ofSeconds(configurationProperties.getDeployPauseTime()));
+	}
+
+	protected void sleep(Duration duration) {
 		try {
-			Thread.sleep(configurationProperties.getDeployPauseTime() * 1000);
+			Thread.sleep(duration.toMillis());
 		}
 		catch (Exception ex) {
-			// ignore
+			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -379,13 +384,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		LogRetriever logRetriever = logRetriever(app);
 
 		while (System.currentTimeMillis() < timeout) {
-			try {
-				Thread.sleep(configurationProperties.getDeployPauseTime() * 1000);
-			}
-			catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				throw new IllegalStateException(e.getMessage(), e);
-			}
+			deploymentPause();
 			logs = logRetriever.retrieveLogs();
 
 			for (Log log : logs) {
@@ -432,12 +431,12 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 	private LogRetriever logRetriever(Application application) {
 		switch (PlatformTypes.of(configurationProperties.getPlatformType())) {
-			case CLOUDFOUNDRY:
-				return new CloudFoundryLogRetriever(application);
-			case KUBERNETES:
-				return new KubernetesLogRetriever(application);
-			default:
-				return new DefaultLogRetriever(application);
+		case CLOUDFOUNDRY:
+			return new CloudFoundryLogRetriever(application);
+		case KUBERNETES:
+			return new KubernetesLogRetriever(application);
+		default:
+			return new DefaultLogRetriever(application);
 		}
 	}
 
@@ -456,7 +455,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			return value;
 		}
 
-		static PlatformTypes of(String value){
+		static PlatformTypes of(String value) {
 			return PlatformTypes.valueOf(value.toUpperCase());
 		}
 
@@ -516,44 +515,44 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		}
 	}
 
-	private abstract class AbstractCommandLogRetriever extends  LogRetriever {
+	private abstract class AbstractCommandLogRetriever extends LogRetriever {
 		AbstractCommandLogRetriever(Application app) {
 			super(app);
 		}
 
-		protected Log doRetrieveLog(String logSource, String ... command) {
+		protected Log doRetrieveLog(String logSource, String... command) {
 			String logContent;
 			final int maxWaitInSeconds = 30;
 			logger.info("Running system command: " + String.join(" ", command));
 			ProcessBuilder procBuilder = new ProcessBuilder(command);
 			Process proc;
 			try {
-			proc = procBuilder.start();
+				proc = procBuilder.start();
 			}
-				catch (IOException e) {
+			catch (IOException e) {
 				throw new IllegalStateException("Can't execute command", e);
 			}
 			boolean exited;
 
 			try {
-			logContent = readStringFromInputStream(proc.getInputStream());
-			logger.info("Waiting for command to exit");
-			exited = proc.waitFor(maxWaitInSeconds, TimeUnit.SECONDS);
-		}
-			catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			throw new IllegalStateException(e.getMessage(), e);
-		}
-			if (exited) {
-			int rc = proc.exitValue();
-			if (rc != 0) {
-				logger.error("ERROR: running system command [rc=" + rc + "]: "
-						+ readStringFromInputStream(proc.getErrorStream()));
+				logContent = readStringFromInputStream(proc.getInputStream());
+				logger.info("Waiting for command to exit");
+				exited = proc.waitFor(maxWaitInSeconds, TimeUnit.SECONDS);
 			}
-		}
+			catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new IllegalStateException(e.getMessage(), e);
+			}
+			if (exited) {
+				int rc = proc.exitValue();
+				if (rc != 0) {
+					logger.error("ERROR: running system command [rc=" + rc + "]: "
+							+ readStringFromInputStream(proc.getErrorStream()));
+				}
+			}
 			else {
-			logger.error("ERROR: system command exceeded maximum wait time (" + maxWaitInSeconds + "s)");
-		}
+				logger.error("ERROR: system command exceeded maximum wait time (" + maxWaitInSeconds + "s)");
+			}
 
 			return new Log(logSource, logContent);
 		}
@@ -580,7 +579,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		List<Log> retrieveLogs() {
 			List<Log> logs = new ArrayList<>();
 			for (String appInstance : app.getInstanceUrls().keySet()) {
-				logs.add(doRetrieveLog(appInstance,"kubectl", "logs", "-n",
+				logs.add(doRetrieveLog(appInstance, "kubectl", "logs", "-n",
 						configurationProperties.getNamespace(), appInstance));
 			}
 			return logs;
@@ -604,7 +603,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				throw new IllegalArgumentException("Malformed url: " + app.getUrl(), e);
 			}
 
-			logs.add(doRetrieveLog(logSource,"cf", "logs", "--recent", logSource));
+			logs.add(doRetrieveLog(logSource, "cf", "logs", "--recent", logSource));
 
 			return logs;
 		}
