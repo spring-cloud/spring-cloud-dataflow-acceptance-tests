@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
+
 . ../common.sh
+
 function use_helm() {
   if [ -z "$SKIPPER_VERSION" ]; then
     echo "SKIPPER_VERSION must be defined"
@@ -16,6 +18,10 @@ function use_helm() {
 
   if [ "$BINDER" == "kafka" ]; then
     HELM_PARAMS="$HELM_PARAMS --set kafka.enabled=true,rabbitmq.enabled=false"
+  fi
+
+  if [ ! -z "$EXTRA_HELM_PARAMS" ]; then
+    HELM_PARAMS="$HELM_PARAMS $EXTRA_HELM_PARAMS"
   fi
 
   if [ ! -z "$HELM_CHART_VERSION" ]; then
