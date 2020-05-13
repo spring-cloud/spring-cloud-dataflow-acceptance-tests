@@ -175,6 +175,26 @@ public class DataflowServerDb2BootstrapTests extends AbstractDataflowTests {
 	}
 
 	@Test
+	@Skipper25x
+	@Dataflow26x
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/db2.yml" }, services = { "db2" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper25xdb2withddl.yml" }, services = { "skipper" })
+	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow26xdb2withddl.yml" }, services = { "dataflow" })
+	public void testDataflow26xWithDb2AndDdl(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
+		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
+
+		registerBatchApp(dockerComposeInfo, "dataflow", "dataflow");
+		registerBatchTaskDefs(dockerComposeInfo, "dataflow", "dataflow");
+		launchTask(dockerComposeInfo, "dataflow", "dataflow", "fakebatch");
+		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
+				TimeUnit.SECONDS);
+		deleteBatchJobExecutions(dockerComposeInfo, "dataflow", "dataflow");
+		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
+				TimeUnit.SECONDS, 0, 0);
+	}
+
+	@Test
 	@Skipper20x
 	@Dataflow20x
 	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/db2.yml" }, services = { "db2" })
