@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,19 +24,6 @@ import org.junit.jupiter.api.Tag;
 
 @Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
-@Skipper100
-@Skipper101
-@Skipper102
-@Skipper103
-@Skipper104
-@Skipper105
-@Skipper110
-@Skipper11x
-@Skipper20x
-@Skipper22x
-@Skipper23x
-@Skipper24x
-@Skipper25x
-@Tag("skipperall")
-public @interface SkipperAll {
+@Tag("skipper25x")
+public @interface Skipper25x {
 }

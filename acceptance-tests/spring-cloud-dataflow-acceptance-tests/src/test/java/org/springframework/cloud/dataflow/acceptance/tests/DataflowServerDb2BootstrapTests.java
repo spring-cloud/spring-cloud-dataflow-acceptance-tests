@@ -33,12 +33,14 @@ import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow22x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow23x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow24x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow25x;
+import org.springframework.cloud.dataflow.acceptance.tests.support.Dataflow26x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Db2;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper11x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper20x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper22x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper23x;
 import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper24x;
+import org.springframework.cloud.dataflow.acceptance.tests.support.Skipper25x;
 
 @ExtendWith(DockerComposeExtension.class)
 @Db2
@@ -139,6 +141,26 @@ public class DataflowServerDb2BootstrapTests extends AbstractDataflowTests {
 	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper24xdb2.yml" }, services = { "skipper" })
 	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow25xdb2.yml" }, services = { "dataflow" })
 	public void testDataflow25xWithDb2(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
+		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
+
+		registerBatchApp(dockerComposeInfo, "dataflow", "dataflow");
+		registerBatchTaskDefs(dockerComposeInfo, "dataflow", "dataflow");
+		launchTask(dockerComposeInfo, "dataflow", "dataflow", "fakebatch");
+		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
+				TimeUnit.SECONDS);
+		deleteBatchJobExecutions(dockerComposeInfo, "dataflow", "dataflow");
+		waitBatchJobExecution(dockerComposeInfo, "dataflow", "dataflow", "COMPLETED", 1, TimeUnit.SECONDS, 180,
+				TimeUnit.SECONDS, 0, 0);
+	}
+
+	@Test
+	@Skipper25x
+	@Dataflow26x
+	@DockerCompose(id = "db", order = 0, locations = { "src/test/resources/db/db2.yml" }, services = { "db2" })
+	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper25xdb2.yml" }, services = { "skipper" })
+	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow26xdb2.yml" }, services = { "dataflow" })
+	public void testDataflow26xWithDb2(DockerComposeInfo dockerComposeInfo) throws Exception {
 		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
 		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
 
