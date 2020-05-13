@@ -293,6 +293,20 @@ jobs:
         APP_VERSION: 24x
         APP_TEMPLATE: skipper-server-with-drivers-template6
         SKIPPER_VERSION: 2.4.0.BUILD-SNAPSHOT
+    - task: build-skipper-server-with-drivers25x
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-skipper-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-skipper25x
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 25x
+        APP_TEMPLATE: skipper-server-with-drivers-template7
+        SKIPPER_VERSION: 2.5.0.BUILD-SNAPSHOT
     - task: build-dataflow-server-with-drivers173
       privileged: true
       timeout: 30m
@@ -405,6 +419,20 @@ jobs:
         APP_VERSION: 25x
         APP_TEMPLATE: dataflow-server-with-drivers-template5
         DATAFLOW_VERSION: 2.5.0.BUILD-SNAPSHOT
+    - task: build-dataflow-server-with-drivers26x
+      privileged: true
+      timeout: 30m
+      image: spring-cloud-dataflow-ci-image
+      file: ci-git-repo/((base-path))/ci/tasks/build-dataflow-server-with-drivers.yml
+      input_mapping:
+        git-repo: ci-apps-git-repo
+      output_mapping:
+        distribution-repository: distribution-repository-dataflow26x
+      params:
+        BASE_PATH: ((base-path))
+        APP_VERSION: 26x
+        APP_TEMPLATE: dataflow-server-with-drivers-template6
+        DATAFLOW_VERSION: 2.6.0.BUILD-SNAPSHOT
     - task: build-timestamp-batch-with-drivers21x
       privileged: true
       timeout: 30m
@@ -440,6 +468,7 @@ jobs:
       - name: distribution-repository-skipper22x
       - name: distribution-repository-skipper23x
       - name: distribution-repository-skipper24x
+      - name: distribution-repository-skipper25x
       - name: distribution-repository-dataflow173
       - name: distribution-repository-dataflow17x
       - name: distribution-repository-dataflow20x
@@ -448,6 +477,7 @@ jobs:
       - name: distribution-repository-dataflow23x
       - name: distribution-repository-dataflow24x
       - name: distribution-repository-dataflow25x
+      - name: distribution-repository-dataflow26x
       - name: distribution-repository-timestampbatch21x
       outputs:
       - name: distribution-repository
