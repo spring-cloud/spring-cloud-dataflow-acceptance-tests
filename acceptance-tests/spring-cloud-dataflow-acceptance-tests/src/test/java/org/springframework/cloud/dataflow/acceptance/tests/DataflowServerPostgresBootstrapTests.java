@@ -181,8 +181,8 @@ public class DataflowServerPostgresBootstrapTests extends AbstractDataflowTests 
 	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper25xpostgreswithddl.yml" }, services = { "skipper" })
 	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow26xpostgreswithddl.yml" }, services = { "dataflow" })
 	public void testDataflow26xWithPostgresAndDdl(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow", false);
 		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
-		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
 
 		registerBatchApp(dockerComposeInfo, "dataflow", "dataflow");
 		registerBatchTaskDefs(dockerComposeInfo, "dataflow", "dataflow");

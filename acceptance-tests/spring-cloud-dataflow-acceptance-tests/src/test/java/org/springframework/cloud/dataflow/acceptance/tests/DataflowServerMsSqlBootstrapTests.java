@@ -181,8 +181,8 @@ public class DataflowServerMsSqlBootstrapTests extends AbstractDataflowTests {
 	@DockerCompose(id = "skipper", order = 1, locations = { "src/test/resources/skipper/skipper25xmssqlwithddl.yml" }, services = { "skipper" })
 	@DockerCompose(id = "dataflow", order = 2, locations = { "src/test/resources/dataflowandskipper/dataflow26xmssqlwithddl.yml" }, services = { "dataflow" })
 	public void testDataflow26xWithMsSqlAndDdl(DockerComposeInfo dockerComposeInfo) throws Exception {
+		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow", false);
 		assertSkipperServerRunning(dockerComposeInfo, "skipper", "skipper");
-		assertDataflowServerRunning(dockerComposeInfo, "dataflow", "dataflow");
 
 		registerBatchApp(dockerComposeInfo, "dataflow", "dataflow");
 		registerBatchTaskDefs(dockerComposeInfo, "dataflow", "dataflow");
