@@ -6,7 +6,7 @@ services:
     network_mode: bridge
     environment:
       - ACCEPTANCE_TEST_SYSTEM_PROPERTIES=-Doracle.jdbc.timezoneAsRegion=false
-      - ACCEPTANCE_TEST_START_WAIT=60
+      - ACCEPTANCE_TEST_START_WAIT=120
       - SPRING_DATASOURCE_URL=jdbc:oracle:thin:spring/spring@oracle:1521/ORCLPDB1
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=oracle.jdbc.OracleDriver
       - SPRING_DATASOURCE_USERNAME=spring

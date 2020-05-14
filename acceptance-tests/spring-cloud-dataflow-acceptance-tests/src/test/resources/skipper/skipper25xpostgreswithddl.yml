@@ -5,7 +5,7 @@ services:
     container_name: skipper
     network_mode: bridge
     environment:
-      - ACCEPTANCE_TEST_START_WAIT=5
+      - ACCEPTANCE_TEST_START_WAIT=65
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/dataflow
       - SPRING_DATASOURCE_USERNAME=spring
       - SPRING_DATASOURCE_PASSWORD=spring
