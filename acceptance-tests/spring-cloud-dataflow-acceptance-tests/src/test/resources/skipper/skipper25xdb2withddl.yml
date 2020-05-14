@@ -10,6 +10,7 @@ services:
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.ibm.db2.jcc.DB2Driver
       - SPRING_DATASOURCE_USERNAME=spring
       - SPRING_DATASOURCE_PASSWORD=spring
+      - SPRING_FLYWAY_ENABLED=false
     ports:
       - 7577
     external_links:
