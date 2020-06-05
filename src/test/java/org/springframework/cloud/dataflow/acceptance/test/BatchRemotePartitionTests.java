@@ -120,7 +120,7 @@ public class BatchRemotePartitionTests extends AbstractTaskTests {
 
 	private String artifactUriForPlatformType() {
 		return "kubernetes".equals(platformForPlatformType())
-				? "docker://springcloud/batch-remote-partition:0.0.1-SNAPSHOT"
+				? "docker://springcloud/batch-remote-partition:0.0.2-SNAPSHOT"
 				: "maven://org.springframework.cloud.dataflow.acceptence.tests:batch-remote-partition:0.0.1-SNAPSHOT";
 	}
 
