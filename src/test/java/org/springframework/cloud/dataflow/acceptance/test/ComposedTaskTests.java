@@ -43,12 +43,12 @@ public class ComposedTaskTests extends AbstractTaskTests {
 	}
 
 	@Test
-	public void ctrMultipleLaunchShouldFailIfBatchParametersDoNotChange() {
+	public void ctrMultipleLaunchBatchParametersDoNotChange() {
 		String taskDefinitionName = composedTaskLaunch("a: timestamp && b:timestamp");
 		logger.info("Launched composed task: {}", taskDefinitionName);
 		assertTaskExecutions(taskDefinitionName, 0, 1);
 		launchExistingTask(taskDefinitionName);
-		assertLastParentTaskExecution(taskDefinitionName, 1);
+		assertLastParentTaskExecution(taskDefinitionName, 0);
 	}
 
 	@Test
