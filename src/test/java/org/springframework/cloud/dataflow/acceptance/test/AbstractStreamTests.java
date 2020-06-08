@@ -64,6 +64,7 @@ import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
@@ -97,6 +98,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 	@Autowired
 	protected TestConfigurationProperties configurationProperties;
+
+	protected RetryTemplate retryTemplate = new RetryTemplate();
 
 	protected DataFlowOperations dataFlowOperations;
 
@@ -163,7 +166,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 */
 	protected void deployStream(StreamDefinition stream) {
 		logger.info("Creating stream '" + stream.getName() + "'");
-		streamOperations.createStream(stream.getName(), stream.getDefinition(), false);
+		retryTemplate
+				.execute(context -> streamOperations.createStream(stream.getName(), stream.getDefinition(), false));
 		Map<String, String> streamProperties = new HashMap<>();
 		streamProperties.put("app.*.logging.file", platformHelper.getLogfileName());
 		streamProperties.put("app.*.endpoints.logfile.sensitive", "false");
@@ -177,7 +181,10 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 		streamProperties.putAll(stream.getDeploymentProperties());
 		logger.info("Deploying stream '" + stream.getName() + "' with properties: " + streamProperties);
-		streamOperations.deploy(stream.getName(), streamProperties);
+		retryTemplate.execute(context -> {
+			streamOperations.deploy(stream.getName(), streamProperties);
+			return null;
+		});
 		streamAvailable(stream);
 	}
 
@@ -187,10 +194,10 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @return the available StreamDefinition REST resource.
 	 */
 	protected StreamDefinitionResource updateStream(StreamDefinition stream, String properties, List<String> appNames) {
-		Map<String, String> propertiesToUse = null;
+		final Map<String, String> propertiesToUse = new HashMap<>();
 		try {
-			propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(properties,
-					null, 0);
+			propertiesToUse.putAll(DeploymentPropertiesUtils.parseDeploymentProperties(properties,
+					null, 0));
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e.getMessage());
@@ -199,7 +206,11 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName(stream.getName());
 		logger.info("Updating stream '" + stream.getName() + "'");
-		this.streamOperations.updateStream(streamName, streamName, packageIdentifier, propertiesToUse, false, appNames);
+		retryTemplate.execute(context -> {
+			this.streamOperations.updateStream(streamName, streamName, packageIdentifier, propertiesToUse, false,
+					appNames);
+			return null;
+		});
 		return streamAvailable(stream);
 	}
 
@@ -220,7 +231,10 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 */
 	protected StreamDefinitionResource rollbackStream(StreamDefinition stream, int streamVersion) {
 		logger.info("Rolling back the stream '" + stream.getName() + "' to the version " + streamVersion);
-		this.streamOperations.rollbackStream(stream.getName(), streamVersion);
+		retryTemplate.execute(context -> {
+			this.streamOperations.rollbackStream(stream.getName(), streamVersion);
+			return null;
+		});
 		return streamAvailable(stream);
 	}
 
@@ -243,7 +257,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		String status = "not present";
 		StreamDefinitionResource resource = null;
 		while (!streamStarted && attempt < configurationProperties.getDeployPauseRetries()) {
-			Iterator<StreamDefinitionResource> streamIter = streamOperations.list().getContent().iterator();
+			Iterator<StreamDefinitionResource> streamIter = retryTemplate
+					.execute(context -> streamOperations.list().getContent().iterator());
 			while (streamIter.hasNext()) {
 				resource = streamIter.next();
 				if (resource.getName().equals(stream.getName())) {
@@ -318,7 +333,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		String logFileUrl = getLogFileUrl(url);
 		String log = null;
 		try {
-			log = restTemplate.getForObject(logFileUrl, String.class);
+			log = retryTemplate.execute(context -> restTemplate.getForObject(logFileUrl, String.class));
 			if (log == null) {
 				logger.info("Unable to retrieve logfile from '" + logFileUrl);
 			}
@@ -342,7 +357,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		String actuatorUrl = String.format("%s/actuator", url);
 		ResponseEntity<String> responseEntity = null;
 		try {
-			responseEntity = restTemplate.exchange(actuatorUrl, HttpMethod.GET, null, String.class);
+			responseEntity = retryTemplate
+					.execute(context -> restTemplate.exchange(actuatorUrl, HttpMethod.GET, null, String.class));
 		}
 		catch (Exception e) {
 
@@ -366,7 +382,11 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		if (this.configurationProperties.isUseHttps()) {
 			uriBuilder.scheme("https");
 		}
-		httpPoster.httpPostData(uriBuilder.build(), message);
+		retryTemplate.execute(
+				context -> {
+					httpPoster.httpPostData(uriBuilder.build(), message);
+					return null;
+				});
 	}
 
 	/**
