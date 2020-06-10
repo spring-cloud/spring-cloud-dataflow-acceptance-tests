@@ -129,7 +129,7 @@ public abstract class AbstractPlatformHelper implements PlatformHelper {
 		boolean instanceUrlsAdded = false;
 		Iterator<AppInstanceStatusResource> resourceIterator = appStatus.getInstances().iterator();
 		if (!resourceIterator.hasNext()) {
-			throw new IllegalStateException(appStatus.getDeploymentId() + " appStatus contains no instances");
+			logger.error(appStatus.getDeploymentId() + " appStatus contains no instances for deployed application.");
 		}
 
 		while (resourceIterator.hasNext()) {
