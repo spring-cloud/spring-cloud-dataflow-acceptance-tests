@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
@@ -42,6 +43,7 @@ public class ComposedTaskTests extends AbstractTaskTests {
 		assertTaskExecutions(taskDefinitionName, 0, 1);
 	}
 
+	@Ignore("This behavior is currently dependent on SCDF version")
 	@Test
 	public void ctrMultipleLaunchBatchParametersDoNotChange() {
 		String taskDefinitionName = composedTaskLaunch("a: timestamp && b:timestamp");
