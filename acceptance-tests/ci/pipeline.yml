@@ -306,7 +306,7 @@ jobs:
         BASE_PATH: ((base-path))
         APP_VERSION: 25x
         APP_TEMPLATE: skipper-server-with-drivers-template7
-        SKIPPER_VERSION: 2.5.0.BUILD-SNAPSHOT
+        SKIPPER_VERSION: 2.5.1-SNAPSHOT
     - task: build-skipper-server-with-drivers26x
       privileged: true
       timeout: 30m
@@ -446,7 +446,7 @@ jobs:
         BASE_PATH: ((base-path))
         APP_VERSION: 26x
         APP_TEMPLATE: dataflow-server-with-drivers-template6
-        DATAFLOW_VERSION: 2.6.0.BUILD-SNAPSHOT
+        DATAFLOW_VERSION: 2.6.1-SNAPSHOT
     - task: build-dataflow-server-with-drivers27x
       privileged: true
       timeout: 30m
@@ -460,7 +460,7 @@ jobs:
         BASE_PATH: ((base-path))
         APP_VERSION: 27x
         APP_TEMPLATE: dataflow-server-with-drivers-template7
-        DATAFLOW_VERSION: 2.6.0-SNAPSHOT
+        DATAFLOW_VERSION: 2.7.0-SNAPSHOT
     - task: build-timestamp-batch-with-drivers21x
       privileged: true
       timeout: 30m
