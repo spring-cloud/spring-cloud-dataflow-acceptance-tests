@@ -16,10 +16,23 @@
 
 package org.springframework.cloud.dataflow.acceptance.test.util;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Collections;
+
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContexts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import org.springframework.http.HttpRequest;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
 
 public class RestTemplateConfigurer {
@@ -33,21 +46,66 @@ public class RestTemplateConfigurer {
 
 	public RestTemplate configure() {
 		RestTemplate restTemplate = new RestTemplate();
-
+		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 		if (skipSslValidation) {
-
-			HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 			try {
-				httpClientBuilder.setSSLContext(SSLContexts.custom().loadTrustMaterial((chain, authType) -> true).build());
-			} catch (Exception e) {
+				httpClientBuilder
+						.setSSLContext(SSLContexts.custom().loadTrustMaterial((chain, authType) -> true).build());
+			}
+			catch (Exception e) {
 				throw new RuntimeException(e.getMessage(), e);
 			}
+		}
+		restTemplate.setRequestFactory(
+				new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClientBuilder.build())));
+		restTemplate.setInterceptors(Arrays.asList(new AcceptCharsetInterceptor(), new LoggingInterceptor()));
+		return restTemplate;
+	}
 
-			restTemplate.setRequestFactory(
-					new HttpComponentsClientHttpRequestFactory(httpClientBuilder.build()));
+	static class AcceptCharsetInterceptor implements ClientHttpRequestInterceptor {
 
+		@Override
+		public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+			request.getHeaders().setAcceptCharset(Collections.singletonList(Charset.forName("UTF-8")));
+			return execution.execute(request, body);
+		}
+	}
+
+	static class LoggingInterceptor implements ClientHttpRequestInterceptor {
+		private static Logger log = LoggerFactory.getLogger(LoggingInterceptor.class);
+
+		@Override
+		public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+				throws IOException {
+			logRequest(request, body);
+			ClientHttpResponse response = execution.execute(request, body);
+			logResponse(response);
+
+			return response;
 		}
 
-		return restTemplate;
+		private void logRequest(HttpRequest request, byte[] body) throws IOException {
+			if (log.isDebugEnabled()) {
+				log.debug("===========================request begin================================================");
+				log.debug("URI         : {}", request.getURI());
+				log.debug("Method      : {}", request.getMethod());
+				log.debug("Headers     : {}", request.getHeaders());
+				log.debug("Request body: {}", new String(body, "UTF-8"));
+				log.debug("==========================request end================================================");
+			}
+		}
+
+		private void logResponse(ClientHttpResponse response) throws IOException {
+
+			if (log.isDebugEnabled()) {
+				log.debug("============================response begin==========================================");
+				log.debug("Status code  : {}", response.getStatusCode());
+				log.debug("Status text  : {}", response.getStatusText());
+				log.debug("Headers      : {}", response.getHeaders());
+				log.debug("Response body: {}", StreamUtils.copyToString(response.getBody(), Charset.defaultCharset()));
+				log.debug("=======================response end=================================================");
+			}
+		}
+
 	}
 }

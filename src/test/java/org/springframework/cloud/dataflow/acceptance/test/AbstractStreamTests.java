@@ -26,6 +26,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +35,8 @@ import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Rule;
-import org.junit.rules.ExternalResource;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,19 +117,28 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 	private HttpPoster httpPoster;
 
-	/**
-	 * Ensures that all streams are destroyed regardless if the test was successful or failed.
-	 */
 	@Rule
-	public ExternalResource resourceCleaner = new ExternalResource() {
+	public LoggingTestWatcher testWatcher = new LoggingTestWatcher();
+
+	class LoggingTestWatcher extends TestWatcher {
+		List<LogRetriever> logRetrievers = new LinkedList<>();
+
 		@Override
-		protected void after() {
-			if (streamOperations != null) {
-				logger.info("Destroy all streams");
-				streamOperations.destroyAll();
-			}
+		protected void failed(Throwable e, Description description) {
+			super.failed(e, description);
+			logRetrievers.forEach(logRetriever -> {
+				logRetriever.retrieveLogs().forEach(log -> logger.error(log.getContent()));
+			});
+			logger.info("Destroy all streams");
+			streamOperations.destroyAll();
 		}
-	};
+
+		@Override
+		protected void succeeded(Description description) {
+			logger.info("Destroy all streams");
+			streamOperations.destroyAll();
+		}
+	}
 
 	@Before
 	public void setup() {
@@ -402,6 +413,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 		final long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
 		List<Log> logs = new ArrayList<>();
 		LogRetriever logRetriever = logRetriever(app);
+		this.testWatcher.logRetrievers.add(logRetriever);
 
 		while (System.currentTimeMillis() < timeout) {
 			deploymentPause();
@@ -415,7 +427,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 				}
 			}
 			logger.info("Polling to get log file. Remaining poll time = "
-					+ Long.toString((timeout - System.currentTimeMillis()) / 1000) + " seconds.");
+					+ (timeout - System.currentTimeMillis()) / 1000 + " seconds.");
 		}
 
 		logger.error("ERROR: Couldn't find '" + StringUtils.arrayToCommaDelimitedString(entries) + "; details below");

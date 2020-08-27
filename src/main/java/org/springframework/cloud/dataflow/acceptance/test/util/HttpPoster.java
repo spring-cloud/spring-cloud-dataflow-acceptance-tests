@@ -30,11 +30,12 @@ public class HttpPoster {
 
 	private final RestTemplate restTemplate;
 
-	public HttpPoster(RestTemplate restTemplate){
+	public HttpPoster(RestTemplate restTemplate) {
 		this.restTemplate = restTemplate;
 	}
 
 	Logger logger = LoggerFactory.getLogger(HttpPoster.class);
+
 	public void httpPostData(URI uri, String message) {
 
 		logger.info("posting to {}", uri);
@@ -46,7 +47,8 @@ public class HttpPoster {
 
 		ResponseEntity<?> responseEntity = restTemplate.exchange(requestEntity, Object.class);
 		if (responseEntity.getStatusCode().isError()) {
-			throw new RuntimeException("HTTP POST " + message + "failed : Status code" + responseEntity.getStatusCode());
+			throw new RuntimeException(
+					"HTTP POST " + message + "failed : Status code" + responseEntity.getStatusCode());
 		}
 	}
 

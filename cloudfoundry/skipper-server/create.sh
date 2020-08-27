@@ -36,6 +36,7 @@ cat << EOF >> ./skipper-manifest.yml
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_APP_NAME_PREFIX: $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE
     SPRING_APPLICATION_JSON: '{ "spring": { "cloud": { "skipper": { "server": { "enableLocalPlatform": "false"} } } } }'
     JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
+    JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: $JBP_JRE_VERSION }}'
 EOF
 }
 
