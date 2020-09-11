@@ -14,7 +14,8 @@ function use_helm() {
   HELM_PARAMS="--set server.version=$DATAFLOW_VERSION --set skipper.version=$SKIPPER_VERSION \
     --set skipper.service.type=LoadBalancer --set skipper.imagePullPolicy=Always \
     --set server.imagePullPolicy=Always --set deployer.readinessProbe.initialDelaySeconds=0 \
-    --set deployer.livenessProbe.initialDelaySeconds=0 --set serviceAccount.name=$DATAFLOW_SERVICE_ACCOUNT_NAME"
+    --set deployer.livenessProbe.initialDelaySeconds=0 --set serviceAccount.name=$DATAFLOW_SERVICE_ACCOUNT_NAME \
+    --set server.service.type=LoadBalancer --set server.service.port=80"
 
   if [ "$BINDER" == "kafka" ]; then
     HELM_PARAMS="$HELM_PARAMS --set kafka.enabled=true,rabbitmq.enabled=false"
@@ -28,10 +29,20 @@ function use_helm() {
     HELM_PARAMS="$HELM_PARAMS --version $HELM_CHART_VERSION"
   fi
 
+  HELM_CHART_REFERENCE="bitnami/spring-cloud-dataflow"
+
+  if [ -z "$USE_LEGACY_HELM_CHART" ]; then
+    helm repo add bitnami https://charts.bitnami.com/bitnami
+  fi
+
   helm repo update
 
-  helm install --name scdf stable/spring-cloud-data-flow ${HELM_PARAMS} --namespace $KUBERNETES_NAMESPACE
+  if [ ! -z "$USE_LEGACY_HELM_CHART" ]; then
+    HELM_CHART_REFERENCE="stable/spring-cloud-data-flow"
+	echo "WARN: Using legacy helm chart, bitnami chart should be used as of SCDF 1.6"
+  fi
 
+  helm install --name scdf ${HELM_CHART_REFERENCE} ${HELM_PARAMS} --namespace $KUBERNETES_NAMESPACE
   helm list
 }
 
