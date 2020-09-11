@@ -30,6 +30,8 @@ export KUBECONFIG=config location
 export CLUSTER_NAME=<cluster-name>
 #By default the setup will perform a helm install. Uncomment to install directly from the git repo.
 #export USE_DISTRO_FILES=true
+#From SCDF 2.6 and above, the bitnami chart should be used. For below, the legacy Helm stable repo can be used:
+#export USE_LEGACY_HELM_CHART=true
 
 run.sh clean -p kubernetes -se #schedules enabled
 run.sh setup -p kubernetes -b rabbit -se -dv 2.5.0.BUILD-SNAPSHOT -sv 2.3.0.BUILD-SNAPSHOT
