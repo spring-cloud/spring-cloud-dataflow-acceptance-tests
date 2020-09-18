@@ -16,6 +16,8 @@ function helm_delete() {
   wait_clean_for_label "all" "release=scdf"
   # Clean up any stray apps
   kubectl delete all -l role=spring-app --namespace $KUBERNETES_NAMESPACE
+  wait_clean_for_label "pvc" "app.kubernetes.io/instance=scdf"
+  kubectl delete pvc -l app.kubernetes.io/instance=scdf --namespace $KUBERNETES_NAMESPACE
 }
 
 function wait_clean_for_label() {
