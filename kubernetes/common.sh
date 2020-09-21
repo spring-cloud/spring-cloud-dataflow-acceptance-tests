@@ -20,6 +20,8 @@ function helm_delete() {
   kubectl delete pvc -l app.kubernetes.io/instance=scdf --namespace $KUBERNETES_NAMESPACE
   wait_clean_for_label "pvc" "app=mariadb"
   kubectl delete pvc -l app=mariadb --namespace $KUBERNETES_NAMESPACE
+  wait_clean_for_label "pvc" "app=rabbitmq"
+  kubectl delete pvc -l app=rabbitmq --namespace $KUBERNETES_NAMESPACE
 }
 
 function wait_clean_for_label() {
