@@ -14,14 +14,18 @@ function distro_files_object_delete() {
 function helm_delete() {
   helm delete scdf --purge || true
   wait_clean_for_label "all" "release=scdf"
+
   # Clean up any stray apps
   kubectl delete all -l role=spring-app --namespace $KUBERNETES_NAMESPACE
-  wait_clean_for_label "pvc" "app.kubernetes.io/instance=scdf"
+
   kubectl delete pvc -l app.kubernetes.io/instance=scdf --namespace $KUBERNETES_NAMESPACE
-  wait_clean_for_label "pvc" "app=mariadb"
+  wait_clean_for_label "pvc" "app.kubernetes.io/instance=scdf"
+
   kubectl delete pvc -l app=mariadb --namespace $KUBERNETES_NAMESPACE
-  wait_clean_for_label "pvc" "app=rabbitmq"
+  wait_clean_for_label "pvc" "app=mariadb"
+
   kubectl delete pvc -l app=rabbitmq --namespace $KUBERNETES_NAMESPACE
+  wait_clean_for_label "pvc" "app=rabbitmq"
 }
 
 function wait_clean_for_label() {
