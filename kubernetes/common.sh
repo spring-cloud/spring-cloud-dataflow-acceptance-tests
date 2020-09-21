@@ -26,6 +26,7 @@ function helm_delete() {
 
 function wait_clean_for_label() {
   RETRIES=100
+  echo "Waiting on resource: $1 with label: $2 to delete"	
   for i in $( seq 1 "${RETRIES}" ); do
   RESOURCES=$(kubectl get $1 -n $KUBERNETES_NAMESPACE -l $2)
    if [ -z "$RESOURCES" ]; then
