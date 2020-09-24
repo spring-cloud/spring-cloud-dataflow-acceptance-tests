@@ -11,11 +11,17 @@ function use_helm() {
     echo "DATAFLOW_VERSION must be defined"
     exit 1
   fi
+
+  # TODO: once support for SCDF 2.5 is dropped, can clean these values up to only be bitnami and drop
+  # legacy stuff
+
   HELM_PARAMS="--set server.version=$DATAFLOW_VERSION --set skipper.version=$SKIPPER_VERSION \
     --set skipper.service.type=LoadBalancer --set skipper.imagePullPolicy=Always \
     --set server.imagePullPolicy=Always --set deployer.readinessProbe.initialDelaySeconds=0 \
     --set deployer.livenessProbe.initialDelaySeconds=0 --set serviceAccount.name=$DATAFLOW_SERVICE_ACCOUNT_NAME \
-    --set server.service.type=LoadBalancer --set server.service.port=80"
+    --set server.service.type=LoadBalancer --set server.service.port=80 \
+    --set server.image.repository=springcloud/spring-cloud-dataflow-server --set server.image.tag=$DATAFLOW_VERSION \
+    --set skipper.image.repository=springcloud/spring-cloud-skipper-server --set skipper.image.tag=$SKIPPER_VERSION"
 
   if [ "$BINDER" == "kafka" ]; then
     HELM_PARAMS="$HELM_PARAMS --set kafka.enabled=true,rabbitmq.enabled=false"
@@ -62,7 +68,6 @@ function distro_files_install() {
 
   popd
 }
-
 
 function distro_files_install_binder() {
   if [ "$BINDER" == "kafka" ]; then
