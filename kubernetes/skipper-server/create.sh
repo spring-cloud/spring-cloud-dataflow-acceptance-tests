@@ -19,12 +19,19 @@ function use_helm() {
     --set skipper.service.type=LoadBalancer --set skipper.imagePullPolicy=Always \
     --set server.imagePullPolicy=Always --set deployer.readinessProbe.initialDelaySeconds=0 \
     --set deployer.livenessProbe.initialDelaySeconds=0 --set serviceAccount.name=$DATAFLOW_SERVICE_ACCOUNT_NAME \
-    --set server.service.type=LoadBalancer --set server.service.port=80 \
-    --set server.image.repository=springcloud/spring-cloud-dataflow-server --set server.image.tag=$DATAFLOW_VERSION \
-    --set skipper.image.repository=springcloud/spring-cloud-skipper-server --set skipper.image.tag=$SKIPPER_VERSION"
+    --set server.service.type=LoadBalancer --set server.service.port=80"
 
   if [ "$BINDER" == "kafka" ]; then
     HELM_PARAMS="$HELM_PARAMS --set kafka.enabled=true,rabbitmq.enabled=false"
+  fi
+
+  HELM_CHART_REFERENCE="bitnami/spring-cloud-dataflow"
+
+  if [ -z "$USE_LEGACY_HELM_CHART" ]; then
+    HELM_PARAMS="$HELM_PARAMS --set server.image.repository=springcloud/spring-cloud-dataflow-server --set server.image.tag=$DATAFLOW_VERSION \
+      --set skipper.image.repository=springcloud/spring-cloud-skipper-server --set skipper.image.tag=$SKIPPER_VERSION"
+
+    helm repo add bitnami https://charts.bitnami.com/bitnami
   fi
 
   if [ ! -z "$EXTRA_HELM_PARAMS" ]; then
@@ -33,12 +40,6 @@ function use_helm() {
 
   if [ ! -z "$HELM_CHART_VERSION" ]; then
     HELM_PARAMS="$HELM_PARAMS --version $HELM_CHART_VERSION"
-  fi
-
-  HELM_CHART_REFERENCE="bitnami/spring-cloud-dataflow"
-
-  if [ -z "$USE_LEGACY_HELM_CHART" ]; then
-    helm repo add bitnami https://charts.bitnami.com/bitnami
   fi
 
   helm repo update
