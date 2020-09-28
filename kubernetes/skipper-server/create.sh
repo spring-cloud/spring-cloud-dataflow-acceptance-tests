@@ -29,7 +29,9 @@ function use_helm() {
 
   if [ -z "$USE_LEGACY_HELM_CHART" ]; then
     HELM_PARAMS="$HELM_PARAMS --set server.image.repository=springcloud/spring-cloud-dataflow-server --set server.image.tag=$DATAFLOW_VERSION \
-      --set skipper.image.repository=springcloud/spring-cloud-skipper-server --set skipper.image.tag=$SKIPPER_VERSION"
+      --set skipper.image.repository=springcloud/spring-cloud-skipper-server --set skipper.image.tag=$SKIPPER_VERSION \
+      --set server.composedTaskRunner.image.repository=springcloud/spring-cloud-dataflow-composed-task-runner \
+      --set server.composedTaskRunner.image.tag=$DATAFLOW_VERSION"
 
     helm repo add bitnami https://charts.bitnami.com/bitnami
   fi
