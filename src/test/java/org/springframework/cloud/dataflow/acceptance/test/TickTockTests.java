@@ -16,13 +16,18 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
+import java.util.Collection;
+
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.StatusCode;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeThat;
 
@@ -70,11 +75,26 @@ public class TickTockTests extends AbstractStreamTests {
 		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "TICKTOCK - TIMESTAMP:"));
 		StreamDefinitionResource updatedStream = updateStream(stream,
 				"app.log.log.expression='TICKTOCK Updated - TIMESTAMP: '.concat(payload)", null);
-		assertTrue(updatedStream.getDslText().contains("--log.expression=\"'TICKTOCK Updated - TIMESTAMP: '.concat(payload)\""));
+		assertTrue(updatedStream.getDslText()
+				.contains("--log.expression=\"'TICKTOCK Updated - TIMESTAMP: '.concat(payload)\""));
 		assertTrue("Sink not started", waitForLogEntry(stream.getApplication("log"), "Started LogSink"));
 		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "TICKTOCK Updated - TIMESTAMP:"));
+
+		// In the AT environment there will be many releases over time until the database is reinitialized.
+		await().until(() -> {
+			Collection<Release> history = dataFlowOperations.streamOperations().history(stream.getName());
+			return history.stream().filter(release -> release.getInfo().getStatus().getStatusCode().equals(StatusCode.DEPLOYED))
+                        .count() == 1;
+		});
+
 		rollbackStream(stream);
 		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "TICKTOCK - TIMESTAMP:"));
+
+		await().until(() -> {
+			Collection<Release> history = dataFlowOperations.streamOperations().history(stream.getName());
+			return history.stream().filter(release -> release.getInfo().getStatus().getStatusCode().equals(StatusCode.DEPLOYED))
+                .count() == 1;
+		});
 	}
 
 	@Test
@@ -92,6 +112,7 @@ public class TickTockTests extends AbstractStreamTests {
 		deployStream(stream);
 		assertTrue("Source not started", waitForLogEntry(stream.getApplication("time"), "Started TimeSource"));
 		assertTrue("Sink not started", waitForLogEntry(stream.getApplication("log"), "Started LogSink"));
-		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "TICKTOCK CLOUD CONFIG - TIMESTAMP:"));
+		assertTrue("No output found",
+				waitForLogEntry(stream.getApplication("log"), "TICKTOCK CLOUD CONFIG - TIMESTAMP:"));
 	}
 }
