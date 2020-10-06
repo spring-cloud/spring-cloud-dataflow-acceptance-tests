@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
+import java.time.Duration;
 import java.util.Collection;
 
 import org.hamcrest.Matchers;
@@ -77,24 +78,15 @@ public class TickTockTests extends AbstractStreamTests {
 				"app.log.log.expression='TICKTOCK Updated - TIMESTAMP: '.concat(payload)", null);
 		assertTrue(updatedStream.getDslText()
 				.contains("--log.expression=\"'TICKTOCK Updated - TIMESTAMP: '.concat(payload)\""));
+		waitForUpdateOrRollback(stream);
+
 		assertTrue("Sink not started", waitForLogEntry(stream.getApplication("log"), "Started LogSink"));
 		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "TICKTOCK Updated - TIMESTAMP:"));
 
-		// In the AT environment there will be many releases over time until the database is reinitialized.
-		await().until(() -> {
-			Collection<Release> history = dataFlowOperations.streamOperations().history(stream.getName());
-			return history.stream().filter(release -> release.getInfo().getStatus().getStatusCode().equals(StatusCode.DEPLOYED))
-                        .count() == 1;
-		});
-
 		rollbackStream(stream);
+		waitForUpdateOrRollback(stream);
 		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "TICKTOCK - TIMESTAMP:"));
 
-		await().until(() -> {
-			Collection<Release> history = dataFlowOperations.streamOperations().history(stream.getName());
-			return history.stream().filter(release -> release.getInfo().getStatus().getStatusCode().equals(StatusCode.DEPLOYED))
-                .count() == 1;
-		});
 	}
 
 	@Test
@@ -114,5 +106,25 @@ public class TickTockTests extends AbstractStreamTests {
 		assertTrue("Sink not started", waitForLogEntry(stream.getApplication("log"), "Started LogSink"));
 		assertTrue("No output found",
 				waitForLogEntry(stream.getApplication("log"), "TICKTOCK CLOUD CONFIG - TIMESTAMP:"));
+	}
+
+	private void waitForUpdateOrRollback(final StreamDefinition stream) {
+		// In the AT environment there will be many releases over time until the database is
+		// reinitialized.
+		await().atMost(Duration.ofMinutes(2)).until(() -> {
+			Collection<Release> history = dataFlowOperations.streamOperations().history(stream.getName());
+			long deployCount = history.stream()
+					.filter(release -> release.getInfo().getStatus().getStatusCode().equals(StatusCode.DEPLOYED))
+					.count();
+
+			long deletedCount = history.stream()
+					.filter(release -> release.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED))
+					.count();
+
+			logger.debug(
+					"Total = " + history.size() + " Deploy Count = " + deployCount + " Deleted Count = "
+							+ deletedCount);
+			return (deployCount == 1) && deletedCount == history.size() - 1;
+		});
 	}
 }

@@ -91,7 +91,7 @@ import org.springframework.web.util.UriBuilder;
 @EnableConfigurationProperties(TestConfigurationProperties.class)
 public abstract class AbstractStreamTests implements InitializingBean {
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private static boolean appsRegistered = false;
 
