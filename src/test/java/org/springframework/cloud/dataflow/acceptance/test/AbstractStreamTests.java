@@ -29,10 +29,18 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
+import org.awaitility.core.ConditionEvaluationListener;
+import org.awaitility.core.EvaluatedCondition;
+import org.awaitility.core.TimeoutEvent;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestWatcher;
@@ -73,6 +81,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilder;
+
+import static org.awaitility.Awaitility.await;
 
 /**
  * Abstract base class that is used by stream acceptance tests. This class contains
@@ -263,75 +273,37 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * @return the available StreamDefinition REST resource.
 	 */
 	protected StreamDefinitionResource streamAvailable(StreamDefinition stream) {
-		boolean streamStarted = false;
-		int attempt = 0;
-		String status = "not present";
-		StreamDefinitionResource resource = null;
-		while (!streamStarted && attempt < configurationProperties.getDeployPauseRetries()) {
-			Iterator<StreamDefinitionResource> streamIter = retryTemplate
-					.execute(context -> streamOperations.list().getContent().iterator());
-			while (streamIter.hasNext()) {
-				resource = streamIter.next();
-				if (resource.getName().equals(stream.getName())) {
-					status = resource.getStatus();
-					logger.info("Checking: Stream=" + stream.getName() +
-							", status = " + status +
-							", status description = " + resource.getStatusDescription());
-					if (status.equals("deployed")) {
-						boolean urlsAvailable = platformHelper.setUrlsForStream(stream);
-						if (urlsAvailable) {
-							streamStarted = true;
-						}
-					}
-					break;
-				}
-			}
-			if (!streamStarted) {
-				attempt++;
-				logger.info("Sleeping to check status of Stream=" + stream.getName());
-				deploymentPause();
-			}
-		}
+		AtomicReference<String> status = new AtomicReference<>();
+		AtomicReference<StreamDefinitionResource> resource = new AtomicReference<>();
+		await().atMost(Duration.ofSeconds(
+				configurationProperties.getDeployPauseTime() * configurationProperties.getDeployPauseRetries()))
+				.pollInterval(Duration.ofSeconds(configurationProperties.getDeployPauseTime()))
+				.until(() -> {
+					Iterator<StreamDefinitionResource> streamIter = retryTemplate
+							.execute(context -> streamOperations.list().getContent().iterator());
+					StreamSupport.stream(Spliterators.spliteratorUnknownSize(streamIter, Spliterator.ORDERED), false)
+							.filter((StreamDefinitionResource r) -> r.getName().equals(stream.getName()))
+							.forEach(r -> {
+								resource.set(r);
+								status.set(r.getStatus());
+								logger.info("Checking: Stream=" + stream.getName() +
+										", status = " + status +
+										", status description = " + r.getStatusDescription());
+							});
+					return status.get().equals("deployed");
+				});
 
-		if (streamStarted) {
-			sleep(Duration.ofSeconds(10));
-			logger.info(String.format("Stream '%s' started with status: %s", stream.getName(), status));
-			for (Application app : stream.getApplications()) {
-				logger.info("App '" + app.getName() + "' has instances: " + app.getInstanceUrls());
-				if (app.getInstanceUrls().isEmpty()) {
-					throw new IllegalStateException("App '" + app.getName() + "' returned no instances: ");
-				}
+		await().atMost(Duration.ofSeconds(30)).pollDelay(Duration.ofSeconds(3))
+				.pollInterval(Duration.ofSeconds(3)).until(() -> platformHelper.setUrlsForStream(stream));
+
+		logger.info(String.format("Stream '%s' started with status: %s", stream.getName(), status));
+		for (Application app : stream.getApplications()) {
+			logger.info("App '" + app.getName() + "' has instances: " + app.getInstanceUrls());
+			if (app.getInstanceUrls().isEmpty()) {
+				throw new IllegalStateException("App '" + app.getName() + "' returned no instances: ");
 			}
 		}
-		else {
-			String statusDescription = "null";
-			if (resource != null) {
-				statusDescription = resource.getStatusDescription();
-			}
-			logger.info(String.format("Stream '%s' NOT started with status: %s.  Description = %s",
-					stream.getName(), status, statusDescription));
-
-			throw new IllegalStateException("Unable to start stream " + stream.getName() +
-					".  Definition = " + stream.getDefinition());
-		}
-		return resource;
-	}
-
-	/**
-	 * Pauses the run to for a period of seconds as specified by the the deployPauseTime
-	 * attribute.
-	 */
-	protected void deploymentPause() {
-		sleep(Duration.ofSeconds(configurationProperties.getDeployPauseTime()));
-	}
-
-	protected void sleep(Duration duration) {
-		try {
-			Thread.sleep(duration.toMillis());
-		}
-		catch (Exception ex) {
-			Thread.currentThread().interrupt();
-		}
+		return resource.get();
 	}
 
 	/**
@@ -410,39 +382,53 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	protected boolean waitForLogEntry(Application app, String... entries) {
 		logger.info("Looking for '" + StringUtils.arrayToCommaDelimitedString(entries) + "' in logfile for "
 				+ app.getDefinition());
-		final long timeout = System.currentTimeMillis() + (configurationProperties.getMaxWaitTime() * 1000);
-		List<Log> logs = new ArrayList<>();
+
 		LogRetriever logRetriever = logRetriever(app);
 		this.testWatcher.logRetrievers.add(logRetriever);
 
-		while (System.currentTimeMillis() < timeout) {
-			deploymentPause();
-			logs = logRetriever.retrieveLogs();
+		AtomicBoolean match = new AtomicBoolean();
 
-			for (Log log : logs) {
-				if (log.getContent() != null && Stream.of(entries).allMatch(log.getContent()::contains)) {
-					logger.info("Matched all '" + StringUtils.arrayToCommaDelimitedString(entries)
-							+ "' in logfile for app " + app.getDefinition() + " (source " + log.getSource() + ")");
-					return true;
-				}
-			}
-			logger.info("Polling to get log file. Remaining poll time = "
-					+ (timeout - System.currentTimeMillis()) / 1000 + " seconds.");
-		}
+		await().atMost(Duration.ofSeconds(configurationProperties.getMaxWaitTime()))
+				.conditionEvaluationListener(new ConditionEvaluationListener() {
+					@Override
+					public void conditionEvaluated(EvaluatedCondition evaluatedCondition) {
+					}
 
-		logger.error("ERROR: Couldn't find '" + StringUtils.arrayToCommaDelimitedString(entries) + "; details below");
-		if (logs.isEmpty()) {
-			logger.error("ERROR: No logs retrieved");
-		}
-		else {
-			logger.error("ERROR: Dumping most recent log files.\n\n");
-			for (Log log : logs) {
-				logger.error("<logFile> =================");
-				logger.error("Log File for " + log.getSource() + "\n" + log.getContent());
-				logger.error("</logFile> ================\n");
-			}
-		}
-		return false;
+					@Override
+					public void onTimeout(TimeoutEvent timeoutEvent) {
+						if (!timeoutEvent.isConditionIsFulfilled()) {
+							List<Log> logs = logRetriever.retrieveLogs();
+							logger.error("ERROR: Couldn't find '" + StringUtils
+									.arrayToCommaDelimitedString(entries) + "; details below");
+							if (logs.isEmpty()) {
+								logger.error("ERROR: No logs retrieved");
+							}
+							else {
+								logger.error("ERROR: Dumping most recent log files.\n\n");
+								for (Log log : logs) {
+									logger.error("<logFile> =================");
+									logger.error("Log File for " + log.getSource() + "\n" + log.getContent());
+									logger.error("</logFile> ================\n");
+								}
+							}
+						}
+					}
+				})
+				.until(() -> {
+					List<Log> logs = logRetriever.retrieveLogs();
+
+					for (Log log : logs) {
+						if (log.getContent() != null && Stream.of(entries).allMatch(log.getContent()::contains)) {
+							logger.info("Matched all '" + StringUtils.arrayToCommaDelimitedString(entries)
+									+ "' in logfile for app " + app.getDefinition() + " (source " + log.getSource()
+									+ ")");
+							match.set(true);
+							return match.get();
+						}
+					}
+					return false;
+				});
+		return match.get();
 	}
 
 	protected DataFlowOperations dataFlowOperations() {
