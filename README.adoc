@@ -171,7 +171,7 @@ The following environment variables must be set:
 Optional settings:
 
 * KUBERNETES_NAMESPACE environment variable that specifies an existing namespace to use for the testing. If this is not specified, the 'default' namespace will be used.
-* DATAFLOW_SERVICE_ACCOUNT_NAME the service account name to create and configure for server access (defaults to `scdf-data-flow`)
+* DATAFLOW_SERVICE_ACCOUNT_NAME the service account name to create and configure for server access (defaults to `scdf-sa`)
 
 === Code formatting guidelines
 

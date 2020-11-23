@@ -12,29 +12,20 @@ function use_helm() {
     exit 1
   fi
 
-  # TODO: once support for SCDF 2.5 is dropped, can clean these values up to only be bitnami and drop
-  # legacy stuff
-
-  HELM_PARAMS="--set server.version=$DATAFLOW_VERSION --set skipper.version=$SKIPPER_VERSION \
-    --set skipper.service.type=LoadBalancer --set skipper.imagePullPolicy=Always \
-    --set server.imagePullPolicy=Always --set deployer.readinessProbe.initialDelaySeconds=0 \
-    --set deployer.livenessProbe.initialDelaySeconds=0 --set serviceAccount.name=$DATAFLOW_SERVICE_ACCOUNT_NAME \
-    --set server.service.type=LoadBalancer --set server.service.port=80"
-
   if [ "$BINDER" == "kafka" ]; then
     HELM_PARAMS="$HELM_PARAMS --set kafka.enabled=true,rabbitmq.enabled=false"
   fi
 
-  HELM_CHART_REFERENCE="bitnami/spring-cloud-dataflow"
+  patch_sa
 
-  if [ -z "$USE_LEGACY_HELM_CHART" ]; then
-    HELM_PARAMS="$HELM_PARAMS --set server.image.repository=springcloud/spring-cloud-dataflow-server --set server.image.tag=$DATAFLOW_VERSION \
-      --set skipper.image.repository=springcloud/spring-cloud-skipper-server --set skipper.image.tag=$SKIPPER_VERSION \
-      --set server.composedTaskRunner.image.repository=springcloud/spring-cloud-dataflow-composed-task-runner \
-      --set server.composedTaskRunner.image.tag=$DATAFLOW_VERSION"
-
-    helm repo add bitnami https://charts.bitnami.com/bitnami
-  fi
+  # use the default service account as it can be pre-patched, open issue on DH limiting:
+  # https://github.com/bitnami/charts/issues/4430
+  HELM_PARAMS="$HELM_PARAMS --set server.image.repository=springcloud/spring-cloud-dataflow-server --set server.image.tag=$DATAFLOW_VERSION \
+    --set skipper.image.repository=springcloud/spring-cloud-skipper-server --set skipper.image.tag=$SKIPPER_VERSION \
+    --set server.composedTaskRunner.image.repository=springcloud/spring-cloud-dataflow-composed-task-runner \
+    --set server.composedTaskRunner.image.tag=$DATAFLOW_VERSION --set skipper.service.type=LoadBalancer --set skipper.image.pullPolicy=Always \
+    --set server.image.pullPolicy=Always --set deployer.readinessProbe.initialDelaySeconds=0 --set deployer.livenessProbe.initialDelaySeconds=0 \
+    --set serviceAccount.create=false --set server.service.type=LoadBalancer --set server.service.port=80"
 
   if [ ! -z "$EXTRA_HELM_PARAMS" ]; then
     HELM_PARAMS="$HELM_PARAMS $EXTRA_HELM_PARAMS"
@@ -44,14 +35,10 @@ function use_helm() {
     HELM_PARAMS="$HELM_PARAMS --version $HELM_CHART_VERSION"
   fi
 
+  helm repo add bitnami https://charts.bitnami.com/bitnami
   helm repo update
 
-  if [ ! -z "$USE_LEGACY_HELM_CHART" ]; then
-    HELM_CHART_REFERENCE="stable/spring-cloud-data-flow"
-	echo "WARN: Using legacy helm chart, bitnami chart should be used as of SCDF 2.6"
-  fi
-
-  helm install --name scdf ${HELM_CHART_REFERENCE} ${HELM_PARAMS} --namespace $KUBERNETES_NAMESPACE
+  helm install --name scdf bitnami/spring-cloud-dataflow ${HELM_PARAMS} --namespace $KUBERNETES_NAMESPACE
   helm list
 }
 
@@ -112,6 +99,10 @@ function update_sa_name() {
   cat $file | sed "s/$OLD_SA_NAME/$DATAFLOW_SERVICE_ACCOUNT_NAME/g"
 }
 
+function patch_sa() {
+  kubectl patch serviceaccount $DATAFLOW_SERVICE_ACCOUNT_NAME -p '{"imagePullSecrets": [{"name": "docker"}]}' --namespace $KUBERNETES_NAMESPACE
+}
+
 function distro_files_install_database() {
   kubectl create -f src/kubernetes/mysql/ --namespace $KUBERNETES_NAMESPACE
 }
@@ -120,6 +111,7 @@ function distro_files_install_rbac() {
   kubectl create -f src/kubernetes/server/server-roles.yaml --namespace $KUBERNETES_NAMESPACE
   update_sa_name src/kubernetes/server/server-rolebinding.yaml | kubectl create -f - --namespace $KUBERNETES_NAMESPACE
   update_sa_name src/kubernetes/server/service-account.yaml | kubectl create -f - --namespace $KUBERNETES_NAMESPACE
+  patch_sa
 }
 
 function distro_files_install_skipper() {
@@ -145,7 +137,6 @@ function distro_files_install_scdf() {
   kubectl create -f src/kubernetes/server/server-svc.yaml --namespace $KUBERNETES_NAMESPACE
   update_sa_name src/kubernetes/server/server-deployment.yaml | kubectl create -f - --namespace $KUBERNETES_NAMESPACE
 }
-
 
 helm_delete
 distro_files_object_delete

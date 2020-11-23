@@ -18,9 +18,17 @@ fi
 if [[ -z "${KUBERNETES_NAMESPACE}" ]]; then
   export KUBERNETES_NAMESPACE='default'
 fi
+
 if [[ -z "${DATAFLOW_SERVICE_ACCOUNT_NAME}" ]]; then
-  export DATAFLOW_SERVICE_ACCOUNT_NAME=scdf-data-flow
+  # use the default service account as it can be pre-patched, open issue on DH limiting:
+  # https://github.com/bitnami/charts/issues/4430
+  export DATAFLOW_SERVICE_ACCOUNT_NAME=default
+
+  if [ -n "$USE_DISTRO_FILES" ]; then
+    export DATAFLOW_SERVICE_ACCOUNT_NAME=scdf-sa
+  fi
 fi
+
 echo "Connecting to kubernetes cluster: ${CLUSTER_NAME} in namespace ${KUBERNETES_NAMESPACE}"
 
 kubernetes_authenticate_and_target
