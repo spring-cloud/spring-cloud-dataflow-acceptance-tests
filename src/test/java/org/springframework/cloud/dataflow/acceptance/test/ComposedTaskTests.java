@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -63,6 +64,47 @@ public class ComposedTaskTests extends AbstractTaskTests {
 		assertParentTaskExecution(taskDefinitionName, 0, 2, 2);
 	}
 
+	@Test
+	public void ctrFailedGraph() {
+		// testFailedGraph COMPLETE
+		// testFailedGraph-scenario ERROR
+		// testFailedGraph-timestamp UNKNOWN
+		//
+		// testFailedGraph exit 0
+		// testFailedGraph-scenario exit 1
+		String taskDefinitionName = composedTaskLaunch("scenario --fail-task=true && timestamp");
+		assertTrue(waitForTaskToComplete(taskDefinitionName + "-scenario", 1));
+		assertTrue(waitForTaskToComplete(taskDefinitionName, 1));
+
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
+		for (TaskExecutionResource taskExecutionResource : taskExecutionResources) {
+			logger.info("task name: {} end time: {} exit code: {}",
+					taskExecutionResource.getTaskName(),
+					taskExecutionResource.getEndTime(),
+					taskExecutionResource.getExitCode());
+		}
+		assertThat(taskExecutionResources).hasSize(1);
+		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+
+		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-scenario");
+		for (TaskExecutionResource taskExecutionResource : taskExecutionResources) {
+			logger.info("task name: {} end time: {} exit code: {}",
+					taskExecutionResource.getTaskName(),
+					taskExecutionResource.getEndTime(),
+					taskExecutionResource.getExitCode());
+		}
+		assertThat(taskExecutionResources).hasSize(1);
+		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(1);
+
+		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-timestamp");
+		for (TaskExecutionResource taskExecutionResource : taskExecutionResources) {
+			logger.info("task name: {} end time: {} exit code: {}",
+					taskExecutionResource.getTaskName(),
+					taskExecutionResource.getEndTime(),
+					taskExecutionResource.getExitCode());
+		}
+		assertThat(taskExecutionResources).hasSize(0);
+	}
 
 	private void assertTaskExecutions(String taskDefinitionName,
 			int expectedExitCode, int expectedCount) {

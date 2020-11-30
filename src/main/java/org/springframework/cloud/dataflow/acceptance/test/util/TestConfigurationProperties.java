@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.acceptance.test.util;
 
+import java.util.Properties;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -51,9 +53,16 @@ public class TestConfigurationProperties {
 
 	private String taskRegistrationResource = "https://dataflow.spring.io/task-maven-latest";
 
+	private Properties taskRegistrationProperties; //Arrays.asList("task.scenario=maven://io.spring:scenario-task:0.0.1-SNAPSHOT");
+
 	private String appHost;
 
 	private boolean useHttps;
+
+	public TestConfigurationProperties() {
+		this.taskRegistrationProperties = new Properties();
+		this.taskRegistrationProperties.setProperty("task.scenario", "maven://io.spring:scenario-task:0.0.1-SNAPSHOT");
+	}
 
 	public int getMaxWaitTime() {
 		return maxWaitTime;
@@ -125,6 +134,14 @@ public class TestConfigurationProperties {
 
 	public void setTaskRegistrationResource(String taskRegistrationResource) {
 		this.taskRegistrationResource = taskRegistrationResource;
+	}
+
+	public Properties getTaskRegistrationProperties() {
+		return taskRegistrationProperties;
+	}
+
+	public void setTaskRegistrationProperties(Properties taskRegistrationProperties) {
+		this.taskRegistrationProperties = taskRegistrationProperties;
 	}
 
 	public String getNamespace() {

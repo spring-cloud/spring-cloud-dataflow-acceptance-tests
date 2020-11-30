@@ -76,7 +76,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	protected static boolean tasksRegistered = false;
+	protected boolean tasksRegistered = false;
 
 	@Rule
 	public LogTestNameRule logTestName = new LogTestNameRule();
@@ -231,12 +231,17 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 * Imports the proper apps required for the acceptance tests.
 	 */
 	protected void registerTasks() {
-		if (tasksRegistered) {
+		if (this.tasksRegistered) {
 			return;
 		}
 		logger.info(String.format("Importing task apps from uri resource: %s",
 				configurationProperties.getTaskRegistrationResource()));
 		appRegistryOperations.importFromResource(configurationProperties.getTaskRegistrationResource(), true);
+
+		logger.info(String.format("Importing task apps from properties: %s",
+				configurationProperties.getTaskRegistrationProperties(), ","));
+		appRegistryOperations.registerAll(configurationProperties.getTaskRegistrationProperties(), true);
+
 		logger.info("Done importing task apps.");
 		this.tasksRegistered = true;
 	}
