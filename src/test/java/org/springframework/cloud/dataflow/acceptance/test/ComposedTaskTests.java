@@ -140,6 +140,31 @@ public class ComposedTaskTests extends AbstractTaskTests {
 		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
 	}
 
+	@Test
+	public void ctrSequential() {
+		String taskDefinitionName = composedTaskLaunch("t1:timestamp && t2:timestamp && t3:timestamp");
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t1", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t2", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t3", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName, 1)).isTrue();
+
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
+		assertThat(taskExecutionResources).hasSize(1);
+		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+
+		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t1");
+		assertThat(taskExecutionResources).hasSize(1);
+		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+
+		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t2");
+		assertThat(taskExecutionResources).hasSize(1);
+		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+
+		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t3");
+		assertThat(taskExecutionResources).hasSize(1);
+		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+	}
+
 	private void assertTaskExecutions(String taskDefinitionName,
 			int expectedExitCode, int expectedCount) {
 		assertTrue(waitForTaskToComplete(taskDefinitionName + "-a", expectedCount));
