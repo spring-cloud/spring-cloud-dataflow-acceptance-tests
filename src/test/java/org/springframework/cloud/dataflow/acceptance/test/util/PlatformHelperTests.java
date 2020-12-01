@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 /**
@@ -50,22 +51,22 @@ public class PlatformHelperTests {
 	@Mock
 	private RuntimeOperations runtimeOperations;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		stream = StreamDefinition.builder(STREAM_NAME).definition("time | log").build();
 		MockitoAnnotations.initMocks(this);
 		List<AppStatusResource> appStatusResources = new ArrayList<>();
 		AppStatusResource logStatus = new AppStatusResource(STREAM_NAME + "-log", "deployed");
-		logStatus.setInstances(new Resources<>(Collections.singletonList(
+		logStatus.setInstances(CollectionModel.of(Collections.singletonList(
 				new AppInstanceStatusResource(STREAM_NAME + "-log", "deployed",
 						Collections.singletonMap("url", "https://log")))));
 		appStatusResources.add(logStatus);
 		AppStatusResource timeStatus = new AppStatusResource(STREAM_NAME + "-time", "deployed");
-		timeStatus.setInstances(new Resources<>(Collections.singletonList(
+		timeStatus.setInstances(CollectionModel.of(Collections.singletonList(
 				new AppInstanceStatusResource(STREAM_NAME + "-time", "deployed",
 						Collections.singletonMap("url", "https://time"))), (new Link[0])));
 		appStatusResources.add(timeStatus);
-		PagedResources<AppStatusResource> resources = new PagedResources<>(appStatusResources, null, new Link("test"));
+		PagedModel<AppStatusResource> resources = new PagedModel<>(appStatusResources, null, new Link("test"));
 		when(this.runtimeOperations.status()).thenReturn(resources);
 	}
 

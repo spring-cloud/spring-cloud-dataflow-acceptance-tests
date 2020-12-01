@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import org.springframework.cloud.dataflow.acceptance.test.util.SchedulerRule;
+import org.springframework.cloud.dataflow.acceptance.test.util.SchedulerExtension;
 import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -40,8 +40,8 @@ public class SchedulerTests extends AbstractTaskTests {
 
 	private final static String DEFAULT_CRON_EXPRESSION = "56 20 ? * *";
 
-	@ClassRule
-	public static SchedulerRule cfAvailable = new SchedulerRule();
+	@RegisterExtension
+	public static SchedulerExtension cfAvailable = new SchedulerExtension();
 
 	@Test
 	public void listTest() {
@@ -50,9 +50,9 @@ public class SchedulerTests extends AbstractTaskTests {
 		for(int i = 0; i < ENTRY_COUNT; i++) {
 			scheduleSet.add(createDefaultSchedule());
 		}
-		PagedResources<ScheduleInfoResource> pagedResources = listSchedules();
-		assertThat(pagedResources.getMetadata().getTotalElements()).isEqualTo(ENTRY_COUNT);
-		Iterator<ScheduleInfoResource> iterator = pagedResources.getContent().iterator();
+		PagedModel<ScheduleInfoResource> pagedModel = listSchedules();
+		assertThat(pagedModel.getMetadata().getTotalElements()).isEqualTo(ENTRY_COUNT);
+		Iterator<ScheduleInfoResource> iterator = pagedModel.getContent().iterator();
 		for(int i = 0; i < ENTRY_COUNT; i++) {
 			ScheduleInfoResource resource = iterator.next();
 			if(scheduleSet.contains(resource.getScheduleName())) {
@@ -86,9 +86,9 @@ public class SchedulerTests extends AbstractTaskTests {
 			scheduleNames[i] = createDefaultSchedule(taskNames[i]);
 		}
 		for(int i = 0; i < ENTRY_COUNT; i++) {
-			PagedResources<ScheduleInfoResource> pagedResources = listSchedules(taskNames[i]);
-			assertThat(pagedResources.getMetadata().getSize()).isEqualTo(1);
-			verifyScheduleIsValid(pagedResources.getContent().iterator().next(), scheduleNames[i], DEFAULT_CRON_EXPRESSION);
+			PagedModel<ScheduleInfoResource> pagedModel = listSchedules(taskNames[i]);
+			assertThat(pagedModel.getMetadata().getSize()).isEqualTo(1);
+			verifyScheduleIsValid(pagedModel.getContent().iterator().next(), scheduleNames[i], DEFAULT_CRON_EXPRESSION);
 		}
 	}
 

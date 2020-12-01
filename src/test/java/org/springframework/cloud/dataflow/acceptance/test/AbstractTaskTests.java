@@ -27,10 +27,9 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +37,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.acceptance.test.util.DataFlowTemplateBuilder;
-import org.springframework.cloud.dataflow.acceptance.test.util.LogTestNameRule;
+import org.springframework.cloud.dataflow.acceptance.test.util.LogTestNameExtension;
 import org.springframework.cloud.dataflow.acceptance.test.util.RestTemplateConfigurer;
 import org.springframework.cloud.dataflow.acceptance.test.util.TestConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
@@ -50,8 +49,8 @@ import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -68,8 +67,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Thomas Risberg
  * @author David Turanski
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @EnableConfigurationProperties({ TestConfigurationProperties.class })
+@ExtendWith(LogTestNameExtension.class)
 public abstract class AbstractTaskTests implements InitializingBean {
 
 	protected static final String DEFAULT_CRON_EXPRESSION_KEY = "spring.cloud.scheduler.cron.expression";
@@ -77,9 +77,6 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	protected boolean tasksRegistered = false;
-
-	@Rule
-	public LogTestNameRule logTestName = new LogTestNameRule();
 
 	protected RestTemplate restTemplate;
 
@@ -96,16 +93,16 @@ public abstract class AbstractTaskTests implements InitializingBean {
 
 	protected List<String> composedTasksToBeDestroyed;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		composedTasksToBeDestroyed = new ArrayList<>();
 		registerTasks();
 	}
 
-	@After
+	@AfterEach
 	public void teardown() {
 		if (schedulerOperations != null) {
-			PagedResources<ScheduleInfoResource> scheduleInfoResources = schedulerOperations.list();
+			PagedModel<ScheduleInfoResource> scheduleInfoResources = schedulerOperations.list();
 			Iterator<ScheduleInfoResource> scheduleInfoResourceIterator = scheduleInfoResources.iterator();
 			ScheduleInfoResource scheduleInfoResource;
 
@@ -122,7 +119,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 			}
 		}
 		else {
-			PagedResources<TaskDefinitionResource> taskExecutionResources = taskOperations.list();
+			PagedModel<TaskDefinitionResource> taskExecutionResources = taskOperations.list();
 			Iterator<TaskDefinitionResource> taskDefinitionResourceIterator = taskExecutionResources.iterator();
 			TaskDefinitionResource taskDefinitionResource;
 
@@ -187,7 +184,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 			Map<String, String> properties, List<String> arguments) {
 
 		String taskDefinitionName = randomTaskName();
-		taskOperations.create(taskDefinitionName, definition);
+		taskOperations.create(taskDefinitionName, definition, "Sample Definition for " +taskDefinitionName);
 		taskOperations.launch(taskDefinitionName, properties, arguments, null);
 		return taskDefinitionName;
 	}
@@ -200,7 +197,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 */
 	protected String taskCreate(String definition) {
 		String taskDefinitionName = randomTaskName();
-		taskOperations.create(taskDefinitionName, definition);
+		taskOperations.create(taskDefinitionName, definition, "Sample Definition for " +taskDefinitionName);
 		return taskDefinitionName;
 	}
 
@@ -375,19 +372,19 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	}
 
 	/**
-	 * Retrieves a {@link org.springframework.hateoas.PagedResources} of the existing schedules.
+	 * Retrieves a {@link org.springframework.hateoas.PagedModel} of the existing schedules.
 	 */
-	protected PagedResources<ScheduleInfoResource> listSchedules() {
+	protected PagedModel<ScheduleInfoResource> listSchedules() {
 		return this.schedulerOperations.list();
 	}
 
 	/**
-	 * Retrieves a {@link PagedResources} of the existing {@link ScheduleInfoResource}s that
+	 * Retrieves a {@link PagedModel} of the existing {@link ScheduleInfoResource}s that
 	 * are associated with the task definition name.
 	 * @param taskDefinitionName The name of the task definition that the schedules should be
 	 *     associated.
 	 */
-	protected PagedResources<ScheduleInfoResource> listSchedules(String taskDefinitionName) {
+	protected PagedModel<ScheduleInfoResource> listSchedules(String taskDefinitionName) {
 		return this.schedulerOperations.list(taskDefinitionName);
 	}
 
@@ -401,9 +398,17 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	}
 
 	protected Collection<JobExecutionResource> getJobExecutionByTaskName(String taskName) {
-		PagedResources<JobExecutionResource> jobExecutionPagedResources = this.jobOperations
+		PagedModel<JobExecutionResource> jobExecutionPagedResources = this.jobOperations
 				.executionListByJobName(taskName);
 		return jobExecutionPagedResources.getContent();
+	}
+
+	/**
+	 * Restart a failed Job.
+	 * @param jobExecutionId the job execution id assocated with the job to be restarted.
+	 */
+	protected void  restartJob(long jobExecutionId) {
+		this.jobOperations.executionRestart(jobExecutionId);
 	}
 
 	private void cleanUpExecutions() {

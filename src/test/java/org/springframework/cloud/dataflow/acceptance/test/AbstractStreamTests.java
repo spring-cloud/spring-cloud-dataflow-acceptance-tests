@@ -41,11 +41,11 @@ import java.util.stream.StreamSupport;
 import org.awaitility.core.ConditionEvaluationListener;
 import org.awaitility.core.EvaluatedCondition;
 import org.awaitility.core.TimeoutEvent;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.extension.TestWatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +59,7 @@ import org.springframework.cloud.dataflow.acceptance.test.util.DefaultPlatformHe
 import org.springframework.cloud.dataflow.acceptance.test.util.HttpPoster;
 import org.springframework.cloud.dataflow.acceptance.test.util.KubernetesPlatformHelper;
 import org.springframework.cloud.dataflow.acceptance.test.util.LocalPlatformHelper;
-import org.springframework.cloud.dataflow.acceptance.test.util.LogTestNameRule;
+import org.springframework.cloud.dataflow.acceptance.test.util.LogTestNameExtension;
 import org.springframework.cloud.dataflow.acceptance.test.util.PlatformHelper;
 import org.springframework.cloud.dataflow.acceptance.test.util.RestTemplateConfigurer;
 import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
@@ -75,7 +75,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -97,16 +97,13 @@ import static org.awaitility.Awaitility.await;
  * @author David Turanski
  */
 @SpringBootTest
-@RunWith(SpringRunner.class)
+@ExtendWith({SpringExtension.class, LogTestNameExtension.class})
 @EnableConfigurationProperties(TestConfigurationProperties.class)
 public abstract class AbstractStreamTests implements InitializingBean {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private static boolean appsRegistered = false;
-
-	@Rule
-	public LogTestNameRule logTestName = new LogTestNameRule();
 
 	@Autowired
 	protected TestConfigurationProperties configurationProperties;
@@ -127,15 +124,13 @@ public abstract class AbstractStreamTests implements InitializingBean {
 
 	private HttpPoster httpPoster;
 
-	@Rule
-	public LoggingTestWatcher testWatcher = new LoggingTestWatcher();
+	@RegisterExtension
+	LoggingTestWatcher testWatcher = new LoggingTestWatcher();
 
-	class LoggingTestWatcher extends TestWatcher {
+	class LoggingTestWatcher implements TestWatcher {
 		List<LogRetriever> logRetrievers = new LinkedList<>();
 
-		@Override
-		protected void failed(Throwable e, Description description) {
-			super.failed(e, description);
+		public void testFailed(ExtensionContext context, Throwable e) {
 			logRetrievers.forEach(logRetriever -> {
 				logRetriever.retrieveLogs().forEach(log -> logger.error(log.getContent()));
 			});
@@ -143,14 +138,13 @@ public abstract class AbstractStreamTests implements InitializingBean {
 			streamOperations.destroyAll();
 		}
 
-		@Override
-		protected void succeeded(Description description) {
+		public void testSuccessful(ExtensionContext context) {
 			logger.info("Destroy all streams");
 			streamOperations.destroyAll();
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		if (appsRegistered) {
 			return;
@@ -188,7 +182,8 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	protected void deployStream(StreamDefinition stream) {
 		logger.info("Creating stream '" + stream.getName() + "'");
 		retryTemplate
-				.execute(context -> streamOperations.createStream(stream.getName(), stream.getDefinition(), false));
+				.execute(context -> streamOperations.createStream(stream.getName(),
+					stream.getDefinition(), "Simple Description of " + stream.getName(), false));
 		Map<String, String> streamProperties = new HashMap<>();
 		streamProperties.put("app.*.logging.file", platformHelper.getLogfileName());
 		streamProperties.put("app.*.endpoints.logfile.sensitive", "false");

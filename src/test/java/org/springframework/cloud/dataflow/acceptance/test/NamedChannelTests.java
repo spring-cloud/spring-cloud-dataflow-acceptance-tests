@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
-import org.junit.Ignore;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
 
-import static org.junit.Assert.assertTrue;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
+
 
 /**
  * Executes acceptance tests for Named Channels.
@@ -67,7 +69,7 @@ public class NamedChannelTests extends AbstractStreamTests {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void directedGraphTest() throws Exception {
 		StreamDefinition fooLogStream = deployLog("DIRECTED-GRAPH-DESTINATION1",
 				":foo > transform --expression=payload+'-foo' | log");

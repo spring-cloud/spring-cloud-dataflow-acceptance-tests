@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@ package org.springframework.cloud.dataflow.acceptance.test;
 import java.time.Duration;
 import java.util.Collection;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.acceptance.test.util.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
@@ -29,8 +28,9 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeThat;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
+
 
 /**
  * Executes acceptance tests for the ticktock demo.
@@ -61,8 +61,7 @@ public class TickTockTests extends AbstractStreamTests {
 		AboutResource aboutResource = this.dataFlowOperations.aboutOperation().get();
 		String implementation = aboutResource.getVersionInfo().getImplementation().getName();
 		if (!implementation.equals("spring-cloud-dataflow-server")) {
-			assumeThat("Skipping test", "true",
-					Matchers.equalToIgnoringCase(String.valueOf(aboutResource.getFeatureInfo().isStreamsEnabled())));
+			assumeTrue("true".equalsIgnoreCase(String.valueOf(aboutResource.getFeatureInfo().isStreamsEnabled())), () -> "Skipping test");
 		}
 		this.dataFlowOperations.streamOperations().destroyAll();
 		StreamDefinition stream = StreamDefinition.builder("TICKTOCK")
@@ -76,7 +75,7 @@ public class TickTockTests extends AbstractStreamTests {
 		assertTrue("No output found", waitForLogEntry(stream.getApplication("log"), "TICKTOCK - TIMESTAMP:"));
 		StreamDefinitionResource updatedStream = updateStream(stream,
 				"app.log.log.expression='TICKTOCK Updated - TIMESTAMP: '.concat(payload)", null);
-		assertTrue(updatedStream.getDslText()
+		assertTrue("Ticktock Message not found", updatedStream.getDslText()
 				.contains("--log.expression=\"'TICKTOCK Updated - TIMESTAMP: '.concat(payload)\""));
 		waitForUpdateOrRollback(stream);
 
@@ -93,8 +92,8 @@ public class TickTockTests extends AbstractStreamTests {
 	public void tickTockTestsFromConfigServer() {
 		String platformType = System.getProperty("PLATFORM_TYPE", "");
 		String skipCloudConfig = System.getProperty("SKIP_CLOUD_CONFIG", "false");
-		assumeThat("Skipping test", "cloudfoundry", Matchers.equalToIgnoringCase(platformType));
-		assumeThat("Skipping test", "false", Matchers.equalToIgnoringCase(skipCloudConfig));
+		assumeTrue("cloudfoundry".equalsIgnoreCase(platformType), () -> "Skipping test" );
+		assumeTrue("false".equalsIgnoreCase(skipCloudConfig), () -> "Skipping test");
 		StreamDefinition stream = StreamDefinition.builder("TICKTOCK-config-server")
 				.definition("time | log")
 				.addProperty("app.log.spring.profiles.active", "test")

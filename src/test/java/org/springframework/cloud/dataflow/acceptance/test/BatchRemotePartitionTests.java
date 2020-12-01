@@ -22,7 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -35,12 +36,14 @@ import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectio
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 /**
  * Executes acceptance tests for the batch remote partition task.
  *
  * @author David Turanski
+ * @author Glenn Renfro
  */
 @ContextConfiguration(classes = BatchRemotePartitionTests.ConditionalCloudFoundryTestConfiguration.class)
 public class BatchRemotePartitionTests extends AbstractTaskTests {
