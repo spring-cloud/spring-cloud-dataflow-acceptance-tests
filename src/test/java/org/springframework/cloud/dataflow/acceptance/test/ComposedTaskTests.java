@@ -72,7 +72,7 @@ public class ComposedTaskTests extends AbstractTaskTests {
 		//
 		// testFailedGraph exit 0
 		// testFailedGraph-scenario exit 1
-		String taskDefinitionName = composedTaskLaunch("scenario --fail-task=true && timestamp");
+		String taskDefinitionName = composedTaskLaunch("scenario --io.spring.fail-task=true && timestamp");
 		assertTrue(waitForTaskToComplete(taskDefinitionName + "-scenario", 1));
 		assertTrue(waitForTaskToComplete(taskDefinitionName, 1));
 
@@ -167,7 +167,7 @@ public class ComposedTaskTests extends AbstractTaskTests {
 
 	@Test
 	public void ctrSequentialTransitionAndSplitWithScenarioFailed() {
-		String taskDefinitionName = composedTaskLaunch("t1: timestamp && t2: scenario --fail-task=true 'FAILED'->t3: timestamp && <t4: timestamp || t5: timestamp> && t6: timestamp");
+		String taskDefinitionName = composedTaskLaunch("t1: timestamp && t2: scenario --io.spring.fail-task=true 'FAILED'->t3: timestamp && <t4: timestamp || t5: timestamp> && t6: timestamp");
 		assertThat(waitForTaskToComplete(taskDefinitionName + "-t1", 1)).isTrue();
 		assertThat(waitForTaskToComplete(taskDefinitionName + "-t2", 1)).isTrue();
 		assertThat(waitForTaskToComplete(taskDefinitionName + "-t3", 1)).isTrue();
