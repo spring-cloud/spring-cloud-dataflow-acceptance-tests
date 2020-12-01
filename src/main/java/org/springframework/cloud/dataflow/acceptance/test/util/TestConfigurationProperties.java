@@ -49,7 +49,7 @@ public class TestConfigurationProperties {
 
 	private String namespace="default";
 
-	private String streamRegistrationResource = "https://https://dataflow.spring.io/rabbitmq-maven-latest";
+	private String streamRegistrationResource = "https://dataflow.spring.io/rabbitmq-maven-latest";
 
 	private String taskRegistrationResource = "https://dataflow.spring.io/task-maven-latest";
 

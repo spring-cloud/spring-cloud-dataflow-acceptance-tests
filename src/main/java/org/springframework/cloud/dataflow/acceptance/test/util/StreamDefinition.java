@@ -17,9 +17,12 @@ package org.springframework.cloud.dataflow.acceptance.test.util;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
+import org.springframework.cloud.dataflow.core.dsl.StreamNode;
+import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 
 /**
  * Builder of deployable SCDF stream definitions which honors elements of SCDF Shell DSL.
@@ -56,12 +59,37 @@ public class StreamDefinition {
 		this.name = builder.name;
 		this.streamDefinitionDsl = builder.streamDefinitionDsl;
 		this.deploymentProperties = builder.deploymentProperties;
-		for (StreamAppDefinition appDefinition : new org.springframework.cloud.dataflow.core.StreamDefinition(this.name,
-				this.streamDefinitionDsl).getAppDefinitions()) {
+		for (StreamAppDefinition appDefinition :
+				getAppDefinitions(this.name, this.streamDefinitionDsl)) {
 			this.applications.put(appDefinition.getRegisteredAppName(),
 					new Application(appDefinition.getRegisteredAppName()));
 		}
 	}
+	/**
+	 * Return the ordered list of application definitions for this stream as a
+	 * {@link LinkedList}. This allows for retrieval of application definitions in the stream by
+	 * index. Application definitions are maintained in stream flow order (source is
+	 * first, sink is last).
+	 *
+	 * @return list of application definitions for this stream definition
+	 */
+	public LinkedList<StreamAppDefinition> getAppDefinitions(String streamName, String streamDefinitionDsl) {
+		LinkedList<StreamAppDefinition> appDefinitions = new LinkedList<>();
+		for (StreamAppDefinition appDefinition : new StreamApplicationDefinitionBuilder(streamName, parse(streamName, streamDefinitionDsl)).build()) {
+			appDefinitions.addFirst(appDefinition);
+		}
+		return appDefinitions;
+	}
+	/**
+	 * Use the {@link StreamParser} to retrieve the {@link StreamNode} representation of the stream.
+	 * @param name the stream definition name
+	 * @param streamDefinitionDsl the dsl to parse.
+	 * @return the StreamNode representation of the stream
+	 */
+	public StreamNode parse(String name, String streamDefinitionDsl) {
+		return new StreamParser(name, streamDefinitionDsl).parse();
+	}
+
 
 	/**
 	 * Creates an instance of the builder for a named stream

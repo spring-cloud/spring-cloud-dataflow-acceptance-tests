@@ -16,18 +16,21 @@
 
 package org.springframework.cloud.dataflow.acceptance.test.util;
 
+import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.api.extension.ExecutionCondition;
+import org.junit.jupiter.api.extension.ExtensionContext;
+
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.SchedulerOperations;
-import org.springframework.cloud.stream.test.junit.AbstractExternalResourceTestSupport;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.util.Assert;
 
 /**
  * Verifies that the Spring Cloud Data Flow Scheduler is available.
@@ -35,26 +38,28 @@ import org.springframework.util.Assert;
  * @author Glenn Renfro
  * @author David Turanski
  */
-public class SchedulerRule extends AbstractExternalResourceTestSupport<DataFlowTemplate> {
+public class SchedulerExtension implements ExecutionCondition, AfterTestExecutionCallback {
 
 	private ConfigurableApplicationContext context;
 
-	public SchedulerRule() {
-		super("SCHEDULER");
-	}
-
 	@Override
-	protected void cleanupResource() {
-		context.close();
-	}
-
-	@Override
-	protected void obtainResource()  {
-		context = new SpringApplicationBuilder(Config.class).web(WebApplicationType.NONE).run();
-		resource = context.getBean(DataFlowTemplate.class);
+	public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext extensionContext) {
+		ConditionEvaluationResult conditionEvaluationResult = ConditionEvaluationResult.enabled("Scheduling Testing is Enabled");
+		ConfigurableApplicationContext context = new SpringApplicationBuilder(Config.class).web(WebApplicationType.NONE).run();
+		DataFlowTemplate resource = context.getBean(DataFlowTemplate.class);
 
 		SchedulerOperations schedulerOperations = resource.schedulerOperations();
-		Assert.notNull(schedulerOperations, "no SchedulerOperations bean is available.  Skipping test.");
+		if(schedulerOperations == null) {
+			conditionEvaluationResult = ConditionEvaluationResult.disabled("no SchedulerOperations bean is available.  Skipping test.");
+		}
+		return conditionEvaluationResult;
+	}
+
+	@Override
+	public void afterTestExecution(ExtensionContext extensionContext) throws Exception {
+		if (this.context != null) {
+			this.context.close();
+		}
 	}
 
 	@Configuration

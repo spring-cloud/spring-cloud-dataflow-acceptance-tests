@@ -17,17 +17,18 @@
 package org.springframework.cloud.dataflow.acceptance.test;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Executes acceptance tests for the composed tasks.
@@ -44,7 +45,7 @@ public class ComposedTaskTests extends AbstractTaskTests {
 		assertTaskExecutions(taskDefinitionName, 0, 1);
 	}
 
-	@Ignore("This behavior is currently dependent on SCDF version")
+	@Disabled("This behavior is currently dependent on SCDF version")
 	@Test
 	public void ctrMultipleLaunchBatchParametersDoNotChange() {
 		String taskDefinitionName = composedTaskLaunch("a: timestamp && b:timestamp");
@@ -57,7 +58,7 @@ public class ComposedTaskTests extends AbstractTaskTests {
 	@Test
 	public void ctrMultipleLaunchWithArguments() {
 		List<String> arguments = new ArrayList<>();
-        arguments.add("--increment-instance-enabled=true");
+		arguments.add("--increment-instance-enabled=true");
 		String taskDefinitionName = composedTaskLaunch("a: timestamp && b:timestamp", Collections.EMPTY_MAP, arguments);
 		assertTaskExecutions(taskDefinitionName, 0, 1);
 		launchExistingTask(taskDefinitionName, Collections.EMPTY_MAP, arguments);
@@ -253,6 +254,18 @@ public class ComposedTaskTests extends AbstractTaskTests {
 		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t3");
 		assertThat(taskExecutionResources).hasSize(1);
 		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+	}
+
+	 @Test
+	public void testEmbeddedFailedGraph() {
+		String taskDefinitionName = composedTaskLaunch("a: timestamp && b:scenario --io.spring.failBatch=true --spring.cloud.task.batch.fail-on-job-failure=true && c:timestamp", Collections.EMPTY_MAP, Collections.emptyList());
+		assertTaskExecutions(taskDefinitionName, 0, 1);
+		Collection<TaskExecutionResource> taskExecutions = this.taskOperations.executionListByTaskName(taskDefinitionName).getContent();
+		List<Long> jobExecutionIds = taskExecutions.toArray(new TaskExecutionResource[0])[0].getJobExecutionIds();
+		assertThat(jobExecutionIds.size()).isEqualTo(1);
+		restartJob(jobExecutionIds.get(0));
+		assertParentTaskExecution(taskDefinitionName, 0, 2, 2);
+
 	}
 
 	private void assertTaskExecutions(String taskDefinitionName,
