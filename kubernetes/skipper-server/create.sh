@@ -25,7 +25,16 @@ function use_helm() {
     --set server.composedTaskRunner.image.repository=springcloud/spring-cloud-dataflow-composed-task-runner \
     --set server.composedTaskRunner.image.tag=$DATAFLOW_VERSION --set skipper.service.type=LoadBalancer --set skipper.image.pullPolicy=Always \
     --set server.image.pullPolicy=Always --set deployer.readinessProbe.initialDelaySeconds=0 --set deployer.livenessProbe.initialDelaySeconds=0 \
-    --set serviceAccount.create=false --set server.service.type=LoadBalancer --set server.service.port=80"
+    --set serviceAccount.create=false --set server.service.type=LoadBalancer --set server.service.port=80 --set mariadb.serviceAccount.create=false \
+    --set kafka.serviceAccount.create=false --set zookeeper.serviceAccount.create=false"
+
+  # bitnami specific flags
+  HELM_PARAMS="$HELM_PARAMS --set server.extraEnvVars[0].name=SPRING_CONFIG_ADDITIONAL-LOCATION \
+     --set server.extraEnvVars[0].value=/opt/bitnami/spring-cloud-dataflow/conf/application.yml \
+     --set server.extraEnvVars[1].name=MAVEN_LOCALREPOSITORY --set server.extraEnvVars[1].value=/tmp \
+     --set skipper.extraEnvVars[0].name=SPRING_CONFIG_ADDITIONAL-LOCATION \
+     --set skipper.extraEnvVars[0].value=/opt/bitnami/spring-cloud-skipper/conf/application.yml \
+     --set skipper.extraEnvVars[1].name=MAVEN_LOCALREPOSITORY --set skipper.extraEnvVars[1].value=/tmp"
 
   if [ ! -z "$EXTRA_HELM_PARAMS" ]; then
     HELM_PARAMS="$HELM_PARAMS $EXTRA_HELM_PARAMS"
@@ -35,11 +44,11 @@ function use_helm() {
     HELM_PARAMS="$HELM_PARAMS --version $HELM_CHART_VERSION"
   fi
 
-  helm repo add bitnami https://charts.bitnami.com/bitnami
-  helm repo update
+  helm3 repo add bitnami https://charts.bitnami.com/bitnami
+  helm3 repo update
 
-  helm install --name scdf bitnami/spring-cloud-dataflow ${HELM_PARAMS} --namespace $KUBERNETES_NAMESPACE
-  helm list
+  helm3 install scdf bitnami/spring-cloud-dataflow ${HELM_PARAMS} --namespace $KUBERNETES_NAMESPACE
+  helm3 list
 }
 
 # functions prefixed with distro_ replicate how in-tree k8s files are deployed

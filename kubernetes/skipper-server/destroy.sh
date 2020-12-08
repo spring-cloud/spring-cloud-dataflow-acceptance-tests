@@ -3,7 +3,7 @@
 . ../common.sh
 
 if [ -z "$USE_DISTRO_FILES" ]; then
-  helm delete scdf --purge || true
+  helm3 delete scdf || true
 else
   distro_files_object_delete
 fi

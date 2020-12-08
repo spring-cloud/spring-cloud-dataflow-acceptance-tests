@@ -12,7 +12,7 @@ function distro_files_object_delete() {
 }
 
 function helm_delete() {
-  helm delete scdf --purge || true
+  helm3 delete scdf || true
   wait_clean_for_label "all" "release=scdf"
 
   # Clean up any stray apps
