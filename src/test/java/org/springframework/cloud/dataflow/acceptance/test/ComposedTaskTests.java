@@ -256,7 +256,7 @@ public class ComposedTaskTests extends AbstractTaskTests {
 		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
 	}
 
-	 @Test
+	@Test
 	public void testEmbeddedFailedGraph() {
 		String taskDefinitionName = composedTaskLaunch("a: timestamp && b:scenario --io.spring.failBatch=true --spring.cloud.task.batch.fail-on-job-failure=true && c:timestamp", Collections.EMPTY_MAP, Collections.emptyList());
 		assertTaskExecutions(taskDefinitionName, 0, 1);
@@ -265,7 +265,6 @@ public class ComposedTaskTests extends AbstractTaskTests {
 		assertThat(jobExecutionIds.size()).isEqualTo(1);
 		restartJob(jobExecutionIds.get(0));
 		assertParentTaskExecution(taskDefinitionName, 0, 2, 2);
-
 	}
 
 	private void assertTaskExecutions(String taskDefinitionName,
