@@ -184,7 +184,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 			Map<String, String> properties, List<String> arguments) {
 
 		String taskDefinitionName = randomTaskName();
-		taskOperations.create(taskDefinitionName, definition, "Sample Definition for " +taskDefinitionName);
+		taskOperations.create(taskDefinitionName, definition, "Sample Definition for " + taskDefinitionName);
 		taskOperations.launch(taskDefinitionName, properties, arguments, null);
 		return taskDefinitionName;
 	}
@@ -197,7 +197,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 */
 	protected String taskCreate(String definition) {
 		String taskDefinitionName = randomTaskName();
-		taskOperations.create(taskDefinitionName, definition, "Sample Definition for " +taskDefinitionName);
+		taskOperations.create(taskDefinitionName, definition, "Sample Definition for " + taskDefinitionName);
 		return taskDefinitionName;
 	}
 
