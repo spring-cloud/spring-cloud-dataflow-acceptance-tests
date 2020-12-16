@@ -19,4 +19,6 @@ docker_stop "mysql:5.7"
 echo "done cleaning up."
 create "mysql" 3306
 echo "Service host is $SERVICE_HOST"
+echo "Sleeping 30s for mysql hopefully come up"
+sleep 30
 APPLICATION_ARGS="$APPLICATION_ARGS --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver --spring.datasource.url=jdbc:mysql://$SERVICE_HOST/$SPRING_SCHEMA_NAME --spring.datasource.username=$SPRING_DATASOURCE_USERNAME --spring.datasource.password=$SPRING_DATASOURCE_PASSWORD"
