@@ -157,7 +157,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 	 * used for the acceptance test.
 	 */
 	public void afterPropertiesSet() {
-		restTemplate = new RestTemplateConfigurer().skipSslValidation(configurationProperties.isUseHttps()).configure();
+		restTemplate = new RestTemplateConfigurer().skipSslValidation(true).configure();
 		dataFlowOperations = DataFlowTemplateBuilder.serverUri(configurationProperties.getServerUri())
 				.restTemplate(restTemplate).build();
 		streamOperations = dataFlowOperations.streamOperations();
