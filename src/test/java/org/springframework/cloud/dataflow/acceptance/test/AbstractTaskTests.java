@@ -129,7 +129,11 @@ public abstract class AbstractTaskTests implements InitializingBean {
 			}
 		}
 
-		cleanUpExecutions();
+		try {
+			cleanUpExecutions();
+		} catch (Exception e) {
+			logger.error("Error cleaning up task executions", e);
+		}
 	}
 
 	/**
@@ -450,7 +454,7 @@ public abstract class AbstractTaskTests implements InitializingBean {
 				.pathSegment(StringUtils.collectionToCommaDelimitedString(ids))
 				.queryParam("action","CLEANUP,REMOVE_DATA")
 				.build();
-
+		logger.info("cleaning up task executions data for ids {}", StringUtils.collectionToCommaDelimitedString(ids));
 		restTemplate.delete(uri);
 	}
 
