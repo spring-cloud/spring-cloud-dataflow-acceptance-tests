@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -40,9 +43,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ComposedTaskTests extends AbstractTaskTests {
 
 	@Test
-	public void ctrLaunch() {
+	public void ctrLaunchTest() {
 		String taskDefinitionName = composedTaskLaunch("a: timestamp && b:timestamp");
 		assertTaskExecutions(taskDefinitionName, 0, 1);
+
+		Collection<TaskExecutionResource> taskExecutions = this.taskOperations.executionListByTaskName(taskDefinitionName).getContent();
+		List<Long> jobExecutionIds = taskExecutions.toArray(new TaskExecutionResource[0])[0].getJobExecutionIds();
+		assertThat(jobExecutionIds.size()).isEqualTo(1);
+		Exception exception = assertThrows(DataFlowClientException.class, () -> {
+			restartJob(jobExecutionIds.get(0));
+		});
+		assertTrue(exception.getMessage().contains(" and state 'COMPLETED' is not restartable"));
 	}
 
 	@Disabled("This behavior is currently dependent on SCDF version")
@@ -73,7 +84,7 @@ public class ComposedTaskTests extends AbstractTaskTests {
 		//
 		// testFailedGraph exit 0
 		// testFailedGraph-scenario exit 1
-		String taskDefinitionName = composedTaskLaunch("scenario --io.spring.fail-task=true && timestamp");
+		String taskDefinitionName = composedTaskLaunch("scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false && timestamp");
 		assertTrue(waitForTaskToComplete(taskDefinitionName + "-scenario", 1));
 		assertTrue(waitForTaskToComplete(taskDefinitionName, 1));
 
@@ -128,17 +139,9 @@ public class ComposedTaskTests extends AbstractTaskTests {
 		assertThat(taskExecutionResources).hasSize(1);
 		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
 
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t1");
-		assertThat(taskExecutionResources).hasSize(1);
-		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
-
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t2");
-		assertThat(taskExecutionResources).hasSize(1);
-		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
-
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t3");
-		assertThat(taskExecutionResources).hasSize(1);
-		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+		verifyWorkFlowElement(taskDefinitionName, "t1", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t2", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t3", 0);
 	}
 
 	@Test
@@ -153,24 +156,16 @@ public class ComposedTaskTests extends AbstractTaskTests {
 		assertThat(taskExecutionResources).hasSize(1);
 		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
 
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t1");
-		assertThat(taskExecutionResources).hasSize(1);
-		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
-
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t2");
-		assertThat(taskExecutionResources).hasSize(1);
-		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
-
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t3");
-		assertThat(taskExecutionResources).hasSize(1);
-		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+		verifyWorkFlowElement(taskDefinitionName, "t1", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t2", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t3", 0);
 	}
 
 	@Test
 	public void ctrSequentialTransitionAndSplitWithScenarioFailed() {
-		String taskDefinitionName = composedTaskLaunch("t1: timestamp && t2: scenario --io.spring.fail-task=true 'FAILED'->t3: timestamp && <t4: timestamp || t5: timestamp> && t6: timestamp");
+		String taskDefinitionName = composedTaskLaunch("t1: timestamp && scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false 'FAILED'->t3: timestamp && <t4: timestamp || t5: timestamp> && t6: timestamp");
 		assertThat(waitForTaskToComplete(taskDefinitionName + "-t1", 1)).isTrue();
-		assertThat(waitForTaskToComplete(taskDefinitionName + "-t2", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-scenario", 1)).isTrue();
 		assertThat(waitForTaskToComplete(taskDefinitionName + "-t3", 1)).isTrue();
 		assertThat(waitForTaskToComplete(taskDefinitionName, 1)).isTrue();
 
@@ -178,17 +173,10 @@ public class ComposedTaskTests extends AbstractTaskTests {
 		assertThat(taskExecutionResources).hasSize(1);
 		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
 
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t1");
-		assertThat(taskExecutionResources).hasSize(1);
-		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
-
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t2");
-		assertThat(taskExecutionResources).hasSize(1);
-		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(1);
-
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t3");
-		assertThat(taskExecutionResources).hasSize(1);
-		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+		verifyWorkFlowElement(taskDefinitionName, "t1", 0);
+		verifyWorkFlowElement(taskDefinitionName, "scenario", 1);
+		verifyWorkFlowElement(taskDefinitionName, "t3", 0);
+		verifyWorkFlowElementNoExecution(taskDefinitionName, "t4");
 	}
 
 	@Test
@@ -205,25 +193,11 @@ public class ComposedTaskTests extends AbstractTaskTests {
 		assertThat(taskExecutionResources).hasSize(1);
 		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
 
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t1");
-		assertThat(taskExecutionResources).hasSize(1);
-		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
-
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t2");
-		assertThat(taskExecutionResources).hasSize(1);
-		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
-
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t4");
-		assertThat(taskExecutionResources).hasSize(1);
-		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
-
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t5");
-		assertThat(taskExecutionResources).hasSize(1);
-		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
-
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t6");
-		assertThat(taskExecutionResources).hasSize(1);
-		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+		verifyWorkFlowElement(taskDefinitionName, "t1", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t2", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t4", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t5", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t6", 0);
 	}
 
 	@Test
@@ -239,32 +213,228 @@ public class ComposedTaskTests extends AbstractTaskTests {
 		assertThat(taskExecutionResources).hasSize(1);
 		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
 
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t1");
 		assertThat(taskExecutionResources).hasSize(1);
 		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
-
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t2");
-		assertThat(taskExecutionResources).hasSize(1);
-		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
-
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t4");
-		assertThat(taskExecutionResources).hasSize(1);
-		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
-
-		taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-t3");
-		assertThat(taskExecutionResources).hasSize(1);
-		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+		verifyWorkFlowElement(taskDefinitionName, "t1", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t2", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t4", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t3", 0);
 	}
 
 	@Test
 	public void testEmbeddedFailedGraph() {
-		String taskDefinitionName = composedTaskLaunch("a: timestamp && b:scenario --io.spring.failBatch=true --spring.cloud.task.batch.fail-on-job-failure=true && c:timestamp", Collections.EMPTY_MAP, Collections.emptyList());
+		String taskDefinitionName = composedTaskLaunch(String.format(
+				"a: timestamp && b:scenario  --io.spring.fail-batch=true --io.spring.jobName=%s --spring.cloud.task.batch.fail-on-job-failure=true && c:timestamp", randomJobName()),
+				Collections.EMPTY_MAP, Collections.emptyList());
 		assertTaskExecutions(taskDefinitionName, 0, 1);
-		Collection<TaskExecutionResource> taskExecutions = this.taskOperations.executionListByTaskName(taskDefinitionName).getContent();
+		Collection<TaskExecutionResource> taskExecutions = this.taskOperations
+				.executionListByTaskName(taskDefinitionName).getContent();
 		List<Long> jobExecutionIds = taskExecutions.toArray(new TaskExecutionResource[0])[0].getJobExecutionIds();
 		assertThat(jobExecutionIds.size()).isEqualTo(1);
 		restartJob(jobExecutionIds.get(0));
 		assertParentTaskExecution(taskDefinitionName, 0, 2, 2);
+	}
+
+	@Test
+	public void twoSplitTest() {
+		String taskDefinitionName = composedTaskLaunch("<t1: timestamp ||t2: timestamp||t3: timestamp> && <t4: timestamp||t5: timestamp>", Collections.EMPTY_MAP, Collections.emptyList());
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t1", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t2", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t3", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t4", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t5", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName, 1)).isTrue();
+
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
+		assertThat(taskExecutionResources).hasSize(1);
+		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+
+		verifyWorkFlowElement(taskDefinitionName, "t1", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t2", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t3", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t4", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t5", 0);
+	}
+
+	@Test
+	public void sequentialAndSplitTest() {
+		String taskDefinitionName = composedTaskLaunch("<t1: timestamp && <t2: timestamp || t3: timestamp || t4: timestamp> && t5: timestamp>", Collections.EMPTY_MAP, Collections.emptyList());
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t1", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t2", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t3", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t4", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t5", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName, 1)).isTrue();
+
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
+		assertThat(taskExecutionResources).hasSize(1);
+		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+
+		verifyWorkFlowElement(taskDefinitionName, "t1", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t2", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t3", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t4", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t5", 0);
+	}
+
+	@Test
+	public void sequentialTransitionAndSplitFailedInvalidTest() {
+		String taskDefinitionName = composedTaskLaunch("t1: timestamp && b:scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false 'FAILED' -> t2: timestamp && t3: timestamp && t4: timestamp && <t5:timestamp || t6: timestamp> && t7: timestamp", Collections.EMPTY_MAP, Collections.emptyList());
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t1", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t2", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName, 1)).isTrue();
+
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
+		assertThat(taskExecutionResources).hasSize(1);
+		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+
+		verifyWorkFlowElement(taskDefinitionName, "t1", 0);
+		verifyWorkFlowElement(taskDefinitionName, "b", 1);
+		verifyWorkFlowElement(taskDefinitionName, "t2", 0);
+		verifyWorkFlowElementNoExecution(taskDefinitionName, "t3");
+	}
+
+	@Test
+	public void sequentialAndSplitWithFlowTest() {
+		String taskDefinitionName = composedTaskLaunch("t1: timestamp && <t2: timestamp && t3: timestamp || t4: timestamp ||t5: timestamp> && t6: timestamp", Collections.EMPTY_MAP, Collections.emptyList());
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t1", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t2", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t3", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t4", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t5", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t6", 1)).isTrue();
+
+		assertThat(waitForTaskToComplete(taskDefinitionName, 1)).isTrue();
+
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
+		assertThat(taskExecutionResources).hasSize(1);
+		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+
+		verifyWorkFlowElement(taskDefinitionName, "t1", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t2", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t3", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t4", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t5", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t6", 0);
+
+	}
+
+	@Test
+	public void sequentialAndFailedSplitTest() {
+		String taskDefinitionName = composedTaskLaunch(String.format(
+				"t1: timestamp && <t2: timestamp ||b:scenario --io.spring.fail-batch=true --io.spring.jobName=%s --spring.cloud.task.batch.fail-on-job-failure=true || t3: timestamp> && t4: timestamp", randomJobName()),
+				Collections.EMPTY_MAP, Collections.emptyList());
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t1", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t2", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-b", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t3", 1)).isTrue();
+
+		assertThat(waitForTaskToComplete(taskDefinitionName, 1)).isTrue();
+
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
+		assertThat(taskExecutionResources).hasSize(1);
+		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+
+		verifyWorkFlowElement(taskDefinitionName, "t1", 0);
+		verifyWorkFlowElement(taskDefinitionName, "b", 1);
+		verifyWorkFlowElement(taskDefinitionName, "t2", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t3", 0);
+		verifyWorkFlowElementNoExecution(taskDefinitionName, "t4");
+
+		Collection<TaskExecutionResource> taskExecutions = this.taskOperations.executionListByTaskName(taskDefinitionName).getContent();
+		List<Long> jobExecutionIds = taskExecutions.toArray(new TaskExecutionResource[0])[0].getJobExecutionIds();
+		assertThat(jobExecutionIds.size()).isEqualTo(1);
+		restartJob(jobExecutionIds.get(0));
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-b", 2)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t4",1)).isTrue();
+		assertParentTaskExecution(taskDefinitionName, 0, 2, 2);
+
+	}
+
+	@Test
+	public void failedBasicTransitionTest() {
+		String taskDefinitionName = composedTaskLaunch("b: scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false 'FAILED' -> t1: timestamp * ->t2: timestamp", Collections.EMPTY_MAP, Collections.emptyList());
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-b", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t1", 1)).isTrue();
+
+		assertThat(waitForTaskToComplete(taskDefinitionName, 1)).isTrue();
+
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
+		assertThat(taskExecutionResources).hasSize(1);
+		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+
+		verifyWorkFlowElement(taskDefinitionName, "t1", 0);
+		verifyWorkFlowElement(taskDefinitionName, "b", 1);
+		verifyWorkFlowElementNoExecution(taskDefinitionName, "t2");
+	}
+
+	@Test
+	public void successBasicTransitionTest() {
+		String taskDefinitionName = composedTaskLaunch("b: scenario --io.spring.launch-batch-job=false 'FAILED' -> t1: timestamp * ->t2: timestamp", Collections.EMPTY_MAP, Collections.emptyList());
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-b", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t2", 1)).isTrue();
+
+		assertThat(waitForTaskToComplete(taskDefinitionName, 1)).isTrue();
+
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName);
+		assertThat(taskExecutionResources).hasSize(1);
+		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(0);
+
+		verifyWorkFlowElement(taskDefinitionName, "t2", 0);
+		verifyWorkFlowElement(taskDefinitionName, "b", 0);
+		verifyWorkFlowElementNoExecution(taskDefinitionName, "t1");
+	}
+
+	@Test
+	public void basicTransitionWithTransitionTest() {
+		String taskDefinitionName = composedTaskLaunch("b1: scenario  --io.spring.launch-batch-job=false 'FAILED' -> t1: timestamp  && b2: scenario --io.spring.launch-batch-job=false 'FAILED' -> t2: timestamp * ->t3: timestamp ", Collections.EMPTY_MAP, Collections.emptyList());
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-b1", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-b2", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t3", 1)).isTrue();
+		verifyWorkFlowElement(taskDefinitionName, "b1", 0);
+		verifyWorkFlowElement(taskDefinitionName, "b2", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t3", 0);
+		verifyWorkFlowElementNoExecution(taskDefinitionName, "t1");
+		verifyWorkFlowElementNoExecution(taskDefinitionName, "t2");
+	}
+
+	@Test
+	public void wildCardOnlyInLastPositionTest() {
+		String taskDefinitionName = composedTaskLaunch("b1: scenario --io.spring.launch-batch-job=false 'FAILED' -> t1: timestamp  && b2: scenario --io.spring.launch-batch-job=false * ->t3: timestamp ", Collections.EMPTY_MAP, Collections.emptyList());
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-b1", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-b2", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t3", 1)).isTrue();
+		verifyWorkFlowElement(taskDefinitionName, "b1", 0);
+		verifyWorkFlowElement(taskDefinitionName, "b2", 0);
+		verifyWorkFlowElement(taskDefinitionName, "t3", 0);
+		verifyWorkFlowElementNoExecution(taskDefinitionName, "t1");
+	}
+
+	@Test
+	public void failedCTRRetryTest() {
+		String taskDefinitionName = composedTaskLaunch(String.format(
+				"b1:scenario --io.spring.fail-batch=true --io.spring.jobName=%s --spring.cloud.task.batch.fail-on-job-failure=true && t1:timestamp", randomJobName()),
+				Collections.EMPTY_MAP, Collections.emptyList());
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-b1", 1)).isTrue();
+		assertThat(waitForTaskToComplete(taskDefinitionName, 1)).isTrue();
+		verifyWorkFlowElement(taskDefinitionName, "b1", 1);
+		Collection<TaskExecutionResource> taskExecutions = this.taskOperations.executionListByTaskName(taskDefinitionName).getContent();
+		List<Long> jobExecutionIds = taskExecutions.toArray(new TaskExecutionResource[0])[0].getJobExecutionIds();
+		assertThat(jobExecutionIds.size()).isEqualTo(1);
+		restartJob(jobExecutionIds.get(0));
+		assertThat(waitForTaskToComplete(taskDefinitionName + "-t1", 1)).isTrue();
+		assertParentTaskExecution(taskDefinitionName, 0, 2, 2);
+	}
+
+	private void verifyWorkFlowElement(String taskDefinitionName, String name, int exitCode) {
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-" + name);
+		assertThat(taskExecutionResources).hasSize(1);
+		assertThat(taskExecutionResources.get(0).getExitCode()).isEqualTo(exitCode);
+	}
+
+	private void verifyWorkFlowElementNoExecution(String taskDefinitionName, String name) {
+		List<TaskExecutionResource> taskExecutionResources = getTaskExecutionResource(taskDefinitionName + "-" + name);
+		assertThat(taskExecutionResources).hasSize(0);
 	}
 
 	private void assertTaskExecutions(String taskDefinitionName,
@@ -311,4 +481,8 @@ public class ComposedTaskTests extends AbstractTaskTests {
 		}
 		assertEquals(expectJobCount, getJobExecutionByTaskName(taskDefinitionName).size());
 	}
+
+    private String randomJobName() {
+        return "job-" + UUID.randomUUID().toString().substring(0, 10);
+    }
 }

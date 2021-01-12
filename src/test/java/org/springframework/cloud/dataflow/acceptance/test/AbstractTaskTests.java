@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,6 +169,8 @@ public abstract class AbstractTaskTests implements InitializingBean {
 	 */
 	protected String composedTaskLaunch(String definition, Map<String, String> properties,
 			List<String> arguments) {
+	    arguments = new ArrayList<>(arguments);
+        arguments.add("--interval-time-between-checks=1000");
 		String taskName = taskLaunch(definition, properties,
 				arguments);
 		composedTasksToBeDestroyed.add(taskName);
