@@ -186,6 +186,7 @@ public abstract class AbstractStreamTests implements InitializingBean {
 					stream.getDefinition(), "Simple Description of " + stream.getName(), false));
 		Map<String, String> streamProperties = new HashMap<>();
 		streamProperties.put("app.*.logging.file", platformHelper.getLogfileName());
+        streamProperties.put("app.*.logging.file.name", platformHelper.getLogfileName());
 		streamProperties.put("app.*.endpoints.logfile.sensitive", "false");
 
 		// Specific to Boot 2.x applications, also allows access without authentication
