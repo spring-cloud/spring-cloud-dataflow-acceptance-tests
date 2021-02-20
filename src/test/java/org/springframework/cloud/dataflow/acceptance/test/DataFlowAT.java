@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.acceptance.test.util;
+package org.springframework.cloud.dataflow.acceptance.test;
 
-import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.integration.test.DataFlowIT;
+import org.springframework.cloud.dataflow.integration.test.DataFlowITProperties;
 
-/**
- * @author Thomas Risberg
- */
-public class LocalPlatformHelper extends AbstractPlatformHelper {
-
-	public LocalPlatformHelper(RuntimeOperations operations) {
-		super(operations);
-	}
-
-	@Override
-	public String getLogfileName() {
-		return "${PID}-" + super.getLogfileName();
-	}
+@SpringBootTest
+@EnableConfigurationProperties({ DataFlowITProperties.class})
+class DataFlowAT extends DataFlowIT {
 }
