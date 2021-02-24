@@ -35,7 +35,7 @@ public class TransformTests extends AbstractStreamTests {
 		final String PROCESSOR_NAME = "transform1";
 
 		StreamDefinition stream = StreamDefinition.builder("TRANSFORM-TEST")
-				.definition("http | transform --expression=payload.toUpperCase() | log")
+				.definition("http | transform --spel.function.expression=payload.toUpperCase() | log")
 				.build();
 
 		deployStream(stream);

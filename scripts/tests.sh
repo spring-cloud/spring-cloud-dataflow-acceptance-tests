@@ -89,7 +89,7 @@ case ${key} in
 -sc|--serverCleanup)
  serverCleanup="true"
  ;;
- -s|--skipCleanup)
+ -c|--skipCleanup)
  skipCleanup="true"
  ;;
  --help)
