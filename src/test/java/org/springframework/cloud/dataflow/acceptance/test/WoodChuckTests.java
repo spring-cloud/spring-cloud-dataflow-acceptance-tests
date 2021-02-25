@@ -37,7 +37,7 @@ public class WoodChuckTests extends AbstractStreamTests {
 	@Test
 	public void testPartitioning() throws URISyntaxException {
 		StreamDefinition stream = StreamDefinition.builder("WOODCHUCK-TEST")
-				.definition("http | splitter --expression=payload.split(' ') | log")
+				.definition("http | splitter --splitter.expression=payload.split(' ') | log")
 				.addProperty("deployer.log.count", "2")
 				.addProperty("app.splitter.producer.partitionKeyExpression", "payload")
 				.addProperty("app.log.spring.cloud.stream.kafka.bindings.input.consumer.autoRebalanceEnabled", "false")
