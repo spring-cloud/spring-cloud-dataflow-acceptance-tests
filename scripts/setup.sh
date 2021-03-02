@@ -15,6 +15,8 @@ Flags:
     -sv | --skipperVersion - set the skipper version to test (e.g. 1.0.5.BUILD-SNAPSHOT)
     -dv | --dataflowVersion - set the dataflow version to test (e.g. 1.5.1.BUILD-SNAPSHOT)
     -se | --schedulesEnabled - installs scheduling infrastructure and configures SCDF to use the service.
+    -sa | --streamAppsUri - streaming applications bulk register URI.
+    -ta | --taskAppsUri - task applications bulk register URI.
 [*] = Required arguments if environment variables are not set.
 EOF
 }
@@ -110,6 +112,8 @@ function setup() {
     run_scripts "skipper-server" "create.sh"
     DEBUG "setup create server $DATAFLOW_VERSION"
     run_scripts "server" "create.sh"
+    DEBUG "register apps"
+    run_scripts "apps" "register-apps.sh"
   popd
 }
 # ======================================= FUNCTIONS END =======================================
@@ -140,6 +144,14 @@ case ${key} in
  ;;
  -b|--binder)
  BINDER="$2"
+ shift
+ ;;
+ -sa|--streamAppsUri)
+ STREAM_APPS_URI="$2"
+ shift
+ ;;
+ -ta|--taskAppsUri)
+ TASK_APPS_URI="$2"
  shift # past argument
  ;;
  -d|--doNotDownload)

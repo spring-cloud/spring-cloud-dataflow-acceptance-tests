@@ -36,11 +36,17 @@ function run_tests() {
 
   log_skipper_versions
 
+  PLATFORM_NAME="default"
+  if [ "$PLATFORM" = "cloudfoundry" ]; then
+    PLATFORM_NAME="pws"
+  fi
 #
 # Add -Dmaven.surefire.debug to enable remote debugging on port 5005.
 #
 eval "./mvnw -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DNAMESPACE=$KUBERNETES_NAMESPACE \\
-  -DSKIP_CLOUD_CONFIG=$skipCloudConfig $MAVEN_PROPERTIES clean test surefire-report:report"
+  -DSKIP_CLOUD_CONFIG=$skipCloudConfig -Dtest.docker.compose.disable.extension=true -Dtest.docker.compose.dataflowServerUrl=$SERVER_URI \\
+  -Dtest.docker.compose.platformName=$PLATFORM_NAME \\
+  $MAVEN_PROPERTIES clean test surefire-report:report"
 }
 
 echo "Starting $(basename $BASH_SOURCE) $@"

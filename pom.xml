@@ -24,7 +24,7 @@
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>
-		<dataflow.version>2.7.0</dataflow.version>
+		<dataflow.version>2.8.0-SNAPSHOT</dataflow.version>
 		<app.starters.support.version>2.5.0</app.starters.support.version>
 		<spring-cloud-deployer-cloudfoundry.version>2.5.0</spring-cloud-deployer-cloudfoundry.version>
 	</properties>
@@ -77,6 +77,55 @@
 			<groupId>org.springframework.retry</groupId>
 			<artifactId>spring-retry</artifactId>
 		</dependency>
+
+
+        <!-- -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-dataflow-server</artifactId>
+            <classifier>tests</classifier>
+            <exclusions>
+                <exclusion>
+                    <artifactId>HikariCP</artifactId>
+                    <groupId>com.zaxxer</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-cloud-starter-dataflow-server</artifactId>
+                    <groupId>org.springframework.cloud</groupId>
+                </exclusion>
+            </exclusions>
+            <type>test-jar</type>
+            <version>${dataflow.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.javacrumbs.json-unit</groupId>
+            <artifactId>json-unit-assertj</artifactId>
+            <version>2.11.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-runner</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.palantir.docker.compose</groupId>
+            <artifactId>docker-compose-junit-jupiter</artifactId>
+            <version>1.4.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version> 3.18.1</version>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 
 	<build>
@@ -183,4 +232,10 @@
 			</pluginRepositories>
 		</profile>
 	</profiles>
+    <repositories>
+        <repository>
+            <id>palantir</id>
+            <url>https://dl.bintray.com/palantir/releases</url>
+        </repository>
+    </repositories>
 </project>
