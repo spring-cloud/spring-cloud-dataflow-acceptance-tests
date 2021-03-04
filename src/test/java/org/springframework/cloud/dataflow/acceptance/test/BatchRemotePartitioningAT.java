@@ -35,7 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.integration.test.DataFlowITProperties;
+import org.springframework.cloud.dataflow.integration.test.IntegrationTestProperties;
 import org.springframework.cloud.dataflow.integration.test.util.SkipSslRestHelper;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.Task;
@@ -55,7 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Christian Tzolov
  */
 @ExtendWith(SpringExtension.class)
-@EnableConfigurationProperties(DataFlowITProperties.class)
+@EnableConfigurationProperties(IntegrationTestProperties.class)
 public class BatchRemotePartitioningAT {
     private static final Logger logger = LoggerFactory.getLogger(BatchRemotePartitioningAT.class);
 
@@ -65,7 +65,7 @@ public class BatchRemotePartitioningAT {
 
 
     @Autowired
-    private DataFlowITProperties testProperties;
+    private IntegrationTestProperties testProperties;
 
     @Autowired(required = false)
     private CFConnectionProperties cfConnectionProperties;
@@ -81,7 +81,7 @@ public class BatchRemotePartitioningAT {
 
     @BeforeEach
     public void before() {
-        dataFlowOperations = SkipSslRestHelper.dataFlowTemplate(testProperties.getDataflowServerUrl());
+        dataFlowOperations = SkipSslRestHelper.dataFlowTemplate(testProperties.getPlatform().getConnection().getDataflowServerUrl());
         Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
         Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
     }
@@ -134,7 +134,7 @@ public class BatchRemotePartitioningAT {
             .description("runBatchRemotePartitionJob - kubernetes")
             .build()) {
 
-            long launchId = task.launch(Collections.singletonMap("deployer.*.kubernetes.deployment-service-account-name", testProperties.getPlatformName()),
+            long launchId = task.launch(Collections.singletonMap("deployer.*.kubernetes.deployment-service-account-name", testProperties.getPlatform().getConnection().getPlatformName()),
                 Arrays.asList("--platform=kubernetes", "--artifact=docker://springcloud/batch-remote-partition:0.0.2-SNAPSHOT"));
 
             Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);

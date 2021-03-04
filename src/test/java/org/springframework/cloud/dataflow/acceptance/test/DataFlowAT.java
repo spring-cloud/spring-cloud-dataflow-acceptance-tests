@@ -19,9 +19,9 @@ package org.springframework.cloud.dataflow.acceptance.test;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.integration.test.DataFlowIT;
-import org.springframework.cloud.dataflow.integration.test.DataFlowITProperties;
+import org.springframework.cloud.dataflow.integration.test.IntegrationTestProperties;
 
 @SpringBootTest
-@EnableConfigurationProperties({ DataFlowITProperties.class})
+@EnableConfigurationProperties({ IntegrationTestProperties.class })
 class DataFlowAT extends DataFlowIT {
 }
