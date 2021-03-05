@@ -16,12 +16,58 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
+import org.awaitility.Awaitility;
+import org.junit.Ignore;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.integration.test.DataFlowIT;
 import org.springframework.cloud.dataflow.integration.test.IntegrationTestProperties;
+import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBuilder;
+import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
 
 @SpringBootTest
 @EnableConfigurationProperties({ IntegrationTestProperties.class })
 class DataFlowAT extends DataFlowIT {
+
+    private static final Logger logger = LoggerFactory.getLogger(DataFlowAT.class);
+
+    // -----------------------------------------------------------------------
+    //                     STREAM  CONFIG SERVER (PCF ONLY)
+    // -----------------------------------------------------------------------
+    @Test
+    @Ignore("Ignored until the AT can provision Config Service")
+    @EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
+    @DisabledIfSystemProperty(named = "SKIP_CLOUD_CONFIG", matches = "true")
+    public void streamWithConfigServer() {
+
+        logger.info("stream-server-config-test");
+
+        try (Stream stream = Stream.builder(dataFlowOperations)
+            .name("TICKTOCK-config-server")
+            .definition("time | log")
+            .create()
+            .deploy(new DeploymentPropertiesBuilder()
+                .putAll(testDeploymentProperties())
+                .put("app.log.spring.profiles.active", "test")
+                .put("deployer.log.cloudfoundry.services", "cloud-config-server")
+                .put("app.log.spring.cloud.config.name", "MY_CONFIG_TICKTOCK_LOG_NAME")
+                .build())) {
+
+            Awaitility.await(stream.getName() + " failed to deploy!")
+                .until(() -> stream.getStatus().equals(DataFlowIT.DEPLOYED));
+
+            Awaitility.await("Source not started").until(
+                () -> stream.logs(app("time")).contains("Started TimeSource"));
+            Awaitility.await("Sink not started").until(
+                () -> stream.logs(app("log")).contains("Started LogSink"));
+            Awaitility.await("No output found").until(
+                () -> stream.logs(app("log")).contains("TICKTOCK CLOUD CONFIG - TIMESTAMP:"));
+        }
+    }
 }
