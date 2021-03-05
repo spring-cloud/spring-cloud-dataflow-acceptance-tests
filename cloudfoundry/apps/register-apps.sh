@@ -4,6 +4,8 @@ then
     export SERVER_URI="https://$SERVER_URI"
 fi
 
+echo "SCDF SERVER URI: $SERVER_URI"
+
 if [[ -z "${STREAM_APPS_URI}" ]]; then
   APPS_BINDER=$BINDER
   if [ "$BINDER" = "rabbit" ]; then
@@ -16,10 +18,11 @@ if [[ -z "${TASK_APPS_URI}" ]]; then
 fi
 
 echo "Register Stream Bulk Apps $STREAM_APPS_URI"
-curl -X POST ${SERVER_URI}/apps -d "uri=$STREAM_APPS_URI" -k
+wget -qO- --no-check-certificate ${SERVER_URI}/apps --post-data="uri=$STREAM_APPS_URI"
 echo "Register Task Bulk Apps $TASK_APPS_URI"
-curl -X POST ${SERVER_URI}/apps -d "uri=$TASK_APPS_URI" -k
-curl -X POST ${SERVER_URI}/apps/task/scenario/0.0.1-SNAPSHOT -d "uri=maven://io.spring:scenario-task:0.0.1-SNAPSHOT" -k
-curl -X POST ${SERVER_URI}/apps/task/batch-remote-partition/0.0.1-SNAPSHOT -d "uri=maven://org.springframework.cloud.dataflow.acceptence.tests:batch-remote-partition:0.0.1-SNAPSHOT" -k
+wget -qO- --no-check-certificate ${SERVER_URI}/apps --post-data="uri=$TASK_APPS_URI"
+wget -qO- --no-check-certificate ${SERVER_URI}/apps/task/scenario/0.0.1-SNAPSHOT --post-data="uri=docker:springcloudtask/scenario-task:0.0.1-SNAPSHOT"
+wget -qO- --no-check-certificate ${SERVER_URI}/apps/task/batch-remote-partition/0.0.2-SNAPSHOT --post-data="uri=docker://springcloud/batch-remote-partition:0.0.2-SNAPSHOT"
+
 
 echo "APPS REGISTERED"
