@@ -1,8 +1,5 @@
-if [ -z "$SERVER_URI" ] ;
-then
-    SERVER_URI=$(cf apps | grep dataflow-server- | awk '{print $6}' | sed 's:,::g')
-    export SERVER_URI="https://$SERVER_URI"
-fi
+SERVER_URI=$(cf apps | grep dataflow-server- | awk '{print $6}' | sed 's:,::g')
+SERVER_URI="https://$SERVER_URI"
 
 echo "SCDF SERVER URI: $SERVER_URI"
 
