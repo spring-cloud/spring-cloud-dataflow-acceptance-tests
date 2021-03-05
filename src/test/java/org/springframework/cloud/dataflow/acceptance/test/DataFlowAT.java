@@ -17,7 +17,7 @@
 package org.springframework.cloud.dataflow.acceptance.test;
 
 import org.awaitility.Awaitility;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -41,7 +41,7 @@ class DataFlowAT extends DataFlowIT {
     //                     STREAM  CONFIG SERVER (PCF ONLY)
     // -----------------------------------------------------------------------
     @Test
-    @Ignore("Ignored until the AT can provision Config Service")
+    @Disabled("Ignored until the AT can provision Config Service")
     @EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
     @DisabledIfSystemProperty(named = "SKIP_CLOUD_CONFIG", matches = "true")
     public void streamWithConfigServer() {
