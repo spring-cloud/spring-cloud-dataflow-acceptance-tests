@@ -86,10 +86,6 @@
             <classifier>tests</classifier>
             <exclusions>
                 <exclusion>
-                    <artifactId>HikariCP</artifactId>
-                    <groupId>com.zaxxer</groupId>
-                </exclusion>
-                <exclusion>
                     <artifactId>spring-cloud-starter-dataflow-server</artifactId>
                     <groupId>org.springframework.cloud</groupId>
                 </exclusion>

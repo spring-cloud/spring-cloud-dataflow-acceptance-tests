@@ -18,8 +18,8 @@ echo "Register Stream Bulk Apps $STREAM_APPS_URI"
 wget -qO- --no-check-certificate ${SERVER_URI}/apps --post-data="uri=$STREAM_APPS_URI"
 echo "Register Task Bulk Apps $TASK_APPS_URI"
 wget -qO- --no-check-certificate ${SERVER_URI}/apps --post-data="uri=$TASK_APPS_URI"
-wget -qO- --no-check-certificate ${SERVER_URI}/apps/task/scenario/0.0.1-SNAPSHOT --post-data="uri=docker:springcloudtask/scenario-task:0.0.1-SNAPSHOT"
-wget -qO- --no-check-certificate ${SERVER_URI}/apps/task/batch-remote-partition/0.0.2-SNAPSHOT --post-data="uri=docker://springcloud/batch-remote-partition:0.0.2-SNAPSHOT"
+wget -qO- --no-check-certificate ${SERVER_URI}/apps/task/scenario/0.0.1-SNAPSHOT --post-data="uri=maven://io.spring:scenario-task:0.0.1-SNAPSHOT"
+wget -qO- --no-check-certificate ${SERVER_URI}/apps/task/batch-remote-partition/0.0.2-SNAPSHOT --post-data="uri=maven://org.springframework.cloud.dataflow.acceptence.tests:batch-remote-partition:0.0.1-SNAPSHOT"
 
 
 echo "APPS REGISTERED"
