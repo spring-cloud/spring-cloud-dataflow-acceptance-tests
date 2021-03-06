@@ -144,27 +144,6 @@ public class BatchRemotePartitioningAT {
         }
     }
 
-    @Test
-    @EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "local")
-    public void runBatchRemotePartitionJobLocal() {
-        logger.info("runBatchRemotePartitionJob - local");
-
-        TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
-        try (Task task = taskBuilder
-            .name(randomName())
-            .definition(TASK_NAME)
-            .description("runBatchRemotePartitionJob - local")
-            .build()) {
-
-            long launchId = task.launch(Collections.EMPTY_MAP, Arrays.asList("--platform=local"));
-
-            Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
-            assertThat(task.executions().size()).isEqualTo(1);
-            assertThat(task.execution(launchId).isPresent()).isTrue();
-            assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
-        }
-    }
-
     private static String randomName() {
         return "task-" + UUID.randomUUID().toString().substring(0, 10);
     }
