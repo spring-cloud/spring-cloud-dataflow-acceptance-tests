@@ -48,6 +48,10 @@ function use_helm() {
   helm3 repo update
 
   helm3 install scdf bitnami/spring-cloud-dataflow ${HELM_PARAMS} --namespace $KUBERNETES_NAMESPACE
+
+  # mount the scdf-metadata-default secret to allow limitless DockerHub access for the app docker metadata
+  kubectl patch deploy scdf-spring-cloud-dataflow-server -p "$(cat ./scdf-metadata-secret-helm-patch.json)" --namespace $KUBERNETES_NAMESPACE
+
   helm3 list
 }
 
@@ -67,7 +71,8 @@ function distro_files_install() {
 
   popd
 
-  patch_secrets
+  # mount the scdf-metadata-default secret to allow limitless DockerHub access for the app docker metadata
+  kubectl patch deploy scdf-server -p "$(cat ./scdf-metadata-secret-patch.json)" --namespace $KUBERNETES_NAMESPACE
 }
 
 function distro_files_install_binder() {
@@ -112,10 +117,6 @@ function update_sa_name() {
 
 function patch_sa() {
   kubectl patch serviceaccount $DATAFLOW_SERVICE_ACCOUNT_NAME -p '{"imagePullSecrets": [{"name": "docker"}]}' --namespace $KUBERNETES_NAMESPACE
-}
-
-function patch_secrets() {
-  kubectl patch deploy scdf-server -p "$(cat ./scdf-metadata-secret-patch.json)" --namespace $KUBERNETES_NAMESPACE
 }
 
 function distro_files_install_database() {
