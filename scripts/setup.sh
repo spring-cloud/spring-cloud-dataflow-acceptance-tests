@@ -4,11 +4,12 @@
 
 function print_usage() {
 cat <<EOF
-USAGE: setup.sh -p <PLATFORM> -b <BINDER> [-d -cc -sv -dv -av -tv -se]
+USAGE: setup.sh -p <PLATFORM> -b <BINDER> [-pf -d -cc -sv -dv -av -tv -se]
   Set up the test environment.
 
 Flags:
     -p  | --platform - define the target platform to run, defaults to local
+    -pf | --platformFolder - folder containing the scripts for installing the platform. Defaults to 'platform'
     -b  | --binder - define the binder (i.e. RABBIT, KAFKA) defaults to RABBIT
     -d  | --doNotDownload - skip the downloading of the SCDF/Skipper servers
     -cc | --skipCloudConfig - skip Cloud Config server tests for CF
@@ -59,7 +60,7 @@ function download_skipper(){
 }
 
 function setup() {
-  pushd $PLATFORM
+  pushd $PLATFORM_FOLDER
     run_scripts "init" "setenv.sh"
     run_scripts "mysql" "create.sh"
     pushd "binder"
@@ -84,7 +85,7 @@ function setup() {
     echo "SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE"
     run_scripts "server" "create.sh"
     echo "Running Config Server test"
-    . ./$PLATFORM/server/server-uri.sh
+    . ./$PLATFORM_FOLDER/server/server-uri.sh
     wget --no-check-certificate $SERVER_URI/about -O about.txt
         # Asserts that the streamsEnabled is false as it was configured in ./scdf-server-cloud1.properties
         if grep -q "\"streamsEnabled\":false,\"tasksEnabled\":true" about.txt
@@ -142,6 +143,10 @@ case ${key} in
  PLATFORM="$2"
  shift
  ;;
+ -pf|--platformFolder)
+ PLATFORM_FOLDER="$2"
+ shift
+ ;;
  -b|--binder)
  BINDER="$2"
  shift
@@ -176,8 +181,10 @@ esac
 shift
 done
 
-[[ ! -d "$PLATFORM" ]] && { echo "$(basename $BASH_SOURCE) $PLATFORM is an invalid platform"; exit 1; }
-[[ ! -d "$PLATFORM/binder/$BINDER" ]] && { echo "$(basename $BASH_SOURCE) $BINDER is an invalid binder for $PLATFORM platform"; exit 1; }
+[[ -z "${PLATFORM_FOLDER}" ]] && PLATFORM_FOLDER=$PLATFORM
+
+[[ ! -d "$PLATFORM_FOLDER" ]] && { echo "$(basename $BASH_SOURCE) $PLATFORM_FOLDER is an invalid platform folder"; exit 1; }
+[[ ! -d "$PLATFORM_FOLDER/binder/$BINDER" ]] && { echo "$(basename $BASH_SOURCE) $BINDER is an invalid binder for $PLATFORM_FOLDER platform folder"; exit 1; }
 
 setup
 

@@ -22,11 +22,12 @@ Alternately, you can run it standalone from the project root:
 ```
 
 ```
-USAGE: tests.sh -p <PLATFORM> -b <BINDER> [-se -cc -av- tv --tests ...]
+USAGE: tests.sh -p <PLATFORM> -b <BINDER> [-pf -se -cc -av- tv -c -sc --tests ...]
   Run the acceptance tests.
 
 Flags:
     -p  | --platform - define the target platform to run, defaults to local
+    -pf | --platformFolder - folder containing the scripts for installing the platform. Defaults to 'platform'
     -b  | --binder - define the binder (i.e. RABBIT, KAFKA) defaults to RABBIT
     --tests - comma separated list of tests to run. Wildcards such as *http* are allowed (e.g. --tests TickTockTests#tickTockTests)
     -cc | --skipCloudConfig - skip Cloud Config server tests for CF

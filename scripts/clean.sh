@@ -10,8 +10,8 @@ USAGE: clean.sh -p <PLATFORM> -b <BINDER> [--schedulesEnabled --serverCleanup]
   This will cleanup any existing resources on the platform
 
 Flags:
-
 -p  | --platform - define the target platform to clean, defaults to local
+-pf | --platformFolder - folder containing the scripts for installing the platform. Defaults to 'platform'
 -b  | --binder - define the binder (i.e. RABBIT, KAFKA) defaults to RABBIT
 -sc | --serverCleanup - run the cleanup for only SCDF and Skipper, along with the applications deployed but excluding the DB, message broker.
 -se | --schedulesEnabled - cleans the scheduling infrastructure.
@@ -23,7 +23,7 @@ function tear_down() {
 
   tear_down_servers
 
-  pushd $PLATFORM
+  pushd $PLATFORM_FOLDER
     run_scripts "mysql" "destroy.sh"
     if [ "$schedulesEnabled" ]; then
         run_scripts "scheduler" "destroy.sh"
@@ -40,7 +40,7 @@ function tear_down() {
 }
 
 function tear_down_servers() {
-  pushd $PLATFORM
+  pushd $PLATFORM_FOLDER
     echo "Clean up servers"
     run_scripts "server" "destroy.sh"
 
@@ -69,11 +69,15 @@ case ${key} in
  PLATFORM="$2"
  shift
  ;;
--b|--binder)
+ -pf|--platformFolder)
+ PLATFORM_FOLDER="$2"
+ shift
+ ;;
+ -b|--binder)
  BINDER="$2"
  shift
  ;;
--se|--schedulesEnabled)
+ -se|--schedulesEnabled)
  schedulesEnabled="true"
  ;;
  -sc|--serverCleanup)
@@ -92,11 +96,12 @@ esac
 shift
 done
 
+[[ -z "${PLATFORM_FOLDER}" ]] && PLATFORM_FOLDER=$PLATFORM
 
-[[ ! -d "$PLATFORM" ]] && { echo "$(basename $BASH_SOURCE) $PLATFORM is an invalid platform"; exit 1; }
-[[ ! -d "$PLATFORM/binder/$BINDER" ]] && { echo "$(basename $BASH_SOURCE) $BINDER is an invalid binder for $PLATFORM platform"; exit 1; }
+[[ ! -d "$PLATFORM_FOLDER" ]] && { echo "$(basename $BASH_SOURCE) $PLATFORM_FOLDER is an invalid platform folder"; exit 1; }
+[[ ! -d "$PLATFORM_FOLDER/binder/$BINDER" ]] && { echo "$(basename $BASH_SOURCE) $BINDER is an invalid binder for $PLATFORM_FOLDER platform folder"; exit 1; }
 
-pushd $PLATFORM
+pushd $PLATFORM_FOLDER
     run_scripts "init" "setenv.sh"
 popd
 

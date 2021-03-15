@@ -24,6 +24,7 @@ USAGE: clean.sh -p <PLATFORM> -b <BINDER> [--schedulesEnabled]
 
 Flags:
 -p  | --platform - define the target platform to clean, defaults to local
+-pf | --platformFolder - folder containing the scripts for installing the platform. Defaults to 'platform'
 -b  | --binder - define the binder to clean (i.e. RABBIT, KAFKA) defaults to RABBIT
 -sc | --serverCleanup - run the cleanup for the SCDF/Skipper (along with the applications deployed but excluding the DB, message broker)
 -se | --schedulesEnabled - cleans scheduling infrastructure if installed.

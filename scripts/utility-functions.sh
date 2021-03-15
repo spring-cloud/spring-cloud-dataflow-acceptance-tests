@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # ======================================= DEFAULTS ============================================
 [[ -z "${PLATFORM}" ]] && PLATFORM=local
+[[ -z "${PLATFORM_FOLDER}" ]] && PLATFORM_FOLDER=$PLATFORM
 [[ -z "${BINDER}" ]] && BINDER=rabbit
 WAIT_TIME="${WAIT_TIME:-5}"
 RETRIES="${RETRIES:-60}"
@@ -108,7 +109,7 @@ function command_exists() {
 }
 
 function config() {
-  pushd $PLATFORM
+  pushd $PLATFORM_FOLDER
     run_scripts "init" "setenv.sh"
     pushd "binder"
       run_scripts $BINDER "config.sh"
