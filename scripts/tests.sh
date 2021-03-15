@@ -4,11 +4,12 @@
 
 function print_usage() {
 cat <<EOF
-USAGE: tests.sh -p <PLATFORM> -b <BINDER> [-d -cc -dv --tests]
+USAGE: tests.sh -p <PLATFORM> -b <BINDER> [-pf -d -cc -dv --tests]
   Run the acceptance tests.
 
 Flags:
     -p  | --platform - define the target platform to run, defaults to local
+    -pf | --platformFolder - folder containing the scripts for installing the platform. Defaults to 'platform'
     -b  | --binder - define the binder (i.e. RABBIT, KAFKA) defaults to RABBIT
     --tests - comma separated list of tests to run. Wildcards such as *http* are allowed (e.g. --tests TickTockTests#tickTockTests)
     -cc | --skipCloudConfig - skip Cloud Config server tests for CF
@@ -73,6 +74,10 @@ case ${key} in
  PLATFORM="$2"
  shift
  ;;
+ -pf|--platformFolder)
+ PLATFORM_FOLDER="$2"
+ shift
+ ;;
 -av|--appsVersion)
  STREAM_APPS_VERSION="$2"
  shift
@@ -117,18 +122,21 @@ esac
 shift
 done
 
-[[ ! -d "$PLATFORM" ]] && { echo "$(basename $BASH_SOURCE)  $PLATFORM is an invalid platform"; exit 1; }
-[[ ! -d "$PLATFORM/binder/$BINDER" ]] && { echo "$(basename $BASH_SOURCE)  $BINDER is an invalid binder for $PLATFORM platform"; exit 1; }
+[[ -z "${PLATFORM_FOLDER}" ]] && PLATFORM_FOLDER=$PLATFORM
+
+[[ ! -d "$PLATFORM_FOLDER" ]] && { echo "$(basename $BASH_SOURCE)  $PLATFORM_FOLDER is an invalid platform folder"; exit 1; }
+[[ ! -d "$PLATFORM_FOLDER/binder/$BINDER" ]] && { echo "$(basename $BASH_SOURCE)  $BINDER is an invalid binder for $PLATFORM_FOLDER platform folder"; exit 1; }
 
 config
 
-. $PLATFORM/skipper-server/server-uri.sh
-. $PLATFORM/server/server-uri.sh
+. $PLATFORM_FOLDER/skipper-server/server-uri.sh
+. $PLATFORM_FOLDER/server/server-uri.sh
 
 run_tests
 # Run clean unless disabled.
 if [ -z "$skipCleanup" ]; then
   set -- "$@" -p $PLATFORM
+  set -- "$@" -pf $PLATFORM_FOLDER
   set -- "$@" -b $BINDER
   if [ "$serverCleanup" ]; then
     set -- "$@" --serverCleanup
