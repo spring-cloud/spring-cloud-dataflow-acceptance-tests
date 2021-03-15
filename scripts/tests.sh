@@ -17,6 +17,7 @@ Flags:
     -tv | --tasksVersion - set the task app version to test (e.g. Elston.RELEASE). Tasks should be accessible via maven repo or docker hub.
     -c  | --skipCleanup - skip the clean up phase
     -sc | --serverCleanup - run the cleanup for only SCDF and Skipper, along with the applications deployed but excluding the DB, message broker.
+    -ss | --skipSslValidation - skip SSL validation.
 [*] = Required arguments
 EOF
 }
@@ -44,8 +45,8 @@ function run_tests() {
 # Add -Dmaven.surefire.debug to enable remote debugging on port 5005.
 #
 eval "./mvnw -U -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DNAMESPACE=$KUBERNETES_NAMESPACE \\
-  -DSKIP_CLOUD_CONFIG=$skipCloudConfig -Dtest.docker.compose.disable.extension=true -Dtest.platform.connection.dataflowServerUrl=$SERVER_URI \\
-  -Dtest.platform.connection.platformName=$PLATFORM_NAME \\
+  -DSKIP_CLOUD_CONFIG=$skipCloudConfig -Dtest.docker.compose.disable.extension=true -Dspring.cloud.dataflow.client.serverUri=$SERVER_URI \\
+  -Dspring.cloud.dataflow.client.skipSslValidation=$skipSslValidation -Dtest.platform.connection.platformName=$PLATFORM_NAME \\
   $MAVEN_PROPERTIES clean test surefire-report:report"
 }
 
@@ -97,6 +98,9 @@ case ${key} in
  ;;
  -c|--skipCleanup)
  skipCleanup="true"
+ ;;
+ -ss|--skipSslValidation)
+ skipSslValidation="true"
  ;;
  --help)
  print_usage
