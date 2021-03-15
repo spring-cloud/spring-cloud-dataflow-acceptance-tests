@@ -63,6 +63,8 @@ if [[ $1 == "--help" || $1 == "-h" ]] ; then
     exit 0
 fi
 
+skipSslValidation="false"
+
 while [[ $# > 0 ]]
 do
 key="$1"
