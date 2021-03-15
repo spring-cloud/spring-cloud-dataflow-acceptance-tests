@@ -42,15 +42,16 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.integration.test.DataFlowOperationsITConfiguration;
 import org.springframework.cloud.dataflow.integration.test.IntegrationTestProperties;
 import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicationHelper;
-import org.springframework.cloud.dataflow.integration.test.util.SkipSslRestHelper;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.Task;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskSchedule;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskScheduleBuilder;
 import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 import org.springframework.cloud.deployer.spi.scheduler.SchedulerPropertyKeys;
+import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -66,6 +67,7 @@ import static org.assertj.core.api.Assertions.fail;
 @TaskScheduleAT.AssumeSchedulerEnabled
 @EnableConfigurationProperties(IntegrationTestProperties.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Import(DataFlowOperationsITConfiguration.class)
 public class TaskScheduleAT {
     private static final Logger logger = LoggerFactory.getLogger(TaskScheduleAT.class);
 
@@ -78,7 +80,12 @@ public class TaskScheduleAT {
      * REST and DSL clients used to interact with the SCDF server and run the tests.
      */
     private String platformInfo;
+
+    @Autowired
     private DataFlowTemplate dataFlowOperations;
+
+    @Autowired
+    private RuntimeApplicationHelper runtime;
 
     @BeforeAll
     public static void beforeAll() {
@@ -86,11 +93,8 @@ public class TaskScheduleAT {
 
     @BeforeEach
     public void before() {
-        dataFlowOperations = SkipSslRestHelper.dataFlowTemplate(testProperties.getPlatform().getConnection().getDataflowServerUrl());
         Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
         Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
-
-        RuntimeApplicationHelper runtime = new RuntimeApplicationHelper(dataFlowOperations, testProperties.getPlatform().getConnection().getPlatformName());
         platformInfo = String.format("[platform = %s, type = %s]", runtime.getPlatformName(), runtime.getPlatformType());
     }
 
@@ -113,7 +117,6 @@ public class TaskScheduleAT {
     @Test
     @Order(Integer.MIN_VALUE)
     public void testConfigurationInfo() {
-        logger.info("[{} = {}]", "test.docker.compose.dataflowServerUrl", testProperties.getPlatform().getConnection().getDataflowServerUrl());
         logger.info(platformInfo);
     }
 
@@ -220,9 +223,8 @@ public class TaskScheduleAT {
 
         @Override
         public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext extensionContext) {
-            IntegrationTestProperties properties = SpringExtension.getApplicationContext(extensionContext).getBean(IntegrationTestProperties.class);
-            boolean schedulerEnabled = SkipSslRestHelper.dataFlowTemplate(properties.getPlatform().getConnection().getDataflowServerUrl())
-                .aboutOperation().get().getFeatureInfo().isSchedulesEnabled();
+            DataFlowTemplate dataFlowTemplate = SpringExtension.getApplicationContext(extensionContext).getBean(DataFlowTemplate.class);
+            boolean schedulerEnabled = dataFlowTemplate.aboutOperation().get().getFeatureInfo().isSchedulesEnabled();
 
             if (!schedulerEnabled) {
                 logger.info("Scheduler feature is not enabled. Skipping test!");

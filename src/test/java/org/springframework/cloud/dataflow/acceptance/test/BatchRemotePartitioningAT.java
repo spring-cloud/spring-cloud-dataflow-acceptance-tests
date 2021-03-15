@@ -35,14 +35,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.integration.test.DataFlowOperationsITConfiguration;
 import org.springframework.cloud.dataflow.integration.test.IntegrationTestProperties;
-import org.springframework.cloud.dataflow.integration.test.util.SkipSslRestHelper;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.Task;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskBuilder;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,13 +57,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ExtendWith(SpringExtension.class)
 @EnableConfigurationProperties(IntegrationTestProperties.class)
+@Import(DataFlowOperationsITConfiguration.class)
 public class BatchRemotePartitioningAT {
     private static final Logger logger = LoggerFactory.getLogger(BatchRemotePartitioningAT.class);
 
     private static final String TASK_NAME = "batch-remote-partition";
     private static final int EXIT_CODE_SUCCESS = 0;
     private static final int EXIT_CODE_ERROR = 1;
-
 
     @Autowired
     private IntegrationTestProperties testProperties;
@@ -73,6 +74,7 @@ public class BatchRemotePartitioningAT {
     /**
      * REST and DSL clients used to interact with the SCDF server and run the tests.
      */
+    @Autowired
     private DataFlowTemplate dataFlowOperations;
 
     @BeforeAll
@@ -81,7 +83,6 @@ public class BatchRemotePartitioningAT {
 
     @BeforeEach
     public void before() {
-        dataFlowOperations = SkipSslRestHelper.dataFlowTemplate(testProperties.getPlatform().getConnection().getDataflowServerUrl());
         Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
         Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
     }
