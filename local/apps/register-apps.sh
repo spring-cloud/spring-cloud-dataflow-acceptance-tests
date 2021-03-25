@@ -21,5 +21,8 @@ echo "Register Task Bulk Apps $TASK_APPS_URI"
 wget -qO- ${SERVER_URI}/apps --post-data="uri=$TASK_APPS_URI"
 wget -qO- ${SERVER_URI}/apps/task/scenario/0.0.1-SNAPSHOT --post-data="uri=maven://io.spring:scenario-task:0.0.1-SNAPSHOT"
 wget -qO- ${SERVER_URI}/apps/task/batch-remote-partition/0.0.1-SNAPSHOT --post-data="uri=maven://org.springframework.cloud.dataflow.acceptence.tests:batch-remote-partition:0.0.1-SNAPSHOT"
+wget -qO- ${SERVER_URI}/apps/sink/ver-log/3.0.1 --post-data="uri=maven://org.springframework.cloud.stream.app:log-sink-kafka:3.0.1"
+wget -qO- ${SERVER_URI}/apps/sink/ver-log/2.1.5.RELEASE --post-data="uri=maven://org.springframework.cloud.stream.app:log-sink-kafka:2.1.5.RELEASE"
+
 
 echo "APPS REGISTERED"
