@@ -28,6 +28,6 @@ wget -qO- ${SERVER_URI}/apps/task/scenario/0.0.1-SNAPSHOT --post-data="uri=docke
 wget -qO- ${SERVER_URI}/apps/task/batch-remote-partition/0.0.2-SNAPSHOT --post-data="uri=docker://springcloud/batch-remote-partition:0.0.2-SNAPSHOT"
 wget -qO- ${SERVER_URI}/apps/sink/ver-log/3.0.1 --post-data="uri=docker:springcloudstream/log-sink-$BINDER:3.0.1"
 wget -qO- ${SERVER_URI}/apps/sink/ver-log/2.1.5.RELEASE --post-data="uri=docker:springcloudstream/log-sink-$BINDER:2.1.5.RELEASE"
-
+wget -qO- ${SERVER_URI}/apps/task/task-demo-metrics-prometheus/0.0.4-SNAPSHOT --post-data="uri=docker://springcloudtask/task-demo-metrics-prometheus:0.0.4-SNAPSHOT"
 
 echo "APPS REGISTERED"
