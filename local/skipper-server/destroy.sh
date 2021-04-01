@@ -7,5 +7,4 @@ if [ -f 'app.pid' ]; then
     echo "Killing process PID [$PID]" >&2
     kill $PID > /dev/null 2>&1
   fi
-
 fi

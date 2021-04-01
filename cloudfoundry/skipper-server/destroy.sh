@@ -19,4 +19,4 @@
         cf delete $app -f -r || exit 0
     fi
  done
-
+cf delete-orphaned-routes -f

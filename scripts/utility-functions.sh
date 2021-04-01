@@ -14,7 +14,7 @@ TASK_APPS_VERSION="latest"
 # ======================================= FUNCTIONS START =======================================
 # ======================================= BE QUIET PUSHD/POPD ===================================
 
-function DEBUG() {
+DEBUG() {
   if [ -n "$DEBUG" ];
   then
     echo "DEBUG -- $1"
@@ -29,24 +29,24 @@ popd () {
     command popd "$@" > /dev/null
 }
 
-function load_file() {
+load_file() {
 filename=$1
 
 echo "Export the unset env. variables from $filename :"
 while IFS='=' read -r var value; do
   # only the un-set variables are exported
   if [ -z ${!var} ]; then
-    export $var=$(eval echo $value)
+    export $var="$(eval echo $value)"
     echo "   $var = $(eval echo $value)"
   fi
 done < "$filename"
 }
 
-function test_port() {
+test_port() {
   nc -w2 ${1} $2 >/dev/null
 }
 
-function netcat_port() {
+netcat_port() {
     local READY_FOR_TESTS=1
     for i in $( seq 1 "${RETRIES}" ); do
         nc -w2 ${1} $2 </dev/null && READY_FOR_TESTS=0 && break
@@ -56,17 +56,27 @@ function netcat_port() {
     return ${READY_FOR_TESTS}
 }
 
-function wait_for_200 {
+wait_for_200() {
   OLDOPTS=$(set +o)
   #Ensure errexit is disable.
   set +e
   local READY_FOR_TESTS=1
+  
   for i in $( seq 1 "${RETRIES}" ); do
-    STATUS=$(curl -k -s -o /dev/null -w '%{http_code}' ${1})
+   if [ $# -gt 1 ]; then
+      STATUS=`curl -k -s -H"$2"  -o /dev/null -w %{http_code} $1`
+    else
+      STATUS=`curl -k -s -o /dev/null -w %{http_code} $1`
+    fi
+    DEBUG "Status: $STATUS"
     if [ $STATUS -eq 200 ]; then
+      DEBUG "READY FOR TESTS"
       READY_FOR_TESTS=0
       break
     else
+      if [ $STATUS -eq 401 ]; then
+         break
+      fi
       echo "Failed to connect to ${1} with status code: $STATUS. Attempt  #$i/${RETRIES}... will try again in [${WAIT_TIME}] seconds" >&2
       sleep "${WAIT_TIME}"
     fi
@@ -83,7 +93,7 @@ function wait_for_200 {
   fi
 }
 
-function run_scripts() {
+run_scripts() {
   SCRIPT_DIR=${1}
   SCRIPT_FILE=${2}
   CURRENT_DIR=${PWD##*/}
@@ -93,7 +103,7 @@ function run_scripts() {
 
     if [[ -f "${SCRIPT_FILE}" ]]; then
       DEBUG "executing $CURRENT_DIR/$SCRIPT_DIR/$SCRIPT_FILE"
-      . ${SCRIPT_FILE}
+      . ${SCRIPT_FILE} ${@:3:$#}
     else
       echo "Not running non-existent script: ${SCRIPT_DIR}/${SCRIPT_FILE}"
     fi
@@ -104,11 +114,11 @@ function run_scripts() {
   fi
 }
 
-function command_exists() {
+command_exists() {
   type "$1" &> /dev/null ;
 }
 
-function config() {
+config() {
   pushd $PLATFORM_FOLDER
     run_scripts "init" "setenv.sh"
     pushd "binder"

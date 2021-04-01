@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-function config_application() {
-  . ./server-uri.sh
-}
+function config_application() { :; }
 
 config_application

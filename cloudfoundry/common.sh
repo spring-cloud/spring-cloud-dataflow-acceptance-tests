@@ -35,12 +35,18 @@ function create_service() {
   local service=$1
   local service_type=$2
   local service_plan=$3
+  local service_config=$4
   local count=0
   local service_info=
   while [ 1 ]; do
     if ! service_info=$(cf service  "$service" 2>&1); then
       msg "creating service $service [$service_type/$service_plan]"
-      cf create-service $service_type $service_plan $service
+      if [[ -z $service_config ]]; then
+        cf create-service $service_type $service_plan $service
+      else
+      echo "'$service_config'"
+       cf create-service $service_type $service_plan $service -c "$service_config"
+      fi
       continue
     fi
     if [[ $service_info == *"create succeeded"* ]]; then
@@ -72,7 +78,7 @@ function destroy_service() {
     if ! service_info=$(cf service  "$service" 2>&1); then
       break
     fi
-    if [[ $service_info == *"create succeeded"* ]]; then
+    if [[ $service_info == *"create succeeded"* ]] || [[ $service_info == *"update succeeded"* ]]; then
       msg "deleting service $service"
       cf delete-service -f $service
       continue

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+export ROOT_DIR=$PWD
 # Import common functions
 . scripts/utility-functions.sh
 

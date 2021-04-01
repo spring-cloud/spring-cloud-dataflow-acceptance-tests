@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+export ROOT_DIR=$PWD
 # Import common functions
 . scripts/utility-functions.sh
 
@@ -25,7 +26,7 @@ EOF
 
 function log_scdf_versions() {
   echo "SCDF SERVER ABOUT:"
-  wget --no-check-certificate -O - $SERVER_URI/about | python -m json.tool
+  curl -k -H "Authorization: $(cf oauth-token)" $SERVER_URI/about | python -m json.tool
 }
 
 function log_skipper_versions() {
@@ -38,11 +39,8 @@ function run_tests() {
 
   log_skipper_versions
 
-  PLATFORM_NAME="default"
-  if [ "$PLATFORM" = "cloudfoundry" ]; then
-    PLATFORM_NAME="pws"
-  fi
-#
+ [ -z  "$PLATFORM_NAME" ] && PLATFORM_NAME="default"
+ 
 # Add -Dmaven.surefire.debug to enable remote debugging on port 5005.
 #
 eval "./mvnw -U -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DNAMESPACE=$KUBERNETES_NAMESPACE \\

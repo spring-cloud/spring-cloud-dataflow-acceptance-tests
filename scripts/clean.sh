@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 #================================= Clean up target AT environment =========================
+export ROOT_DIR=$PWD
 # Import common functions
 . scripts/utility-functions.sh
 
@@ -21,21 +22,8 @@ EOF
 function tear_down() {
   echo "Clean up, clean up, everybody everywhere; clean up clean up, everybody do your share!"
 
-  tear_down_servers
-
   pushd $PLATFORM_FOLDER
-    run_scripts "mysql" "destroy.sh"
-    if [ "$schedulesEnabled" ]; then
-        run_scripts "scheduler" "destroy.sh"
-    fi
-    pushd "binder"
-      run_scripts $BINDER "destroy.sh"
-    popd
-    #TODO: Remove platform specific logic
-    if [ "$PLATFORM" == "cloudfoundry" ];
-    then
-      cf delete-orphaned-routes -f
-    fi
+    run_scripts "." "destroy-all.sh" $schedulesEnabled
   popd
 }
 
@@ -45,11 +33,6 @@ function tear_down_servers() {
     run_scripts "server" "destroy.sh"
 
     run_scripts "skipper-server" "destroy.sh"
-    #TODO: Remove platform specific logic
-    if [ "$PLATFORM" == "cloudfoundry" ];
-    then
-      cf delete-orphaned-routes -f
-    fi
   popd
 }
 # ======================================= Main =======================================

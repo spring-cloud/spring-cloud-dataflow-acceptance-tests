@@ -60,3 +60,4 @@ acceptance-tests/.vscode/*
 !acceptance-tests/.vscode/tasks.json
 !acceptance-tests/.vscode/launch.json
 !acceptance-tests/.vscode/extensions.json
+.vscode
