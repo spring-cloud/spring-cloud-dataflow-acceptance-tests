@@ -111,9 +111,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.palantir.docker.compose</groupId>
-            <artifactId>docker-compose-junit-jupiter</artifactId>
-            <version>1.4.2</version>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-dataflow-common-test-docker-junit5</artifactId>
+            <version>${dataflow.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -230,10 +230,4 @@
 			</pluginRepositories>
 		</profile>
 	</profiles>
-    <repositories>
-        <repository>
-            <id>palantir</id>
-            <url>https://dl.bintray.com/palantir/releases</url>
-        </repository>
-    </repositories>
 </project>
