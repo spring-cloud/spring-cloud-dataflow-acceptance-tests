@@ -1,0 +1,36 @@
+fullName:
+  managementClusterName: aws-hosted
+  name: name-changeme
+  provisionerName: scdf-provisioner
+meta:
+  description: ""
+  labels: null
+spec:
+  clusterGroupName: scdf-clusters
+  tkgAws:
+    distribution:
+      provisionerCredentialName: scdf-credential
+      region: us-east-1
+      version: version-changeme
+    settings:
+      security:
+        sshKey: sshkey-changeme
+    topology:
+      controlPlane:
+        availabilityZones:
+        - us-east-1a
+        instanceType: m5.large
+      nodePools:
+      - info:
+          description: default description for the nodepool
+          name: default-node-pool
+        spec:
+          tkgAws:
+            availabilityZone: us-east-1a
+            instanceType: m5.xlarge
+          workerNodeCount: 5
+type:
+  kind: Cluster
+  package: vmware.tanzu.manage.v1alpha1.cluster
+  version: v1alpha1
+
