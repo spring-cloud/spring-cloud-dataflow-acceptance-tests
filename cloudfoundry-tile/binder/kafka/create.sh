@@ -1,2 +1,3 @@
 #!/usr/bin/env bash
-# Messaging managed created by SCDF tile
+run_scripts "$PWD" "config.sh"
+# Messaging managed by SCDF tile

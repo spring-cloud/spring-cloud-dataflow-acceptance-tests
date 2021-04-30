@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-# Messaging managed created by SCDF tile
+# Messaging managed by SCDF tile

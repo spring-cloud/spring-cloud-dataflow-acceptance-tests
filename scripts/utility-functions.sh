@@ -30,16 +30,16 @@ popd () {
 }
 
 load_file() {
-filename=$1
-
-echo "Export the unset env. variables from $filename :"
-while IFS='=' read -r var value; do
-  # only the un-set variables are exported
-  if [ -z ${!var} ]; then
-    export $var="$(eval echo $value)"
-    echo "   $var = $(eval echo $value)"
+  filename=$1
+  echo "Export the unset env. variables from $filename :"
+  while IFS='=' read -r var value; do
+  if ! [[ $var == \#* ]]; then
+    # only the un-set variables are exported
+    if [ -z ${!var} ]; then
+      export $var="$(eval echo $value)"
+    fi
   fi
-done < "$filename"
+  done < "$filename"
 }
 
 test_port() {
@@ -61,7 +61,7 @@ wait_for_200() {
   #Ensure errexit is disable.
   set +e
   local READY_FOR_TESTS=1
-  
+
   for i in $( seq 1 "${RETRIES}" ); do
    if [ $# -gt 1 ]; then
       STATUS=`curl -k -s -H"$2"  -o /dev/null -w %{http_code} $1`
