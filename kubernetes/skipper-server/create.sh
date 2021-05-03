@@ -52,6 +52,15 @@ function use_helm() {
   # mount the scdf-metadata-default secret to allow limitless DockerHub access for the app docker metadata
   kubectl patch deploy scdf-spring-cloud-dataflow-server -p "$(cat ./scdf-metadata-secret-helm-patch.json)" --namespace $KUBERNETES_NAMESPACE
 
+  if [ "$HTTPS_ENABLED" ]; then
+    echo "Patch HELM for HTTPS configuration"
+    kubectl patch deploy scdf-spring-cloud-dataflow-server -p "$(cat ./scdf-https-helm-patch.json)" --namespace $KUBERNETES_NAMESPACE
+    kubectl patch deploy scdf-spring-cloud-dataflow-skipper -p "$(cat ./skipper-https-helm-patch.json)" --namespace $KUBERNETES_NAMESPACE
+
+    kubectl patch service scdf-spring-cloud-dataflow-server -p "$(cat ./scdf-svc-helm-patch.yaml)" --namespace $KUBERNETES_NAMESPACE
+    kubectl patch service scdf-spring-cloud-dataflow-skipper -p "$(cat ./skipper-svc-helm-patch.yaml)" --namespace $KUBERNETES_NAMESPACE
+  fi
+
   helm3 list
 }
 
@@ -73,6 +82,15 @@ function distro_files_install() {
 
   # mount the scdf-metadata-default secret to allow limitless DockerHub access for the app docker metadata
   kubectl patch deploy scdf-server -p "$(cat ./scdf-metadata-secret-patch.json)" --namespace $KUBERNETES_NAMESPACE
+
+  if [ "$HTTPS_ENABLED" ]; then
+    echo "Patch distro for HTTPS configuration"
+    kubectl patch service scdf-server -p "$(cat ./scdf-svc-distro-patch.yaml)" --namespace $KUBERNETES_NAMESPACE
+    kubectl replace --force -f ./skipper-svc-distro-patch.yaml --namespace $KUBERNETES_NAMESPACE
+
+    kubectl patch deploy scdf-server -p "$(cat ./scdf-https-distro-patch.json)" --namespace $KUBERNETES_NAMESPACE
+    kubectl patch deploy skipper -p "$(cat ./skipper-https-distro-patch.json)" --namespace $KUBERNETES_NAMESPACE
+  fi
 }
 
 function distro_files_install_binder() {
@@ -89,9 +107,9 @@ function distro_files_clone_repo() {
   pushd spring-cloud-dataflow
   git fetch --all --tags
 
-  REPO_VERSION="origin/master"
+  REPO_VERSION="origin/main"
 
-  # origin/master, tags/v2.3.0.M1 etc
+  # origin/main, tags/v2.3.0.M1 etc
   if [ -n "$DISTRO_FILES_REPO_VERSION" ]; then
     REPO_VERSION="$DISTRO_FILES_REPO_VERSION"
   fi

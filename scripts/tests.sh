@@ -20,6 +20,7 @@ Flags:
     -c  | --skipCleanup - skip the clean up phase
     -sc | --serverCleanup - run the cleanup for only SCDF and Skipper, along with the applications deployed but excluding the DB, message broker.
     -ss | --skipSslValidation - skip SSL validation.
+    -hs | --httpsEnabled - uses HTTPS urls to connect to deployed Stream and Task apps (k8s only).
 [*] = Required arguments
 EOF
 }
@@ -40,12 +41,13 @@ function run_tests() {
   log_skipper_versions
 
  [ -z  "$PLATFORM_NAME" ] && PLATFORM_NAME="default"
- 
+
 # Add -Dmaven.surefire.debug to enable remote debugging on port 5005.
 #
 eval "./mvnw -U -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM -DNAMESPACE=$KUBERNETES_NAMESPACE \\
   -DSKIP_CLOUD_CONFIG=$skipCloudConfig -Dtest.docker.compose.disable.extension=true -Dspring.cloud.dataflow.client.serverUri=$SERVER_URI \\
   -Dspring.cloud.dataflow.client.skipSslValidation=$skipSslValidation -Dtest.platform.connection.platformName=$PLATFORM_NAME \\
+  -Dtest.platform.connection.applicationOverHttps=$HTTPS_ENABLED \\
   $MAVEN_PROPERTIES clean test surefire-report:report"
 }
 
@@ -63,6 +65,7 @@ if [[ $1 == "--help" || $1 == "-h" ]] ; then
 fi
 
 skipSslValidation="false"
+HTTPS_ENABLED="false"
 
 while [[ $# > 0 ]]
 do
@@ -106,6 +109,9 @@ case ${key} in
  ;;
  -ss|--skipSslValidation)
  skipSslValidation="true"
+ ;;
+ -hs|--httpsEnabled)
+ HTTPS_ENABLED="true"
  ;;
  --help)
  print_usage

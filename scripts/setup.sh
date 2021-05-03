@@ -19,6 +19,7 @@ Flags:
     -se | --schedulesEnabled - installs scheduling infrastructure and configures SCDF to use the service.
     -sa | --streamAppsUri - streaming applications bulk register URI.
     -ta | --taskAppsUri - task applications bulk register URI.
+    -hs | --httpsEnabled - configures HTTPS enabled SCDF and Skipper servers as well as the OOTB stream and tasks. (K8s only)
 [*] = Required arguments if environment variables are not set.
 EOF
 }
@@ -128,6 +129,8 @@ if [[ $1 == "--help" || $1 == "-h" ]] ; then
     exit 0
 fi
 
+HTTPS_ENABLED="false"
+
 while [[ $# > 0 ]]
 do
 key="$1"
@@ -168,6 +171,9 @@ case ${key} in
  ;;
  -se|--schedulesEnabled)
  schedulesEnabled="true"
+ ;;
+ -hs|--httpsEnabled)
+ HTTPS_ENABLED="true"
  ;;
  --help)
  print_usage

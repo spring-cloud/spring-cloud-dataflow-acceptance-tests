@@ -1,0 +1,31 @@
+{
+    "spec": {
+        "template": {
+            "spec": {
+               "containers": [{
+                   "name": "skipper",
+                   "livenessProbe": {
+                       "httpGet": {
+                           "scheme": "HTTPS"
+                       }
+                   },
+                   "readinessProbe": {
+                       "httpGet": {
+                           "scheme": "HTTPS"
+                       }
+                   },
+                   "env":[
+                       {"name":"SERVER_SSL_ENABLED","value":"true"},
+                       {"name":"SERVER_SSL_KEY_STORE_TYPE","value":"PKCS12"},
+                       {"name":"SERVER_SSL_KEY_STORE_PASSWORD","value":"scdftest"},
+                       {"name":"SERVER_SSL_KEY_ALIAS","value":"scdftest"},
+                       {"name":"SERVER_SSL_KEY_STORE","value":"https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-acceptance-tests/master/keystore/scdf-test.p12"},
+                       {"name":"SPRING_CLOUD_SKIPPER_CLIENT_SKIPSSLVALIDATION","value":"true"},
+                       {"name":"SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_KUBERNETES_ACCOUNTS_DEFAULT_readinessHttpProbeScheme","value":"HTTPS"},
+                       {"name":"SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_KUBERNETES_ACCOUNTS_DEFAULT_livenessHttpProbeScheme","value":"HTTPS"}
+                   ]
+               }]
+            }
+        }
+    }
+}

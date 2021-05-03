@@ -36,5 +36,6 @@ Flags:
     -tv | --tasksVersion - set the task app version to test (e.g. Elston.RELEASE). Tasks should be accessible via maven repo or docker hub.
     -c  | --skipCleanup - skip the clean up phase
     -sc | --serverCleanup - run the cleanup for only SCDF and Skipper, along with the applications deployed but excluding the DB, message broker.
+    -hs | --httpsEnabled - uses HTTPS urls to connect to deployed Stream and Task apps (k8s only).
 ```
 

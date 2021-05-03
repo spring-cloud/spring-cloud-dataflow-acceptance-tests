@@ -5,7 +5,13 @@ then
     sleep 1
     SCDF_IP=$(kubectl get svc --namespace $KUBERNETES_NAMESPACE | grep server | awk '{print $4}')
   done
-  export SERVER_URI="http://$SCDF_IP"
+
+  if [ "$HTTPS_ENABLED" ]; then
+    export SERVER_URI="https://$SCDF_IP"
+  else
+    export SERVER_URI="http://$SCDF_IP"
+  fi
+
   DEBUG "executing wait_for_200 on $SERVER_URI"
   wait_for_200 ${SERVER_URI}/about
 fi

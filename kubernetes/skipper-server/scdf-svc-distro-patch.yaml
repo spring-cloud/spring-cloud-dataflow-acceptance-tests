@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: scdf-server
+  labels:
+    app: scdf-server
+    spring-deployment-id: scdf
+spec:
+  ports:
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 9393
+  selector:
+      app: scdf-server
