@@ -12,6 +12,14 @@ if [ ! -f "${ROOT_DIR}/$CERT_URI.cer" ]; then
     set +e
     openssl s_client -connect  $CERT_URI:443 -showcerts > ${ROOT_DIR}/$CERT_URI.cer </dev/null
     set -e
+    JAVA_CACERTS=$JAVA_HOME/jre/lib/security/cacerts
+    if [ ! -d  $JAVA_CERTS ]; then
+       JAVA_CACERTS=$JAVA_HOME/lib/security/cacerts
+    fi
+    if [ ! -d  $JAVA_CACERTS ]; then
+       echo "ERROR: directory not found: $JAVA_CACERTS."
+       exit 1
+    fi
     cp $JAVA_HOME/jre/lib/security/cacerts ${ROOT_DIR}/mycacerts
     $JAVA_HOME/bin/keytool -import -alias myNewCertificate -file "${ROOT_DIR}/$CERT_URI.cer" -noprompt -keystore "${ROOT_DIR}/mycacerts" -storepass changeit
 fi
