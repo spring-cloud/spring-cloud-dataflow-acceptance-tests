@@ -13,10 +13,10 @@ if [ ! -f "${ROOT_DIR}/$CERT_URI.cer" ]; then
     openssl s_client -connect  $CERT_URI:443 -showcerts > ${ROOT_DIR}/$CERT_URI.cer </dev/null
     set -e
     JAVA_CACERTS=$JAVA_HOME/jre/lib/security/cacerts
-    if [ ! -d  $JAVA_CERTS ]; then
+    if [ ! -f $JAVA_CACERTS ]; then
        JAVA_CACERTS=$JAVA_HOME/lib/security/cacerts
     fi
-    if [ ! -d  $JAVA_CACERTS ]; then
+    if [ ! -f  $JAVA_CACERTS ]; then
        echo "ERROR: directory not found: $JAVA_CACERTS."
        exit 1
     fi
