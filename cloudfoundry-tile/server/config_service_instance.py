@@ -9,7 +9,7 @@ config={}
 if len(dataflow_tile_configuration):
     config = json.loads(dataflow_tile_configuration)
 
-config['mavenCache']=True
+config['maven-cache']=True
 
 if schedules_enabled and not 'scheduler' in config.keys():
     schedules_service_name = os.environ['SCHEDULES_SERVICE_NAME']
