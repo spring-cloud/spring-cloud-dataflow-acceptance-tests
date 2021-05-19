@@ -8,3 +8,6 @@ for app in $(cf apps | tail +5 | awk '{print $1}');
 do
         cf delete -f -r $app
 done
+
+cf delete-orphaned-routes -f
+

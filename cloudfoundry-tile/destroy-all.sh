@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 source $ROOT_DIR/$PLATFORM/common.sh
-run_scripts server destroy.sh
 schedulesEnabled=$1
+run_scripts server destroy.sh
+DEBUG "schedulesEnabled $@"
 if [ "$schedulesEnabled" ]; then
         echo "Destroy scheduler"
         run_scripts "scheduler" "destroy.sh"

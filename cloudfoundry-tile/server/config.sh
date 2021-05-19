@@ -20,6 +20,6 @@ if [ ! -f "${ROOT_DIR}/$CERT_URI.cer" ]; then
        echo "ERROR: directory not found: $JAVA_CACERTS."
        exit 1
     fi
-    cp $JAVA_HOME/jre/lib/security/cacerts ${ROOT_DIR}/mycacerts
+    cp $JAVA_CACERTS ${ROOT_DIR}/mycacerts
     $JAVA_HOME/bin/keytool -import -alias myNewCertificate -file "${ROOT_DIR}/$CERT_URI.cer" -noprompt -keystore "${ROOT_DIR}/mycacerts" -storepass changeit
 fi

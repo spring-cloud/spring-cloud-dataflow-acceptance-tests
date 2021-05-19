@@ -97,13 +97,14 @@ run_scripts() {
   SCRIPT_DIR=${1}
   SCRIPT_FILE=${2}
   CURRENT_DIR=${PWD##*/}
+  ARGS=${@:3:$#}
 
   if [[ -d "${SCRIPT_DIR}" ]]; then
     pushd "${SCRIPT_DIR}"
 
     if [[ -f "${SCRIPT_FILE}" ]]; then
-      DEBUG "executing $CURRENT_DIR/$SCRIPT_DIR/$SCRIPT_FILE"
-      . ${SCRIPT_FILE} ${@:3:$#}
+      DEBUG "executing $CURRENT_DIR/$SCRIPT_DIR/$SCRIPT_FILE 1:$1 ARGS:${ARGS}"
+      . ${SCRIPT_FILE} "${ARGS}"
     else
       echo "Not running non-existent script: ${SCRIPT_DIR}/${SCRIPT_FILE}"
     fi

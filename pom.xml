@@ -6,7 +6,8 @@
 	<groupId>org.springframework.cloud.dataflow.acceptance.tests</groupId>
 	<artifactId>spring-cloud-dataflow-acceptance-tests</artifactId>
 	<version>1.1.0.BUILD-SNAPSHOT</version>
-	<packaging>jar</packaging>
+
+    <packaging>pom</packaging>
 
 	<name>Data Flow Acceptance Tests</name>
 	<description>Demo project for Spring Boot</description>
@@ -24,7 +25,9 @@
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>
-		<dataflow.version>2.8.0-SNAPSHOT</dataflow.version>
+        <checkstyle.header.file>etc/checkstyle/checkstyle-header.txt</checkstyle.header.file>
+
+        <dataflow.version>2.8.0-SNAPSHOT</dataflow.version>
 		<app.starters.support.version>2.5.0</app.starters.support.version>
 		<spring-cloud-deployer-cloudfoundry.version>2.5.0</spring-cloud-deployer-cloudfoundry.version>
 	</properties>

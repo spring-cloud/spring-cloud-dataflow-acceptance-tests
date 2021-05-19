@@ -36,7 +36,7 @@ case ${key} in
  setup)
    shift
    . scripts/setup.sh $@
-   exit 0
+   return
    ;;
  tests)
    shift
@@ -49,3 +49,4 @@ case ${key} in
  exit 1
  ;;
 esac
+
