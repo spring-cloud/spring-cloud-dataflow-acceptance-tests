@@ -85,7 +85,7 @@ create_manifest
 cf push -i 0
 echo "CLEANING UP TASKS"
 task_wait $TASK_NAME ".java-buildpack/open_jdk_jre/bin/java org.springframework.boot.loader.JarLauncher --org.springframework.cloud.dataflow.task.performance.cleanup=true"
-echo "INITIALIZING TASK DEFINITIONS AND EXECUTIONS"
+echo "INITIALIZING $ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_TASK_PERFORMANCE_TASK_DEFINITION_COUNT DEFINITIONS AND $ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_TASK_PERFORMANCE_TASK_EXECUTION_COUNT EXECUTIONS PER DEFINITION"
 task_wait $TASK_NAME ".java-buildpack/open_jdk_jre/bin/java org.springframework.boot.loader.JarLauncher"
 cf delete -f $TASK_NAME
 
