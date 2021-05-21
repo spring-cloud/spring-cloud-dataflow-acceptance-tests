@@ -60,7 +60,7 @@ fi
 }
 
 # Main
-
+set -e
 ./mvnw clean package -f task-perf-tests-initializer
 create_manifest
 cf push -i 0
