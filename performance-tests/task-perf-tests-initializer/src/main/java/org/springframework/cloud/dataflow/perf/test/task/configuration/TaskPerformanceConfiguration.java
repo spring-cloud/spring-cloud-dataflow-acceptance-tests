@@ -18,17 +18,21 @@ package org.springframework.cloud.dataflow.perf.test.task.configuration;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableConfigurationProperties(TaskPerformanceProperties.class)
 public class TaskPerformanceConfiguration {
-
+    private static final Logger logger = LoggerFactory.getLogger(TaskPerformanceConfiguration.class);
 	@Autowired
 	TaskPerformanceProperties properties;
 
@@ -39,7 +43,7 @@ public class TaskPerformanceConfiguration {
 	private DataSource dataSource;
 
 	@Bean
-	public ApplicationRunner applicationRunner() {
+	public ApplicationRunner applicationRunner(Environment environment) {
 		return args -> {
 			if (properties.getCleanup()) {
 				TaskUtils.cleanup(properties.getTaskPrefix(), dataFlowOperations);
@@ -49,10 +53,14 @@ public class TaskPerformanceConfiguration {
 						dataFlowOperations);
 				if (properties.getAddTaskExecutions()) {
 					if (dataSource != null) {
+                        logger.info("Datasource configured:" + environment.getProperty("spring.datasource.url"));
 						TaskUtils.dbInsertTaskExecutions(properties.getTaskExecutionCount(),
 								TaskUtils.getTaskDefinitionsByPrefix(properties.getTaskPrefix(), dataFlowOperations),
 								dataSource);
 					}
+					else {
+					    logger.warn("Datasource not configured. Will not create task executions.");
+                    }
 				}
 			}
 		};
