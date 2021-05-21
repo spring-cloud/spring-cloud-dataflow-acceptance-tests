@@ -110,7 +110,7 @@ public class TaskUtils {
 	 */
 	public static void dbInsertTaskExecutions(int numberOfTaskExecutions, List<Task> taskDefinitions,
 			DataSource dataSource) {
-		logger.info(String.format("Creating %s task executions", numberOfTaskExecutions * taskDefinitions));
+		logger.info(String.format("Creating %s task executions", numberOfTaskExecutions * taskDefinitions.size()));
 		DataFieldMaxValueIncrementer incrementer = getIncrementer(dataSource);
 		int sizeOfTaskDefinitions = taskDefinitions.size();
 		for (Task task : taskDefinitions) {
