@@ -102,23 +102,28 @@ public class TaskUtils {
 
 	/**
 	 * Inserts the specified number of task executions into the task_execution table.
-	 * @param numberOfTaskExecutions Number of task executions to insert.
-	 * @param taskDefinitions A list of task definitions to use for populating task the task name and task description.
+	 * @param numberOfTaskExecutions Number of task executions for each task definition to
+	 *     insert.
+	 * @param taskDefinitions A list of task definitions to use for populating task the task
+	 *     name and task description.
 	 * @param dataSource The dataSource to use for inserting the data.
 	 */
-	public static void dbInsertTaskExecutions(int numberOfTaskExecutions, List<Task> taskDefinitions, DataSource dataSource) {
-		logger.info(String.format("Creating %s task executions", numberOfTaskExecutions));
+	public static void dbInsertTaskExecutions(int numberOfTaskExecutions, List<Task> taskDefinitions,
+			DataSource dataSource) {
+		logger.info(String.format("Creating %s task executions", numberOfTaskExecutions * taskDefinitions));
 		DataFieldMaxValueIncrementer incrementer = getIncrementer(dataSource);
 		int sizeOfTaskDefinitions = taskDefinitions.size();
-		for (int i = 0; i < numberOfTaskExecutions; i++) {
-			long executionid = incrementer.nextLongValue();
-			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-			jdbcTemplate.update("INSERT INTO TASK_EXECUTION (TASK_EXECUTION_ID," +
-							"START_TIME,END_TIME,TASK_NAME,EXIT_CODE,EXIT_MESSAGE,ERROR_MESSAGE," +
-							"LAST_UPDATED,EXTERNAL_EXECUTION_ID,PARENT_EXECUTION_ID) VALUES " +
-							"( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-					executionid, new Date(), new Date(), taskDefinitions.get(i % sizeOfTaskDefinitions).getTaskName(),
-					0, null, null, new Date(), taskDefinitions.get(i % sizeOfTaskDefinitions).getTaskName(), null);
+		for (Task task : taskDefinitions) {
+			for (int i = 0; i < numberOfTaskExecutions; i++) {
+				long executionid = incrementer.nextLongValue();
+				JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+				jdbcTemplate.update("INSERT INTO TASK_EXECUTION (TASK_EXECUTION_ID," +
+						"START_TIME,END_TIME,TASK_NAME,EXIT_CODE,EXIT_MESSAGE,ERROR_MESSAGE," +
+						"LAST_UPDATED,EXTERNAL_EXECUTION_ID,PARENT_EXECUTION_ID) VALUES " +
+						"( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+						executionid, new Date(), new Date(), task.getTaskName(),
+						0, null, null, new Date(), task.getTaskName(), null);
+			}
 		}
 	}
 

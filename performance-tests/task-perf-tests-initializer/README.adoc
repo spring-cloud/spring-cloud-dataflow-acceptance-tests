@@ -1,0 +1,47 @@
+# Task Performance Application
+The purpose this application is to load up a database with a large number of task definitions
+and task executions to exercise Spring Cloud Data Flow.
+
+
+## Getting Started
+
+### Building
+
+```bash
+mvn clean install
+```
+
+
+### Executing the app
+By default, running the application without any properties, the application will
+create 10 task definitions prefixed with `perfTestTask` using the local instance of dataflow at port 9393.
+For example:
+```bash
+java -jar target/task-performance-tests-initializer-1.1.0.BUILD-SNAPSHOT.jar
+```
+
+If you add database connection properties, the application will create 10 task executions. (1 for each task definition)
+
+NOTE: Currently only supports `mysql`
+
+To create 100 task definitions with 1000 task executions run the following:
+```bash
+ java -jar target/task-performance-tests-initializer-1.1.0.BUILD-SNAPSHOT.jar --org.springframework.cloud.dataflow.task.performance.taskDefinitionCount=100 --org.springframework.cloud.dataflow.task.performance.taskExecutionCount=1000
+```
+
+#### Configuration
+* taskPrefix - The prefix to be used for task definition names. Defaults to `perfTestTask`.
+* taskDefinitionCount - Then number of definitions to create. Defaults to `10`.
+* addTaskExecutions - If true task executions will be created by launching tasks. Defaults to `true`.
+* taskExecutionCount - The number of task executions per task definition to be inserted into the task execution table.  Defaults to `10`.
+* cleanup - If `true` prevents the loading of the database and deletes all task definitions with task name starting with `taskPrefix` and their associated task executions.   Defaults to `false`.
+* launchTasks - If true task executions will be added via task launch request to SCDF.  Default is false.
+* maxTaskExecutionWaitMinutes - Used with launchTasks is true.  The maximum wait time (in minutes) that the perf tests should wait for task launches to complete. Default is 15 minutes.
+
+#### Cleanup
+To remove all task definitions with task name starting with `taskPrefix` and their associated task executions. Set the `cleanup` flag to true.
+For example:
+
+```bash
+java -jar target/task-performance-tests-initializer-1.1.0.BUILD-SNAPSHOT.jar --org.springframework.cloud.dataflow.task.performance.cleanup=true
+```

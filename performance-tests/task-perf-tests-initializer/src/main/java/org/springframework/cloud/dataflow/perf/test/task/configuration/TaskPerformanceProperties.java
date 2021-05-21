@@ -42,7 +42,7 @@ public class TaskPerformanceProperties {
 	private Boolean isCleanup = false;
 
 	/**
-	 * The number of task executions to be inserted into the task execution table.
+	 * The number of task executions per task definition to be inserted into the task execution table.
 	 */
 	private Integer taskExecutionCount = 10;
 
