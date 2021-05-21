@@ -14,10 +14,22 @@
     <artifactId>task-performance-tests-initializer</artifactId>
 
     <properties>
-        <java-cfenv.version>2.2.2.RELEASE</java-cfenv.version>
+        <java-cfenv.version>2.2.1.RELEASE</java-cfenv.version>
         <checkstyle.config.location>../../etc/checkstyle/checkstyle.xml</checkstyle.config.location>
         <checkstyle.header.file>../../etc/checkstyle/checkstyle-header.txt</checkstyle.header.file>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.pivotal.spring.cloud</groupId>
+                <artifactId>spring-cloud-services-dependencies</artifactId>
+                <version>3.1.4.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -33,26 +45,7 @@
             <artifactId>java-cfenv-boot</artifactId>
             <version>${java-cfenv.version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.pivotal.cfenv</groupId>
-            <artifactId>java-cfenv-jdbc</artifactId>
-            <version>${java-cfenv.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.pivotal.cfenv</groupId>
-            <artifactId>java-cfenv-jdbc</artifactId>
-            <version>${java-cfenv.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.pivotal.cfenv</groupId>
-            <artifactId>java-cfenv-jdbc</artifactId>
-            <version>2.2.0.RELEASE</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
-
-
 
     <build>
         <plugins>
