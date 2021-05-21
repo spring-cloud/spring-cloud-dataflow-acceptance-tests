@@ -83,6 +83,9 @@ set -e
 ./mvnw clean package -f task-perf-tests-initializer
 create_manifest
 cf push -i 0
+echo "CLEANING UP TASKS"
+task_wait $TASK_NAME ".java-buildpack/open_jdk_jre/bin/java org.springframework.boot.loader.JarLauncher --org.springframework.cloud.dataflow.task.performance.cleanup=true"
+echo "INITIALIZING TASK DEFINITIONS AND EXECUTIONS"
 task_wait $TASK_NAME ".java-buildpack/open_jdk_jre/bin/java org.springframework.boot.loader.JarLauncher"
 cf delete -f $TASK_NAME
 
