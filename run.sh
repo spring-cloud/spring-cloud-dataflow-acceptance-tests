@@ -36,7 +36,6 @@ case ${key} in
  setup)
    shift
    . scripts/setup.sh $@
-   return
    ;;
  tests)
    shift
