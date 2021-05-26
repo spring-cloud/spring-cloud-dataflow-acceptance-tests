@@ -4,15 +4,6 @@
 
 TASK_NAME=task-performance-stream-initializer
 
-get_db_service_instance() {
-  service=$(cf services | grep p-dataflow-relational | awk '{print $1}')
-  if [ -z "$service" ]; then
-    echo "Dataflow Service is not available"
-    exit 1
-  fi
-  echo $service
-}
-
 get_app_properties() {
   [[ -z "$ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_CLEANUP" ]] &&  ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_CLEANUP=false
   [[ -z "$ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_STREAM_PREFIX" ]] &&  ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_STREAM_PREFIX=stream
@@ -24,7 +15,7 @@ get_app_properties() {
 create_manifest() {
   get_app_properties
   DB_SERVICE_INSTANCE=$(get_db_service_instance)
-  cat << EOF > ./manifest.yml
+  cat << EOF > ./manifest-stream.yml
 applications:
 - name: $TASK_NAME
   timeout: 120
@@ -56,7 +47,7 @@ EOF
 set -e
 ./mvnw clean package -f stream-perf-tests-initializer
 create_manifest
-cf push -i 0
+cf push -f manifest-stream.yml -i 0
 echo "CLEANING UP STREAMS"
 task_wait $TASK_NAME ".java-buildpack/open_jdk_jre/bin/java org.springframework.boot.loader.JarLauncher --org.springframework.cloud.dataflow.stream.performance.cleanup=true"
 echo "INITIALIZING $ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_STREAM_DEFINITIONS_NUMBER DEFINITIONS, DEPLOYMENT ENABLED: $ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_BATCH_DEPLOYMENT_ENABLED AND BATCH SIZE: $ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_BATCH_DEPLOYMENT_SIZE"

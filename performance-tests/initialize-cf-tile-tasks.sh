@@ -4,15 +4,6 @@
 
 TASK_NAME=task-performance-test-initializer
 
-get_db_service_instance() {
-  service=$(cf services | grep p-dataflow-relational | awk '{print $1}')
-  if [ -z "$service" ]; then
-    echo "Dataflow Service is not available"
-    exit 1
-  fi
-  echo $service
-}
-
 get_app_properties() {
   [[ -z "$ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_TASK_PERFORMANCE_TASK_DEFINITION_COUNT" ]] &&  ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_TASK_PERFORMANCE_TASK_DEFINITION_COUNT=10
   [[ -z "$ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_TASK_PERFORMANCE_TASK_PREFIX" ]] &&  ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_TASK_PERFORMANCE_TASK_PREFIX=perfTestTask
