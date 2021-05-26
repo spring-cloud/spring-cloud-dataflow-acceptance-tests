@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-STREAM_NAME=task-performance-stream-initializer
+. ./common.sh
+
+TASK_NAME=task-performance-stream-initializer
 
 get_db_service_instance() {
   service=$(cf services | grep p-dataflow-relational | awk '{print $1}')
@@ -13,7 +15,7 @@ get_db_service_instance() {
 
 get_app_properties() {
   [[ -z "$ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_CLEANUP" ]] &&  ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_CLEANUP=false
-  [[ -z "$ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_STREAM_PREFIX" ]] &&  ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_STREAM_PREFIX=streamPrefix
+  [[ -z "$ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_STREAM_PREFIX" ]] &&  ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_STREAM_PREFIX=stream
   [[ -z "$ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_STREAM_DEFINITIONS_NUMBER" ]] &&  ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_STREAM_DEFINITIONS_NUMBER=10
   [[ -z "$ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_BATCH_DEPLOYMENT_ENABLED" ]] &&  ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_BATCH_DEPLOYMENT_ENABLED=false
   [[ -z "$ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_BATCH_DEPLOYMENT_SIZE" ]] &&  ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_BATCH_DEPLOYMENT_SIZE=2
@@ -24,7 +26,7 @@ create_manifest() {
   DB_SERVICE_INSTANCE=$(get_db_service_instance)
   cat << EOF > ./manifest.yml
 applications:
-- name: $STREAM_NAME
+- name: $TASK_NAME
   timeout: 120
   path: ./stream-perf-tests-initializer/target/stream-performance-tests-initializer-1.1.0.BUILD-SNAPSHOT.jar
   memory: 1G
@@ -50,37 +52,13 @@ applications:
 EOF
 }
 
-stream_wait() {
-  APP_NAME=$1
-  CMD=$2
-  echo "running $APP_NAME with command $CMD"
-  app_id=$(cf run-task $APP_NAME "${CMD}" | grep "app id:" | awk '{print $3}')
-
-  app_name=$(cf tasks $APP_NAME | grep "^$app_id " | awk '{print $2}')
-  app_status=$(cf tasks $APP_NAME | grep "^$app_id " | awk '{print $3}')
-
-  while [ $app_status = 'RUNNING' ]
-  do
-      sleep 1
-      app_status=$(cf tasks $APP_NAME | grep "^$app_id " | awk '{print $3}')
-  done
-
-  cf logs $APP_NAME --recent
-
-  echo "$APP_NAME complete with status $app_status"
-  if [ !$app_status = 'SUCCEEDED' ]; then
-    exit 1;
-  fi
-
-}
-
 # Main
 set -e
 ./mvnw clean package -f stream-perf-tests-initializer
 create_manifest
 cf push -i 0
 echo "CLEANING UP STREAMS"
-stream_wait $STREAM_NAME ".java-buildpack/open_jdk_jre/bin/java org.springframework.boot.loader.JarLauncher --org.springframework.cloud.dataflow.stream.performance.cleanup=true"
+task_wait $TASK_NAME ".java-buildpack/open_jdk_jre/bin/java org.springframework.boot.loader.JarLauncher --org.springframework.cloud.dataflow.stream.performance.cleanup=true"
 echo "INITIALIZING $ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_STREAM_DEFINITIONS_NUMBER DEFINITIONS, DEPLOYMENT ENABLED: $ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_BATCH_DEPLOYMENT_ENABLED AND BATCH SIZE: $ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_BATCH_DEPLOYMENT_SIZE"
-stream_wait $STREAM_NAME ".java-buildpack/open_jdk_jre/bin/java org.springframework.boot.loader.JarLauncher"
-cf delete -f $STREAM_NAME
+task_wait $TASK_NAME ".java-buildpack/open_jdk_jre/bin/java org.springframework.boot.loader.JarLauncher"
+cf delete -f $TASK_NAME
