@@ -10,6 +10,7 @@ get_app_properties() {
   [[ -z "$ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_STREAM_DEFINITIONS_NUMBER" ]] &&  ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_STREAM_DEFINITIONS_NUMBER=10
   [[ -z "$ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_BATCH_DEPLOYMENT_ENABLED" ]] &&  ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_BATCH_DEPLOYMENT_ENABLED=false
   [[ -z "$ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_BATCH_DEPLOYMENT_SIZE" ]] &&  ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_BATCH_DEPLOYMENT_SIZE=2
+  return 0
 }
 
 create_manifest() {
@@ -44,9 +45,10 @@ EOF
 }
 
 # Main
-set -e
 ./mvnw clean package -f stream-perf-tests-initializer
+echo $?
 create_manifest
+echo $?
 cf push -f manifest-stream.yml -i 0
 echo "CLEANING UP STREAMS"
 task_wait $TASK_NAME ".java-buildpack/open_jdk_jre/bin/java org.springframework.boot.loader.JarLauncher --org.springframework.cloud.dataflow.stream.performance.cleanup=true"
