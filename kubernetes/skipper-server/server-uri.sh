@@ -6,7 +6,7 @@ then
     SKIPPER_IP=$(kubectl get svc --namespace $KUBERNETES_NAMESPACE | grep skipper | awk '{print $4}')
   done
 
-  if [ "$HTTPS_ENABLED" ]; then
+  if [ "$HTTPS_ENABLED" == "true" ]; then
     export SKIPPER_SERVER_URI="https://$SKIPPER_IP"
   else
     export SKIPPER_SERVER_URI="http://$SKIPPER_IP"

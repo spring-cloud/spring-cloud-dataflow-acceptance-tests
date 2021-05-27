@@ -52,7 +52,7 @@ function use_helm() {
   # mount the scdf-metadata-default secret to allow limitless DockerHub access for the app docker metadata
   kubectl patch deploy scdf-spring-cloud-dataflow-server -p "$(cat ./scdf-metadata-secret-helm-patch.json)" --namespace $KUBERNETES_NAMESPACE
 
-  if [ "$HTTPS_ENABLED" ]; then
+  if [ "$HTTPS_ENABLED" == "true" ]; then
     echo "Patch HELM for HTTPS configuration"
     kubectl patch deploy scdf-spring-cloud-dataflow-server -p "$(cat ./scdf-https-helm-patch.json)" --namespace $KUBERNETES_NAMESPACE
     kubectl patch deploy scdf-spring-cloud-dataflow-skipper -p "$(cat ./skipper-https-helm-patch.json)" --namespace $KUBERNETES_NAMESPACE
@@ -83,7 +83,7 @@ function distro_files_install() {
   # mount the scdf-metadata-default secret to allow limitless DockerHub access for the app docker metadata
   kubectl patch deploy scdf-server -p "$(cat ./scdf-metadata-secret-patch.json)" --namespace $KUBERNETES_NAMESPACE
 
-  if [ "$HTTPS_ENABLED" ]; then
+  if [ "$HTTPS_ENABLED" == "true"]; then
     echo "Patch distro for HTTPS configuration"
     kubectl patch service scdf-server -p "$(cat ./scdf-svc-distro-patch.yaml)" --namespace $KUBERNETES_NAMESPACE
     kubectl replace --force -f ./skipper-svc-distro-patch.yaml --namespace $KUBERNETES_NAMESPACE

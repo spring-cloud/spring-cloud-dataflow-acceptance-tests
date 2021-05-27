@@ -5,7 +5,7 @@ while [[ "$SCDF_IP" == "<pending>" ]] ; do
   SCDF_IP=$(kubectl get svc --namespace $KUBERNETES_NAMESPACE | grep server | awk '{print $4}')
 done
 
-if [ "$HTTPS_ENABLED" ]; then
+if [ "$HTTPS_ENABLED" == "true" ]; then
     export SERVER_URI="https://$SCDF_IP"
 else
     export SERVER_URI="http://$SCDF_IP"
