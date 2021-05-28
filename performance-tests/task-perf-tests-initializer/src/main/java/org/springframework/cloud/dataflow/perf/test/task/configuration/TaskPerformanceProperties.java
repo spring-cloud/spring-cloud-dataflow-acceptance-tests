@@ -46,6 +46,12 @@ public class TaskPerformanceProperties {
 	 */
 	private Integer taskExecutionCount = 10;
 
+    /**
+     * The number of task Job instnaces per task execution to be inserted into the batch infra. Each job instance
+     * will have 1 job execution with a single step.   Default is 0.
+     */
+    private Integer jobInstancesPerTaskExecution = 0;
+
 	public String getTaskPrefix() {
 		return taskPrefix;
 	}
@@ -93,4 +99,12 @@ public class TaskPerformanceProperties {
 	public void setCleanup(Boolean cleanup) {
 		isCleanup = cleanup;
 	}
+
+    public Integer getJobInstancesPerTaskExecution() {
+        return jobInstancesPerTaskExecution;
+    }
+
+    public void setJobInstancesPerTaskExecution(Integer jobInstancesPerTaskExecution) {
+        this.jobInstancesPerTaskExecution = jobInstancesPerTaskExecution;
+    }
 }
