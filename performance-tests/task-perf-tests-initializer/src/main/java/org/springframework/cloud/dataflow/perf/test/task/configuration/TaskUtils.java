@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.perf.test.task.configuration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
@@ -108,10 +109,10 @@ public class TaskUtils {
 	 *     name and task description.
 	 * @param dataSource The dataSource to use for inserting the data.
 	 */
-	public static void dbInsertTaskExecutions(int numberOfTaskExecutions, List<Task> taskDefinitions,
+	public static void dbInsertTaskExecutions(int numberOfTaskExecutions, int numberOfJobInstances, List<Task> taskDefinitions,
 			DataSource dataSource) {
 		logger.info(String.format("Creating %s task executions", numberOfTaskExecutions * taskDefinitions.size()));
-		DataFieldMaxValueIncrementer incrementer = getIncrementer(dataSource);
+		DataFieldMaxValueIncrementer incrementer = getIncrementer(dataSource, "TASK_SEQ");
 		int sizeOfTaskDefinitions = taskDefinitions.size();
 		for (Task task : taskDefinitions) {
 			for (int i = 0; i < numberOfTaskExecutions; i++) {
@@ -123,9 +124,54 @@ public class TaskUtils {
 						"( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 						executionid, new Date(), new Date(), task.getTaskName(),
 						0, null, null, new Date(), task.getTaskName(), null);
+                dbInsertJobInstances(numberOfJobInstances, executionid, dataSource);
 			}
 		}
 	}
+
+    /**
+     * Creates a number of job instances for each execution id.
+     * @param numberOfJobInstances the number of job instance for each task execution
+     * @param executionId the execution id that the job instances will be associated
+     * @param dataSource he dataSource to use for inserting the data.
+     */
+	private static void dbInsertJobInstances(int numberOfJobInstances, long executionId, DataSource dataSource) {
+        DataFieldMaxValueIncrementer jobExecutionIncrementer = getIncrementer(dataSource, "BATCH_JOB_EXECUTION_SEQ");
+        DataFieldMaxValueIncrementer jobInstanceIncrementer = getIncrementer(dataSource, "BATCH_JOB_SEQ");
+        DataFieldMaxValueIncrementer jobStepExecutionIncrementer = getIncrementer(dataSource, "BATCH_STEP_EXECUTION_SEQ");
+
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+
+        for (long i = 0 ; i < numberOfJobInstances; i++) {
+            long jobInstanceId = jobInstanceIncrementer.nextLongValue();
+            long jobExecutionId = jobExecutionIncrementer.nextLongValue();
+            long stepExecutionId = jobStepExecutionIncrementer.nextLongValue();
+            jdbcTemplate.update("INSERT INTO BATCH_JOB_INSTANCE (JOB_INSTANCE_ID,VERSION,JOB_NAME,JOB_KEY) VALUES " +
+                    "( ?, ?, ?, ?)",
+                jobInstanceId, 0, "job" + i, UUID.randomUUID().toString().substring(15));
+
+            jdbcTemplate.update("INSERT INTO BATCH_JOB_EXECUTION (JOB_EXECUTION_ID,VERSION,JOB_INSTANCE_ID,CREATE_TIME,START_TIME,END_TIME,STATUS,EXIT_CODE,EXIT_MESSAGE,LAST_UPDATED) VALUES " +
+                    "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                jobExecutionId, 1, jobInstanceId, new Date(), new Date(), new Date(), "COMPLETED", "COMPLETED", "", new Date());
+
+            jdbcTemplate.update("INSERT INTO BATCH_JOB_EXECUTION_CONTEXT (JOB_EXECUTION_ID,SHORT_CONTEXT) VALUES " +
+                    "(?, ?)",
+                jobExecutionId, "{}");
+
+            jdbcTemplate.update("INSERT INTO BATCH_JOB_EXECUTION_PARAMS (JOB_EXECUTION_ID,TYPE_CD,KEY_NAME,STRING_VAL,DATE_VAL,LONG_VAL,DOUBLE_VAL,IDENTIFYING) VALUES " +
+                    "(?, ?, ?, ?, ?, ?, ?, ?)",
+                jobExecutionId, "STRING", "-spring.cloud.task.executionid", executionId, new Date(), 0, 0, "N");
+
+            jdbcTemplate.update("INSERT INTO BATCH_STEP_EXECUTION (STEP_EXECUTION_ID,VERSION,STEP_NAME,JOB_EXECUTION_ID,START_TIME,END_TIME,STATUS,COMMIT_COUNT,READ_COUNT,FILTER_COUNT,WRITE_COUNT,READ_SKIP_COUNT,WRITE_SKIP_COUNT,PROCESS_SKIP_COUNT,ROLLBACK_COUNT,EXIT_CODE,EXIT_MESSAGE,LAST_UPDATED) VALUES " +
+                    "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                stepExecutionId, 3, "job1step1", jobExecutionId, new Date(), new Date(), "COMPLETED", 1, 0, 0, 0, 0, 0, 0, 0, "COMPLETED", "", new Date());
+
+            jdbcTemplate.update("INSERT INTO TASK_TASK_BATCH (TASK_EXECUTION_ID,JOB_EXECUTION_ID) VALUES " +
+                    "(?, ?)",
+                executionId, jobExecutionId);
+
+        }
+    }
 
 	/**
 	 * Removes all task definitions that has a task name that starts with the taskName prefix and their associated task executions.
@@ -142,9 +188,10 @@ public class TaskUtils {
 	 * Creates a incrementer for the DataSource.
 	 *
 	 * @param dataSource the datasource that the incrementer will use to record current id.
+     * @param incrementerName - the name of the incrementer to retrieve.
 	 * @return a DataFieldMaxValueIncrementer object.
 	 */
-	private static DataFieldMaxValueIncrementer getIncrementer(DataSource dataSource) {
+	private static DataFieldMaxValueIncrementer getIncrementer(DataSource dataSource, String incrementerName) {
 		DataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(
 				dataSource);
 		String databaseType = null;
@@ -154,6 +201,6 @@ public class TaskUtils {
 		catch (MetaDataAccessException e) {
 			throw new IllegalStateException(e);
 		}
-		return incrementerFactory.getIncrementer(databaseType, "TASK_SEQ");
+		return incrementerFactory.getIncrementer(databaseType, incrementerName);
 	}
 }

@@ -54,7 +54,7 @@ public class TaskPerformanceConfiguration {
 				if (properties.getAddTaskExecutions()) {
 					if (dataSource != null) {
                         logger.info("Datasource configured:" + environment.getProperty("spring.datasource.url"));
-						TaskUtils.dbInsertTaskExecutions(properties.getTaskExecutionCount(),
+						TaskUtils.dbInsertTaskExecutions(properties.getTaskExecutionCount(), properties.getJobInstancesPerTaskExecution(),
 								TaskUtils.getTaskDefinitionsByPrefix(properties.getTaskPrefix(), dataFlowOperations),
 								dataSource);
 					}
