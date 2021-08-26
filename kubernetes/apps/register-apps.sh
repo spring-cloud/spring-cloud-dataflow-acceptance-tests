@@ -31,5 +31,6 @@ wget -qO- ${SERVER_URI}/apps/task/batch-remote-partition/0.0.2-SNAPSHOT --no-che
 wget -qO- ${SERVER_URI}/apps/sink/ver-log/3.0.1 --no-check-certificate --post-data="uri=docker:springcloudstream/log-sink-$BINDER:3.0.1"
 wget -qO- ${SERVER_URI}/apps/sink/ver-log/2.1.5.RELEASE --no-check-certificate --post-data="uri=docker:springcloudstream/log-sink-$BINDER:2.1.5.RELEASE"
 wget -qO- ${SERVER_URI}/apps/task/task-demo-metrics-prometheus/0.0.4-SNAPSHOT --no-check-certificate --post-data="uri=docker://springcloudtask/task-demo-metrics-prometheus:0.0.4-SNAPSHOT"
+wget -qO- ${SERVER_URI}/apps/sink/dataflow-tasklauncher/$DATAFLOW_VERSION --no-check-certificate --post-data="uri=docker:springcloud/spring-cloud-dataflow-tasklauncher-sink-$BINDER:$DATAFLOW_VERSION"
 
 echo "APPS REGISTERED"

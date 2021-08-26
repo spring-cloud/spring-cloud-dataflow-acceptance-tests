@@ -25,6 +25,7 @@ wget -qO- --header "$HEADER" --no-check-certificate ${SERVER_URI}/apps/task/batc
 wget -qO- --header "$HEADER" --no-check-certificate ${SERVER_URI}/apps/sink/ver-log/3.0.1 --post-data="uri=maven://org.springframework.cloud.stream.app:log-sink-$BINDER:3.0.1"
 wget -qO- --header "$HEADER" --no-check-certificate ${SERVER_URI}/apps/sink/ver-log/2.1.5.RELEASE --post-data="uri=maven://org.springframework.cloud.stream.app:log-sink-$BINDER:2.1.5.RELEASE"
 wget -qO- --header "$HEADER" --no-check-certificate ${SERVER_URI}/apps/task/task-demo-metrics-prometheus/0.0.4-SNAPSHOT --post-data="uri=maven://io.spring.task:task-demo-metrics-prometheus:0.0.4-SNAPSHOT"
+wget -qO- --header "$HEADER" --no-check-certificate ${SERVER_URI}/apps/sink/dataflow-tasklauncher/$DATAFLOW_VERSION --post-data="uri=maven://org.springframework.cloud:spring-cloud-dataflow-tasklauncher-sink-$BINDER:$DATAFLOW_VERSION"
 wget -O- --header "$HEADER" --no-check-certificate ${SERVER_URI}/apps
 
 echo "APPS REGISTERED"

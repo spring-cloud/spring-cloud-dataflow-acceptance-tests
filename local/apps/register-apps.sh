@@ -24,6 +24,6 @@ wget -qO- ${SERVER_URI}/apps/task/batch-remote-partition/0.0.1-SNAPSHOT --post-d
 wget -qO- ${SERVER_URI}/apps/sink/ver-log/3.0.1 --post-data="uri=maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.1"
 wget -qO- ${SERVER_URI}/apps/sink/ver-log/2.1.5.RELEASE --post-data="uri=maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.1.5.RELEASE"
 wget -qO- ${SERVER_URI}/apps/task/task-demo-metrics-prometheus/0.0.4-SNAPSHOT --post-data="uri=maven://io.spring.task:task-demo-metrics-prometheus:0.0.4-SNAPSHOT"
-
+wget -qO- ${SERVER_URI}/apps/sink/dataflow-tasklauncher/$DATAFLOW_VERSION --post-data="uri=maven://org.springframework.cloud:spring-cloud-dataflow-tasklauncher-sink-$BINDER:$DATAFLOW_VERSION"
 
 echo "APPS REGISTERED"
