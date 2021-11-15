@@ -1,0 +1,41 @@
+= SCDF Database Performance Tests
+
+This module contains code to create CF tasks that populate the SCDF database with many task executions and stream deployments, used for a one-off test to determine if these conditions create a perceptible delay in certain query operations, as reported by a user. Once the tasks are running, the responsiveness of the SCDF dashboard was manually observed.
+
+The platform initialization relies on The acceptance test code to set up SCDF on CF, then run scripts to build and deploy the tasks from the corresponding Java apps:
+
+```
+#!/usr/bin/env bash
+export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL=${bamboo.CLOUDFOUNDRY_URL}
+export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG=${bamboo.CLOUDFOUNDRY_ORG}
+export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE=${bamboo.CLOUDFOUNDRY_SPACE}
+export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN=${bamboo.CLOUDFOUNDRY_DOMAIN}
+export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME=${bamboo.CLOUDFOUNDRY_USERNAME}
+export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD=${bamboo.CLOUDFOUNDRY_PASSWORD}
+export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION=${bamboo.CLOUDFOUNDRY_SKIP_SSL_VALIDATION}
+export DEPLOY_PAUSE_TIME=${bamboo.DEPLOY_PAUSE_TIME}
+export TRUST_CERTS=${bamboo.TRUST_CERTS}
+export CF_DIAL_TIMEOUT=${bamboo.CF_DIAL_TIMEOUT}
+export JAVA_BUILDPACK=${bamboo.JAVA_BUILDPACK}
+export PLATFORM=${bamboo.PLATFORM}
+export PLATFORM_FOLDER=${bamboo.PLATFORM_FOLDER}
+export CERT_URI=${bamboo.CERT_URI}
+export ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_TASK_PERFORMANCE_TASK_DEFINITION_COUNT=100
+export ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_TASK_PERFORMANCE_JOB_INSTANCES_PER_TASK_EXECUTION=1
+export ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_BATCH_DEPLOYMENT_ENABLED=true
+export ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_BATCH_DEPLOYMENT_SIZE=10
+export ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_STREAM_DEFINITIONS_NUMBER=100
+#echo CLEANING UP
+#./run.sh clean
+echo RUNNING SETUP
+. ./run.sh setup -cc  
+
+# Run the set up
+echo INITIALIZING APPLICATIONS
+pushd ./performance-tests
+./initialize-cf-tile-tasks.sh
+./initialize-cf-tile-streams.sh
+popd
+
+echo "SCDF Server URI : $SERVER_URI"
+```
