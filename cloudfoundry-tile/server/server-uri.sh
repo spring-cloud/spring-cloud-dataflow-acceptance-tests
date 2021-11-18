@@ -7,4 +7,4 @@ DEBUG "Setting server uri"
 fi
 echo "SCDF SERVER URI: $SERVER_URI"
 echo "SCDF SERVER CONFIGURATION:"
-wget -qO- --no-check-certificate ${SERVER_URI}/about
+wget -O- --no-check-certificate ${SERVER_URI}/about
