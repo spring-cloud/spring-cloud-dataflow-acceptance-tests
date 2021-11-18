@@ -6,3 +6,5 @@ DEBUG "Setting server uri"
     wait_for_200 ${SERVER_URI}/about  "Authorization: $(cf oauth-token)"
 fi
 echo "SCDF SERVER URI: $SERVER_URI"
+echo "SCDF SERVER CONFIGURATION:"
+wget -qO- --no-check-certificate ${SERVER_URI}/about
