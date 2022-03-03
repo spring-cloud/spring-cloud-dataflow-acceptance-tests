@@ -40,7 +40,6 @@ case ${key} in
  tests)
    shift
    . scripts/tests.sh $@
-   exit 0
    ;;
  *)
  echo "Invalid task name: [$1]"

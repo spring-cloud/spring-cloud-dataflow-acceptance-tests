@@ -137,6 +137,12 @@ config
 . $PLATFORM_FOLDER/server/server-uri.sh
 
 run_tests
+status=$?
+if [ $status -ne 0 ]
+then
+  exit $status
+fi
+
 # Run clean unless disabled.
 if [ -z "$skipCleanup" ]; then
   set -- "$@" -p $PLATFORM
@@ -150,3 +156,4 @@ if [ -z "$skipCleanup" ]; then
   fi
   . scripts/clean.sh "$@"
 fi
+exit
