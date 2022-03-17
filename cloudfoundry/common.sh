@@ -80,7 +80,7 @@ function destroy_service() {
     if ! service_info=$(cf service  "$service" 2>&1); then
       break
     fi
-    if [[ $service_info == *"create succeeded"* ]] || [[ $service_info == *"update succeeded"* ]]; [[ $service_info == *"create failed"* ]]; then
+    if [[ $service_info == *"create succeeded"* ]] || [[ $service_info == *"update succeeded"* ]] || [[$service_info == *"create failed"* ]]; then
       msg "deleting service $service"
       cf delete-service -f $service
       continue

@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.acceptance.test;
 
+
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
@@ -29,6 +30,8 @@ import org.springframework.cloud.dataflow.integration.test.DataFlowIT;
 import org.springframework.cloud.dataflow.integration.test.IntegrationTestProperties;
 import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBuilder;
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
+
+import static org.junit.Assert.fail;
 
 @SpringBootTest
 @EnableConfigurationProperties({ IntegrationTestProperties.class })
@@ -67,5 +70,10 @@ class DataFlowAT extends DataFlowIT {
             Awaitility.await("No output found").until(
                 () -> stream.logs(app("log")).contains("TICKTOCK CLOUD CONFIG - TIMESTAMP:"));
         }
+    }
+
+    @Test
+    public void testFail() {
+        fail();
     }
 }
