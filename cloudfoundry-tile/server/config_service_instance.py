@@ -31,7 +31,7 @@ def user_provided_postgresql(db, dbname):
 def init_db(db, dbname):
   #stderr because the config json is piped via stdout.
   sys.stderr.write("initializing DB %s...\n" %(dbname))
-  conn = ''
+  conn = None
   try:
       conn = psycopg2.connect(
             host = db['host'],
@@ -57,7 +57,8 @@ def init_db(db, dbname):
   except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
      log(f'Error {e}')
   finally:
-      conn.close()
+     if conn:
+        conn.close()
 
 
 schedules_enabled = os.getenv(
