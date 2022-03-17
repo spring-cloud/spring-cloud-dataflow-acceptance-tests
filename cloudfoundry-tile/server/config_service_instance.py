@@ -4,6 +4,10 @@ import os
 import psycopg2
 import time
 
+def log(msg):
+    #stderr because the config json is piped via stdout. This is out of band
+    sys.stderr.write("%s\n" %(msg))
+
 def dbname(prefix):
     binder = os.getenv("BINDER", "rabbit")
     db_index = os.getenv("SQL_DB_INDEX" , "")
@@ -25,6 +29,7 @@ def user_provided_postgresql(db, dbname):
     return ups
 
 def init_db(db, dbname):
+  #stderr because the config json is piped via stdout.
   sys.stderr.write("initializing DB %s...\n" %(dbname))
   conn = ''
   try:
@@ -49,10 +54,8 @@ def init_db(db, dbname):
         cur.execute("DROP DATABASE IF EXISTS %s;" % dbname)
         cur.execute("CREATE DATABASE %s;" % dbname)
         sys.stderr.write("completed initialization of DB %s\n" %(dbname))
-  except psycopg2.DatabaseError as e:
-      print(f'Error {e}')
-      sys.exit(1)
-
+  except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
+     log(f'Error {e}')
   finally:
       conn.close()
 
