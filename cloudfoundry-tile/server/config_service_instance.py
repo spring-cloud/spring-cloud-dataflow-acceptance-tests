@@ -30,7 +30,7 @@ def user_provided_postgresql(db, dbname):
 
 def init_db(db, dbname):
   #stderr because the config json is piped via stdout.
-  sys.stderr.write("initializing DB %s...\n" %(dbname))
+  log("initializing DB %s..." %(dbname))
   conn = None
   try:
       conn = psycopg2.connect(
@@ -43,17 +43,17 @@ def init_db(db, dbname):
       with conn.cursor() as cur:
         cur.execute("SELECT count(*) FROM pg_stat_activity WHERE datname = %s;",(dbname,))
         live_connections = cur.fetchone()[0]
-        sys.stderr.write("DB %s has %d live connections\n" %(dbname, live_connections))
+        log("DB %s has %d live connections" %(dbname, live_connections))
         while live_connections > 0:
             cur.execute("SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = %s;",(dbname,))
             time.sleep(1.0)
             cur.execute("SELECT count(*) FROM pg_stat_activity WHERE datname = %s;",(dbname,))
             live_connections = cur.fetchone()[0]
-            sys.stderr.write("DB %s has %d live connections\n" %(dbname, live_connections))
+            log("DB %s has %d live connections" %(dbname, live_connections))
 
         cur.execute("DROP DATABASE IF EXISTS %s;" % dbname)
         cur.execute("CREATE DATABASE %s;" % dbname)
-        sys.stderr.write("completed initialization of DB %s\n" %(dbname))
+        log("completed initialization of DB %s" %(dbname))
   except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
      log(f'Error {e}')
   finally:
