@@ -38,7 +38,8 @@ def init_db(db, dbname):
             port = db['port'],
             user = db['username'],
             password = db['password'],
-            dbname = 'postgres')
+            dbname = 'postgres',
+            connect_timeout = 5)
       conn.autocommit = True
       with conn.cursor() as cur:
         cur.execute("SELECT count(*) FROM pg_stat_activity WHERE datname = %s;",(dbname,))
