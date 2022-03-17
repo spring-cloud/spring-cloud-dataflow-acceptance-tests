@@ -44,12 +44,16 @@ function create_service() {
       if [[ -z $service_config ]]; then
         cf create-service $service_type $service_plan $service
       else
+       echo "cf create-service $service_type $service_plan $service -c $service_config"
        cf create-service $service_type $service_plan $service -c "$service_config"
       fi
       continue
     fi
     if [[ $service_info == *"create succeeded"* ]]; then
       break
+    fi
+    if [[ $service_info == *"create failed"* ]]; then
+       die "failed to create service $service"
     fi
     if [[ $service_info == *"delete in progress"* ]]; then
       die "cannot create service $service; it is in the process of being deleted"
@@ -64,8 +68,7 @@ function create_service() {
       continue
     fi
     err "unhandled status:"
-    echo $service_info
-    die
+    die $service_info
   done
 }
 
@@ -77,7 +80,7 @@ function destroy_service() {
     if ! service_info=$(cf service  "$service" 2>&1); then
       break
     fi
-    if [[ $service_info == *"create succeeded"* ]] || [[ $service_info == *"update succeeded"* ]]; then
+    if [[ $service_info == *"create succeeded"* ]] || [[ $service_info == *"update succeeded"* ]]; [[ $service_info == *"create failed"* ]]; then
       msg "deleting service $service"
       cf delete-service -f $service
       continue

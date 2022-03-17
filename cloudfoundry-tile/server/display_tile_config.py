@@ -22,7 +22,7 @@ def maskConfiguration(config):
 dataflow_tile_configuration = os.getenv("DATAFLOW_TILE_CONFIGURATION", "")
 config={}
 if len(dataflow_tile_configuration):
-    dataflow_tile_configuration
-    config = json.loads(dataflow_tile_configuration)
-print("using tile configuration: %s" % (maskConfiguration(config)))
+    print(dataflow_tile_configuration)
+    #config = json.loads(dataflow_tile_configuration)
+#print("using tile configuration: %s" % (maskConfiguration(config)))
 
