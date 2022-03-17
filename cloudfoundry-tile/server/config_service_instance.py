@@ -25,6 +25,7 @@ def user_provided_postgresql(db, dbname):
     return ups
 
 def init_db(db, dbname):
+  sys.stderr.write("initializing DB %s...\n" %(dbname))
   conn = ''
   try:
       conn = psycopg2.connect(
@@ -37,20 +38,24 @@ def init_db(db, dbname):
       with conn.cursor() as cur:
         cur.execute("SELECT count(*) FROM pg_stat_activity WHERE datname = %s;",(dbname,))
         live_connections = cur.fetchone()[0]
+        sys.stderr.write("DB %s has %d live connections\n" %(dbname, live_connections))
         while live_connections > 0:
             cur.execute("SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = %s;",(dbname,))
             time.sleep(1.0)
             cur.execute("SELECT count(*) FROM pg_stat_activity WHERE datname = %s;",(dbname,))
             live_connections = cur.fetchone()[0]
+            sys.stderr.write("DB %s has %d live connections\n" %(dbname, live_connections))
 
         cur.execute("DROP DATABASE IF EXISTS %s;" % dbname)
         cur.execute("CREATE DATABASE %s;" % dbname)
+        sys.stderr.write("completed initialization of DB %s\n" %(dbname))
   except psycopg2.DatabaseError as e:
       print(f'Error {e}')
       sys.exit(1)
 
   finally:
       conn.close()
+
 
 schedules_enabled = os.getenv(
     "SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED", 'false')
