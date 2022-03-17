@@ -2,8 +2,10 @@
 # Run AT Tests. Required environment variables must be set.
 #
 #Install required POSTGRESQL lib for python
-curl -L get-pip.io | python3
-pip install psycopg2-binary
+PATH=$PATH:~/.local/bin
+curl  https://bootstrap.pypa.io/pip/3.6/get-pip.py  > get-pip.py
+python3 get-pip.py
+pip3 install psycopg2-binary
 
 echo CLEANING UP RESOURCES BEFORE RUNNING TESTS
 ./run.sh clean -se
