@@ -62,6 +62,6 @@ jobs:
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG : p-dataflow
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME : admin
         run: |
-           snap install cf-cli
+           sudo snap install cf-cli
            scripts/at-test-script.sh
         
