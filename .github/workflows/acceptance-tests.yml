@@ -38,6 +38,7 @@ jobs:
       - name: run the test script
         env:
           DEBUG: true
+          BINDER : ${{ matrix.binder }}
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE : ${{ matrix.binder }}
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD: ${{ secrets.CF_ENV_0_PASSWORD }}
           # Postgres SQL Properties
