@@ -66,5 +66,6 @@ jobs:
            echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
            sudo apt-get update
            sudo apt-get install cf-cli
+           echo "cfpw: $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD"
            scripts/at-test-script.sh
         
