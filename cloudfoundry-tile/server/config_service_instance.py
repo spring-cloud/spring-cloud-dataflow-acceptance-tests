@@ -68,7 +68,8 @@ dataflow_tile_configuration = os.getenv("DATAFLOW_TILE_CONFIGURATION")
 config={}
 if dataflow_tile_configuration:
     config = json.loads(dataflow_tile_configuration)
-else:
+
+if not config.get('relational-data-service') or not config.get('relational-data-service'):
     db = {}
     db['username'] = os.getenv("SQL_USERNAME", "acceptance-tests")
     db['password'] = os.getenv("SQL_PASSWORD")
