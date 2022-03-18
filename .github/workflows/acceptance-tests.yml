@@ -47,7 +47,6 @@ jobs:
           SQL_PORT: ${{ secrets.SQL_PORT }}
           SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
           SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
-          JAVA_HOME: /opt/jdk-8
           DATAFLOW_TILE_KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
           DATAFLOW_TILE_KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
           DATAFLOW_TILE_KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
