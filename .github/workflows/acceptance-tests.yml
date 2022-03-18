@@ -55,7 +55,7 @@ jobs:
           TRUST_CERTS : "api.sys.${{ matrix.cf_host }}.cf-app.com" 
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION : false
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES : scdf-scheduler
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL= : "https://api.sys.${{ matrix.cf_host }}.cf-app.com" 
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL : "https://api.sys.${{ matrix.cf_host }}.cf-app.com" 
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN : "apps.${{ matrix.cf_host }}.cf-app.com"
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG : p-dataflow
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME : ${{ secrets.CF_USERNAME }}
