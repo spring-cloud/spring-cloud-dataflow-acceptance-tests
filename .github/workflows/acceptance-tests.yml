@@ -62,7 +62,8 @@ jobs:
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG : p-dataflow
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME : admin
         run: |
-           sudo wget -O /etc/yum.repos.d/cloudfoundry-cli.repo https://packages.cloudfoundry.org/fedora/cloudfoundry-cli.repo
-           sudo yum install cf-cli
+           wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
+           echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+           sudo apt get cf-cli
            scripts/at-test-script.sh
         
