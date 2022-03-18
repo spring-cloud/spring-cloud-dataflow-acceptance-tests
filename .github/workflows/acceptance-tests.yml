@@ -61,5 +61,7 @@ jobs:
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN : apps.${CF_ROOT_DOMAIN}
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG : p-dataflow
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME : admin
-        run: scripts/at-test-script.sh
+        run: |
+           sudo apt-get install cf-cli
+           scripts/at-test-script.sh
         
