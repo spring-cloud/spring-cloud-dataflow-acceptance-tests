@@ -1,6 +1,5 @@
-# This is a basic workflow to help you get started with Actions
 
-name: CI
+name: SCDF Acceptance Tests for Cloudfoundry tile
 
 # Controls when the workflow will run
 on:
@@ -16,9 +15,15 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     strategy:
+       max-parallel: 3
        matrix:
          cf_host: ['santabarbara']
          binder: ['rabbit', 'kafka']
+         include: 
+            - cf_host :santabarbara
+                db_index: 0
+     
+      
          
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -27,5 +32,32 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: run the test script
+        env:
+          DEBUG : true
+          # Postgres SQL Properties
+          # SQL_DB_INDEX used as a suffix. Should be unique for each CF_HOST
+          SQL_DB_INDEX : ${{ matrix.db_index }
+          SQL_HOST : 34.66.47.209
+          SQL_PORT : 5432
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE : ${{ matrix.binder }}
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD : ${CF_PASSWORD}
+          CF_ROOT_DOMAIN : ${{ matrix.cf_host }}.cf-app.com 
+          JAVA_HOME : /opt/jdk-8
+          DATAFLOW_TILE_KAFKA_BROKER_ADDRESS : 35.227.103.143:9092
+          DATAFLOW_TILE_KAFKA_USERNAME : admin
+          DATAFLOW_TILE_KAFKA_PASSWORD : ${KAFKA_PASSWORD}
+          DEPLOY_PAUSE_TIME : 20
+          CF_DIAL_TIMEOUT : 600
+          JAVA_BUILDPACK : java_buildpack_offline
+          PLATFORM : cloudfoundry
+          PLATFORM_FOLDER : cloudfoundry-tile
+          CERT_URI : uaa.sys.${CF_ROOT_DOMAIN}
+          TRUST_CERTS : api.sys.${CF_ROOT_DOMAIN}
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION : false
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES : scdf-scheduler
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL= : https://api.sys.${CF_ROOT_DOMAIN}
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN : apps.${CF_ROOT_DOMAIN}
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG : p-dataflow
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME : admin
         run: scripts/at-test-script.sh
         
