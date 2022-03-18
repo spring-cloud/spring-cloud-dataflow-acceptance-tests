@@ -62,7 +62,6 @@ jobs:
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG : p-dataflow
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME : admin
         run: |
-           sudo apt-get update
-           sudo apt-get install cf-cli
+           snap install cf-cli
            scripts/at-test-script.sh
         
