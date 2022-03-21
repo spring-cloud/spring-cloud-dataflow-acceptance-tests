@@ -17,6 +17,8 @@ echo RUNNING TESTS
 # ensure no false prometheus is detected.
 export TEST_PLATFORM_CONNECTION_PROMETHEUS_URL=none
 export MAVEN_PROPERTIES="-Dtest.docker.compose.disable.extension=true -Djavax.net.ssl.trustStore=${PWD}/mycacerts -Djavax.net.ssl.trustStorePassword=changeit"
-./run.sh tests -c -cc -se --tests !DataFlowAT#streamAppCrossVersion,!DataFlowAT#streamPartitioning,!BatchRemotePartitioningAT#runBatchRemotePartitionJobCloudFoundry
+status=./run.sh tests -c -cc -se --tests DataFlowAT#testFail
+#!DataFlowAT#streamAppCrossVersion,!DataFlowAT#streamPartitioning,!BatchRemotePartitioningAT#runBatchRemotePartitionJobCloudFoundry
 echo FINISHED RUNNING TESTS
 ./run.sh clean -se
+exit $status

@@ -138,10 +138,6 @@ config
 
 run_tests
 status=$?
-if [ $status -ne 0 ]
-then
-  exit $status
-fi
 
 # Run clean unless disabled.
 if [ -z "$skipCleanup" ]; then
@@ -156,4 +152,4 @@ if [ -z "$skipCleanup" ]; then
   fi
   . scripts/clean.sh "$@"
 fi
-exit
+exit $status
