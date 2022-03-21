@@ -71,9 +71,4 @@ class DataFlowAT extends DataFlowIT {
                 () -> stream.logs(app("log")).contains("TICKTOCK CLOUD CONFIG - TIMESTAMP:"));
         }
     }
-
-    @Test
-    public void testFail() {
-        fail();
-    }
 }

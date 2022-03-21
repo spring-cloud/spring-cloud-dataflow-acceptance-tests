@@ -44,7 +44,6 @@ function create_service() {
       if [[ -z $service_config ]]; then
         cf create-service $service_type $service_plan $service
       else
-       echo "cf create-service $service_type $service_plan $service -c $service_config"
        cf create-service $service_type $service_plan $service -c "$service_config"
       fi
       continue
