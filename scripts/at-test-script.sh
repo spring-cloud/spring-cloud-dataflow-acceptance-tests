@@ -3,8 +3,9 @@
 #
 #Install required POSTGRESQL lib for python
 PATH=$PATH:~/.local/bin
-curl  https://bootstrap.pypa.io/pip/3.6/get-pip.py  > get-pip.py
-python3 get-pip.py
+#curl  https://bootstrap.pypa.io/pip/3.6/get-pip.py  > get-pip.py
+#python3 get-pip.py
+python3 -m pip install --upgrade pip
 pip3 install psycopg2-binary
 
 #Install cf cli
