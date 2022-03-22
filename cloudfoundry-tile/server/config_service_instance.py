@@ -69,7 +69,7 @@ config={}
 if dataflow_tile_configuration:
     config = json.loads(dataflow_tile_configuration)
 
-if not config.get('relational-data-service') or not config.get('relational-data-service'):
+if not config.get('relational-data-service') or not config.get('skipper-relational'):
     db = {}
     db['username'] = os.getenv("SQL_USERNAME", "acceptance-tests")
     db['password'] = os.getenv("SQL_PASSWORD")
