@@ -1,0 +1,17 @@
+
+name: SCDF AT for CF tile (Rabbit - env 2)
+
+# Controls when the workflow will run
+on:
+  schedule:
+  - cron: "0 4 * * *"
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+    rabbit-2:
+        - uses: ./.github/workflows/common/at-common-workflow
+          with:
+              cf_host: benicia
+              cf_index: 2
+              binder: rabbit
