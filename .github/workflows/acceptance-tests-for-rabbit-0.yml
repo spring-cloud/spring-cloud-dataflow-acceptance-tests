@@ -16,6 +16,7 @@ jobs:
              cf_index: 0
              binder: rabbit
         secrets:
+<<<<<<< Updated upstream
            CF_USERNAME: ${{secrets.CF_USERNAME}}
            CF_ENV_0_PASSWORD: ${{secrets.CF_ENV_0_PASSWORD}}
            CF_ENV_1_PASSWORD: ${{secrets.CF_ENV_1_PASSWORD}}
@@ -27,3 +28,16 @@ jobs:
            KAFKA_USERNAME: ${{secrets.KAFKA_USERNAME}}
            KAFKA_PASSWORD: ${{secrets.KAFKA_PASSWORD}}
            KAFKA_BROKER_ADDRESS: ${{secrets.KAFKA_BROKER_ADDRESS}}
+=======
+            CF_USERNAME: ${{secrets.CF_USERNAME}}
+            CF_ENV_0_PASSWORD: ${{secrets.CF_ENV_0_PASSWORD}}
+            CF_ENV_1_PASSWORD: ${{secrets.CF_ENV_1_PASSWORD}}
+            CF_ENV_2_PASSWORD: ${{secrets.CF_ENV_2_PASSWORD}}
+            SQL_USERNAME: ${{secrets.SQL_USERNAME}}
+            SQL_PASSWORD: ${{secrets.SQL_PASSWORD}}
+            SQL_HOST: ${{secrets.SQL_HOST}}
+            SQL_PORT: ${{secrets.SQL_PORT}}
+            KAFKA_USERNAME: ${{secrets.KAFKA_USERNAME}}
+            KAFKA_PASSWORD: ${{secrets.KAFKA_PASSWORD}}
+            KAFKA_BROKER_ADDRESS: ${{secrets.KAFKA_BROKER_ADDRESS}}
+>>>>>>> Stashed changes

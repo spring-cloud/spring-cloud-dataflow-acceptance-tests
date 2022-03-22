@@ -27,7 +27,7 @@ on:
              required: true
            KAFKA_BROKER_ADDRESS:
              required: true
-   
+
         inputs:
             environment:
                 default: scdf_at
@@ -89,5 +89,6 @@ jobs:
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG : p-dataflow
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME : ${{ secrets.CF_USERNAME }}
               run: |
+                echo "PASSWORD_KEY : $PASSWORD_KEY"
                 scripts/at-test-script.sh
 
