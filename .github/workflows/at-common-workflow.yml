@@ -61,5 +61,7 @@ jobs:
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN : "apps.${{ inputs.cf_host }}.cf-app.com"
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG : p-dataflow
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME : ${{ secrets.CF_USERNAME }}
-              run: scripts/at-test-script.sh
+              run: |
+                echo "DATAFLOW_TILE_KAFKA_BROKER_ADDRESS: $DATAFLOW_TILE_KAFKA_BROKER_ADDRESS"
+                scripts/at-test-script.sh
 
