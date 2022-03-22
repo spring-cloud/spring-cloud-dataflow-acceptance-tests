@@ -62,7 +62,7 @@ jobs:
               env:
                 PASSWORD_KEY: ${{ format('CF_ENV_{0}_PASSWORD', inputs.cf_index) }}
                 #SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD: ${{ secrets[env.PASSWORD_KEY] }}
-                run : echo "SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD=${{ secrets[env.PASSWORD_KEY] }}" >> $GITHUB_ENV
+              run : echo "SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD=${{ secrets[env.PASSWORD_KEY] }}" >> $GITHUB_ENV
             - name: run the test script
               env:
                   # DEBUG: true
