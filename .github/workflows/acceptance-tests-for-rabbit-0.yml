@@ -10,7 +10,7 @@ on:
 
 jobs:
     rabbit-0:
-        uses: ./.github/workflows/at-common-workflow
+        uses: ./.github/workflows/at-common-workflow.yml
         with:
              cf_host: alturas
              cf_index: 0

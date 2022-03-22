@@ -10,7 +10,7 @@ on:
 
 jobs:
     kafka-2:
-        uses: ./.github/workflows/at-common-workflow
+        uses: ./.github/workflows/at-common-workflow.yml
         with:
             cf_host: benicia
             cf_index: 2
