@@ -10,9 +10,9 @@ on:
 
 jobs:
   kafka-0:
-      - uses: ./.github/workflows/common/at-common-workflow
-        with:
-            cf_host: alturas
-            cf_index: 0
-            binder: kafka
+      uses: ./.github/workflows/common/at-common-workflow
+      with:
+          cf_host: alturas
+          cf_index: 0
+          binder: kafka
 
