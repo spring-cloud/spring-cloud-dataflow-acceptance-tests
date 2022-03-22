@@ -11,7 +11,7 @@ on:
 jobs:
     kafka-2:
         uses: ./.github/workflows/common/at-common-workflow
-          with:
+        with:
             cf_host: benicia
             cf_index: 2
             binder: kafka
