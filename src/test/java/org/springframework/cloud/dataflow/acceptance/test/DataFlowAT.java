@@ -31,8 +31,6 @@ import org.springframework.cloud.dataflow.integration.test.IntegrationTestProper
 import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBuilder;
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
 
-import static org.junit.Assert.fail;
-
 @SpringBootTest
 @EnableConfigurationProperties({ IntegrationTestProperties.class })
 class DataFlowAT extends DataFlowIT {
