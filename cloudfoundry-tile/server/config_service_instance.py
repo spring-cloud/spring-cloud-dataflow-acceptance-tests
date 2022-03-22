@@ -33,6 +33,7 @@ def init_db(db, dbname):
   log("initializing DB %s..." %(dbname))
   conn = None
   try:
+      # Connect to the postgres (admin) database to drop/create target database
       conn = psycopg2.connect(
             host = db['host'],
             port = db['port'],
@@ -46,6 +47,7 @@ def init_db(db, dbname):
         live_connections = cur.fetchone()[0]
         log("DB %s has %d live connections" %(dbname, live_connections))
         while live_connections > 0:
+            # Terminate any existing connections to the database
             cur.execute("SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = %s;",(dbname,))
             time.sleep(1.0)
             cur.execute("SELECT count(*) FROM pg_stat_activity WHERE datname = %s;",(dbname,))
@@ -56,6 +58,7 @@ def init_db(db, dbname):
         cur.execute("CREATE DATABASE %s;" % dbname)
         log("completed initialization of DB %s" %(dbname))
   except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
+     # If we fail, continue anyway
      log(f'Error {e}')
   finally:
      if conn:
@@ -71,7 +74,7 @@ if dataflow_tile_configuration:
 
 if not config.get('relational-data-service') or not config.get('skipper-relational'):
     db = {}
-    db['username'] = os.getenv("SQL_USERNAME", "acceptance-tests")
+    db['username'] = os.getenv("SQL_USERNAME")
     db['password'] = os.getenv("SQL_PASSWORD")
     db['host'] = os.getenv("SQL_HOST")
     db['port'] = os.getenv("SQL_PORT", "5432")
