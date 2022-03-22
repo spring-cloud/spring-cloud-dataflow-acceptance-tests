@@ -9,9 +9,9 @@ on:
   workflow_dispatch:
 
 jobs:
-    kafka-1:
-        - uses: ./.github/workflows/common/at-common-workflow
+    rabbit-0:
+        uses: ./.github/workflows/common/at-common-workflow
           with:
-              cf_host: alturas
-              cf_index: 0
-              binder: rabbit
+             cf_host: alturas
+             cf_index: 0
+             binder: rabbit

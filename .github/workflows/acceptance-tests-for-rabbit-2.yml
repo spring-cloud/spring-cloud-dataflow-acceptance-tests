@@ -10,8 +10,8 @@ on:
 
 jobs:
     rabbit-2:
-        - uses: ./.github/workflows/common/at-common-workflow
+        uses: ./.github/workflows/common/at-common-workflow
           with:
-              cf_host: benicia
-              cf_index: 2
-              binder: rabbit
+            cf_host: benicia
+            cf_index: 2
+            binder: rabbit
