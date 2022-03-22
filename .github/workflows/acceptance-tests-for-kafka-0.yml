@@ -1,5 +1,5 @@
 
-name: SCDF AT for CF tile (Kafka - env 0)
+name: SCDF AT Kafka - env 0
 
 # Controls when the workflow will run
 on:

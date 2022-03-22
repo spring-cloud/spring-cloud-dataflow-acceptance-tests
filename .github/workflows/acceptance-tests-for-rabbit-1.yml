@@ -1,5 +1,5 @@
 
-name: SCDF AT for CF tile (Rabbit - env 1)
+name: SCDF AT Rabbit - env 1
 
 # Controls when the workflow will run
 on:
