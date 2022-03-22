@@ -1,0 +1,32 @@
+# This is a test
+name: Experiment
+
+# Controls when the workflow will run
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+# Controls when the workflow will run
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  acceptance-tests:
+    environment: scdf_at
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    strategy:
+       max-parallel: 3
+       matrix:
+         cf_host: ['santabarbara']
+         binder: ['rabbit', 'kafka']
+         include:
+              - env_index: 0
+         
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # Runs a single command using the runners shell
+      - name: run the test script
+        env:
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD: ${{ secrets.CF_ENV_${{matrix.env_index}}_PASSWORD }}
+        run: echo "works"
+        
