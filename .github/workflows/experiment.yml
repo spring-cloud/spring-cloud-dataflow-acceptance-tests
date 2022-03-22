@@ -28,6 +28,7 @@ jobs:
       # Runs a single command using the runners shell
       - name: run the test script
         env:
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD: ${{ secrets.CF_ENV_${{matrix.env_index}}_PASSWORD }}
+          PASSWORD_KEY: ${{ format('CF_ENV_{0}_PASSWORD', ${{matrix.env_index}}) }}
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD: ${{ secrets[env.PASSWORD_KEY] }}
         run: echo "works"
         
