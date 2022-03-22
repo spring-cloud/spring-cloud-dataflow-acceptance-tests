@@ -1,5 +1,5 @@
 
-name: SSCDF AT Kafka - env 2
+name: SCDF AT Kafka - env 2
 
 # Controls when the workflow will run
 on:
