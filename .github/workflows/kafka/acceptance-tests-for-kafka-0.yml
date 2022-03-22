@@ -12,7 +12,7 @@ jobs:
   kafka-0:
       - uses: ./.github/workflows/at-common-workflow
         with:
-            cf_host: host 0
+            cf_host: alturas
             cf_index: 0
             binder: kafka
 
