@@ -4,6 +4,30 @@ name: SCDF Acceptance Tests Common Workflow
 # Controls when the workflow will run
 on:
     workflow_call:
+        secrets:
+           CF_USERNAME:
+             required: true
+           CF_ENV_0_PASSWORD:
+             required: true
+           CF_ENV_1_PASSWORD:
+             required: true
+           CF_ENV_2_PASSWORD:
+             required: true
+           SQL_USERNAME:
+             required: true
+           SQL_PASSWORD:
+             required: true
+           SQL_HOST:
+             required: true
+           SQL_PORT:
+             required: true
+           KAFKA_USERNAME:
+             required: true
+           KAFKA_PASSWORD:
+             required: true
+           KAFKA_BROKER_ADDRESS:
+             required: true
+   
         inputs:
             environment:
                 default: scdf_at
