@@ -19,7 +19,8 @@ jobs:
          cf_host: ['santabarbara']
          binder: ['rabbit', 'kafka']
          include:
-              - env_index: 0
+            - cf_host: santabarbara
+              env_index: 0
          
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
