@@ -63,6 +63,7 @@ jobs:
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME : ${{ secrets.CF_USERNAME }}
               run: |
                 echo "BINDER: $BINDER"
+                echo "SQL_PORT: $SQL_PORT"
                 echo "DATAFLOW_TILE_KAFKA_BROKER_ADDRESS: $DATAFLOW_TILE_KAFKA_BROKER_ADDRESS"
-                scripts/at-test-script.sh
+                #scripts/at-test-script.sh
 
