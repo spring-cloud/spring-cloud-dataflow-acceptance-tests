@@ -98,5 +98,5 @@ jobs:
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG : p-dataflow
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME : ${{ secrets.CF_USERNAME }}
               run: |
-                scripts/at-test-script-no-scheduler.sh
+                scripts/at-test-script.sh
 
