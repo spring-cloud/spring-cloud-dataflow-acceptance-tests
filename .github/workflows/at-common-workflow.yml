@@ -29,9 +29,6 @@ on:
              required: true
 
         inputs:
-            scheduler:
-                default: true
-                type: boolean
             environment:
                 default: scdf_at
                 type: string
@@ -44,7 +41,6 @@ on:
             cf_index:
                 required: true
                 type: string
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
     acceptance-tests:
@@ -55,6 +51,7 @@ jobs:
         steps:
             # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
             - uses: actions/checkout@v3
+
             - uses: actions/setup-java@v1
               with:
                   java-version: 1.8
@@ -69,7 +66,6 @@ jobs:
             - name: run the test script
               env:
                   # DEBUG: true
-                  SCHEDULER : ${{ inputs.scheduler }}
                   BINDER : ${{ inputs.binder }}
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE : ${{ inputs.binder }}
                   PASSWORD_KEY: ${{ format('CF_ENV_{0}_PASSWORD', inputs.cf_index) }}
@@ -97,7 +93,6 @@ jobs:
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN : "apps.${{ inputs.cf_host }}.cf-app.com"
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG : p-dataflow
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME : ${{ secrets.CF_USERNAME }}
-
-            run: |
-                scripts/at-test-script.sh
+              run: |
+                scripts/at-test-script-no-scheduler.sh
 
