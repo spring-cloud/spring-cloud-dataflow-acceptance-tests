@@ -69,6 +69,7 @@ jobs:
             - name: run the test script
               env:
                   # DEBUG: true
+                  SCHEDULER : ${{ inputs.scheduler }}
                   BINDER : ${{ inputs.binder }}
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE : ${{ inputs.binder }}
                   PASSWORD_KEY: ${{ format('CF_ENV_{0}_PASSWORD', inputs.cf_index) }}
