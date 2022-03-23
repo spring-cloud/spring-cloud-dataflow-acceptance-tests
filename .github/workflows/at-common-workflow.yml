@@ -29,6 +29,9 @@ on:
              required: true
 
         inputs:
+            scheduler:
+                default: true
+                type: boolean
             environment:
                 default: scdf_at
                 type: string
