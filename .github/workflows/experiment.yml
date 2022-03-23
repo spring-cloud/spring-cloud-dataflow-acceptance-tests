@@ -9,26 +9,14 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  acceptance-tests:
-    environment: scdf_at
+  experiment:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    strategy:
-       max-parallel: 3
-       matrix:
-         cf_host: ['santabarbara']
-         binder: ['rabbit', 'kafka']
-         include:
-            - cf_host: santabarbara
-              env_index: 0
-         
+    
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       # Runs a single command using the runners shell
-      - name: run the test script
-        env:
-          PASSWORD_KEY: ${{ format('CF_ENV_{0}_PASSWORD', matrix.env_index) }}
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD: ${{ secrets[env.PASSWORD_KEY] }}
-        run: echo "$PASSWORD_KEY"
+      - name: run some commands
+        run: echo "Hello"
         
