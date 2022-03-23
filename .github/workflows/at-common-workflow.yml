@@ -29,6 +29,9 @@ on:
              required: true
 
         inputs:
+            scheduler:
+                default: true
+                type: boolean
             environment:
                 default: scdf_at
                 type: string
@@ -66,6 +69,7 @@ jobs:
             - name: run the test script
               env:
                   # DEBUG: true
+                  SCHEDULER : ${{ inputs.scheduler }}
                   BINDER : ${{ inputs.binder }}
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE : ${{ inputs.binder }}
                   PASSWORD_KEY: ${{ format('CF_ENV_{0}_PASSWORD', inputs.cf_index) }}
@@ -93,6 +97,7 @@ jobs:
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN : "apps.${{ inputs.cf_host }}.cf-app.com"
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG : p-dataflow
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME : ${{ secrets.CF_USERNAME }}
-              run: |
-                scripts/at-test-script-no-scheduler.sh
+
+            run: |
+                scripts/at-test-script.sh
 

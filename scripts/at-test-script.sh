@@ -15,18 +15,23 @@ then
   sudo apt-get install cf-cli
 fi
 
+SCHED_FLAG=""
+if [ "$SCHEDULER" == "true" ]; then
+        SCHED_FLAG="-se"
+fi
+
 echo CLEANING UP RESOURCES BEFORE RUNNING TESTS
 ./run.sh clean -se
 echo FINISHED CLEANING UP RESOURCES
 # setup environment
-./run.sh setup -cc -se
+./run.sh setup -cc $SCHED_FLAG
 # Run the tests
 echo RUNNING TESTS
 # ensure no false prometheus is detected.
 export TEST_PLATFORM_CONNECTION_PROMETHEUS_URL=none
 export MAVEN_PROPERTIES="-Dtest.docker.compose.disable.extension=true -Djavax.net.ssl.trustStore=${PWD}/mycacerts -Djavax.net.ssl.trustStorePassword=changeit"
-./run.sh tests -c -cc -se --tests !DataFlowAT#streamAppCrossVersion,!DataFlowAT#streamPartitioning,!BatchRemotePartitioningAT#runBatchRemotePartitionJobCloudFoundry
+./run.sh tests -c -cc $SCHED_FLAG --tests !DataFlowAT#streamAppCrossVersion,!DataFlowAT#streamPartitioning,!BatchRemotePartitioningAT#runBatchRemotePartitionJobCloudFoundry
 status=$?
 echo FINISHED RUNNING TESTS
-./run.sh clean -se
+./run.sh clean $SCHED_FLAG
 exit $status
