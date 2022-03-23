@@ -27,7 +27,7 @@
 		<checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>
         <checkstyle.header.file>etc/checkstyle/checkstyle-header.txt</checkstyle.header.file>
 
-		<dataflow.version>2.10.0-SNAPSHOT</dataflow.version>
+		<dataflow.version>2.9.3-SNAPSHOT</dataflow.version>
 		<app.starters.support.version>2.5.0</app.starters.support.version>
 		<spring-cloud-deployer-cloudfoundry.version>[2.7,)</spring-cloud-deployer-cloudfoundry.version>
 	</properties>
