@@ -58,6 +58,7 @@ jobs:
               with:
                   java-version: 1.8
                   cache: maven
+                  distribution: liberica
             - uses: stCarolas/setup-maven@v4.3
               with:
                   maven-version: 3.8.2
