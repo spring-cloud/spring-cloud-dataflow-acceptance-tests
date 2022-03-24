@@ -2,6 +2,11 @@
 
 This project bootstraps a dataflow server on a target platform (certified local, kubernetes, cloudfoundry environments), executes a series of tests by creating a series of streams and tasks and then cleans up after its done.
 
+NOTE: Currently these shell scripts are used only to test Cloud Foundry environments, K8s acceptance tests use GH Actions in the https://github.com/spring-cloud/spring-cloud-dataflow[spring-cloud-dataflow] repository. The java test code here is used by the K8s build as will. 
+
+== Current status
+image::https://github.com/github/docs/actions/workflows/acceptance-tests-for-rabbit-0.yml/badge.svg[link="https://github.com/github/docs/actions/workflows/acceptance-tests-for-rabbit-0.yml", title="rabbit-env-0"]
+
 == How to run it
 
 The main script is called `run.sh` and is a wrapper to run tasks for three phases:
