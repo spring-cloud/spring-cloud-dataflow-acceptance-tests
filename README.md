@@ -13,7 +13,7 @@
 This project bootstraps a dataflow server on a target platform (certified local, kubernetes, cloudfoundry environments), executes a series of tests by creating a series of streams and tasks and then cleans up after its done.
 
 ## NOTE:
-Currently, these shell scripts are used only to test Cloud Foundry environments, K8s acceptance tests use GH Actions in the https://github.com/spring-cloud/spring-cloud-dataflow[spring-cloud-dataflow] repository. The java test code here is used by the K8s build as will.
+Currently, these shell scripts are used only to test Cloud Foundry environments, K8s acceptance tests use GH Actions in the [spring-cloud-dataflow](https://github.com/spring-cloud/spring-cloud-dataflow) repository. The java test code here is used by the K8s build as will.
 
 
 
