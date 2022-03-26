@@ -1,0 +1,31 @@
+
+name: SCDF AT Rabbit - env 0
+
+# Controls when the workflow will run
+on:
+  schedule:
+  - cron: "0 4 * * *"
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+    rabbit-0-oracle:
+        uses: ./.github/workflows/at-common-workflow.yml
+        with:
+             cf_host: alturas
+             cf_index: 0
+             binder: rabbit
+             sql_provider: oracle
+        secrets:
+            CF_USERNAME: ${{secrets.CF_USERNAME}}
+            CF_ENV_0_PASSWORD: ${{secrets.CF_ENV_0_PASSWORD}}
+            CF_ENV_1_PASSWORD: ${{secrets.CF_ENV_1_PASSWORD}}
+            CF_ENV_2_PASSWORD: ${{secrets.CF_ENV_2_PASSWORD}}
+            SQL_USERNAME: ${{secrets.ORACLE_USERNAME}}
+            SQL_PASSWORD: ${{secrets.ORACLE_PASSWORD}}
+            SQL_HOST: ${{secrets.ORACLE_HOST}}
+            SQL_PORT: ${{secrets.ORACLE_PORT}}
+            KAFKA_USERNAME: ${{secrets.KAFKA_USERNAME}}
+            KAFKA_PASSWORD: ${{secrets.KAFKA_PASSWORD}}
+            KAFKA_BROKER_ADDRESS: ${{secrets.KAFKA_BROKER_ADDRESS}}
+
