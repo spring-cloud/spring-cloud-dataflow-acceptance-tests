@@ -5,7 +5,7 @@
 PATH=$PATH:~/.local/bin
 python3 -m pip install --upgrade pip
 pip3 install psycopg2-binary
-
+pip3 install cx_Oracle --upgrade --user
 #Install cf cli
 if ! command -v cf &> /dev/null
 then

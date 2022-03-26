@@ -29,6 +29,9 @@ on:
              required: true
 
         inputs:
+            sql_provider:
+                default: postgresql
+                type: string
             scheduler:
                 default: true
                 type: boolean
@@ -82,6 +85,7 @@ jobs:
                   SQL_PORT: ${{ secrets.SQL_PORT }}
                   SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
                   SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
+                  SQL_PROVIDER: ${{ inputs.sql_provider }}
                   DATAFLOW_TILE_KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
                   DATAFLOW_TILE_KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
                   DATAFLOW_TILE_KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
