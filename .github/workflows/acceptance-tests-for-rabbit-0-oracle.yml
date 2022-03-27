@@ -1,10 +1,10 @@
 
-name: SCDF AT Rabbit - env 0
+name: SCDF AT Rabbit Orace - env 0
 
 # Controls when the workflow will run
 on:
   schedule:
-  - cron: "0 4 * * *"
+  #- cron: "0 4 * * *"
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
