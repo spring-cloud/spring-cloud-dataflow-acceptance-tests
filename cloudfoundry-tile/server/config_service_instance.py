@@ -97,18 +97,24 @@ def init_oracle_db(db, dbname):
      CONN_INFO = {
          'host': db['host'],
          'port': db['port'],
-         'user': db['username'],
+         'user': 'SYSTEM',
          'psw': db['password'],
          'service': 'xe',
      }
-     log(CONN_INFO)
      conn_str = '{user}/{psw}@{host}:{port}/{service}'.format(**CONN_INFO)
-     log(conn_str)
      conn = cx_Oracle.connect(conn_str)
      # todo: set connect_timeout
      with conn.cursor() as cur:
-         cur.execute("DROP USER CASCADE %s;" % db['username'])
-         log("completed initialization of DB %s" %(dbname))
+
+         cur.execute("ALTER SESSION SET '_ORACLE_SCRIPT'=TRUE;")
+         try:
+           cur.execute("DROP USER %s CASCADE;" % db['username'])
+          except cx_Oracle.DatabaseError as e:
+             log(f'Error {e}')
+         finally:
+           cur.execute("CREATE USER %s IDENTIFIED BY %s;" % (db['username'], db['password']))
+           cur.execute("GRANT ALL PRIVILEGES TO %s;" % (db['username']))
+           log("completed initialization of DB %s" %(dbname))
 
    except cx_Oracle.DatabaseError as e:
         # If we fail, continue anyway
