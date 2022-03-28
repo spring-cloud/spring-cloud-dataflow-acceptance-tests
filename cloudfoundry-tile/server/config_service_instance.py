@@ -107,7 +107,7 @@ def init_oracle_db(db, dbname):
      conn = cx_Oracle.connect(conn_str)
      # todo: set connect_timeout
      with conn.cursor() as cur:
-         cur.execute("DROP USER IF EXISTS %s;" % db['username'])
+         cur.execute("DROP USER CASCADE %s;" % db['username'])
          log("completed initialization of DB %s" %(dbname))
 
    except cx_Oracle.DatabaseError as e:
@@ -121,6 +121,7 @@ def init_db(db, dbname):
    if db['provider'] == 'postgresql':
       init_postgres_db(db, dbname)
    elif db['provider'] == 'oracle':
+      dbname='xe'
       init_oracle_db(db, dbname)
    else:
      raise Exception("Invalid db provider %s" % db['provider'])
