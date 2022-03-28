@@ -109,8 +109,8 @@ def init_oracle_db(db, dbname):
          cur.execute("ALTER SESSION SET '_ORACLE_SCRIPT'=TRUE;")
          try:
            cur.execute("DROP USER %s CASCADE;" % db['username'])
-          except cx_Oracle.DatabaseError as e:
-             log(f'Error {e}')
+         except cx_Oracle.DatabaseError as e:
+            log(f'Error {e}')
          finally:
            cur.execute("CREATE USER %s IDENTIFIED BY %s;" % (db['username'], db['password']))
            cur.execute("GRANT ALL PRIVILEGES TO %s;" % (db['username']))
