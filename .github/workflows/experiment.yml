@@ -41,7 +41,7 @@ jobs:
               if [[ "$SQL_PROVIDER"=="oracle" ]]; then
                 echo "Installing ORACLE components"
                 #sudo apt-get install build-essential unzip python-dev libaio-dev
-                wget -q -O - https://download.oracle.com/otn_software/linux/instantclient/215000/instantclient-basiclite-linux.x64-21.5.0.0.0dbru.zip
+                wget -q https://download.oracle.com/otn_software/linux/instantclient/215000/instantclient-basiclite-linux.x64-21.5.0.0.0dbru.zip
                 export LD_LIBRARY_PATH=./instantclient_21_5
               fi
             fi
