@@ -110,9 +110,8 @@ def init_oracle_db(db, dbname):
      conn = cx_Oracle.connect(conn_str)
      # todo: set connect_timeout
      with conn.cursor() as cur:
-
-         cur.execute('ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE;')
          try:
+           #cur.execute('ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE;')
            cur.execute("DROP USER %s CASCADE;" % db['username'])
          except cx_Oracle.DatabaseError as e:
             log(get_traceback(e))
