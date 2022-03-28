@@ -4,6 +4,11 @@ import os
 import psycopg2
 import time
 import cx_Oracle
+import traceback
+
+def get_traceback(e):
+    lines = traceback.format_exception(type(e), e, e.__traceback__)
+    return ''.join(lines)
 
 def log(msg):
     #stderr because the config json is piped via stdout. This is out of band
@@ -110,7 +115,7 @@ def init_oracle_db(db, dbname):
          try:
            cur.execute("DROP USER %s CASCADE;" % db['username'])
          except cx_Oracle.DatabaseError as e:
-            log(f'Error {e}')
+            log(get_traceback(e))
          finally:
            cur.execute("CREATE USER %s IDENTIFIED BY %s;" % (db['username'], db['password']))
            cur.execute("GRANT ALL PRIVILEGES TO %s;" % (db['username']))
@@ -118,7 +123,7 @@ def init_oracle_db(db, dbname):
 
    except cx_Oracle.DatabaseError as e:
         # If we fail, continue anyway
-        log(f'Error {e}')
+        log(get_traceback(e))
    finally:
      if conn:
         conn.close()
