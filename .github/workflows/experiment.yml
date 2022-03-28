@@ -27,6 +27,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       # Runs a single command using the runners shell
+      - uses: actions/checkout@v3
       - name: run some commands
         run: |
             #Install required POSTGRESQL lib for python
