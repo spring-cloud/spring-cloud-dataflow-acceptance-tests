@@ -49,6 +49,7 @@ def user_provided(db, dbname):
     if db['provider'] == 'postgresql':
        return user_provided_postgresql(db, dbname)
     elif db['provider'] == 'oracle':
+       dbname='xe'
        return user_provided_oracle(db, dbname)
     else:
         raise Exception("Invalid db provider %s" % db['provider'])
@@ -106,8 +107,7 @@ def init_oracle_db(db, dbname):
      conn = cx_Oracle.connect(conn_str)
      # todo: set connect_timeout
      with conn.cursor() as cur:
-         #cur.execute("DROP DATABASE IF EXISTS %s;" % dbname)
-         #cur.execute("CREATE DATABASE %s;" % dbname)
+         cur.execute("DROP USER IF EXISTS %s;" % db['username'])
          log("completed initialization of DB %s" %(dbname))
 
    except cx_Oracle.DatabaseError as e:
