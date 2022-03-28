@@ -111,13 +111,13 @@ def init_oracle_db(db, dbname):
      # todo: set connect_timeout
      with conn.cursor() as cur:
          try:
-           #cur.execute('ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE;')
-           cur.execute("DROP USER %s CASCADE;" % db['username'])
+           cur.execute('ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE')
+           cur.execute("DROP USER %s CASCADE" % db['username'])
          except cx_Oracle.DatabaseError as e:
             log(get_traceback(e))
          finally:
-           cur.execute("CREATE USER %s IDENTIFIED BY %s;" % (db['username'], db['password']))
-           cur.execute("GRANT ALL PRIVILEGES TO %s;" % (db['username']))
+           cur.execute("CREATE USER %s IDENTIFIED BY %s" % (db['username'], db['password']))
+           cur.execute("GRANT ALL PRIVILEGES TO %s" % (db['username']))
            log("completed initialization of DB %s" %(dbname))
 
    except cx_Oracle.DatabaseError as e:
