@@ -112,6 +112,10 @@ def init_oracle_db(db, dbname):
      with conn.cursor() as cur:
          try:
            cur.execute('ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE')
+           cur.execute("SELECT sid,serial# FROM v$session where username='%s'" %(db['username'].upper()))
+           for row in cur.fetchall():
+               log("killing session " + str(row))
+               cur.execute("ALTER SYSTEM kill session '%s,%s' immediate" % (row))
            cur.execute("DROP USER %s CASCADE" % db['username'])
          except cx_Oracle.DatabaseError as e:
             log(get_traceback(e))
