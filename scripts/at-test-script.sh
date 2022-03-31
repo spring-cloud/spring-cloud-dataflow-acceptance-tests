@@ -9,7 +9,7 @@ pip3 install psycopg2-binary
 pip3 install cx_Oracle --upgrade --user
 #Install cf cli
 os=$(uname)
-if [[ "$os"=="Linux" ]]; then
+if [[ "$os" == "Linux" ]]; then
     if ! command -v cf &> /dev/null
     then
       wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
@@ -17,11 +17,11 @@ if [[ "$os"=="Linux" ]]; then
       sudo apt-get update
       sudo apt-get install cf-cli
     fi
-    if [[ "$SQL_PROVIDER"=="oracle" ]]; then
+    if [[ "$SQL_PROVIDER" == "oracle" ]]; then
       echo "Installing ORACLE components"
-      sudo apt-get install build-essential unzip python-dev libaio-dev
-      wget -q -O - https://download.oracle.com/otn_software/linux/instantclient/215000/instantclient-basiclite-linux.x64-21.5.0.0.0dbru.zip
-      export LD_LIBRARY_PATH=./instantclient_21_5
+       wget -q https://download.oracle.com/otn_software/linux/instantclient/215000/instantclient-basiclite-linux.x64-21.5.0.0.0dbru.zip
+       unzip instantclient-basiclite-linux.x64-21.5.0.0.0dbru.zip
+       export LD_LIBRARY_PATH=./instantclient_21_5
     fi
 fi
 
