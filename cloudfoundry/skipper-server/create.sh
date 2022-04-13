@@ -8,10 +8,10 @@ applications:
 - name: skipper-server-$RANDOM
   timeout: 120
   path: ./skipper-server.jar
-  memory: 1G
+  memory: 2G
+  disk_quota: 2048M
   buildpack: $JAVA_BUILDPACK
-  services:
-    - mysql_skipper
+
 EOF
 if [ $LOG_SERVICE_NAME ]; then
     cat << EOF >> ./skipper-manifest.yml
@@ -52,3 +52,4 @@ download_skipper $PWD
 generate_manifest
 push_application
 run_scripts "$PWD" "config.sh"
+. ./server-uri.sh

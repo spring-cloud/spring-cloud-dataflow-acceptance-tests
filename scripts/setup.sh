@@ -62,17 +62,20 @@ function download_skipper(){
 }
 
 function setup() {
-  pushd $PLATFORM_FOLDER
+    if [ -z "$SQL_PROVIDER" ]; then
+        export SQL_PROVIDER=postgresql
+    fi
+    pushd $PLATFORM_FOLDER
     run_scripts "init" "setenv.sh"
-    run_scripts "mysql" "create.sh"
+    run_scripts $SQL_PROVIDER "create.sh"
     pushd "binder"
-      run_scripts $BINDER "create.sh"
+        run_scripts $BINDER "create.sh"
     popd
     if [ "$schedulesEnabled" ]; then
-        run_scripts "scheduler" "create.sh"
-        export SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED=true
+          run_scripts "scheduler" "create.sh"
+          export SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED=true
     else
-        export SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED=false
+          export SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED=false
     fi
 
     DOWNLOADED_SERVER=
@@ -80,28 +83,28 @@ function setup() {
     #TODO - Remove platform specific here
     if [ "$PLATFORM" == "cloudfoundry" ] && [ -z "$skipCloudConfig" ];
     then
-    echo "NOTE: The Config Server must be pre-started using the config-server/create.sh"
-    # Note: to create config server service on PWS run (creation takes couple of minutes!):
-    # cf create-service -c '{"git": { "uri": "https://github.com/spring-cloud/spring-cloud-dataflow-acceptance-tests"}}' $CONFIG_SERVER_SERVICE_NAME $CONFIG_SERVER_PLAN_NAME cloud-config-server
-    export SPRING_PROFILES_ACTIVE=cloud1
-    echo "SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE"
-    run_scripts "server" "create.sh"
-    echo "Running Config Server test"
-    . ./$PLATFORM_FOLDER/server/server-uri.sh
-    wget --no-check-certificate $SERVER_URI/about -O about.txt
-        # Asserts that the streamsEnabled is false as it was configured in ./scdf-server-cloud1.properties
-        if grep -q "\"streamsEnabled\":false,\"tasksEnabled\":true" about.txt
-            then
-            echo "Spring Cloud Config server properties are updated correctly."
-            rm about.txt
-            else
-            echo "Spring Cloud Config server properties are not available for the SCDF server. Tests fails"
-            exit 1
-        fi
-    run_scripts "server" "destroy.sh"
-    echo "Config Server test completed"
-    DOWNLOADED_SERVER=true
-    export SPRING_PROFILES_ACTIVE=cloud
+      echo "NOTE: The Config Server must be pre-started using the config-server/create.sh"
+      # Note: to create config server service on PWS run (creation takes couple of minutes!):
+      # cf create-service -c '{"git": { "uri": "https://github.com/spring-cloud/spring-cloud-dataflow-acceptance-tests"}}' $CONFIG_SERVER_SERVICE_NAME $CONFIG_SERVER_PLAN_NAME cloud-config-server
+      export SPRING_PROFILES_ACTIVE=cloud1
+      echo "SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE"
+      run_scripts "server" "create.sh"
+      echo "Running Config Server test"
+      . ./$PLATFORM_FOLDER/server/server-uri.sh
+      wget --no-check-certificate $SERVER_URI/about -O about.txt
+          # Asserts that the streamsEnabled is false as it was configured in ./scdf-server-cloud1.properties
+          if grep -q "\"streamsEnabled\":false,\"tasksEnabled\":true" about.txt
+              then
+              echo "Spring Cloud Config server properties are updated correctly."
+              rm about.txt
+              else
+              echo "Spring Cloud Config server properties are not available for the SCDF server. Tests fails"
+              exit 1
+          fi
+      run_scripts "server" "destroy.sh"
+      echo "Config Server test completed"
+      DOWNLOADED_SERVER=true
+      export SPRING_PROFILES_ACTIVE=cloud
     fi
 
     if [ "$PLATFORM" == "cloudfoundry" ];
@@ -111,7 +114,7 @@ function setup() {
     fi
     # Spring Config Server Test (end)
 
-    DEBUG "setup create skipper-server $DATAFLOW_VERSION"
+    DEBUG "setup create skipper-server $SKIPPER_VERSION"
     run_scripts "skipper-server" "create.sh"
     DEBUG "setup create server $DATAFLOW_VERSION"
     run_scripts "server" "create.sh"

@@ -4,7 +4,28 @@ set -o errexit
 
 # ======================================= FUNCTIONS START =======================================
 
+function cf_create_broker_org_space() {
+  [ -z "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG" ] && { echo "Environment variable SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG must be set"; exit 1; }
+  [ -z "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE" ] && { echo "Environment variable SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE must be set"; exit 1; }
 
+  if ! (cf orgs | grep "^${SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG}$"); then
+    cf create-org $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG
+  fi
+  cf target -o $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG
+
+  if ! (cf spaces | grep "^${SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE}$"); then
+    cf create-space $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE
+  fi
+
+}
+
+function cf_target_broker_org_space() {
+  [ -z "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG" ] && { echo "Environment variable SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG must be set"; exit 1; }
+  [ -z "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE" ] && { echo "Environment variable SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE must be set"; exit 1; }
+  DEBUG "running cf target -o $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG -s $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE"
+  cf target -o $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG -s $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE
+  sleep 1
+}
 
 function cf_authenticate_and_target() {
   echo "api is : $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL"
@@ -27,32 +48,8 @@ function cf_authenticate_and_target() {
   fi
   cf api $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL $cf_skip_ssl_validation
   cf auth $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD
+  cf_target_broker_org_space
 }
-
-function cf_create_broker_org_space() {
-  [ -z "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG" ] && { echo "Environment variable SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG must be set"; exit 1; }
-  [ -z "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE" ] && { echo "Environment variable SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE must be set"; exit 1; }
-
-  if ! (cf orgs | grep "^${SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG}$"); then
-    cf create-org $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG
-  fi
-  cf target -o $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG
-
-  if ! (cf spaces | grep "^${SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE}$"); then
-    cf create-space $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE
-  fi
-
-}
-
-
-
-function cf_target_broker_org_space() {
-  [ -z "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG" ] && { echo "Environment variable SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG must be set"; exit 1; }
-  [ -z "$SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE" ] && { echo "Environment variable SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE must be set"; exit 1; }
-
-  cf target -o $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG -s $SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE
-}
-
 # ======================================= FUNCTIONS END =======================================
 
 
@@ -68,5 +65,6 @@ fi
 cf_authenticate_and_target
 cf_create_broker_org_space
 cf_target_broker_org_space
+
 
 

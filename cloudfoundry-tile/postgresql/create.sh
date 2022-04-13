@@ -1,0 +1,1 @@
+python3 $ROOT_DIR/scripts/python/config_external_db.py

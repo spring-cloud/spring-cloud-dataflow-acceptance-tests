@@ -101,7 +101,6 @@ run_scripts() {
 
   if [[ -d "${SCRIPT_DIR}" ]]; then
     pushd "${SCRIPT_DIR}"
-
     if [[ -f "${SCRIPT_FILE}" ]]; then
       DEBUG "executing $CURRENT_DIR/$SCRIPT_DIR/$SCRIPT_FILE 1:$1 ARGS:${ARGS}"
       . ${SCRIPT_FILE} "${ARGS}"
