@@ -6,8 +6,7 @@
 |---|----------|--------|
 | 0 | ![rabbit-env-0](https://github.com/spring-cloud/spring-cloud-dataflow-acceptance-tests/actions/workflows/acceptance-tests-for-rabbit-0.yml/badge.svg) | ![kafka-env-0](https://github.com/spring-cloud/spring-cloud-dataflow-acceptance-tests/actions/workflows/acceptance-tests-for-kafka-0.yml/badge.svg) |
 | 1 | ![rabbit-env-1](https://github.com/spring-cloud/spring-cloud-dataflow-acceptance-tests/actions/workflows/acceptance-tests-for-rabbit-1.yml/badge.svg) | ![kafka-env-1](https://github.com/spring-cloud/spring-cloud-dataflow-acceptance-tests/actions/workflows/acceptance-tests-for-kafka-1.yml/badge.svg) |
-| 2 | ![rabbit-env-2](https://github.com/spring-cloud/spring-cloud-dataflow-acceptance-tests/actions/workflows/acceptance-tests-for-rabbit-2.yml/badge.svg) | ![kafka-env-2](https://github.com/spring-cloud/spring-cloud-dataflow-acceptance-tests/actions/workflows/acceptance-tests-for-kafka-2.yml/badge.svg)
-|
+| 2 | ![rabbit-env-2](https://github.com/spring-cloud/spring-cloud-dataflow-acceptance-tests/actions/workflows/acceptance-tests-for-rabbit-2.yml/badge.svg) | ![kafka-env-2](https://github.com/spring-cloud/spring-cloud-dataflow-acceptance-tests/actions/workflows/acceptance-tests-for-kafka-2.yml/badge.svg)|
 
 ## About
 This project bootstraps a dataflow server on a target platform (certified local, kubernetes, cloudfoundry environments), executes a series of tests by creating a series of streams and tasks and then cleans up after its done.
