@@ -1,8 +1,9 @@
 #!/bin/bash
 #Install required libs for python
-PATH=$PATH:~/.local/bin
+#PATH=$PATH:~/.local/bin
+SETUP_ROOT_DIR='..'
 python3 -m pip install --upgrade pip | grep -v 'Requirement already satisfied'
-pip3 install -r requirements.txt | grep -v 'Requirement already satisfied'
+pip3 install -r $SETUP_ROOT_DIR/requirements.txt | grep -v 'Requirement already satisfied'
 
 load_file() {
   filename=$1
@@ -15,6 +16,18 @@ load_file() {
     fi
   fi
   done < "$filename"
+}
+
+function run_tests() {
+  HTTPS_ENABLED="true"
+# Add -Dmaven.surefire.debug to enable remote debugging on port 5005.
+#
+eval "./mvnw -U -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM\\
+  -DSKIP_CLOUD_CONFIG=true -Dtest.docker.compose.disable.extension=true -Dspring.cloud.dataflow.client.serverUri=$SERVER_URI \\
+  -Dspring.cloud.dataflow.client.skipSslValidation=$SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION \\
+  -Dtest.platform.connection.platformName=$PLATFORM_NAME \\
+  -Dtest.platform.connection.applicationOverHttps=$HTTPS_ENABLED \\
+  $MAVEN_PROPERTIES clean test surefire-report:report"
 }
 
 
@@ -60,15 +73,22 @@ elif [[ "$os" == "Darwin" ]]; then
   fi
 
 fi
-export PYTHONPATH=./src:$PYTHONPATH
-python3 -m install.clean
-if [[ $? > 0 ]]; then
-  exit 1
-fi
 
-python3 -m install.setup $ARGS
-if [[ $? > 0 ]]; then
-  exit 1
-fi
+echo "SETUP_ROOT_DIR: $SETUP_ROOT_DIR"
+pushd $SETUP_ROOT_DIR
+export PYTHONPATH=./src:$PYTHONPATH
+echo $PWD
+#python3 -m install.clean --appsOnly -v
+#if [[ $? > 0 ]]; then
+#  exit 1
+#fi
+#
+#python3 -m install.setup -v --doNotDownload
+#if [[ $? > 0 ]]; then
+#  exit 1
+#fi
 load_file "cf_scdf.properties"
 echo "SERVER_URI=$SERVER_URI"
+popd
+echo "Running Tests..."
+run_tests
