@@ -17,6 +17,10 @@ on:
              required: false
            SQL_PASSWORD:
              required: false
+           SQL_SYSTEM_USERNAME:
+             required: false
+           SQL_SYSTEM_PASSWORD:
+             required: false
            SQL_HOST:
              required: false
            SQL_PORT:
@@ -34,6 +38,12 @@ on:
               required: false
               type: string
             sql_service_name:
+              required: false
+              type: string
+            sql_system_user:
+              required: false
+              type: string
+            sql_system_password:
               required: false
               type: string
             scheduler:
@@ -96,8 +106,8 @@ jobs:
                   SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
                   SQL_PROVIDER: ${{ inputs.sql_provider }}
                   SQL_SERVICE_NAME: ${{ inputs.sql_service_name }}
-                  SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_PASSWORD }}
-                  SQL_SYSTEM_USERNAME: ${{ secrets.SQL_USERNAME }}
+                  SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_SYSTEM_PASSWORD }}
+                  SQL_SYSTEM_USERNAME: ${{ secrets.SQL_SYSTEM_USERNAME }}
                   SQL_DATAFLOW_DB_NAME: "dataflow_pro_1_5_0_${{ inputs.binder }}_${{ inputs.cf_index }}"
                   KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
                   KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}

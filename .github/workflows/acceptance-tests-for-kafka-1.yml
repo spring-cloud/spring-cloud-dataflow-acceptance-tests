@@ -22,6 +22,8 @@ jobs:
         CF_ENV_2_PASSWORD: ${{secrets.CF_ENV_2_PASSWORD}}
         SQL_USERNAME: ${{secrets.SQL_USERNAME}}
         SQL_PASSWORD: ${{secrets.SQL_PASSWORD}}
+        SQL_SYSTEM_USERNAME: ${{secrets.SQL_USERNAME}}
+        SQL_SYSTEM_PASSWORD: ${{secrets.SQL_PASSWORD}}
         SQL_HOST: ${{secrets.SQL_HOST}}
         SQL_PORT: ${{secrets.SQL_PORT}}
         KAFKA_USERNAME: ${{secrets.KAFKA_USERNAME}}

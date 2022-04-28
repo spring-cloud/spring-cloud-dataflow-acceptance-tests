@@ -24,6 +24,8 @@ jobs:
             CF_ENV_2_PASSWORD: ${{secrets.CF_ENV_2_PASSWORD}}
             SQL_USERNAME: ${{secrets.ORACLE_USERNAME}}
             SQL_PASSWORD: ${{secrets.ORACLE_PASSWORD}}
+            SQL_SYSTEM_USERNAME: 'SYSTEM'
+            SQL_SYSTEM_PASSWORD: ${{secrets.ORACLE_PASSWORD}}
             SQL_HOST: ${{secrets.ORACLE_HOST}}
             SQL_PORT: ${{secrets.ORACLE_PORT}}
 
