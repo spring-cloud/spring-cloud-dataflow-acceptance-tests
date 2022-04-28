@@ -101,4 +101,7 @@ load_file "cf_scdf.properties"
 echo "Dataflow Server is live @ $SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI"
 popd
 echo "Running Tests..."
-run_tests
+stat=run_tests
+# If tests fail, clean up anyway.
+python3 -m install.clean -v
+return stat
