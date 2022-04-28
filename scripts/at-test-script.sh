@@ -2,10 +2,13 @@
 #Install required libs for python
 #PATH=$PATH:~/.local/bin
 SETUP_ROOT_DIR='scdf_cf_setup'
-echo "SETUP_ROOT_DIR=$SETUP_ROOT_DIR"
+echo "$SETUP_TOOL_REPO=$SETUP_TOOL_REPO"
+if [[ -d $SETUP_TOOL_REPO ]]; then
+  rmdir -f $SETUP_TOOL_REPO
+fi
 git clone https://github.com/dturanski/scdf_cf_setup.git
 python3 -m pip install --upgrade pip | grep -v 'Requirement already satisfied'
-pip3 install -r $SETUP_ROOT_DIR/requirements.txt | grep -v 'Requirement already satisfied'
+pip3 install -r $SETUP_TOOL_REPO/requirements.txt | grep -v 'Requirement already satisfied'
 
 load_file() {
   filename=$1
@@ -76,7 +79,7 @@ elif [[ "$os" == "Darwin" ]]; then
 
 fi
 
-pushd $SETUP_ROOT_DIR
+pushd $SETUP_TOOL_REPO
 export PYTHONPATH=./src:$PYTHONPATH
 echo $PWD
 python3 -m install.clean -v
