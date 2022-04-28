@@ -1,8 +1,8 @@
 #!/bin/bash
 #Install required libs for python
 #PATH=$PATH:~/.local/bin
-SETUP_ROOT_DIR="scdf_cf_setup"
-echo "$SETUP_TOOL_REPO=$SETUP_TOOL_REPO"
+SETUP_TOOL_REPO="scdf_cf_setup"
+echo "SETUP_TOOL_REPO=$SETUP_TOOL_REPO"
 if [[ -d $SETUP_TOOL_REPO ]]; then
   rmdir -f $SETUP_TOOL_REPO
 fi
