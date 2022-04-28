@@ -84,7 +84,7 @@ fi
 pushd $SETUP_TOOL_REPO
 export PYTHONPATH=./src:$PYTHONPATH
 echo $PWD
-python3 -m install.clean -v
+python3 -m install.clean -v --appsOnly
 if [[ $? > 0 ]]; then
   exit 1
 fi
