@@ -97,10 +97,6 @@ jobs:
                   KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
                   PLATFORM : tile
 
-              run: |
-                openssl s_client -connect uaa.sys.avenal.cf-app.com:443 -showcerts > uaa.sys.avenal.cf-app.com.cer < /dev/null
-                ls uaa.sys.avenal.cf-app.com.cer
-                openssl s_client -connect uaa.sys.avenal.cf-app.com:443 -showcerts '>' foo.cer '<' /dev/null
-                
-                # scripts/at-test-script.sh
+              run: |        
+                scripts/at-test-script.sh
 
