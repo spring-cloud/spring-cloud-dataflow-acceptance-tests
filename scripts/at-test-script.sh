@@ -86,22 +86,22 @@ elif [[ "$os" == "Darwin" ]]; then
 fi
 
 pushd $SETUP_TOOL_REPO
-export PYTHONPATH=./src:$PYTHONPATH
-echo $PWD
-python3 -m install.clean -v
-if [[ $? > 0 ]]; then
-  exit 1
-fi
+  export PYTHONPATH=./src:$PYTHONPATH
+  echo $PWD
+  python3 -m install.clean -v
+  if [[ $? > 0 ]]; then
+    exit 1
+  fi
 
-python3 -m install.setup -v --initializeDB
-if [[ $? > 0 ]]; then
-  exit 1
-fi
-load_file "cf_scdf.properties"
-echo "Dataflow Server is live @ $SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI"
+  python3 -m install.setup -v --initializeDB
+  if [[ $? > 0 ]]; then
+    exit 1
+  fi
+  load_file "cf_scdf.properties"
+  echo "Dataflow Server is live @ $SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI"
+  echo "Running Tests..."
+  stat=run_tests
+  # If tests fail, clean up anyway.
+  python3 -m install.clean -v
 popd
-echo "Running Tests..."
-stat=run_tests
-# If tests fail, clean up anyway.
-python3 -m install.clean -v
 exit stat
