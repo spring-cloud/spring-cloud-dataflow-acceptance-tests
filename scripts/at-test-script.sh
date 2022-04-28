@@ -2,6 +2,7 @@
 #Install required libs for python
 #PATH=$PATH:~/.local/bin
 SETUP_ROOT_DIR='scdf_cf_setup'
+echo "SETUP_ROOT_DIR=$SETUP_ROOT_DIR"
 git clone https://github.com/dturanski/scdf_cf_setup.git
 python3 -m pip install --upgrade pip | grep -v 'Requirement already satisfied'
 pip3 install -r $SETUP_ROOT_DIR/requirements.txt | grep -v 'Requirement already satisfied'
