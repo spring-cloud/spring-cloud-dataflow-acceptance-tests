@@ -104,4 +104,4 @@ echo "Running Tests..."
 stat=run_tests
 # If tests fail, clean up anyway.
 python3 -m install.clean -v
-return stat
+exit stat
