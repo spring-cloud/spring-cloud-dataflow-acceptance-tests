@@ -27,6 +27,9 @@ load_file() {
 
 function run_tests() {
   HTTPS_ENABLED="true"
+  if [[ -z "$SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION"]]; then
+    SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION="false"
+  fi
 # Add -Dmaven.surefire.debug to enable remote debugging on port 5005.
 #
 eval "./mvnw -U -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM\\
