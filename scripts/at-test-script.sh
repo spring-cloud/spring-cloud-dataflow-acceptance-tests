@@ -1,12 +1,10 @@
 #!/bin/bash
-#Install required libs for python
-#PATH=$PATH:~/.local/bin
 SETUP_TOOL_REPO="scdf_cf_setup"
 echo "SETUP_TOOL_REPO=$SETUP_TOOL_REPO"
 echo "SQL_DATAFLOW_DB_NAME=$SQL_DATAFLOW_DB_NAME"
 echo "SQL_SKIPPER_DB_NAME=$SQL_SKIPPER_DB_NAME"
 if [[ -d $SETUP_TOOL_REPO ]]; then
-  rmdir -f $SETUP_TOOL_REPO
+  rm -rf $SETUP_TOOL_REPO
 fi
 git clone https://github.com/dturanski/scdf_cf_setup.git
 python3 -m pip install --upgrade pip | grep -v 'Requirement already satisfied'
@@ -29,8 +27,10 @@ function run_tests() {
   export TEST_PLATFORM_CONNECTION_PROMETHEUS_URL=none
   JAVA_TRUST_STORE=${PWD}/scdf_cf_setup/mycacerts
   MAVEN_PROPERTIES="-Dtest.docker.compose.disable.extension=true -Djavax.net.ssl.trustStore=${JAVA_TRUST_STORE} -Djavax.net.ssl.trustStorePassword=changeit"
-  TESTS="!DataFlowAT#streamAppCrossVersion,!DataFlowAT#streamPartitioning,!BatchRemotePartitioningAT#runBatchRemotePartitionJobCloudFoundry"
+#  TESTS="!DataFlowAT#streamAppCrossVersion,!DataFlowAT#streamPartitioning,!BatchRemotePartitioningAT#runBatchRemotePartitionJobCloudFoundry"
+  TESTS="DataFlowAT#timestampTask"
   HTTPS_ENABLED="true"
+  SERVER_URI="$SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI"
   SKIP_SSL_VALIDATION="$SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION"
   if [[ -z "$SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION" ]]; then
     SKIP_SSL_VALIDATION="false"
@@ -39,11 +39,10 @@ function run_tests() {
 #
 eval "./mvnw -U -B -Dspring.profiles.active=blah -Dtest=$TESTS  \\
   -DSKIP_CLOUD_CONFIG=true -Dtest.docker.compose.disable.extension=true -Dspring.cloud.dataflow.client.serverUri=$SERVER_URI \\
-  -Dspring.cloud.dataflow.client.skipSslValidation=$SKIP_SSL_VALIDATION -Dtest.platform.connection.platformName=cloudfoundry \\
+  -Dspring.cloud.dataflow.client.skipSslValidation=$SKIP_SSL_VALIDATION -Dtest.platform.connection.platformName=default \\
   -Dtest.platform.connection.applicationOverHttps=$HTTPS_ENABLED \\
   $MAVEN_PROPERTIES clean test surefire-report:report"
 }
-
 
 ARGS=$@
 #This consumes $@ so save to ARGS first
@@ -85,13 +84,12 @@ elif [[ "$os" == "Darwin" ]]; then
     fi
     export LD_LIBRARY_PATH=$PWD/instantclient_19_8
   fi
-
 fi
 
 pushd $SETUP_TOOL_REPO
 export PYTHONPATH=./src:$PYTHONPATH
 echo $PWD
-python3 -m install.clean -v --appsOnly
+python3 -m install.clean -v
 if [[ $? > 0 ]]; then
   exit 1
 fi
@@ -101,7 +99,7 @@ if [[ $? > 0 ]]; then
   exit 1
 fi
 load_file "cf_scdf.properties"
-echo "SERVER_URI=$SERVER_URI"
+echo "Dataflow Server is live @ $SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI"
 popd
 echo "Running Tests..."
 run_tests
