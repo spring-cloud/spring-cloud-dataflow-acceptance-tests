@@ -27,7 +27,7 @@ load_file() {
 
 function run_tests() {
   HTTPS_ENABLED="true"
-  if [[ -z "$SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION"]]; then
+  if [[ -z "$SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION" ]]; then
     SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION="false"
   fi
 # Add -Dmaven.surefire.debug to enable remote debugging on port 5005.
@@ -92,7 +92,7 @@ if [[ $? > 0 ]]; then
   exit 1
 fi
 
-python3 -m install.setup -v
+python3 -m install.setup -v --initializeDB
 if [[ $? > 0 ]]; then
   exit 1
 fi
