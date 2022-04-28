@@ -33,14 +33,11 @@ function run_tests() {
   fi
 # Add -Dmaven.surefire.debug to enable remote debugging on port 5005.
 #
-  cmd="./mvnw test -U -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=cloudfoundry\\
-    -DSKIP_CLOUD_CONFIG=true -Dtest.docker.compose.disable.extension=true -Dspring.cloud.dataflow.client.serverUri=$SERVER_URI \\
-    -Dspring.cloud.dataflow.client.skipSslValidation=$SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION \\
-    -Dtest.platform.connection.platformName=cloudfoundry \\
-    -Dtest.platform.connection.applicationOverHttps=$HTTPS_ENABLED \\
-    $MAVEN_PROPERTIES clean test surefire-report:report"
-  echo "Running $cmd"
-  eval $cmd
+eval "./mvnw -U -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=cloudfoundry  \\
+  -DSKIP_CLOUD_CONFIG=$skipCloudConfig -Dtest.docker.compose.disable.extension=true -Dspring.cloud.dataflow.client.serverUri=$SERVER_URI \\
+  -Dspring.cloud.dataflow.client.skipSslValidation=$SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION -Dtest.platform.connection.platformName=cloudfoundry \\
+  -Dtest.platform.connection.applicationOverHttps=$HTTPS_ENABLED \\
+  $MAVEN_PROPERTIES clean test surefire-report:report"
 }
 
 
