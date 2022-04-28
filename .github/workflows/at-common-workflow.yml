@@ -30,14 +30,20 @@ on:
 
         inputs:
             sql_provider:
-                default: postgresql
-                type: string
+              default: postgresql
+              required: false
+              type: string
+            sql_service_name:
+              required: false
+              type: string
             scheduler:
-                default: true
-                type: boolean
+              default: true
+              required: false
+              type: boolean
             environment:
-                default: scdf_at
-                type: string
+              default: scdf_at
+              required: false
+              type: string
             binder:
                 required: true
                 type: string
@@ -89,6 +95,7 @@ jobs:
                   SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
                   SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
                   SQL_PROVIDER: ${{ inputs.sql_provider }}
+                  SQL_SERVICE_NAME: ${{ inputs.sql_service_name }}
                   SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_PASSWORD }}
                   SQL_SYSTEM_USERNAME: ${{ secrets.SQL_USERNAME }}
                   SQL_DATAFLOW_DB_NAME: "dataflow_pro_1_5_0_${{ inputs.binder }}_${{ inputs.cf_index }}"

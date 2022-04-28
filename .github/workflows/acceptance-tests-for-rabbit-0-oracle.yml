@@ -25,5 +25,6 @@ jobs:
             SQL_PASSWORD: ${{secrets.ORACLE_PASSWORD}}
             SQL_HOST: ${{secrets.ORACLE_HOST}}
             SQL_PORT: ${{secrets.ORACLE_PORT}}
+            SQL_SERVICE_NAME: 'xe'
 
 
