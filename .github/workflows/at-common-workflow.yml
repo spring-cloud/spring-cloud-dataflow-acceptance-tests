@@ -14,19 +14,19 @@ on:
            CF_ENV_2_PASSWORD:
              required: true
            SQL_USERNAME:
-             required: true
+             required: false
            SQL_PASSWORD:
-             required: true
+             required: false
            SQL_HOST:
-             required: true
+             required: false
            SQL_PORT:
-             required: true
+             required: false
            KAFKA_USERNAME:
-             required: true
+             required: false
            KAFKA_PASSWORD:
-             required: true
+             required: false
            KAFKA_BROKER_ADDRESS:
-             required: true
+             required: false
 
         inputs:
             sql_provider:
