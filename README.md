@@ -12,7 +12,7 @@
 This project installs Spring Cloud Dataflow to cloudfoundry environments and executes a series of integration tests deploying streams and tasks in different scenarios.
 
 ## NOTE:
-Currently, these shell scripts are used only to test Cloud Foundry environments, K8s acceptance tests use GH Actions in the [spring-cloud-dataflow](https://github.com/spring-cloud/spring-cloud-dataflow) repository. 
+Currently, this repo is used only to test Cloud Foundry environments, K8s acceptance tests use GH Actions in the [spring-cloud-dataflow](https://github.com/spring-cloud/spring-cloud-dataflow) repository. 
 The java test code here is the same used by the K8s build.
 
 
