@@ -98,5 +98,6 @@ jobs:
                   PLATFORM : tile
 
               run: |
-                scripts/at-test-script.sh
+                openssl s_client -connect uaa.sys.avenal.cf-app.com:443 -showcerts > uaa.sys.avenal.cf-app.com.cer < /dev/null
+                # scripts/at-test-script.sh
 
