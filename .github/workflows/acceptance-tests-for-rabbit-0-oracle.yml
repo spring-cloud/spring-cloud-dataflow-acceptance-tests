@@ -25,7 +25,5 @@ jobs:
             SQL_PASSWORD: ${{secrets.ORACLE_PASSWORD}}
             SQL_HOST: ${{secrets.ORACLE_HOST}}
             SQL_PORT: ${{secrets.ORACLE_PORT}}
-            KAFKA_USERNAME: ${{secrets.KAFKA_USERNAME}}
-            KAFKA_PASSWORD: ${{secrets.KAFKA_PASSWORD}}
-            KAFKA_BROKER_ADDRESS: ${{secrets.KAFKA_BROKER_ADDRESS}}
+
 
