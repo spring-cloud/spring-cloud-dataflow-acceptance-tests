@@ -40,7 +40,7 @@ function run_tests() {
     -Dtest.platform.connection.applicationOverHttps=$HTTPS_ENABLED \\
     $MAVEN_PROPERTIES clean test surefire-report:report"
   echo "Running $cmd"
-  return eval $cmd
+  eval $cmd
 }
 
 
