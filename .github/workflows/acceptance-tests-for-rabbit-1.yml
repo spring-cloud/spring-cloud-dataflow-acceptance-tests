@@ -27,3 +27,4 @@ jobs:
             KAFKA_USERNAME: ${{secrets.KAFKA_USERNAME}}
             KAFKA_PASSWORD: ${{secrets.KAFKA_PASSWORD}}
             KAFKA_BROKER_ADDRESS: ${{secrets.KAFKA_BROKER_ADDRESS}}
+

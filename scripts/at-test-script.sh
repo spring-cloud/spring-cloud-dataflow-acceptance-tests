@@ -78,15 +78,15 @@ echo "SETUP_ROOT_DIR: $SETUP_ROOT_DIR"
 pushd $SETUP_ROOT_DIR
 export PYTHONPATH=./src:$PYTHONPATH
 echo $PWD
-#python3 -m install.clean --appsOnly -v
-#if [[ $? > 0 ]]; then
-#  exit 1
-#fi
-#
-#python3 -m install.setup -v --doNotDownload
-#if [[ $? > 0 ]]; then
-#  exit 1
-#fi
+python3 -m install.clean -v
+if [[ $? > 0 ]]; then
+  exit 1
+fi
+
+python3 -m install.setup -v
+if [[ $? > 0 ]]; then
+  exit 1
+fi
 load_file "cf_scdf.properties"
 echo "SERVER_URI=$SERVER_URI"
 popd
