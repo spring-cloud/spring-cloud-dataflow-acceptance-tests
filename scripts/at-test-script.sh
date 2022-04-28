@@ -26,6 +26,7 @@ load_file() {
 }
 
 function run_tests() {
+  TESTS="!DataFlowAT#streamAppCrossVersion,!DataFlowAT#streamPartitioning,!BatchRemotePartitioningAT#runBatchRemotePartitionJobCloudFoundry"
   HTTPS_ENABLED="true"
   if [[ -z "$SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION" ]]; then
     SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION="false"
@@ -35,7 +36,7 @@ function run_tests() {
 eval "./mvnw -U -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=$PLATFORM\\
   -DSKIP_CLOUD_CONFIG=true -Dtest.docker.compose.disable.extension=true -Dspring.cloud.dataflow.client.serverUri=$SERVER_URI \\
   -Dspring.cloud.dataflow.client.skipSslValidation=$SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION \\
-  -Dtest.platform.connection.platformName=$PLATFORM_NAME \\
+  -Dtest.platform.connection.platformName=$PLATFORM \\
   -Dtest.platform.connection.applicationOverHttps=$HTTPS_ENABLED \\
   $MAVEN_PROPERTIES clean test surefire-report:report"
 }
