@@ -1,7 +1,8 @@
 #!/bin/bash
 #Install required libs for python
 #PATH=$PATH:~/.local/bin
-SETUP_ROOT_DIR='..'
+SETUP_ROOT_DIR='scdf_cf_setup'
+git clone https://github.com/dturanski/scdf_cf_setup.git
 python3 -m pip install --upgrade pip | grep -v 'Requirement already satisfied'
 pip3 install -r $SETUP_ROOT_DIR/requirements.txt | grep -v 'Requirement already satisfied'
 
@@ -74,7 +75,6 @@ elif [[ "$os" == "Darwin" ]]; then
 
 fi
 
-echo "SETUP_ROOT_DIR: $SETUP_ROOT_DIR"
 pushd $SETUP_ROOT_DIR
 export PYTHONPATH=./src:$PYTHONPATH
 echo $PWD
