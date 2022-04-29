@@ -36,11 +36,12 @@ function run_tests() {
   fi
 # Add -Dmaven.surefire.debug to enable remote debugging on port 5005.
 #
-eval "./mvnw -U -B -Dspring.profiles.active=blah -Dtest=$TESTS  \\
+ eval "./mvnw -U -B -Dspring.profiles.active=blah -Dtest=$TESTS  \\
   -DSKIP_CLOUD_CONFIG=true -Dtest.docker.compose.disable.extension=true -Dspring.cloud.dataflow.client.serverUri=$SERVER_URI \\
   -Dspring.cloud.dataflow.client.skipSslValidation=$SKIP_SSL_VALIDATION -Dtest.platform.connection.platformName=default \\
   -Dtest.platform.connection.applicationOverHttps=$HTTPS_ENABLED \\
   $MAVEN_PROPERTIES clean test surefire-report:report"
+  return $?
 }
 
 ARGS=$@
