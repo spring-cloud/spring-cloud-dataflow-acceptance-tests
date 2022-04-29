@@ -100,9 +100,11 @@ pushd $SETUP_TOOL_REPO
   load_file "cf_scdf.properties"
   echo "Dataflow Server is live @ $SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI"
   echo "Running Tests..."
-  run_tests
-  stat=$?
-  # If tests fail, clean up anyway.
-  python3 -m install.clean -v
+popd
+    run_tests
+    stat=$?
+pushd $SETUP_TOOL_REPO
+    # If tests fail, clean up anyway.
+    python3 -m install.clean -v
 popd
 exit stat
