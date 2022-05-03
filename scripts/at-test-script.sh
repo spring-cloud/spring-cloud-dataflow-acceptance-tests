@@ -1,4 +1,6 @@
 #!/bin/bash
+# default exit code
+stat=0
 SETUP_TOOL_REPO="scdf_cf_setup"
 echo "SETUP_TOOL_REPO=$SETUP_TOOL_REPO"
 echo "SQL_DATAFLOW_DB_NAME=$SQL_DATAFLOW_DB_NAME"
@@ -102,10 +104,10 @@ pushd $SETUP_TOOL_REPO
   echo "Dataflow Server is live @ $SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI"
   echo "Running Tests..."
 popd
-    run_tests
-    stat=$?
+run_tests
+stat=$?
 pushd $SETUP_TOOL_REPO
     # If tests fail, clean up anyway.
     python3 -m install.clean -v
 popd
-exit stat
+exit $stat
