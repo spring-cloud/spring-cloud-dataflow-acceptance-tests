@@ -12,6 +12,8 @@ git clone https://github.com/dturanski/scdf_cf_setup.git
 python3 -m pip install --upgrade pip | grep -v 'Requirement already satisfied'
 pip3 install -r $SETUP_TOOL_REPO/requirements.txt | grep -v 'Requirement already satisfied'
 
+$(dirname $0)/../acceptance-tests/ci/scripts/build-timestamp-batch-with-drivers.sh
+
 load_file() {
   filename=$1
   echo "exporting required env variables from $filename :"
