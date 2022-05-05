@@ -4,7 +4,7 @@ buildscript {
 		projectBuildVersion = project.properties['projectBuildVersion'] ?: '2.1.1.BUILD-SNAPSHOT'
 		springBootVersion = project.properties['springBootVersion'] ?: '2.1.1.RELEASE'
 		oracleJdbcDriverVersion = project.properties['oracleJdbcDriverVersion'] ?: '12.2.0.1'
-		db2JdbcDriverVersion = project.properties['db2JdbcDriverVersion'] ?: '4.19.26'
+		db2JdbcDriverVersion = project.properties['db2JdbcDriverVersion'] ?: '11.5.7.0'
 		mysqlJdbcDriverVersion = project.properties['mysqlJdbcDriverVersion'] ?: '8.0.16'
 		springCloudTaskAppVersion = project.properties['springCloudTaskAppVersion'] ?: '2.1.1.BUILD-SNAPSHOT'
 	}
@@ -36,23 +36,24 @@ repositories {
 	maven { url "https://repo.springsource.org/libs-snapshot" }
 	maven { url "https://repo.springsource.org/libs-release" }
 	maven { url "https://repo.springsource.org/libs-milestone" }
-	maven {
-		url "https://repo.springsource.org/ext-private-local"
-		credentials {
-			username = System.getenv('ARTIFACTORY_USERNAME') ?: artifactoryUsername
-			password = System.getenv('ARTIFACTORY_PASSWORD') ?: artifactoryPassword
-		}
-	}
+//	maven {
+//		url "https://repo.springsource.org/ext-private-local"
+//		credentials {
+//			username = System.getenv('ARTIFACTORY_USERNAME') ?: artifactoryUsername
+//			password = System.getenv('ARTIFACTORY_PASSWORD') ?: artifactoryPassword
+//		}
+//	}
 
 }
 
 dependencies {
-	compile('org.springframework.cloud:spring-cloud-starter-config')
-	compile('org.springframework.cloud.task.app:spring-cloud-starter-task-timestamp-batch')
-	runtime("com.oracle.jdbc:ojdbc8:${oracleJdbcDriverVersion}")
-	runtime("mysql:mysql-connector-java:${mysqlJdbcDriverVersion}")
-	runtime("com.ibm.db2:db2jcc4:${db2JdbcDriverVersion}")
-	testCompile('org.springframework.boot:spring-boot-starter-test')
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+	implementation 'org.springframework.cloud.task.app:spring-cloud-starter-task-timestamp-batch'
+    runtime "com.oracle.database.jdbc:ojdbc8:$oracleJdbcDriverVersion"
+	runtime "mysql:mysql-connector-java:$mysqlJdbcDriverVersion"
+    runtime "com.ibm.db2:jcc:$db2JdbcDriverVersion"
+
+    testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
 dependencyManagement {
