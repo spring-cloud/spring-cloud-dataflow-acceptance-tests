@@ -30,6 +30,9 @@ jar {
 	archivesBaseName = "timestamp-batch-with-drivers${jarPostfix}"
 }
 
+artifacts {
+    archives bootJar
+}
 repositories {
 	mavenLocal()
 	mavenCentral()

@@ -114,6 +114,7 @@ jobs:
                   KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
                   PLATFORM : tile
 
-              run: |        
-                scripts/at-test-script.sh
+              run: |
+                ./acceptance-tests/ci/scripts/build-timestamp-batch-with-drivers.sh
+                ./scripts/at-test-script.sh
 
