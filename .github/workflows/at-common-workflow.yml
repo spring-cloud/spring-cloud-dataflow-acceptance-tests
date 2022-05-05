@@ -118,6 +118,5 @@ jobs:
                 pushd acceptance-tests/custom-apps/timestamp-batch-with-drivers-template1
                     ./gradlew clean build install
                 popd
-                ./acceptance-tests/ci/scripts/build-timestamp-batch-with-drivers.sh
                 ./scripts/at-test-script.sh
 
