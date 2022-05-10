@@ -3,7 +3,7 @@ name: Spring Cloud Dataflow Acceptance Tests
 
 on:
     schedule:
-        - cron: "0 0 * * *"
+        -   cron: "0 0 * * *"
     # Allows you to run this workflow manually from the Actions tab
     workflow_dispatch:
 
@@ -126,17 +126,17 @@ jobs:
         needs: [ kafka-0, rabbit-0 ]
         runs-on: ubuntu-latest
         steps:
-            -   name: Completed Env 0
-            run: echo "Completed env-0"
+            - name: Completed Env 0
+              run: echo "Completed env-0"
     completed-1:
         needs: [ kafka-0, rabbit-0 ]
         runs-on: ubuntu-latest
         steps:
-            -   name: Completed Env 1
-                run: echo "Completed env-1"
+            - name: Completed Env 1
+              run: echo "Completed env-1"
     completed-2:
         needs: [ kafka-2, rabbit-2 ]
         runs-on: ubuntu-latest
         steps:
-            -   name: Completed Env 2
-                run: echo "Completed env-2"
+            - name: Completed Env 2
+              run: echo "Completed env-2"
