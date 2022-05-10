@@ -129,7 +129,7 @@ jobs:
             - name: Completed Env 0
               run: echo "Completed env-0"
     completed-1:
-        needs: [ kafka-0, rabbit-0 ]
+        needs: [ kafka-1, rabbit-1 ]
         runs-on: ubuntu-latest
         steps:
             - name: Completed Env 1
