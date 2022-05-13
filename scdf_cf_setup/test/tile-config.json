@@ -1,0 +1,32 @@
+{
+  "maven-cache": true,
+  "SPRING_CLOUD_DATAFLOW_FEATURES_STREAMS_ENABLED": true,
+  "SPRING_CLOUD_DATAFLOW_FEATURES_TASKS_ENABLED": true,
+  "SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED": false,
+  "spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.brokers": "broker",
+  "spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.jaas.loginModule": "org.apache.kafka.common.security.plain.PlainLoginModule",
+  "spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.jaas.options.username": "user",
+  "spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.jaas.options.password": "password",
+  "spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.configuration.security.protocol": "SASL_PLAINTEXT",
+  "spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.configuration.sasl.mechanism": "PLAIN",
+  "spring.cloud.dataflow.applicationProperties.stream.trustCerts": "uaa.sys.somehost.cf-app.com",
+  "spring.cloud.dataflow.applicationProperties.task.trustCerts": "uaa.sys.somehost.cf-app.com",
+  "skipper-relational": {
+    "user-provided": {
+      "uri": "jdbc:postgresql://12.34.56.789:5432/skipper_db?user=user&password=password",
+      "jdbcUrl": "jdbc:jdbc:postgresql://12.34.56.789:5432/skipper_db?user=users&password=password",
+      "username": "user",
+      "password": "password",
+      "dbname": "skipper_db"
+    }
+  },
+  "relational-data-service": {
+    "user-provided": {
+      "uri": "postgresql://12.34.56.789:5432/dataflow_db?user=users&password=password",
+      "jdbcUrl": "jdbc:postgresql://12.34.56.789:5432/dataflow_db?user=user&password=password",
+      "username": "user",
+      "password": "password",
+      "dbname": "dataflow_db"
+    }
+  }
+}

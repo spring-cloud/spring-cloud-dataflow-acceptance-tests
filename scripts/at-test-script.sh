@@ -8,7 +8,7 @@ echo "SQL_SKIPPER_DB_NAME=$SQL_SKIPPER_DB_NAME"
 if [[ -d $SETUP_TOOL_REPO ]]; then
   rm -rf $SETUP_TOOL_REPO
 fi
-git clone https://github.com/dturanski/scdf_cf_setup.git
+# git clone https://github.com/dturanski/scdf_cf_setup.git
 python3 -m pip install --upgrade pip | grep -v 'Requirement already satisfied'
 pip3 install -r $SETUP_TOOL_REPO/requirements.txt | grep -v 'Requirement already satisfied'
 
@@ -104,7 +104,11 @@ pushd $SETUP_TOOL_REPO
   echo "Dataflow Server is live @ $SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI"
   echo "Running Tests..."
 popd
-export SPRING_APPLICATION_JSON='{ "maven": { "remote-repositories": { "repo1": { "url": "https://repo.spring.io" } } } }'
+
+wget -qO- http://$SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI/apps/task/timestamp/2.0.1 --post-data="uri=maven://io.spring:timestamp-task:2.0.1"
+wget -qO- http://$SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI/apps/task/timestamp/2.0.2 --post-data="uri=maven://io.spring:timestamp-task:2.0.2"
+wget -qO- http://$SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI/apps/task/timestamp-batch/2.0.2 --post-data="uri=maven://io.spring:/timestamp-batch-task:2.0.2"
+
 run_tests
 stat=$?
 pushd $SETUP_TOOL_REPO
