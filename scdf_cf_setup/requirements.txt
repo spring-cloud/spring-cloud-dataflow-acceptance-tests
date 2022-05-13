@@ -1,0 +1,5 @@
+cx-Oracle == 8.3.0
+pip >= 22.0.4
+psycopg2-binary == 2.9.3
+PyYAML == 6.0
+requests
