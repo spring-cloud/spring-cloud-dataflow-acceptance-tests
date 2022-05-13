@@ -11,7 +11,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=spring
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
       - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=http://skipper:7577/api
-      - SPRING_APPLICATION_JSON={"maven":{"remote-repositories":{"ext-private-local":{"url":"https://repo.spring.io/ext-private-local","auth":{"username":"${ARTIFACTORY_USERNAME}","password":"${ARTIFACTORY_PASSWORD}"}}}}}
+      - SPRING_APPLICATION_JSON={"maven":{"remote-repositories":{"libs-snapshot":{"url":"https://repo.spring.io/libs-snapshot"}}}}
     ports:
       - 9393
     external_links:

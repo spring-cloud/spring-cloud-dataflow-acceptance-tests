@@ -515,7 +515,7 @@ jobs:
         path: ci-git-repo/((base-path))/ci/scripts/aggregate-build-skipper-server-with-drivers.sh
   - put: artifactory-repo
     params:
-      repo: ext-private-local
+      repo: libs-snapshot
       folder: distribution-repository
       strip_snapshot_timestamps: false
       build_uri: "https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
