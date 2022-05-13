@@ -104,6 +104,7 @@ pushd $SETUP_TOOL_REPO
   echo "Dataflow Server is live @ $SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI"
   echo "Running Tests..."
 popd
+export SPRING_APPLICATION_JSON='{ "maven": { "remote-repositories": { "repo1": { "url": "https://repo.spring.io" } } } }'
 run_tests
 stat=$?
 pushd $SETUP_TOOL_REPO
