@@ -105,6 +105,7 @@ pushd $SETUP_TOOL_REPO
   echo "Running Tests..."
 popd
 
+
 wget -qO- http://$SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI/apps/task/timestamp/2.0.1 --post-data="uri=maven://io.spring:timestamp-task:2.0.1"
 wget -qO- http://$SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI/apps/task/timestamp/2.0.2 --post-data="uri=maven://io.spring:timestamp-task:2.0.2"
 wget -qO- http://$SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI/apps/task/timestamp-batch/2.0.2 --post-data="uri=maven://io.spring:/timestamp-batch-task:2.0.2"
