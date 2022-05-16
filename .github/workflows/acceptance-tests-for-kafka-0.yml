@@ -1,10 +1,6 @@
 name: SCDF AT Kafka - env 0
 
-# Controls when the workflow will run
 on:
-#    schedule:
-#        -   cron: "0 0 * * *"
-    # Allows you to run this workflow manually from the Actions tab
     workflow_dispatch:
 
 jobs:
@@ -28,4 +24,3 @@ jobs:
             KAFKA_USERNAME: ${{secrets.KAFKA_USERNAME}}
             KAFKA_PASSWORD: ${{secrets.KAFKA_PASSWORD}}
             KAFKA_BROKER_ADDRESS: ${{secrets.KAFKA_BROKER_ADDRESS}}
-
