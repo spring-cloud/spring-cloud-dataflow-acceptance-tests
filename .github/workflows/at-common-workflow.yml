@@ -114,10 +114,11 @@ jobs:
                   KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
                   KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
                   PLATFORM : tile
-
               run: |
+                echo "Building timestamp-batch-with-drivers-template1"
                 pushd acceptance-tests/custom-apps/timestamp-batch-with-drivers-template1
-                    ./gradlew clean build install
+                    sh ./gradlew build install
                 popd
-                ./scripts/at-test-script.sh
-
+                echo "Starting Acceptance Tests"
+                sh ./scripts/at-test-script.sh
+                echo "Completed Acceptance Tests"
