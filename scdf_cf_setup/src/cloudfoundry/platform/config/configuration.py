@@ -71,7 +71,6 @@ class ConfigurationProperties(EnvironmentAware):
         self.config_server_enabled = config_server_enabled
         self.task_services = task_services
         self.stream_services = stream_services
-        self.task_apps_uri = task_apps_uri
         self.cert_host = cert_host
         self.service_key_name = service_key_name
 
@@ -79,3 +78,5 @@ class ConfigurationProperties(EnvironmentAware):
             self.stream_apps_uri = 'https://dataflow.spring.io/rabbitmq-maven-latest'
         elif self.binder == 'kafka':
             self.stream_apps_uri = 'https://dataflow.spring.io/kafka-maven-latest'
+
+        self.task_apps_uri = 'https://dataflow.spring.io/task-foo'
