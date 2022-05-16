@@ -91,7 +91,6 @@ jobs:
                   # DEBUG: true
                   SCHEDULER : ${{ inputs.scheduler }}
                   BINDER : ${{ inputs.binder }}
-                  SPRING_CLOUD_DATAFLOW_FEATURES_TASKS_ENABLED: false
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE : ${{ inputs.binder }}
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
                   SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: scdf-scheduler

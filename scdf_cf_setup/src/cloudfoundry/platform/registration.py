@@ -31,10 +31,10 @@ def register_apps(cf, installation, server_uri, app_import_path='app-imports.pro
     else:
         logger.info("skipping stream apps, since streams_enabled if False")
 
-    if installation.dataflow_config.tasks_enabled:
-        app_registrations.register_task_apps()
-    else:
-        logger.info("skipping task apps, since tasks_enabled if False")
+    # if installation.dataflow_config.tasks_enabled:
+    #     app_registrations.register_task_apps()
+    # else:
+    logger.info("skipping task apps, since tasks_enabled if False")
     app_registrations.register_test_apps()
     logger.debug("registered apps:\n%s" % json.dumps(app_registrations.apps(), indent=4))
 
