@@ -5,11 +5,6 @@ SETUP_TOOL_REPO="scdf_cf_setup"
 echo "SETUP_TOOL_REPO=$SETUP_TOOL_REPO"
 echo "SQL_DATAFLOW_DB_NAME=$SQL_DATAFLOW_DB_NAME"
 echo "SQL_SKIPPER_DB_NAME=$SQL_SKIPPER_DB_NAME"
-if [[ ! -d $SETUP_TOOL_REPO ]]; then
-  echo "Expected $SETUP_TOOL_REPO"
-  exit 2
-fi
-
 python3 -m pip install --upgrade pip | grep -v 'Requirement already satisfied'
 pip3 install -r $SETUP_TOOL_REPO/requirements.txt | grep -v 'Requirement already satisfied'
 
