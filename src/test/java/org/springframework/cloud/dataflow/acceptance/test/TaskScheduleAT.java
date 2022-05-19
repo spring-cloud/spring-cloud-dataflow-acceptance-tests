@@ -126,8 +126,8 @@ public class TaskScheduleAT {
 
         TaskScheduleBuilder taskScheduleBuilder = TaskSchedule.builder(dataFlowOperations);
 
-        try (Task task1 = Task.builder(dataFlowOperations).name(randomName("task1")).definition("timestamp").build();
-             Task task2 = Task.builder(dataFlowOperations).name(randomName("task2")).definition("timestamp").build();
+        try (Task task1 = Task.builder(dataFlowOperations).name(randomName("task1")).definition("testtimestamp").build();
+             Task task2 = Task.builder(dataFlowOperations).name(randomName("task2")).definition("testtimestamp").build();
 
              TaskSchedule taskSchedule1 = taskScheduleBuilder.scheduleName(randomName("schedule1")).task(task1).build();
              TaskSchedule taskSchedule2 = taskScheduleBuilder.scheduleName(randomName("schedule2")).task(task2).build()) {
@@ -156,8 +156,8 @@ public class TaskScheduleAT {
 
         TaskScheduleBuilder taskScheduleBuilder = TaskSchedule.builder(dataFlowOperations);
 
-        try (Task task1 = Task.builder(dataFlowOperations).name(randomName("task1")).definition("timestamp").build();
-             Task task2 = Task.builder(dataFlowOperations).name(randomName("task2")).definition("timestamp").build();
+        try (Task task1 = Task.builder(dataFlowOperations).name(randomName("task1")).definition("testtimestamp").build();
+             Task task2 = Task.builder(dataFlowOperations).name(randomName("task2")).definition("testtimestamp").build();
 
              TaskSchedule taskSchedule1 = taskScheduleBuilder.scheduleName(randomName("schedule1")).task(task1).build();
              TaskSchedule taskSchedule2 = taskScheduleBuilder.scheduleName(randomName("schedule2")).task(task2).build()) {
@@ -188,7 +188,7 @@ public class TaskScheduleAT {
     public void scheduleLifeCycle() {
         logger.info("schedule-lifecycle-test");
 
-        try (Task task = Task.builder(dataFlowOperations).name(randomName("task")).definition("timestamp").build();
+        try (Task task = Task.builder(dataFlowOperations).name(randomName("task")).definition("testtimestamp").build();
              TaskSchedule taskSchedule = TaskSchedule.builder(dataFlowOperations).scheduleName(randomName("schedule")).task(task).build()) {
 
             assertThat(taskSchedule.isScheduled()).isFalse();
