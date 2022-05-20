@@ -28,6 +28,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.integration.test.DataFlowIT;
 import org.springframework.cloud.dataflow.integration.test.IntegrationTestProperties;
+import org.springframework.cloud.dataflow.integration.test.util.AwaitUtils;
 import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBuilder;
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
 
@@ -59,14 +60,18 @@ class DataFlowAT extends DataFlowIT {
                 .build())) {
 
             Awaitility.await(stream.getName() + " failed to deploy!")
+                .failFast(() -> AwaitUtils.hasErrorInLog(stream))
                 .until(() -> stream.getStatus().equals(DataFlowIT.DEPLOYED));
 
-            Awaitility.await("Source not started").until(
-                () -> stream.logs(app("time")).contains("Started TimeSource"));
-            Awaitility.await("Sink not started").until(
-                () -> stream.logs(app("log")).contains("Started LogSink"));
-            Awaitility.await("No output found").until(
-                () -> stream.logs(app("log")).contains("TICKTOCK CLOUD CONFIG - TIMESTAMP:"));
+            Awaitility.await("Source not started")
+                .failFast(() -> AwaitUtils.hasErrorInLog(stream))
+                .until(() -> stream.logs(app("time")).contains("Started TimeSource"));
+            Awaitility.await("Sink not started")
+                .failFast(() -> AwaitUtils.hasErrorInLog(stream))
+                .until(() -> stream.logs(app("log")).contains("Started LogSink"));
+            Awaitility.await("No output found")
+                .failFast(() -> AwaitUtils.hasErrorInLog(stream))
+                .until(() -> stream.logs(app("log")).contains("TICKTOCK CLOUD CONFIG - TIMESTAMP:"));
         }
     }
 }
