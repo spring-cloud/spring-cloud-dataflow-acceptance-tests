@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 the original author or authors.
+ * Copyright 2020-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,29 +29,22 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.integration.test.DataFlowOperationsITConfiguration;
-import org.springframework.cloud.dataflow.integration.test.IntegrationTestProperties;
-import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicationHelper;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.Task;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskSchedule;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskScheduleBuilder;
 import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 import org.springframework.cloud.deployer.spi.scheduler.SchedulerPropertyKeys;
-import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -62,30 +55,19 @@ import static org.assertj.core.api.Assertions.fail;
  * The scheduler tests are run only if the SCDF Scheduler feature is enabled.
  *
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
 @ExtendWith(SpringExtension.class)
 @TaskScheduleAT.AssumeSchedulerEnabled
-@EnableConfigurationProperties(IntegrationTestProperties.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Import(DataFlowOperationsITConfiguration.class)
-public class TaskScheduleAT {
+public class TaskScheduleAT extends CommonTestBase {
     private static final Logger logger = LoggerFactory.getLogger(TaskScheduleAT.class);
 
     private final static String DEFAULT_CRON_EXPRESSION = "56 20 ? * *";
-
-    @Autowired
-    private IntegrationTestProperties testProperties;
 
     /**
      * REST and DSL clients used to interact with the SCDF server and run the tests.
      */
     private String platformInfo;
-
-    @Autowired
-    private DataFlowTemplate dataFlowOperations;
-
-    @Autowired
-    private RuntimeApplicationHelper runtime;
 
     @BeforeAll
     public static void beforeAll() {
@@ -95,7 +77,8 @@ public class TaskScheduleAT {
     public void before() {
         Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
         Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
-        platformInfo = String.format("[platform = %s, type = %s]", runtime.getPlatformName(), runtime.getPlatformType());
+        platformInfo = String.format("[platform = %s, type = %s]", runtimeApps.getPlatformName(), runtimeApps.getPlatformType());
+        registerTimestampTasks();
     }
 
     @AfterEach
