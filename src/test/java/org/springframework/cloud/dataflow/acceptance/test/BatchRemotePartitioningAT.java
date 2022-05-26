@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,14 @@ import java.util.Collections;
 import java.util.UUID;
 
 import org.awaitility.Awaitility;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,15 +37,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.integration.test.DataFlowOperationsITConfiguration;
-import org.springframework.cloud.dataflow.integration.test.IntegrationTestProperties;
-import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.Task;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskBuilder;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,28 +52,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author David Turanski
  * @author Glenn Renfro
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
 @ExtendWith(SpringExtension.class)
-@EnableConfigurationProperties(IntegrationTestProperties.class)
-@Import(DataFlowOperationsITConfiguration.class)
-public class BatchRemotePartitioningAT {
+public class BatchRemotePartitioningAT extends CommonTestBase {
     private static final Logger logger = LoggerFactory.getLogger(BatchRemotePartitioningAT.class);
 
     private static final String TASK_NAME = "batch-remote-partition";
     private static final int EXIT_CODE_SUCCESS = 0;
     private static final int EXIT_CODE_ERROR = 1;
 
-    @Autowired
-    private IntegrationTestProperties testProperties;
-
     @Autowired(required = false)
     private CFConnectionProperties cfConnectionProperties;
-
-    /**
-     * REST and DSL clients used to interact with the SCDF server and run the tests.
-     */
-    @Autowired
-    private DataFlowTemplate dataFlowOperations;
 
     @BeforeAll
     public static void beforeAll() {
@@ -85,6 +73,8 @@ public class BatchRemotePartitioningAT {
     public void before() {
         Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
         Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
+        logger.info("[platform = {}, type = {}]", runtimeApps.getPlatformName(), runtimeApps.getPlatformType());
+
     }
 
     @AfterEach
