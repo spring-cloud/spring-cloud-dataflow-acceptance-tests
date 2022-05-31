@@ -1,0 +1,4 @@
+test:
+    platform:
+        connection:
+            platformName: 'default'

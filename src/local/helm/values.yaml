@@ -56,7 +56,7 @@ server:
   ##
   image:
     registry: docker.io
-    repository: bitnami/spring-cloud-dataflow
+    repository:  bitnami/spring-cloud-dataflow
     tag: 2.9.4-debian-10-r14
     ## Specify a imagePullPolicy. Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -151,8 +151,8 @@ server:
   ##     value: BAR
   ##
   extraEnvVars:
-      - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD
-        value: DEBUG
+    - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD
+      value: DEBUG
   ## @param server.extraEnvVarsCM ConfigMap with extra environment variables
   ##
   extraEnvVarsCM: ""
@@ -625,8 +625,8 @@ skipper:
   ##     value: BAR
   ##
   extraEnvVars:
-      -   name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD
-          value: DEBUG
+    - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD
+      value: DEBUG
   ## @param skipper.extraEnvVarsCM Name of existing ConfigMap containing extra environment variables
   ##
   extraEnvVarsCM: ""
