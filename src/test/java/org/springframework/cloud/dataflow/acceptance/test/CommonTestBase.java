@@ -29,6 +29,8 @@ import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicati
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
+
+import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientProperties;
 import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -59,9 +61,13 @@ public class CommonTestBase {
     @Autowired
     protected RuntimeApplicationHelper runtimeApps;
 
+    @Autowired
+    protected DataFlowClientProperties dataFlowClientProperties;
+
     protected void registerApp(String name, String url) {
         try {
             dataFlowOperations.appRegistryOperations().register(name, ApplicationType.app, url, null, true);
+            logger.info("registerApp:{}:{}", name, url);
         } catch (DataFlowClientException x) {
             if (!x.toString().contains("exists")) {
                 fail(x);
@@ -81,6 +87,10 @@ public class CommonTestBase {
         } catch (DataFlowClientException x) {
             if (!x.toString().contains("already registered")) {
                 logger.error("registerTask:" + name + ":Exception:" + x);
+            } else {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("registerTask:{}:{}", name, x.toString());
+                }
             }
         }
     }

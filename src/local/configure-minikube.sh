@@ -1,2 +1,5 @@
 #!/usr/bin/env bash
-minikube start --cpus=4 --memory=10240
+
+MK_DRIVER=docker
+# MK_DRIVER=kvm2, docker, vmware, virtualbox, podman, vmwarefusion
+minikube start --cpus=4 --memory=10240 --driver=$MK_DRIVER

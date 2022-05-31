@@ -21,6 +21,8 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+
+import java.util.Collection;
 import java.util.Collections;
 
 import org.slf4j.Logger;
@@ -33,6 +35,7 @@ import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientProperties;
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
+import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -59,6 +62,7 @@ import org.springframework.web.client.RestTemplate;
 @Import(DataFlowClientAutoConfiguration.class)
 @EnableConfigurationProperties({IntegrationTestProperties.class})
 public class DataFlowOperationsATConfiguration {
+    private static final Logger logger = LoggerFactory.getLogger(DataFlowOperationsATConfiguration.class);
 
     @Bean
     public RestTemplate restTemplate(DataFlowClientProperties dataFlowClientProperties) throws URISyntaxException {
@@ -76,6 +80,9 @@ public class DataFlowOperationsATConfiguration {
     @Bean
     public RuntimeApplicationHelper runtimeApplicationHelper(DataFlowTemplate dataFlowOperations,
                                                              IntegrationTestProperties testProperties) {
+
+        Collection<Deployer> platforms = dataFlowOperations.streamOperations().listPlatforms();
+        logger.debug("platforms:{}", platforms);
 
         return new RuntimeApplicationHelper(dataFlowOperations,
             testProperties.getPlatform().getConnection().getPlatformName(),
