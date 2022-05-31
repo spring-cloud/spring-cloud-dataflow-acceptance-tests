@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-TARGET=helm
-if [[ "$1" == "" ]]
+
+TARGET=kubectl
+if [[ "$1" != "" ]]
 then
-  TARGET=helm
-else
   TARGET=$1
 fi
 export PLATFORM_TYPE=kubernetes

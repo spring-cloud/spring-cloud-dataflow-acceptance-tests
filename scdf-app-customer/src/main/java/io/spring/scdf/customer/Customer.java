@@ -32,6 +32,8 @@ import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.cloud.stream.annotation.Output;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
@@ -50,11 +52,14 @@ public class Customer {
     private List<String> food = Arrays.asList("burger", "pizza", "steak", "pasta");
     private final Events events;
     private final ApplicationAvailability applicationAvailability;
+
+    private final Environment environment;
     private boolean placedOrder = false;
 
-    public Customer(Events events, ApplicationAvailability applicationAvailability) {
+    public Customer(Events events, ApplicationAvailability applicationAvailability, Environment environment) {
         this.events = events;
         this.applicationAvailability = applicationAvailability;
+        this.environment = environment;
     }
 
     public void placeOrders() {
@@ -85,18 +90,15 @@ public class Customer {
     }
 
     @EventListener
-    public void onEvent(AvailabilityChangeEvent<AvailabilityState> event) {
+    public void onEvent(AvailabilityChangeEvent<ReadinessState> event) {
         logger.info("onEvent:{}", event.getState());
-        if (event.getState() instanceof ReadinessState) {
-            ReadinessState readinessState = (ReadinessState) event.getState();
-            if (ReadinessState.ACCEPTING_TRAFFIC.equals(readinessState)) {
+        logger.info("availability:{}:{}", applicationAvailability.getLivenessState(), applicationAvailability.getReadinessState());
+        if(!environment.acceptsProfiles(Profiles.of("test"))) {
+            if (LivenessState.CORRECT.equals(applicationAvailability.getLivenessState())) {
                 placeOrders();
             }
-        } else if (event.getState() instanceof LivenessState) {
-            LivenessState livenessState = (LivenessState) event.getState();
-            if (LivenessState.CORRECT.equals(livenessState)) {
-                placeOrders();
-            }
+        } else {
+            logger.info("onEvent:skip:test");
         }
     }
 
