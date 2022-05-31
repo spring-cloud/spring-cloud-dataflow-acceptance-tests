@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 function load_image() {
   echo "Pulling:$1"
   docker pull $1
@@ -13,6 +14,7 @@ load_image "springcloud/spring-cloud-dataflow-composed-task-runner:2.10.0-SNAPSH
 load_image "springcloud/spring-cloud-skipper-server:2.9.0-SNAPSHOT"
 load_image "springcloud/spring-cloud-dataflow-server:2.10.0-SNAPSHOT"
 ATDIR=$(pwd)
+
 pushd ../spring-cloud-dataflow
 # Deploy Rabbit
 kubectl create -f src/kubernetes/rabbitmq/

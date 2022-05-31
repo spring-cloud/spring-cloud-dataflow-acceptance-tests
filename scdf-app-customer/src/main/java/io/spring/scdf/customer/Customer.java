@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.availability.ApplicationAvailability;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
+import org.springframework.boot.availability.AvailabilityState;
 import org.springframework.boot.availability.LivenessState;
 import org.springframework.boot.availability.ReadinessState;
 import org.springframework.cloud.stream.annotation.EnableBinding;
@@ -51,6 +52,7 @@ public class Customer {
     private List<String> food = Arrays.asList("burger", "pizza", "steak", "pasta");
     private final Events events;
     private final ApplicationAvailability applicationAvailability;
+
     private final Environment environment;
     private boolean placedOrder = false;
 

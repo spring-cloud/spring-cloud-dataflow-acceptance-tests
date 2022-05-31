@@ -8,8 +8,6 @@ function load_image() {
   echo "Loaded:$1"
 }
 
-SKIPPER_VERSION=2.9.0-SNAPSHOT
-DATAFLOW_VERSION=2.10.0-SNAPSHOT
 
 load_image "bitnami/kubectl:1.23.6-debian-10-r0"
 load_image "bitnami/mariadb:10.6.7-debian-10-r70"

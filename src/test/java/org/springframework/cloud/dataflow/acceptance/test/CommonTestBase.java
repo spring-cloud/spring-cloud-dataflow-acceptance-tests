@@ -29,6 +29,7 @@ import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicati
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
+
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientProperties;
 import org.springframework.context.annotation.Import;
 
@@ -59,6 +60,7 @@ public class CommonTestBase {
      */
     @Autowired
     protected RuntimeApplicationHelper runtimeApps;
+
     @Autowired
     protected DataFlowClientProperties dataFlowClientProperties;
 

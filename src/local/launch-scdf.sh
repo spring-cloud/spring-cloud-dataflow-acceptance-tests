@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 TARGET=kubectl
 if [[ "$1" != "" ]]
 then
