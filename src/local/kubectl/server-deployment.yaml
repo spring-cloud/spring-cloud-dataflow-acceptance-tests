@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: scdf-server
-          image: springcloud/scdf-pro-server:1.5.0-SNAPSHOT
+          image: springcloud/spring-cloud-dataflow-server:2.10.0-SNAPSHOT
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: config
@@ -79,6 +79,7 @@ spec:
       initContainers:
         - name: init-mariadb-wait
           image: busybox:1
+          imagePullPolicy: IfNotPresent
           command: [ 'sh', '-c', 'until nc -w3 -z mariadb 3306; do echo waiting for mariadb; sleep 3; done;' ]
       serviceAccountName: scdf-sa
       volumes:
