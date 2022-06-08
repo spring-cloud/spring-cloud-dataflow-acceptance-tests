@@ -37,6 +37,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.jayway.jsonpath.JsonPath;
+import junit.framework.AssertionFailedError;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
 import org.assertj.core.api.Condition;
 import org.awaitility.Awaitility;
@@ -89,6 +90,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -124,8 +127,8 @@ class DataFlowAT extends CommonTestBase {
     public void before() {
         logger.debug("before:start");
         logger.info("[platform = {}, type = {}]", runtimeApps.getPlatformName(), runtimeApps.getPlatformType());
-        Awaitility.setDefaultPollInterval(Duration.ofSeconds(3));
-        Awaitility.setDefaultTimeout(Duration.ofMinutes(5));
+        Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
+        Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
         registerTimestampTasks();
         resetTimestampVersion();
         logger.debug("before:end");
@@ -235,11 +238,11 @@ class DataFlowAT extends CommonTestBase {
     @Test
     public void multipleStreamApps() {
         if (this.runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
-            registerApp("restaurant", "docker:springcloudstream/scdf-app-restaurant:latest");
-            registerApp("customer", "docker:springcloudstream/scdf-app-customer:latest");
-            registerApp("waitron", "docker:springcloudstream/scdf-app-waitron:latest");
+            registerApp("kitchen", "docker:springcloudstream/scdf-app-kitchen:1.0.0-SNAPSHOT");
+            registerApp("customer", "docker:springcloudstream/scdf-app-customer:1.0.0-SNAPSHOT");
+            registerApp("waitron", "docker:springcloudstream/scdf-app-waitron:1.0.0-SNAPSHOT");
         } else {
-            registerApp("restaurant", "maven:io.spring:scdf-app-restaurant:1.0.0-SNAPSHOT");
+            registerApp("kitchen", "maven:io.spring:scdf-app-kitchen:1.0.0-SNAPSHOT");
             registerApp("customer", "maven:io.spring:scdf-app-customer:1.0.0-SNAPSHOT");
             registerApp("waitron", "maven:io.spring:scdf-app-waitron:1.0.0-SNAPSHOT");
         }
@@ -258,7 +261,7 @@ class DataFlowAT extends CommonTestBase {
         logger.info("multipleStreamApps:define:restaurant-test");
         StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
             .name("restaurant-test")
-            .definition("restaurant || waitron || customer")
+            .definition("kitchen || waitron || customer")
             .create();
         logger.info("multipleStreamApps:deploy:restaurant-test");
         StreamApplication waitron = new StreamApplication("waitron");
@@ -266,24 +269,30 @@ class DataFlowAT extends CommonTestBase {
         try {
             final Stream stream = streamDefinition.deploy(
                 new DeploymentPropertiesBuilder()
-                    .putAll(testDeploymentProperties("restaurant", "customer", "waitron"))
+                    .putAll(testDeploymentProperties("kitchen", "customer", "waitron"))
                     // Input from Waitron
-                    .put("app.restaurant.spring.cloud.stream.bindings.orders.destination", "ordersDest")
+                    .put("app.kitchen.spring.cloud.stream.bindings.orders.destination", "ordersDest")
+                    .put("app.kitchen.spring.cloud.stream.bindings.staff.destination", "staffDest")
                     // Output to Waitron
-                    .put("app.restaurant.spring.cloud.stream.bindings.food.destination", "foodDest")
-                    .put("app.restaurant.spring.cloud.stream.bindings.hotDrinks.destination", "hotDrinksDest")
-                    .put("app.restaurant.spring.cloud.stream.bindings.coldDrinks.destination", "coldDrinksDest")
+                    .put("app.kitchen.spring.cloud.stream.bindings.food.destination", "foodDest")
+                    .put("app.kitchen.spring.cloud.stream.bindings.hotDrinks.destination", "hotDrinksDest")
+                    .put("app.kitchen.spring.cloud.stream.bindings.coldDrinks.destination", "coldDrinksDest")
+                    // Output to Customers
+                    .put("app.kitchen.spring.cloud.stream.bindings.open.destination", "openDest")
                     // Input from Kitchen
                     .put("app.waitron.spring.cloud.stream.bindings.food.destination", "foodDest")
                     .put("app.waitron.spring.cloud.stream.bindings.hotDrinks.destination", "hotDrinksDest")
                     .put("app.waitron.spring.cloud.stream.bindings.coldDrinks.destination", "coldDrinksDest")
                     // Output to Kitchen
                     .put("app.waitron.spring.cloud.stream.bindings.orders.destination", "ordersDest")
+                    .put("app.waitron.spring.cloud.stream.bindings.at_work.destination", "staffDest")
                     // Input from Customer
                     .put("app.waitron.spring.cloud.stream.bindings.order.destination", "orderDest")
                     .put("app.waitron.spring.cloud.stream.bindings.payment.destination", "paymentDest")
                     // Output to Customer
                     .put("app.waitron.spring.cloud.stream.bindings.delivery.destination", "receiveDest")
+                    // Input from Restaurant
+                    .put("app.customer.spring.cloud.stream.bindings.open.destination", "openDest")
                     // Output to Waitron
                     .put("app.customer.spring.cloud.stream.bindings.order.destination", "orderDest")
                     .put("app.customer.spring.cloud.stream.bindings.payment.destination", "paymentDest")
@@ -303,6 +312,8 @@ class DataFlowAT extends CommonTestBase {
             Awaitility.await()
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> AwaitUtils.hasInLog(waitronLog, "acceptPayment"));
+        } catch (AssertionError x) {
+            throw x;
         } catch (Throwable x) {
             logger.error("multipleStreamApps:exception:" + x, x);
             fail(x);
@@ -431,20 +442,25 @@ class DataFlowAT extends CommonTestBase {
             .name("transform-test")
             .definition("http | transform --expression=payload.toUpperCase() | log")
             .create()
-            .deploy(testDeploymentProperties("http"))) {
+            .deploy(new DeploymentPropertiesBuilder()
+                .putAll(testDeploymentProperties("http"))
+                .put("deployer.http.kubernetes.createLoadBalancer", "true").build()
+            )
+        ) {
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
-            assertThat(stream.getStatus()).is(
-                condition(status -> status.equals(DEPLOYING) || status.equals(PARTIAL)));
-
+            logger.info("stream-transform-test:deploying:{}", stream.getName());
             Awaitility.await()
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
-
+            logger.info("stream-transform-test:deployed:{}", stream.getName());
             String message = "Unique Test message: " + new Random().nextInt();
 
             runtimeApps.httpPost(stream.getName(), "http", message);
+            logger.info("stream-transform-test:sent:{}:{}", stream.getName(), message);
             final AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(stream, "log");
-            Awaitility.await().until(() -> AwaitUtils.hasInLog(logOffset, message.toUpperCase()));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> AwaitUtils.hasInLog(logOffset, message.toUpperCase()));
         }
         logger.info("stream-transform-test:done");
     }
@@ -604,20 +620,24 @@ class DataFlowAT extends CommonTestBase {
             .create()
             .deploy(new DeploymentPropertiesBuilder()
                 .putAll(testDeploymentProperties())
-                .put("deployer.*.count", "" + appInstanceCount)
+                .put("deployer.*.count", Integer.toString(appInstanceCount))
                 .build())) {
+            logger.info("stream-lifecycle-test: await deployment");
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
-
+            logger.info("stream-lifecycle-test:deployed");
             streamAssertions.accept(stream);
 
-            Awaitility.await().until(
-                () -> stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:"));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:"));
 
             assertThat(stream.history().size()).isEqualTo(1L);
-            Awaitility.await().until(() -> stream.history().get(1).equals(DEPLOYED));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.history().get(1).equals(DEPLOYED));
 
             assertThat(stream.logs()).contains("TICKTOCK - TIMESTAMP:");
             assertThat(stream.logs(app("log"))).contains("TICKTOCK - TIMESTAMP:");
@@ -635,11 +655,14 @@ class DataFlowAT extends CommonTestBase {
 
             streamAssertions.accept(stream);
 
-            Awaitility.await().until(
-                () -> stream.logs(app("log")).contains("Updated TICKTOCK - TIMESTAMP:"));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.logs(app("log")).contains("Updated TICKTOCK - TIMESTAMP:"));
 
             assertThat(stream.history().size()).isEqualTo(2);
-            Awaitility.await().until(() -> stream.history().get(1).equals(DELETED));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.history().get(1).equals(DELETED));
             Awaitility.await().until(() -> stream.history().get(2).equals(DEPLOYED));
 
             // ROLLBACK
@@ -652,24 +675,39 @@ class DataFlowAT extends CommonTestBase {
 
             streamAssertions.accept(stream);
 
-            Awaitility.await().until(
-                () -> stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:"));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:"));
 
             assertThat(stream.history().size()).isEqualTo(3);
-            Awaitility.await().until(() -> stream.history().get(1).equals(DELETED));
-            Awaitility.await().until(() -> stream.history().get(2).equals(DELETED));
-            Awaitility.await().until(() -> stream.history().get(3).equals(DEPLOYED));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.history().get(1).equals(DELETED));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.history().get(2).equals(DELETED));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.history().get(3).equals(DEPLOYED));
 
             // UNDEPLOY
             logger.info("stream-lifecycle-test: UNDEPLOY");
             stream.undeploy();
 
-            Awaitility.await().until(() -> stream.getStatus().equals(UNDEPLOYED));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.getStatus().equals(UNDEPLOYED));
 
             assertThat(stream.history().size()).isEqualTo(3);
-            Awaitility.await().until(() -> stream.history().get(1).equals(DELETED));
-            Awaitility.await().until(() -> stream.history().get(2).equals(DELETED));
-            Awaitility.await().until(() -> stream.history().get(3).equals(DELETED));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.history().get(1).equals(DELETED));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.history().get(2).equals(DELETED));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.history().get(3).equals(DELETED));
 
             assertThat(dataFlowOperations.streamOperations().list().getMetadata().getTotalElements()).isEqualTo(1L);
             // DESTROY
@@ -686,11 +724,12 @@ class DataFlowAT extends CommonTestBase {
             .definition("time | log --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
             .create()
             .deploy(testDeploymentProperties())) {
+            logger.info("stream-scaling-test:await deployment");
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
-
+            logger.info("stream-scaling-test:deployed");
             final StreamApplication time = app("time");
             final StreamApplication log = app("log");
 
@@ -719,30 +758,36 @@ class DataFlowAT extends CommonTestBase {
     public void namedChannelDestination() {
         logger.info("stream-named-channel-destination-test");
         try (
-            Stream logStream = Stream.builder(dataFlowOperations)
-                .name("log-destination-sink")
-                .definition(":LOG-DESTINATION > log")
-                .create()
-                .deploy(testDeploymentProperties());
             Stream httpStream = Stream.builder(dataFlowOperations)
                 .name("http-destination-source")
                 .definition("http > :LOG-DESTINATION")
                 .create()
-                .deploy(testDeploymentProperties("http"))) {
+                .deploy(testDeploymentProperties("http"));
+            Stream logStream = Stream.builder(dataFlowOperations)
+                .name("log-destination-sink")
+                .definition(":LOG-DESTINATION > log")
+                .create()
+                .deploy(testDeploymentProperties("log"))) {
+            logger.info("namedChannelDestination:deploying:{}", logStream.getName());
+            logger.info("namedChannelDestination:deploying:{}", httpStream.getName());
             AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(logStream);
             AwaitUtils.StreamLog httpOffset = AwaitUtils.logOffset(httpStream);
             Awaitility.await()
                 .failFast(() -> AwaitUtils.hasErrorInLog(logOffset))
                 .until(() -> logStream.getStatus().equals(DEPLOYED));
+            logger.info("namedChannelDestination:deployed:{}", logStream.getName());
             Awaitility.await()
                 .failFast(() -> AwaitUtils.hasErrorInLog(httpOffset))
                 .until(() -> httpStream.getStatus().equals(DEPLOYED));
-
+            logger.info("namedChannelDestination:deployed:{}", httpStream.getName());
             String message = "Unique Test message: " + new Random().nextInt();
-
+            logger.info("namedChannelDestination:sending:{} to {}", message, httpStream.getName());
             runtimeApps.httpPost(httpStream.getName(), "http", message);
-            AwaitUtils.StreamLog logLog = AwaitUtils.logOffset(logStream, "log");
-            Awaitility.await().until(() -> AwaitUtils.hasInLog(logLog, message));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(httpOffset))
+                .failFast(() -> AwaitUtils.hasErrorInLog(logOffset))
+                .until(() -> logStream.logs(app("log")).contains(message));
+            logger.info("namedChannelDestination:found:{} in {}", message, logStream.getName());
         }
     }
 

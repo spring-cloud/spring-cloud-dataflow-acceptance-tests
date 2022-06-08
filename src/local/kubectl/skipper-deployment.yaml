@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skipper
+  labels:
+    app: skipper
+spec:
+  selector:
+    matchLabels:
+      app: skipper
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: skipper
+    spec:
+      containers:
+      - name: skipper
+        image: springcloud/spring-cloud-skipper-server:2.9.0-SNAPSHOT
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - name: config
+            mountPath: /workspace/config
+            readOnly: true
+          - name: database
+            mountPath: /etc/secrets/database
+            readOnly: true
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 7577
+          initialDelaySeconds: 45
+        readinessProbe:
+          httpGet:
+            path: /actuator/info
+            port: 7577
+          initialDelaySeconds: 45
+        resources:
+          limits:
+            cpu: 1.0
+            memory: 1024Mi
+          requests:
+            cpu: 0.5
+            memory: 640Mi
+        env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: 'kubernetes'
+          - name: SERVER_PORT
+            value: '7577'
+          - name: SPRING_CLOUD_CONFIG_ENABLED
+            value: 'false'
+          - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
+            value: 'false'
+          - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
+            value: 'false'
+          - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
+            value: /etc/secrets
+      initContainers:
+      - name: init-mariadb-wait
+        image: busybox:1
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '-c', 'until nc -w3 -z mariadb 3306; do echo waiting for mariadb; sleep 3; done;']
+      - name: init-mariadb-database
+        image: mariadb:10.4.22
+        env:
+        - name: MARIADB_PWD
+          valueFrom:
+            secretKeyRef:
+              name: mariadb
+              key: mariadb-root-password
+        command: ['sh', '-c', 'mariadb -h mariadb -u root --password=$MARIADB_PWD -e "CREATE DATABASE IF NOT EXISTS skipper;"']
+      serviceAccountName: scdf-sa
+      volumes:
+        - name: config
+          configMap:
+            name: skipper
+            items:
+            - key: 'application-kubernetes.yaml'
+              path: 'application-kubernetes.yaml'
+        - name: database
+          secret:
+            secretName: mariadb
