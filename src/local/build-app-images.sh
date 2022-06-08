@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
-eval $(minikube docker-env)
-pushd scdf-app-restaurant
-  ./mvnw install spring-boot:build-image -Dspring-boot.build-image.imageName=springcloudstream/scdf-app-restaurant
-popd
+set -e
+pushd ../spring-cloud-dataflow-samples/restaurant-stream-apps
+  pushd scdf-app-kitchen
+    ./mvnw install spring-boot:build-image -Dspring-boot.build-image.imageName=springcloudstream/scdf-app-kitchen
+  popd
 
-pushd scdf-app-customer
-  ./mvnw install spring-boot:build-image -Dspring-boot.build-image.imageName=springcloudstream/scdf-app-customer
-popd
+  pushd scdf-app-customer
+    ./mvnw install spring-boot:build-image -Dspring-boot.build-image.imageName=springcloudstream/scdf-app-customer
+  popd
 
-pushd scdf-app-waitron
-  ./mvnw install spring-boot:build-image -Dspring-boot.build-image.imageName=springcloudstream/scdf-app-waitron
+  pushd scdf-app-waitron
+    ./mvnw install spring-boot:build-image -Dspring-boot.build-image.imageName=springcloudstream/scdf-app-waitron
+  popd
 popd
