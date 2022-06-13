@@ -87,6 +87,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -123,7 +124,7 @@ class DataFlowAT extends CommonTestBase {
         logger.debug("before:start");
         logger.info("[platform = {}, type = {}]", runtimeApps.getPlatformName(), runtimeApps.getPlatformType());
         Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
-        Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
+        Awaitility.setDefaultTimeout(Duration.ofMinutes(5));
         registerTimestampTasks();
         resetTimestampVersion();
         logger.debug("before:end");
@@ -166,6 +167,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @DisabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "kubernetes")
     public void applicationMetadataMavenTests() {
         logger.info("application-metadata-maven-test");
 
@@ -264,7 +266,7 @@ class DataFlowAT extends CommonTestBase {
         try {
             final Stream stream = streamDefinition.deploy(
                 new DeploymentPropertiesBuilder()
-                    .putAll(testDeploymentProperties("kitchen", "customer", "waitron"))
+                    .putAll(testDeploymentProperties("waitron"))
                     // Input from Waitron
                     .put("app.kitchen.spring.cloud.stream.bindings.orders.destination", "ordersDest")
                     .put("app.kitchen.spring.cloud.stream.bindings.staff.destination", "staffDest")
@@ -437,10 +439,7 @@ class DataFlowAT extends CommonTestBase {
             .name("transform-test")
             .definition("http | transform --expression=payload.toUpperCase() | log")
             .create()
-            .deploy(new DeploymentPropertiesBuilder()
-                .putAll(testDeploymentProperties("http"))
-                .put("deployer.http.kubernetes.createLoadBalancer", "true").build()
-            )
+            .deploy(testDeploymentProperties("http"))
         ) {
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             logger.info("stream-transform-test:deploying:{}", stream.getName());
@@ -478,26 +477,29 @@ class DataFlowAT extends CommonTestBase {
             .put("app.log.logging.pattern.level",
                 "WOODCHUCK-${INSTANCE_INDEX:${CF_INSTANCE_INDEX:${spring.cloud.stream.instanceIndex:666}}} %5p")
             .build())) {
+            logger.info("streamPartitioning:deploying:{}", stream.getName());
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
-
+            logger.info("streamPartitioning:deployed:{}", stream.getName());
             String message = "How much wood would a woodchuck chuck if a woodchuck could chuck wood";
+            logger.info("streamPartitioning:sending:{}:{}", stream.getName(), message);
             runtimeApps.httpPost(stream.getName(), "http", message);
-
-            Awaitility.await().until(() -> {
-                Collection<String> logs = runtimeApps.applicationInstanceLogs(stream.getName(), "log").values();
-
-                return (logs.size() == 2) && logs.stream()
-                    // partition order is undetermined
-                    .map(log -> (log.contains("WOODCHUCK-0"))
-                        ? asList("WOODCHUCK-0", "How", "chuck").stream().allMatch(log::contains)
-                        : asList("WOODCHUCK-1", "much", "wood", "would", "if", "a", "woodchuck", "could")
-                        .stream().allMatch(log::contains))
-                    .reduce(Boolean::logicalAnd)
-                    .orElse(false);
-            });
+            logger.info("streamPartitioning:sent:{}:{}", stream.getName(), message);
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> {
+                    Collection<String> logs = runtimeApps.applicationInstanceLogs(stream.getName(), "log").values();
+                    return (logs.size() == 2) && logs.stream()
+                        // partition order is undetermined
+                        .map(log -> (log.contains("WOODCHUCK-0"))
+                            ? asList("WOODCHUCK-0", "How", "chuck").stream().allMatch(log::contains)
+                            : asList("WOODCHUCK-1", "much", "wood", "would", "if", "a", "woodchuck", "could")
+                            .stream().allMatch(log::contains))
+                        .reduce(Boolean::logicalAnd)
+                        .orElse(false);
+                });
         }
         logger.info("stream-partitioning-test:done (aka. WoodChuckTests)");
     }
@@ -614,7 +616,7 @@ class DataFlowAT extends CommonTestBase {
             .definition("time | log --log.name='TEST' --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
             .create()
             .deploy(new DeploymentPropertiesBuilder()
-                .putAll(testDeploymentProperties())
+                .putAll(testDeploymentProperties("log"))
                 .put("deployer.*.count", Integer.toString(appInstanceCount))
                 .build())) {
             logger.info("stream-lifecycle-test: await deployment");
@@ -718,7 +720,7 @@ class DataFlowAT extends CommonTestBase {
             .name("stream-scaling-test")
             .definition("time | log --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
             .create()
-            .deploy(testDeploymentProperties())) {
+            .deploy(testDeploymentProperties("log", "time"))) {
             logger.info("stream-scaling-test:await deployment");
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
@@ -778,6 +780,7 @@ class DataFlowAT extends CommonTestBase {
             String message = "Unique Test message: " + new Random().nextInt();
             logger.info("namedChannelDestination:sending:{} to {}", message, httpStream.getName());
             runtimeApps.httpPost(httpStream.getName(), "http", message);
+            logger.info("namedChannelDestination:sent:{} to {}", message, httpStream.getName());
             Awaitility.await()
                 .failFast(() -> AwaitUtils.hasErrorInLog(httpOffset))
                 .failFast(() -> AwaitUtils.hasErrorInLog(logOffset))
@@ -799,21 +802,27 @@ class DataFlowAT extends CommonTestBase {
                 .name("tapstream")
                 .definition(":taphttp.http > log")
                 .create()
-                .deploy(testDeploymentProperties())) {
+                .deploy(testDeploymentProperties("log"))) {
+            logger.info("namedChannelTap:deploying:{}", httpLogStream.getName());
+            logger.info("namedChannelTap:deploying:{}", tapStream.getName());
             AwaitUtils.StreamLog httpOffset = AwaitUtils.logOffset(httpLogStream);
             AwaitUtils.StreamLog tapOffset = AwaitUtils.logOffset(tapStream);
             Awaitility.await()
                 .failFast(() -> AwaitUtils.hasErrorInLog(httpOffset))
                 .until(() -> httpLogStream.getStatus().equals(DEPLOYED));
+            logger.info("namedChannelTap:deployed:{}", httpLogStream.getName());
             Awaitility.await()
                 .failFast(() -> AwaitUtils.hasErrorInLog(tapOffset))
                 .until(() -> tapStream.getStatus().equals(DEPLOYED));
+            logger.info("namedChannelTap:deployed:{}", tapStream.getName());
 
             String message = "Unique Test message: " + new Random().nextInt();
-
+            logger.info("namedChannelTap:sending:{}:{}", httpLogStream.getName(), message);
             runtimeApps.httpPost(httpLogStream.getName(), "http", message);
-
-            Awaitility.await().until(() -> tapStream.logs(app("log")).contains(message));
+            logger.info("namedChannelTap:sent:{}:{}", httpLogStream.getName(), message);
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(tapOffset))
+                .until(() -> tapStream.logs(app("log")).contains(message));
         }
     }
 
@@ -825,7 +834,7 @@ class DataFlowAT extends CommonTestBase {
                 .name("many-to-one")
                 .definition(":MANY-TO-ONE-DESTINATION > log")
                 .create()
-                .deploy(testDeploymentProperties());
+                .deploy(testDeploymentProperties("log"));
             Stream httpStreamOne = Stream.builder(dataFlowOperations)
                 .name("http-source-1")
                 .definition("http > :MANY-TO-ONE-DESTINATION")
@@ -873,37 +882,51 @@ class DataFlowAT extends CommonTestBase {
                 .name("directed-graph-destination1")
                 .definition(":foo > transform --expression=payload+'-foo' | log")
                 .create()
-                .deploy(testDeploymentProperties());
+                .deploy(testDeploymentProperties("log"));
             Stream barLogStream = Stream.builder(dataFlowOperations)
                 .name("directed-graph-destination2")
                 .definition(":bar > transform --expression=payload+'-bar' | log")
                 .create()
-                .deploy(testDeploymentProperties());
+                .deploy(testDeploymentProperties("log"));
             Stream httpStream = Stream.builder(dataFlowOperations)
                 .name("directed-graph-http-source")
                 .definition("http | router --expression=payload.contains('a')?'foo':'bar'")
                 .create()
                 .deploy(testDeploymentProperties("http"))) {
+            logger.info("namedChannelDirectedGraph:deploying:{}", httpStream.getName());
+            logger.info("namedChannelDirectedGraph:deploying:{}", fooLogStream.getName());
+            logger.info("namedChannelDirectedGraph:deploying:{}", barLogStream.getName());
             AwaitUtils.StreamLog fooOffset = AwaitUtils.logOffset(fooLogStream);
             AwaitUtils.StreamLog barOffset = AwaitUtils.logOffset(barLogStream);
             AwaitUtils.StreamLog httpOffset = AwaitUtils.logOffset(httpStream);
             Awaitility.await()
                 .failFast(() -> AwaitUtils.hasErrorInLog(fooOffset))
                 .until(() -> fooLogStream.getStatus().equals(DEPLOYED));
+            logger.info("namedChannelDirectedGraph:deployed:{}", fooLogStream.getName());
             Awaitility.await()
                 .failFast(() -> AwaitUtils.hasErrorInLog(barOffset))
                 .until(() -> barLogStream.getStatus().equals(DEPLOYED));
+            logger.info("namedChannelDirectedGraph:deployed:{}", barLogStream.getName());
             Awaitility.await()
                 .failFast(() -> AwaitUtils.hasErrorInLog(httpOffset))
                 .until(() -> httpStream.getStatus().equals(DEPLOYED));
-
+            logger.info("namedChannelDirectedGraph:deployed:{}", httpStream.getName());
+            logger.info("namedChannelDirectedGraph:get-url:{}", httpStream.getName());
             String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpStream.getName(), "http");
+            assertNotNull(httpAppUrl, "expected http url");
+            logger.info("namedChannelDirectedGraph:{},url={}", httpStream.getName(), httpAppUrl);
             runtimeApps.httpPost(httpAppUrl, "abcd");
+            logger.info("namedChannelDirectedGraph:send:abcd -> {}", httpAppUrl);
             runtimeApps.httpPost(httpAppUrl, "defg");
+            logger.info("namedChannelDirectedGraph:send:defg -> {}", httpAppUrl);
             AwaitUtils.StreamLog fooLogOffset = AwaitUtils.logOffset(fooLogStream, "log");
             AwaitUtils.StreamLog barLogOffset = AwaitUtils.logOffset(barLogStream, "log");
-            Awaitility.await().until(() -> AwaitUtils.hasInLog(fooLogOffset, "abcd-foo"));
-            Awaitility.await().until(() -> AwaitUtils.hasInLog(barLogOffset, "defg-bar"));
+            Awaitility.await()
+                .failFast(()->AwaitUtils.hasErrorInLog(fooLogOffset))
+                .until(() -> AwaitUtils.hasInLog(fooLogOffset, "abcd-foo"));
+            Awaitility.await()
+                .failFast(()->AwaitUtils.hasErrorInLog(barLogOffset))
+                .until(() -> AwaitUtils.hasInLog(barLogOffset, "defg-bar"));
         }
     }
 
@@ -948,7 +971,7 @@ class DataFlowAT extends CommonTestBase {
                         + " --trigger.initialDelay=100 --trigger.maxPeriod=1000 " +
                         "--spring.cloud.dataflow.client.serverUri=" + dataFlowClientProperties.getServerUri())
                     .create()
-                    .deploy(testDeploymentProperties())) {
+                    .deploy(testDeploymentProperties("http"))) {
                     AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
                     Awaitility.await()
                         .failFast(() -> AwaitUtils.hasErrorInLog(offset))
@@ -2592,7 +2615,7 @@ class DataFlowAT extends CommonTestBase {
             .definition("time | log")
             .create()
             .deploy(new DeploymentPropertiesBuilder()
-                .putAll(testDeploymentProperties())
+                .putAll(testDeploymentProperties("log", "time"))
                 .put("app.log.spring.profiles.active", "test")
                 .put("deployer.log.cloudfoundry.services", "cloud-config-server")
                 .put("app.log.spring.cloud.config.name", "MY_CONFIG_TICKTOCK_LOG_NAME")

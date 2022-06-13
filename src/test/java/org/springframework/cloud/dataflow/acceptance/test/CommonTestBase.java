@@ -66,6 +66,13 @@ public class CommonTestBase {
 
     protected void registerApp(String name, String url) {
         try {
+            dataFlowOperations.appRegistryOperations().unregister(name, ApplicationType.app);
+        } catch (DataFlowClientException x) {
+            if(!x.toString().contains("application could not be found")) {
+                fail(x);
+            }
+        }
+        try {
             dataFlowOperations.appRegistryOperations().register(name, ApplicationType.app, url, null, true);
             logger.info("registerApp:{}:{}", name, url);
         } catch (DataFlowClientException x) {

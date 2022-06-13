@@ -66,6 +66,7 @@ public class DataFlowOperationsATConfiguration {
 
     @Bean
     public RestTemplate restTemplate(DataFlowClientProperties dataFlowClientProperties) throws URISyntaxException {
+        logger.info("dataflow-client-uri={}", dataFlowClientProperties.getServerUri());
         ClientHttpRequestFactory requestFactory = HttpClientConfigurer
             .create(new URI(dataFlowClientProperties.getServerUri()))
             .skipTlsCertificateVerification(dataFlowClientProperties.isSkipSslValidation())
