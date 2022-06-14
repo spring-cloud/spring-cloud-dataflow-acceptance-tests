@@ -301,7 +301,7 @@ class DataFlowAT extends CommonTestBase {
             destroy = stream;
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
 
             logger.info("multipleStreamApps:waiting for acceptPayment:restaurant-test");
@@ -444,7 +444,7 @@ class DataFlowAT extends CommonTestBase {
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             logger.info("stream-transform-test:deploying:{}", stream.getName());
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
             logger.info("stream-transform-test:deployed:{}", stream.getName());
             String message = "Unique Test message: " + new Random().nextInt();
@@ -538,7 +538,7 @@ class DataFlowAT extends CommonTestBase {
                 .build())) {
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
 
             // Helper supplier to retrieve the ver-log version from the stream's current manifest.
@@ -566,7 +566,7 @@ class DataFlowAT extends CommonTestBase {
 
             stream.update(new DeploymentPropertiesBuilder().put("version.ver-log", VERSION_2_1_5).build());
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
 
             awaitSendAndReceiveTestMessage.accept(String.format("TEST MESSAGE 2-%s ", RANDOM_SUFFIX));
@@ -578,7 +578,7 @@ class DataFlowAT extends CommonTestBase {
 
             stream.rollback(0);
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
 
             awaitSendAndReceiveTestMessage.accept(String.format("TEST MESSAGE 3-%s ", RANDOM_SUFFIX));
@@ -625,7 +625,7 @@ class DataFlowAT extends CommonTestBase {
             logger.info("stream-lifecycle-test: await deployment");
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
             logger.info("stream-lifecycle-test:deployed");
             streamAssertions.accept(stream);
@@ -636,7 +636,7 @@ class DataFlowAT extends CommonTestBase {
 
             assertThat(stream.history().size()).isEqualTo(1L);
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(1).equals(DEPLOYED));
 
             assertThat(stream.logs()).contains("TICKTOCK - TIMESTAMP:");
@@ -650,7 +650,7 @@ class DataFlowAT extends CommonTestBase {
                 .build());
 
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
 
             streamAssertions.accept(stream);
@@ -670,7 +670,7 @@ class DataFlowAT extends CommonTestBase {
             stream.rollback(0);
 
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
 
             streamAssertions.accept(stream);
@@ -687,7 +687,7 @@ class DataFlowAT extends CommonTestBase {
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(2).equals(DELETED));
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(3).equals(DEPLOYED));
 
             // UNDEPLOY
@@ -727,7 +727,7 @@ class DataFlowAT extends CommonTestBase {
             logger.info("stream-scaling-test:await deployment");
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
             logger.info("stream-scaling-test:deployed");
             final StreamApplication time = app("time");
@@ -742,7 +742,7 @@ class DataFlowAT extends CommonTestBase {
             stream.scaleApplicationInstances(log, 2, Collections.emptyMap());
 
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
             Awaitility.await().until(() -> stream.runtimeApps().get(log).size() == 2);
 
@@ -773,11 +773,11 @@ class DataFlowAT extends CommonTestBase {
             AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(logStream);
             AwaitUtils.StreamLog httpOffset = AwaitUtils.logOffset(httpStream);
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(logOffset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(logOffset))
                 .until(() -> logStream.getStatus().equals(DEPLOYED));
             logger.info("namedChannelDestination:deployed:{}", logStream.getName());
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(httpOffset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(httpOffset))
                 .until(() -> httpStream.getStatus().equals(DEPLOYED));
             logger.info("namedChannelDestination:deployed:{}", httpStream.getName());
             String message = "Unique Test message: " + new Random().nextInt();
@@ -811,11 +811,11 @@ class DataFlowAT extends CommonTestBase {
             AwaitUtils.StreamLog httpOffset = AwaitUtils.logOffset(httpLogStream);
             AwaitUtils.StreamLog tapOffset = AwaitUtils.logOffset(tapStream);
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(httpOffset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(httpOffset))
                 .until(() -> httpLogStream.getStatus().equals(DEPLOYED));
             logger.info("namedChannelTap:deployed:{}", httpLogStream.getName());
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(tapOffset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(tapOffset))
                 .until(() -> tapStream.getStatus().equals(DEPLOYED));
             logger.info("namedChannelTap:deployed:{}", tapStream.getName());
 
@@ -852,13 +852,13 @@ class DataFlowAT extends CommonTestBase {
             AwaitUtils.StreamLog httpOffsetOne = AwaitUtils.logOffset(httpStreamOne);
             AwaitUtils.StreamLog httpOffsetTwo = AwaitUtils.logOffset(httpStreamTwo);
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(logOffset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(logOffset))
                 .until(() -> logStream.getStatus().equals(DEPLOYED));
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(httpOffsetOne))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(httpOffsetOne))
                 .until(() -> httpStreamOne.getStatus().equals(DEPLOYED));
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(httpOffsetTwo))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(httpOffsetTwo))
                 .until(() -> httpStreamTwo.getStatus().equals(DEPLOYED));
 
             String messageOne = "Unique Test message: " + new Random().nextInt();
@@ -903,15 +903,15 @@ class DataFlowAT extends CommonTestBase {
             AwaitUtils.StreamLog barOffset = AwaitUtils.logOffset(barLogStream);
             AwaitUtils.StreamLog httpOffset = AwaitUtils.logOffset(httpStream);
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(fooOffset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(fooOffset))
                 .until(() -> fooLogStream.getStatus().equals(DEPLOYED));
             logger.info("namedChannelDirectedGraph:deployed:{}", fooLogStream.getName());
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(barOffset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(barOffset))
                 .until(() -> barLogStream.getStatus().equals(DEPLOYED));
             logger.info("namedChannelDirectedGraph:deployed:{}", barLogStream.getName());
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(httpOffset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(httpOffset))
                 .until(() -> httpStream.getStatus().equals(DEPLOYED));
             logger.info("namedChannelDirectedGraph:deployed:{}", httpStream.getName());
             logger.info("namedChannelDirectedGraph:get-url:{}", httpStream.getName());
@@ -978,7 +978,7 @@ class DataFlowAT extends CommonTestBase {
                     .deploy(testDeploymentProperties("http"))) {
                     AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
                     Awaitility.await()
-                        .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                        // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                         .until(() -> stream.getStatus().equals(DEPLOYED));
 
                     HttpHeaders headers = new HttpHeaders();
@@ -1032,7 +1032,7 @@ class DataFlowAT extends CommonTestBase {
             .deploy(testDeploymentProperties("http"))) {
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
 
             String message1 = "Test message 1"; // length 14
@@ -1103,7 +1103,7 @@ class DataFlowAT extends CommonTestBase {
             .deploy(testDeploymentProperties("http"))) {
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
 
             String message1 = "Test message 1"; // length 14
@@ -2626,7 +2626,7 @@ class DataFlowAT extends CommonTestBase {
                 .build())) {
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await(stream.getName() + " failed to deploy!")
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
 
             Awaitility.await("Source not started")
