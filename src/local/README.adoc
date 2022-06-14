@@ -1,14 +1,12 @@
-= Configure MiniKube for Local testing of Spring Cloud Dataflow
+= Configure Kubernetes for Local development or testing of Spring Cloud Dataflow
 
 == Building and loading containers.
-For local development you need control of the containers used in the local environment.
 
-In order to ensure to manage the specific versions of data flow and skipper containers you can set SKIPPER_VERSION and DATAFLOW_VERSION environmental variable and then invoke `./src/local/pull-dataflow.sh` and `./src/local/pull-skipper.sh`
+For local development you need control of the containers used in the local environment. In order to ensure to manage the specific versions of data flow and skipper containers you can set SKIPPER_VERSION and DATAFLOW_VERSION environmental variable and then invoke `./src/local/pull-dataflow.sh` and `./src/local/pull-skipper.sh`
 
 If you want to use a locally built application you can invoke
 `./src/loca/build-skipper-image.sh` or `./src/local/build-dataflow.sh`
 
-== Scripts
 
 == Create Configure k8s environment
 
@@ -59,3 +57,4 @@ For minikube launch a new shell and execute `minikube tunnel`
 ./src/local/destroy-k8s.sh
 ....
 
+== Scripts
