@@ -56,12 +56,10 @@ case "$K8S_DRIVER" in
     kind load docker-image "$IMAGE" "$IMAGE"
   ;;
   "tce")
-    # echo "Cannot upload to TCE"
     kind load docker-image "$IMAGE" --name scdf-local
   ;;
   "tmc")
-    echo "not supported"
-    exit 1
+    echo "not supported in TMC"
   ;;
   *)
     minikube image load "$IMAGE"
