@@ -480,23 +480,26 @@ class DataFlowAT extends CommonTestBase {
             logger.info("streamPartitioning:deploying:{}", stream.getName());
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(DEPLOYED));
             logger.info("streamPartitioning:deployed:{}", stream.getName());
             String message = "How much wood would a woodchuck chuck if a woodchuck could chuck wood";
             logger.info("streamPartitioning:sending:{}:{}", stream.getName(), message);
             runtimeApps.httpPost(stream.getName(), "http", message);
             logger.info("streamPartitioning:sent:{}:{}", stream.getName(), message);
+            final List<String> woodChuck0 = asList("WOODCHUCK-0", "How", "chuck");
+            final List<String> woodChuck1 = asList("WOODCHUCK-1", "much", "wood", "would", "if", "a", "woodchuck", "could");
             Awaitility.await()
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> {
                     Collection<String> logs = runtimeApps.applicationInstanceLogs(stream.getName(), "log").values();
+                    logger.info("streamPartitioning:logs:{}", logs);
                     return (logs.size() == 2) && logs.stream()
                         // partition order is undetermined
                         .map(log -> (log.contains("WOODCHUCK-0"))
-                            ? asList("WOODCHUCK-0", "How", "chuck").stream().allMatch(log::contains)
-                            : asList("WOODCHUCK-1", "much", "wood", "would", "if", "a", "woodchuck", "could")
-                            .stream().allMatch(log::contains))
+                            ? woodChuck0.stream().allMatch(log::contains)
+                            : woodChuck1.stream().allMatch(log::contains)
+                        )
                         .reduce(Boolean::logicalAnd)
                         .orElse(false);
                 });
@@ -914,18 +917,19 @@ class DataFlowAT extends CommonTestBase {
             logger.info("namedChannelDirectedGraph:get-url:{}", httpStream.getName());
             String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpStream.getName(), "http");
             assertNotNull(httpAppUrl, "expected http url");
+            AwaitUtils.StreamLog fooLogOffset = AwaitUtils.logOffset(fooLogStream, "log");
+            AwaitUtils.StreamLog barLogOffset = AwaitUtils.logOffset(barLogStream, "log");
+
             logger.info("namedChannelDirectedGraph:{},url={}", httpStream.getName(), httpAppUrl);
             runtimeApps.httpPost(httpAppUrl, "abcd");
             logger.info("namedChannelDirectedGraph:send:abcd -> {}", httpAppUrl);
             runtimeApps.httpPost(httpAppUrl, "defg");
             logger.info("namedChannelDirectedGraph:send:defg -> {}", httpAppUrl);
-            AwaitUtils.StreamLog fooLogOffset = AwaitUtils.logOffset(fooLogStream, "log");
-            AwaitUtils.StreamLog barLogOffset = AwaitUtils.logOffset(barLogStream, "log");
             Awaitility.await()
-                .failFast(()->AwaitUtils.hasErrorInLog(fooLogOffset))
+                .failFast(() -> AwaitUtils.hasErrorInLog(fooLogOffset))
                 .until(() -> AwaitUtils.hasInLog(fooLogOffset, "abcd-foo"));
             Awaitility.await()
-                .failFast(()->AwaitUtils.hasErrorInLog(barLogOffset))
+                .failFast(() -> AwaitUtils.hasErrorInLog(barLogOffset))
                 .until(() -> AwaitUtils.hasInLog(barLogOffset, "defg-bar"));
         }
     }

@@ -11,5 +11,10 @@ spec:
   ports:
   - port: 7577
     targetPort: 7577
+    name: http-skipper
+  #  debug port
+  - port: 8000
+    targetPort: 8000
+    name: jdwp-skipper
   selector:
     app: skipper

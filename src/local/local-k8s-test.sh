@@ -1,10 +1,23 @@
 #!/usr/bin/env bash
-pushd acceptance-tests/custom-apps/timestamp-batch-with-drivers-template1
+SCDIR=$(dirname $0)
+if [ "$SCDIR" == "" ]
+then
+  SCDIR="."
+fi
+pushd "$SCDIR/../../acceptance-tests/custom-apps/timestamp-batch-with-drivers-template1"
   ./gradlew build install
 popd
 # This assumes you are using minikube with helm from bitnami and used release name scdf and executed forward-scdf.sh
+if [ "$DATAFLOW_IP" == "" ]
+then
+  source "$SCDIR/k8s/export-dataflow-ip.sh"
+fi
+EXTRA=""
+if [ "$1" != "" ]
+then
+  EXTRA="-Dtest=$1"
+fi
 
-DATAFLOW_IP="http://localhost:9393"
 BROKER=rabbit
 echo "DATAFLOW_IP=$DATAFLOW_IP"
 ./mvnw -Dspring.profiles.active=blah \
@@ -15,4 +28,4 @@ echo "DATAFLOW_IP=$DATAFLOW_IP"
     -Dspring.cloud.dataflow.client.serverUri=$DATAFLOW_IP \
     -Dspring.cloud.dataflow.client.skipSslValidation=true \
     -Dtest=!DataFlowAT#streamAppCrossVersion \
-    clean test | tee build.log
+    -X clean test $EXTRA | tee build.log

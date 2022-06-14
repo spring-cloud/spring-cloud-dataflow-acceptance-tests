@@ -11,5 +11,7 @@ spec:
   ports:
     - port: 9393
       name: scdf-server
+    - port: 5005
+      name: jdwp-dataflow
   selector:
     app: scdf-server
