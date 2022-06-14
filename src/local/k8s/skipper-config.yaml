@@ -13,14 +13,11 @@ data:
           springframework:
             cloud: debug
         io:
-          fabric8:
-            kubernetes:
-              client: debug
+          fabric8: debug
     spring:
       cloud:
         deployer:
           kubernetes:
-            createLoadBalancer: true
             imagePullPolicy: IfNotPresent
             imagePullSecret: 'regcred'
         skipper:

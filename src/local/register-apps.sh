@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+SCDIR=$(dirname $0)
+if [ "$SCDIR" == "" ]
+then
+  SCDIR="."
+fi
 set -e
 function dataflow_post() {
   echo "Invoking POST $1 >> $2"
@@ -16,8 +21,17 @@ if [ "$1" != "" ]
 then
   PLATFORM_TYPE=$1
 fi
+if [ "$PLATFORM_TYPE" == "" ]
+then
+  PLATFORM_TYPE=kubernetes
+fi
 
-DATAFLOW_IP="http://localhost:9393"
+
+if [ "$DATAFLOW_IP" == "" ]
+then
+  source "$SCDIR/k8s/export-dataflow-ip.sh"
+fi
+
 BROKER=rabbitmq
 if [ "$BROKER" = "rabbitmq" ]; then
   BROKER_NAME=rabbit
@@ -29,6 +43,7 @@ fi
 STREAM_APPS_VERSION=2021.1.2
 # RELEASE_SNAPSHOT=snapshot
 RELEASE_SNAPSHOT=release
+
 if [ "$PLATFORM_TYPE" != "kubernetes" ]; then
   TYPE=maven
 else
@@ -45,9 +60,6 @@ if [ "$TYPE" == "docker" ]; then
   dataflow_post "uri=docker:springcloudstream/log-sink-$BROKER_NAME:3.0.1" "$DATAFLOW_IP/apps/sink/ver-log/3.0.1"
   dataflow_post "uri=docker:springcloudstream/log-sink-$BROKER_NAME:2.1.5.RELEASE" "$DATAFLOW_IP/apps/sink/ver-log/2.1.5.RELEASE"
   dataflow_post "uri=docker:springcloudtask/task-demo-metrics-prometheus:0.0.4-SNAPSHOT" "$DATAFLOW_IP/apps/task/task-demo-metrics-prometheus/0.0.4-SNAPSHOT"
-  dataflow_post "uri=docker:springcloudstream/scdf-app-kitchen:1.0.0-SNAPSHOT" "$DATAFLOW_IP/apps/app/kitchen/1.0.0"
-  dataflow_post "uri=docker:springcloudstream/scdf-app-customer:1.0.0-SNAPSHOT" "$DATAFLOW_IP/apps/app/customer/1.0.0"
-  dataflow_post "uri=docker:springcloudstream/scdf-app-waitron:1.0.0-SNAPSHOT" "$DATAFLOW_IP/apps/app/waitron/1.0.0"
 else
   dataflow_post "uri=maven:io.spring:timestamp-task:2.0.2" "$DATAFLOW_IP/apps/task/timestamp/2.0.2"
   dataflow_post "uri=maven:io.spring:timestamp-batch-task:2.0.2" "$DATAFLOW_IP/apps/task/timestamp-batch/2.0.2"
@@ -56,7 +68,4 @@ else
   dataflow_post "uri=maven:org.springframework.cloud.stream.app:log-sink-$BROKER_NAME:3.0.1" "$DATAFLOW_IP/apps/sink/ver-log/3.0.1"
   dataflow_post "uri=maven:org.springframework.cloud.stream.app:log-sink-$BROKER_NAME:2.1.5.RELEASE" "$DATAFLOW_IP/apps/sink/ver-log/2.1.5.RELEASE"
   dataflow_post "uri=maven:io.spring.task:task-demo-metrics-prometheus:0.0.4-SNAPSHOT" "$DATAFLOW_IP/apps/task/task-demo-metrics-prometheus/0.0.4-SNAPSHOT"
-  dataflow_post "uri=maven:io.spring:scdf-app-kitchen:1.0.0-SNAPSHOT" "$DATAFLOW_IP/apps/app/kitchen/1.0.0-SNAPSHOT"
-  dataflow_post "uri=maven:io.spring:scdf-app-customer:1.0.0-SNAPSHOT" "$DATAFLOW_IP/apps/app/customer/1.0.0-SNAPSHOT"
-  dataflow_post "uri=maven:io.spring:scdf-app-waitron:1.0.0-SNAPSHOT" "$DATAFLOW_IP/apps/app/waitron/1.0.0-SNAPSHOT"
 fi

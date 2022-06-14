@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-echo "Waiting for mariadb"
-kubectl rollout status deployment mariadb
-echo "Waiting for rabbitmq"
-kubectl rollout status deployment rabbitmq
-echo "Waiting for skipper"
-kubectl rollout status deployment skipper
 echo "Waiting for dataflow"
 kubectl rollout status deployment scdf-server
 

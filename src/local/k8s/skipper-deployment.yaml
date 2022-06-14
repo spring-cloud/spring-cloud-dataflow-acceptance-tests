@@ -26,7 +26,10 @@ spec:
             mountPath: /etc/secrets/database
             readOnly: true
         ports:
-        - containerPort: 80
+        - containerPort: 7577
+          name: http
+        - containerPort: 8000
+          name: jdwp
         livenessProbe:
           httpGet:
             path: /actuator/health
@@ -57,6 +60,9 @@ spec:
             value: 'false'
           - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
             value: /etc/secrets
+          # debugging
+#          - name: JAVA_OPTS
+#            value: '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000'
       initContainers:
       - name: init-mariadb-wait
         image: busybox:1

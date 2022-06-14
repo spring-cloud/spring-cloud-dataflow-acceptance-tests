@@ -28,6 +28,9 @@ spec:
           ports:
             - hostPort: 9393
               containerPort: 9393
+#            # debugging
+#            - hostPort: 5005
+#              containerPort: 5005
           livenessProbe:
             httpGet:
               path: /management/health
@@ -76,6 +79,9 @@ spec:
               # Add Maven repo for metadata artifact resolution for all stream apps
             - name: SPRING_APPLICATION_JSON
               value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\"} } } }"
+#            # debugging
+#            - name: JAVA_OPTS
+#              value: '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'
       initContainers:
         - name: init-mariadb-wait
           image: busybox:1

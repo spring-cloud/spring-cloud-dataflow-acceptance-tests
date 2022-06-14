@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
-kubectl_pid=$(ps aux | grep 'kubectl' | grep 'port\-forward' | awk '{print $2}')
-if [ "$kubectl_pid" != "" ]
+SCDIR=$(dirname $0)
+if [ "$SCDIR" == "" ]
 then
-  kill $kubectl_pid
+  SCDIR="."
 fi
-if [ "$MK_DRIVER" == "kind" ]
-then
-  kind delete cluster
-else
-  minikube delete
+if [ "$K8S_DRIVER" == "" ]; then
+  K8S_DRIVER=kind
 fi
+
+case "$K8S_DRIVER" in
+  "kind")
+    kind delete cluster
+  ;;
+  "tmc")
+    sh "$SCDIR/tmc/delete-cluster.sh"
+  ;;
+  *)
+    minikube delete
+  ;;
+esac
