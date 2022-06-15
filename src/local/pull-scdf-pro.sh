@@ -1,3 +1,2 @@
 #!/usr/bin/env bash
-echo "Not supported. Build local image using build-scdf-pro-image.sh"
-exit 1
+docker pull "dev.registry.pivotal.io/p-scdf-for-kubernetes/scdf-pro-repo/scdfpro.tanzu.vmware.com:1.5.0-SNAPSHOT"

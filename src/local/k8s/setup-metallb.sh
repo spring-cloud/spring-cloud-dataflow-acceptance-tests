@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 SCDIR=$(dirname $0)
-if [ "$SCDIR" == "" ]
-then
+if [ "$SCDIR" == "" ]; then
   SCDIR="."
 fi
 sh "$SCDIR/load-image.sh" "quay.io/metallb/speaker" "v0.12.1"

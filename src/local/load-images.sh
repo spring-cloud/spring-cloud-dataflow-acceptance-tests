@@ -1,13 +1,19 @@
 #!/usr/bin/env bash
 SCDIR=$(dirname $0)
-if [ "$SCDIR" == "" ]
-then
+if [ "$SCDIR" == "" ]; then
   SCDIR="."
 fi
-
-BROKER=rabbitmq
-if [ "$BROKER" = "rabbitmq" ]
-then
+if [ "$BINDER" == "" ]; then
+  export BINDER=rabbit
+else
+  export BINDER=kafka
+fi
+if [ "$BINDER" == "kafka" ]; then
+  BROKER=kafka
+else
+  BROKER=rabbitmq
+fi
+if [ "$BROKER" = "rabbitmq" ]; then
   BROKER_NAME=rabbit
 else
   BROKER_NAME=$BROKER
