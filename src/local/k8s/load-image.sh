@@ -1,31 +1,21 @@
 #!/usr/bin/env bash
-if [ "$K8S_DRIVER" == "" ]
-then
+if [ "$K8S_DRIVER" == "" ]; then
   K8S_DRIVER=kind
 fi
-BROKER=rabbitmq
-if [ "$BROKER" = "rabbitmq" ]
-then
-  BROKER_NAME=rabbit
-else
-  BROKER_NAME=$BROKER
-fi
+
 set -e
 DONT_PULL=$3
-if [[ "$2" == "" ]]
-then
+if [[ "$2" == "" ]]; then
   echo "A TAG is required for $1"
   exit 2
 fi
 IMAGE="$1:$2"
 set +e
-docker images | grep "$1" | grep "$2" > /dev/null
-set -e
+docker images | grep -F "$1" | grep -F "$2" >/dev/null
 EXISTS=$?
-if [ "$DONT_PULL" != "true" ]
-then
-  if [[ "$2" == *"SNAPSHOT"* ]] || [[ "$2" == *"latest"* ]] || [[ "$EXISTS" != 0 ]]
-  then
+set -e
+if [ "$DONT_PULL" != "true" ]; then
+  if [[ "$2" == *"SNAPSHOT"* ]] || [[ "$2" == *"latest"* ]] || [[ "$EXISTS" != "0" ]]; then
     echo "Pulling:$IMAGE"
     docker pull "$IMAGE"
   else
@@ -35,34 +25,32 @@ else
   echo "Not pulling:$IMAGE"
 fi
 set +e
-docker images | grep "$1" | grep "$2" > /dev/null
-set -e
+docker images | grep -F "$1" | grep -F "$2" >/dev/null
 EXISTS=$?
-if [[ "$EXISTS" != 0 ]]
-then
+set -e
+if [[ "$EXISTS" != 0 ]]; then
   echo "Image not found $IMAGE"
   exit 2
 fi
 err=$(docker history "$IMAGE")
 rc=$?
-if [[ $rc -ne 0 ]]
-then
+if [[ $rc -ne 0 ]]; then
   echo "$err"
   exit 1
 fi
 echo "Loading:$IMAGE"
 case "$K8S_DRIVER" in
-  "kind")
-    kind load docker-image "$IMAGE" "$IMAGE"
+"kind")
+  kind load docker-image "$IMAGE" "$IMAGE"
   ;;
-  "tce")
-    kind load docker-image "$IMAGE" --name scdf-local
+"tce")
+  kind load docker-image "$IMAGE" --name scdf-local
   ;;
-  "tmc")
-    echo "not supported in TMC"
+"tmc")
+  echo "not supported in TMC"
   ;;
-  *)
-    minikube image load "$IMAGE"
+*)
+  minikube image load "$IMAGE"
   ;;
 esac
 echo "Loaded:$IMAGE"

@@ -33,267 +33,268 @@ import com.jayway.jsonpath.JsonPath;
 import com.palantir.docker.compose.connection.DockerPort;
 
 public abstract class AbstractDataflowTests {
+    private final static String STREAM_APPS_VER = "2021.1.2";
+    private final static String STREAM_APPS_URI = "https://repo.spring.io/libs-release-local/org/springframework/cloud/stream/app/spring-cloud-stream-app-descriptor/" +
+        STREAM_APPS_VER + "/spring-cloud-stream-app-descriptor-" + STREAM_APPS_VER + ".stream-apps-rabbit-maven";
+    private final static String TASK_APPS_URI = "https://repo.spring.io/libs-release/org/springframework/cloud/task/app/spring-cloud-task-app-descriptor/Elston.RELEASE/spring-cloud-task-app-descriptor-Elston.RELEASE.task-apps-maven";
 
-	private final static String STREAM_APPS_URI = "https://repo.spring.io/libs-release-local/org/springframework/cloud/stream/app/spring-cloud-stream-app-descriptor/Celsius.SR3/spring-cloud-stream-app-descriptor-Celsius.SR3.stream-apps-rabbit-maven";
-	private final static String TASK_APPS_URI = "https://repo.spring.io/libs-release/org/springframework/cloud/task/app/spring-cloud-task-app-descriptor/Elston.RELEASE/spring-cloud-task-app-descriptor-Elston.RELEASE.task-apps-maven";
+    protected static void start(DockerComposeInfo dockerComposeInfo, String id) {
+        dockerComposeInfo.id(id).start();
+    }
 
-	protected static void start(DockerComposeInfo dockerComposeInfo, String id) {
-		dockerComposeInfo.id(id).start();
-	}
+    protected static void stop(DockerComposeInfo dockerComposeInfo, String id) {
+        dockerComposeInfo.id(id).stop();
+    }
 
-	protected static void stop(DockerComposeInfo dockerComposeInfo, String id) {
-		dockerComposeInfo.id(id).stop();
-	}
+    protected static void upgradeSkipper(DockerComposeInfo dockerComposeInfo, String from, String to, String container) {
+        stop(dockerComposeInfo, from);
+        start(dockerComposeInfo, to);
+        assertSkipperServerRunning(dockerComposeInfo, to, container);
+    }
 
-	protected static void upgradeSkipper(DockerComposeInfo dockerComposeInfo, String from, String to, String container) {
-		stop(dockerComposeInfo, from);
-		start(dockerComposeInfo, to);
-		assertSkipperServerRunning(dockerComposeInfo, to, container);
-	}
+    protected static void upgradeDataflow(DockerComposeInfo dockerComposeInfo, String from, String to, String container) {
+        stop(dockerComposeInfo, from);
+        start(dockerComposeInfo, to);
+        assertDataflowServerRunning(dockerComposeInfo, to, container, false);
+    }
 
-	protected static void upgradeDataflow(DockerComposeInfo dockerComposeInfo, String from, String to, String container) {
-		stop(dockerComposeInfo, from);
-		start(dockerComposeInfo, to);
-		assertDataflowServerRunning(dockerComposeInfo, to, container, false);
-	}
+    protected static void assertDataflowServerRunning(DockerComposeInfo dockerComposeInfo, String id, String container) {
+        assertDataflowServerRunning(dockerComposeInfo, id, container, true);
+    }
 
-	protected static void assertDataflowServerRunning(DockerComposeInfo dockerComposeInfo, String id, String container) {
-		assertDataflowServerRunning(dockerComposeInfo, id, container, true);
-	}
+    protected static void assertDataflowServerRunning(DockerComposeInfo dockerComposeInfo, String id, String container, boolean skipper) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+        String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/about";
+        AssertUtils.assertDataflowServerRunning(url);
+        if (skipper) {
+            AssertUtils.assertSkipperServerRunning(url);
+        }
+    }
 
-	protected static void assertDataflowServerRunning(DockerComposeInfo dockerComposeInfo, String id, String container, boolean skipper) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
-		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/about";
-		AssertUtils.assertDataflowServerRunning(url);
-		if (skipper) {
-			AssertUtils.assertSkipperServerRunning(url);
-		}
-	}
+    protected static void assertSkipperServerRunning(DockerComposeInfo dockerComposeInfo, String id, String container) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(7577);
+        String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/api/about";
+        AssertUtils.assertSkipperServerRunning(url);
+    }
 
-	protected static void assertSkipperServerRunning(DockerComposeInfo dockerComposeInfo, String id, String container) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(7577);
-		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/api/about";
-		AssertUtils.assertSkipperServerRunning(url);
-	}
+    protected static List<String> registerApps(DockerComposeInfo dockerComposeInfo, String id, String container) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+        String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/apps";
+        RestTemplate template = new RestTemplate();
 
-	protected static List<String> registerApps(DockerComposeInfo dockerComposeInfo, String id, String container) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
-		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/apps";
-		RestTemplate template = new RestTemplate();
+        MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
+        values.add("uri", STREAM_APPS_URI);
+        template.postForLocation(url, values);
+        values = new LinkedMultiValueMap<>();
+        values.add("uri", TASK_APPS_URI);
+        template.postForLocation(url, values);
 
-		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
-		values.add("uri", STREAM_APPS_URI);
-		template.postForLocation(url, values);
-		values = new LinkedMultiValueMap<>();
-		values.add("uri", TASK_APPS_URI);
-		template.postForLocation(url, values);
+        return registeredApps(dockerComposeInfo, id, container);
+    }
 
-		return registeredApps(dockerComposeInfo, id, container);
-	}
+    protected static List<String> registeredApps(DockerComposeInfo dockerComposeInfo, String id, String container) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+        String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/apps";
+        RestTemplate template = new RestTemplate();
 
-	protected static List<String> registeredApps(DockerComposeInfo dockerComposeInfo, String id, String container) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
-		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/apps";
-		RestTemplate template = new RestTemplate();
+        String json = template.getForObject(url + "?size=2000", String.class);
+        List<String> appsUris = JsonPath.read(json, "$._embedded.appRegistrationResourceList[*].uri");
+        return appsUris;
+    }
 
-		String json = template.getForObject(url + "?size=2000", String.class);
-		List<String> appsUris = JsonPath.read(json, "$._embedded.appRegistrationResourceList[*].uri");
-		return appsUris;
-	}
+    protected static List<String> registerApp(DockerComposeInfo dockerComposeInfo, String id, String container) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+        String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/apps/sink/fakelog";
+        RestTemplate template = new RestTemplate();
 
-	protected static List<String> registerApp(DockerComposeInfo dockerComposeInfo, String id, String container) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
-		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/apps/sink/fakelog";
-		RestTemplate template = new RestTemplate();
+        MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
+        values.add("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.3.1.RELEASE");
+        values.add("metadata-uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.3.1.RELEASE");
+        template.postForLocation(url, values);
 
-		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
-		values.add("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.3.1.RELEASE");
-		values.add("metadata-uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.3.1.RELEASE");
-		template.postForLocation(url, values);
+        return registeredApps(dockerComposeInfo, id, container);
+    }
 
-		return registeredApps(dockerComposeInfo, id, container);
-	}
+    protected static List<String> registerBatchApp(DockerComposeInfo dockerComposeInfo, String id, String container) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+        String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/apps/task/timestamp-batch-task";
+        RestTemplate template = new RestTemplate();
 
-	protected static List<String> registerBatchApp(DockerComposeInfo dockerComposeInfo, String id, String container) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
-		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/apps/task/timestamp-batch-task";
-		RestTemplate template = new RestTemplate();
+        MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
+        values.add("uri", "maven://org.springframework.cloud.task.acceptance.app:timestamp-batch-with-drivers21x:2.1.1.BUILD-SNAPSHOT");
+        template.postForLocation(url, values);
 
-		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
-		values.add("uri", "maven://org.springframework.cloud.task.acceptance.app:timestamp-batch-with-drivers21x:2.1.1.BUILD-SNAPSHOT");
-		template.postForLocation(url, values);
+        return registeredApps(dockerComposeInfo, id, container);
+    }
 
-		return registeredApps(dockerComposeInfo, id, container);
-	}
+    protected static List<String> registerStreamDefs(DockerComposeInfo dockerComposeInfo, String id, String container) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+        String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/streams/definitions";
+        RestTemplate template = new RestTemplate();
 
-	protected static List<String> registerStreamDefs(DockerComposeInfo dockerComposeInfo, String id, String container) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
-		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/streams/definitions";
-		RestTemplate template = new RestTemplate();
+        MultiValueMap<String, Object> uriVariables = new LinkedMultiValueMap<>();
+        uriVariables.add("name", "ticktock");
+        uriVariables.add("definition", "time|log");
+        template.postForObject(url, uriVariables, String.class);
+        return registeredStreamDefs(dockerComposeInfo, id, container);
+    }
 
-		MultiValueMap<String, Object> uriVariables = new LinkedMultiValueMap<>();
-		uriVariables.add("name", "ticktock");
-		uriVariables.add("definition", "time|log");
-		template.postForObject(url, uriVariables, String.class);
-		return registeredStreamDefs(dockerComposeInfo, id, container);
-	}
+    protected static List<String> registeredStreamDefs(DockerComposeInfo dockerComposeInfo, String id, String container) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+        String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/streams/definitions?size=2000";
+        RestTemplate template = new RestTemplate();
 
-	protected static List<String> registeredStreamDefs(DockerComposeInfo dockerComposeInfo, String id, String container) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
-		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/streams/definitions?size=2000";
-		RestTemplate template = new RestTemplate();
+        String json = template.getForObject(url, String.class);
+        List<String> streamNames = JsonPath.read(json, "$._embedded.streamDefinitionResourceList[*].name");
+        return streamNames;
+    }
 
-		String json = template.getForObject(url, String.class);
-		List<String> streamNames = JsonPath.read(json, "$._embedded.streamDefinitionResourceList[*].name");
-		return streamNames;
-	}
+    protected static List<String> registerTaskDefs(DockerComposeInfo dockerComposeInfo, String id, String container) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+        String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/definitions";
+        RestTemplate template = new RestTemplate();
 
-	protected static List<String> registerTaskDefs(DockerComposeInfo dockerComposeInfo, String id, String container) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
-		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/definitions";
-		RestTemplate template = new RestTemplate();
+        MultiValueMap<String, Object> uriVariables = new LinkedMultiValueMap<>();
+        uriVariables.add("name", "timestamp");
+        uriVariables.add("definition", "timestamp");
+        template.postForObject(url, uriVariables, String.class);
+        return registeredTaskDefs(dockerComposeInfo, id, container);
+    }
 
-		MultiValueMap<String, Object> uriVariables = new LinkedMultiValueMap<>();
-		uriVariables.add("name", "timestamp");
-		uriVariables.add("definition", "timestamp");
-		template.postForObject(url, uriVariables, String.class);
-		return registeredTaskDefs(dockerComposeInfo, id, container);
-	}
+    protected static List<String> registerBatchTaskDefs(DockerComposeInfo dockerComposeInfo, String id, String container) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+        String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/definitions";
+        RestTemplate template = new RestTemplate();
 
-	protected static List<String> registerBatchTaskDefs(DockerComposeInfo dockerComposeInfo, String id, String container) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
-		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/definitions";
-		RestTemplate template = new RestTemplate();
+        MultiValueMap<String, Object> uriVariables = new LinkedMultiValueMap<>();
+        uriVariables.add("name", "fakebatch");
+        uriVariables.add("definition", "timestamp-batch-task");
+        template.postForObject(url, uriVariables, String.class);
+        return registeredTaskDefs(dockerComposeInfo, id, container);
+    }
 
-		MultiValueMap<String, Object> uriVariables = new LinkedMultiValueMap<>();
-		uriVariables.add("name", "fakebatch");
-		uriVariables.add("definition", "timestamp-batch-task");
-		template.postForObject(url, uriVariables, String.class);
-		return registeredTaskDefs(dockerComposeInfo, id, container);
-	}
+    protected static List<String> registeredTaskDefs(DockerComposeInfo dockerComposeInfo, String id, String container) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+        String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/definitions?size=2000";
+        RestTemplate template = new RestTemplate();
 
-	protected static List<String> registeredTaskDefs(DockerComposeInfo dockerComposeInfo, String id, String container) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
-		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/definitions?size=2000";
-		RestTemplate template = new RestTemplate();
+        String json = template.getForObject(url, String.class);
+        List<String> taskNames = JsonPath.read(json, "$._embedded.taskDefinitionResourceList[*].name");
+        return taskNames;
+    }
 
-		String json = template.getForObject(url, String.class);
-		List<String> taskNames = JsonPath.read(json, "$._embedded.taskDefinitionResourceList[*].name");
-		return taskNames;
-	}
+    protected static List<String> auditRecords(DockerComposeInfo dockerComposeInfo, String id, String container) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+        String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/audit-records";
+        RestTemplate template = new RestTemplate();
 
-	protected static List<String> auditRecords(DockerComposeInfo dockerComposeInfo, String id, String container) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
-		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/audit-records";
-		RestTemplate template = new RestTemplate();
+        String json = template.getForObject(url, String.class);
+        List<String> correlationIds = JsonPath.read(json, "$._embedded.auditRecordResourceList[*].correlationId");
+        return correlationIds;
+    }
 
-		String json = template.getForObject(url, String.class);
-		List<String> correlationIds = JsonPath.read(json, "$._embedded.auditRecordResourceList[*].correlationId");
-		return correlationIds;
-	}
+    protected static void deployStream(DockerComposeInfo dockerComposeInfo, String id, String container, String stream) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+        String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/streams/deployments/" + stream;
+        RestTemplate template = new RestTemplate();
+        template.postForObject(url, new HashMap<String, String>(), Object.class);
+    }
 
-	protected static void deployStream(DockerComposeInfo dockerComposeInfo, String id, String container, String stream) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
-		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/streams/deployments/" + stream;
-		RestTemplate template = new RestTemplate();
-		template.postForObject(url, new HashMap<String, String>(), Object.class);
-	}
+    protected static void launchTask(DockerComposeInfo dockerComposeInfo, String id, String container, String task) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+        String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/executions?name=" + task;
+        RestTemplate template = new RestTemplate();
+        template.postForObject(url, new HashMap<String, String>(), Object.class);
+    }
 
-	protected static void launchTask(DockerComposeInfo dockerComposeInfo, String id, String container, String task) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
-		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/executions?name=" + task;
-		RestTemplate template = new RestTemplate();
-		template.postForObject(url, new HashMap<String, String>(), Object.class);
-	}
+    protected static void waitStream(DockerComposeInfo dockerComposeInfo, String id, String container, String stream,
+                                     String responseContains, long pollInterval, TimeUnit pollTimeUnit, long awaitInterval, TimeUnit awaitTimeUnit) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+        String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/streams/definitions/" + stream;
+        RestTemplate template = new RestTemplate();
 
-	protected static void waitStream(DockerComposeInfo dockerComposeInfo, String id, String container, String stream,
-			String responseContains, long pollInterval, TimeUnit pollTimeUnit, long awaitInterval, TimeUnit awaitTimeUnit) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
-		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/streams/definitions/" + stream;
-		RestTemplate template = new RestTemplate();
+        with()
+            .pollInterval(pollInterval, pollTimeUnit)
+            .and()
+            .await()
+            .ignoreExceptions()
+            .atMost(awaitInterval, awaitTimeUnit)
+            .until(() -> {
+                String json = template.getForObject(url, String.class);
+                String status = JsonPath.read(json, "$.status");
+                return ObjectUtils.nullSafeEquals(status, responseContains);
+            });
+    }
 
-		with()
-			.pollInterval(pollInterval, pollTimeUnit)
-			.and()
-			.await()
-				.ignoreExceptions()
-				.atMost(awaitInterval, awaitTimeUnit)
-				.until(() -> {
-					String json = template.getForObject(url, String.class);
-					String status = JsonPath.read(json, "$.status");
-					return ObjectUtils.nullSafeEquals(status, responseContains);
-				});
-	}
+    protected static void waitBatchJobExecution(DockerComposeInfo dockerComposeInfo, String id, String container,
+                                                String responseContains, long pollInterval, TimeUnit pollTimeUnit, long awaitInterval,
+                                                TimeUnit awaitTimeUnit) {
+        waitBatchJobExecution(dockerComposeInfo, id, container, responseContains, pollInterval, pollTimeUnit,
+            awaitInterval, awaitTimeUnit, 1, 2);
+    }
 
-	protected static void waitBatchJobExecution(DockerComposeInfo dockerComposeInfo, String id, String container,
-			String responseContains, long pollInterval, TimeUnit pollTimeUnit, long awaitInterval,
-			TimeUnit awaitTimeUnit) {
-		waitBatchJobExecution(dockerComposeInfo, id, container, responseContains, pollInterval, pollTimeUnit,
-				awaitInterval, awaitTimeUnit, 1, 2);
-	}
+    protected static void waitBatchJobExecution(DockerComposeInfo dockerComposeInfo, String id, String container,
+                                                String responseContains, long pollInterval, TimeUnit pollTimeUnit, long awaitInterval,
+                                                TimeUnit awaitTimeUnit, int count1, int count2) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+        RestTemplate template = new RestTemplate();
 
-	protected static void waitBatchJobExecution(DockerComposeInfo dockerComposeInfo, String id, String container,
-			String responseContains, long pollInterval, TimeUnit pollTimeUnit, long awaitInterval,
-			TimeUnit awaitTimeUnit, int count1, int count2) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
-		RestTemplate template = new RestTemplate();
+        String url1 = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/executions";
+        with()
+            .pollInterval(pollInterval, pollTimeUnit)
+            .and()
+            .await()
+            .ignoreExceptions()
+            .atMost(awaitInterval, awaitTimeUnit)
+            .until(() -> {
+                String json = template.getForObject(url1, String.class);
+                List<Object> executions = new ArrayList<>();
+                try {
+                    executions = JsonPath.read(json, "$._embedded.taskExecutionResourceList[?(@.taskName == 'fakebatch')]");
+                } catch (Exception e) {
+                }
+                return executions.size() == count1;
+            });
 
-		String url1 = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/executions";
-		with()
-			.pollInterval(pollInterval, pollTimeUnit)
-			.and()
-			.await()
-				.ignoreExceptions()
-				.atMost(awaitInterval, awaitTimeUnit)
-				.until(() -> {
-					String json = template.getForObject(url1, String.class);
-					List<Object> executions = new ArrayList<>();
-					try {
-						executions = JsonPath.read(json, "$._embedded.taskExecutionResourceList[?(@.taskName == 'fakebatch')]");
-					} catch (Exception e) {
-					}
-					return executions.size() == count1;
-				});
+        String url2 = "http://" + port.getIp() + ":" + port.getExternalPort() + "/jobs/thinexecutions";
+        with()
+            .pollInterval(pollInterval, pollTimeUnit)
+            .and()
+            .await()
+            .ignoreExceptions()
+            .atMost(awaitInterval, awaitTimeUnit)
+            .until(() -> {
+                String json = template.getForObject(url2, String.class);
+                List<Object> executions = new ArrayList<>();
+                try {
+                    executions = JsonPath.read(json, "$._embedded.jobExecutionThinResourceList[?(@.status == 'COMPLETED')]");
+                } catch (Exception e) {
+                }
+                return executions.size() == count2;
+            });
+    }
 
-		String url2 = "http://" + port.getIp() + ":" + port.getExternalPort() + "/jobs/thinexecutions";
-		with()
-			.pollInterval(pollInterval, pollTimeUnit)
-			.and()
-			.await()
-				.ignoreExceptions()
-				.atMost(awaitInterval, awaitTimeUnit)
-				.until(() -> {
-					String json = template.getForObject(url2, String.class);
-					List<Object> executions = new ArrayList<>();
-					try {
-						executions = JsonPath.read(json, "$._embedded.jobExecutionThinResourceList[?(@.status == 'COMPLETED')]");
-					} catch (Exception e) {
-					}
-					return executions.size() == count2;
-				});
-	}
+    protected static void deleteBatchJobExecutions(DockerComposeInfo dockerComposeInfo, String id, String container) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+        RestTemplate template = new RestTemplate();
 
-	protected static void deleteBatchJobExecutions(DockerComposeInfo dockerComposeInfo, String id, String container) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
-		RestTemplate template = new RestTemplate();
+        String url1 = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/executions";
+        String json = template.getForObject(url1, String.class);
+        List<Integer> executionIds = new ArrayList<>();
+        try {
+            executionIds = JsonPath.read(json, "$._embedded.taskExecutionResourceList[?(@.taskName == 'fakebatch')].executionId");
+        } catch (Exception e) {
+        }
 
-		String url1 = "http://" + port.getIp() + ":" + port.getExternalPort() + "/tasks/executions";
-		String json = template.getForObject(url1, String.class);
-		List<Integer> executionIds = new ArrayList<>();
-		try {
-			executionIds = JsonPath.read(json, "$._embedded.taskExecutionResourceList[?(@.taskName == 'fakebatch')].executionId");
-		} catch (Exception e) {
-		}
+        for (Integer executionId : executionIds) {
+            template.delete(url1 + "/" + executionId + "?action=REMOVE_DATA");
+        }
+    }
 
-		for (Integer executionId : executionIds) {
-			template.delete(url1 + "/" + executionId + "?action=REMOVE_DATA");
-		}
-	}
-
-	protected static void unDeployStream(DockerComposeInfo dockerComposeInfo, String id, String container, String stream) {
-		DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
-		String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/streams/deployments/" + stream;
-		RestTemplate template = new RestTemplate();
-		template.delete(url);
-	}
+    protected static void unDeployStream(DockerComposeInfo dockerComposeInfo, String id, String container, String stream) {
+        DockerPort port = dockerComposeInfo.id(id).getRule().containers().container(container).port(9393);
+        String url = "http://" + port.getIp() + ":" + port.getExternalPort() + "/streams/deployments/" + stream;
+        RestTemplate template = new RestTemplate();
+        template.delete(url);
+    }
 }

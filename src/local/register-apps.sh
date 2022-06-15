@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 SCDIR=$(dirname $0)
-if [ "$SCDIR" == "" ]
-then
+if [ "$SCDIR" == "" ]; then
   SCDIR="."
 fi
 set -e
@@ -10,29 +9,28 @@ function dataflow_post() {
   result=$(curl -s -d "$1" -X POST "$2")
   rc=$?
   # shellcheck disable=SC2086
-  if [ "$rc" != "0" ]
-  then
+  if [ "$rc" != "0" ]; then
     echo "$RC : $result"
     echo ""
   fi
 }
 
-if [ "$1" != "" ]
-then
+if [ "$1" != "" ]; then
   PLATFORM_TYPE=$1
 fi
-if [ "$PLATFORM_TYPE" == "" ]
-then
+if [ "$PLATFORM_TYPE" == "" ]; then
   PLATFORM_TYPE=kubernetes
 fi
 
-
-if [ "$DATAFLOW_IP" == "" ]
-then
+if [ "$DATAFLOW_IP" == "" ]; then
   source "$SCDIR/k8s/export-dataflow-ip.sh"
 fi
+if [ "$BINDER" == "kafka" ]; then
+  export BROKER=kafka
+else
+  export BROKER=rabbitmq
+fi
 
-BROKER=rabbitmq
 if [ "$BROKER" = "rabbitmq" ]; then
   BROKER_NAME=rabbit
 else

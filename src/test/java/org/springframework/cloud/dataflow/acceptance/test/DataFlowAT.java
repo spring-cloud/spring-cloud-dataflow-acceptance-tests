@@ -481,7 +481,7 @@ class DataFlowAT extends CommonTestBase {
             logger.info("streamPartitioning:deploying:{}", stream.getName());
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
-                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset)) // TODO
                 .until(() -> stream.getStatus().equals(DEPLOYED));
             logger.info("streamPartitioning:deployed:{}", stream.getName());
             String message = "How much wood would a woodchuck chuck if a woodchuck could chuck wood";
@@ -491,7 +491,7 @@ class DataFlowAT extends CommonTestBase {
             final List<String> woodChuck0 = asList("WOODCHUCK-0", "How", "chuck");
             final List<String> woodChuck1 = asList("WOODCHUCK-1", "much", "wood", "would", "if", "a", "woodchuck", "could");
             Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> {
                     Collection<String> logs = runtimeApps.applicationInstanceLogs(stream.getName(), "log").values();
                     logger.info("streamPartitioning:logs:{}", logs);

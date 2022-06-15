@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: scdf-server
+  name: skipper
   labels:
-    app: scdf-server
+    app: skipper
 data:
   application-kubernetes.yaml: |-
     logging:
@@ -12,38 +12,32 @@ data:
         org:
           springframework:
             cloud: debug
-    management:
-      metrics:
-        export:
-          prometheus:
-            enabled: true
-            rsocket:
-              enabled: true
-              host: prometheus-proxy
-              port: 7001
+        io:
+          fabric8: debug
     spring:
       cloud:
         deployer:
           kubernetes:
             imagePullPolicy: IfNotPresent
             imagePullSecret: 'regcred'
-        dataflow:
-          metrics.dashboard:
-            url: 'http://localhost:3000'
-          task:
+        skipper:
+          server:
             platform:
               kubernetes:
                 accounts:
                   default:
                     imagePullPolicy: IfNotPresent
                     imagePullSecret: 'regcred'
+                    environmentVariables: 'SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=kafka-broker:9092,SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES=${KAFKA_ZK_SERVICE_HOST}:${KAFKA_ZK_SERVICE_PORT}'
                     limits:
                       memory: 1024Mi
+                      cpu: 500m
+                    readinessProbeDelay: 120
+                    livenessProbeDelay: 90
       datasource:
-        url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/mysql
+        url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/skipper
         username: root
         password: ${mariadb-root-password}
         driverClassName: org.mariadb.jdbc.Driver
         testOnBorrow: true
         validationQuery: "SELECT 1"
-
