@@ -233,6 +233,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @EnabledIfEnvironmentVariable(named = "BINDER", matches = "rabbit")
     public void multipleStreamApps() {
         if (this.runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
             registerApp("kitchen", "docker:springcloudstream/scdf-app-kitchen:1.0.0-SNAPSHOT");
