@@ -137,10 +137,9 @@ class CloudFoundry:
         if self.deployer_config.skip_ssl_validation:
             skip_ssl = "--skip-ssl-validation"
 
-        cmd = "cf login -a %s -o %s -s %s -u %s -p %s %s" % \
+        cmd = "cf login -a %s -o %s -u %s -p %s %s" % \
               (self.deployer_config.api_endpoint,
                self.deployer_config.org,
-               self.deployer_config.space,
                self.deployer_config.username,
                self.deployer_config.password,
                skip_ssl)
