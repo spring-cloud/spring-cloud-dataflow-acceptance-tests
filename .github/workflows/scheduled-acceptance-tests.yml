@@ -11,14 +11,13 @@ jobs:
     kafka-0:
         uses: ./.github/workflows/at-common-workflow.yml
         with:
-            cf_host: alturas
+            cf_host: halfmoonbay
             cf_index: 0
             binder: kafka
         secrets:
             CF_USERNAME: ${{secrets.CF_USERNAME}}
             CF_ENV_0_PASSWORD: ${{secrets.CF_ENV_0_PASSWORD}}
             CF_ENV_1_PASSWORD: ${{secrets.CF_ENV_1_PASSWORD}}
-            CF_ENV_2_PASSWORD: ${{secrets.CF_ENV_2_PASSWORD}}
             SQL_USERNAME: ${{secrets.SQL_USERNAME}}
             SQL_PASSWORD: ${{secrets.SQL_PASSWORD}}
             SQL_SYSTEM_USERNAME: ${{secrets.SQL_USERNAME}}
@@ -31,40 +30,19 @@ jobs:
     kafka-1:
         uses: ./.github/workflows/at-common-workflow.yml
         with:
-            cf_host: avenal
+            cf_host: needles
             cf_index: 1
             binder: kafka
         secrets:
             CF_USERNAME: ${{secrets.CF_USERNAME}}
             CF_ENV_0_PASSWORD: ${{secrets.CF_ENV_0_PASSWORD}}
             CF_ENV_1_PASSWORD: ${{secrets.CF_ENV_1_PASSWORD}}
-            CF_ENV_2_PASSWORD: ${{secrets.CF_ENV_2_PASSWORD}}
             SQL_USERNAME: ${{secrets.SQL_USERNAME}}
             SQL_PASSWORD: ${{secrets.SQL_PASSWORD}}
             SQL_SYSTEM_USERNAME: ${{secrets.SQL_USERNAME}}
             SQL_SYSTEM_PASSWORD: ${{secrets.SQL_PASSWORD}}
             SQL_HOST: ${{secrets.SQL_HOST}}
             SQL_PORT: ${{secrets.SQL_PORT}}
-            KAFKA_USERNAME: ${{secrets.KAFKA_USERNAME}}
-            KAFKA_PASSWORD: ${{secrets.KAFKA_PASSWORD}}
-            KAFKA_BROKER_ADDRESS: ${{secrets.KAFKA_BROKER_ADDRESS}}
-    kafka-2:
-        uses: ./.github/workflows/at-common-workflow.yml
-        with:
-            cf_host: benicia
-            cf_index: 2
-            binder: kafka
-        secrets:
-            CF_USERNAME: ${{secrets.CF_USERNAME}}
-            CF_ENV_0_PASSWORD: ${{secrets.CF_ENV_0_PASSWORD}}
-            CF_ENV_1_PASSWORD: ${{secrets.CF_ENV_1_PASSWORD}}
-            CF_ENV_2_PASSWORD: ${{secrets.CF_ENV_2_PASSWORD}}
-            SQL_USERNAME: ${{secrets.SQL_USERNAME}}
-            SQL_PASSWORD: ${{secrets.SQL_PASSWORD}}
-            SQL_HOST: ${{secrets.SQL_HOST}}
-            SQL_PORT: ${{secrets.SQL_PORT}}
-            SQL_SYSTEM_USERNAME: ${{secrets.SQL_USERNAME}}
-            SQL_SYSTEM_PASSWORD: ${{secrets.SQL_PASSWORD}}
             KAFKA_USERNAME: ${{secrets.KAFKA_USERNAME}}
             KAFKA_PASSWORD: ${{secrets.KAFKA_PASSWORD}}
             KAFKA_BROKER_ADDRESS: ${{secrets.KAFKA_BROKER_ADDRESS}}
@@ -72,14 +50,13 @@ jobs:
         uses: ./.github/workflows/at-common-workflow.yml
         needs: [ kafka-0 ]
         with:
-            cf_host: alturas
+            cf_host: halfmoonbay
             cf_index: 0
             binder: rabbit
         secrets:
             CF_USERNAME: ${{secrets.CF_USERNAME}}
             CF_ENV_0_PASSWORD: ${{secrets.CF_ENV_0_PASSWORD}}
             CF_ENV_1_PASSWORD: ${{secrets.CF_ENV_1_PASSWORD}}
-            CF_ENV_2_PASSWORD: ${{secrets.CF_ENV_2_PASSWORD}}
             SQL_USERNAME: ${{secrets.SQL_USERNAME}}
             SQL_PASSWORD: ${{secrets.SQL_PASSWORD}}
             SQL_SYSTEM_USERNAME: ${{secrets.SQL_USERNAME}}
@@ -90,32 +67,13 @@ jobs:
         uses: ./.github/workflows/at-common-workflow.yml
         needs: [ kafka-1 ]
         with:
-            cf_host: avenal
+            cf_host: needles
             cf_index: 1
             binder: rabbit
         secrets:
             CF_USERNAME: ${{secrets.CF_USERNAME}}
             CF_ENV_0_PASSWORD: ${{secrets.CF_ENV_0_PASSWORD}}
             CF_ENV_1_PASSWORD: ${{secrets.CF_ENV_1_PASSWORD}}
-            CF_ENV_2_PASSWORD: ${{secrets.CF_ENV_2_PASSWORD}}
-            SQL_USERNAME: ${{secrets.SQL_USERNAME}}
-            SQL_PASSWORD: ${{secrets.SQL_PASSWORD}}
-            SQL_SYSTEM_USERNAME: ${{secrets.SQL_USERNAME}}
-            SQL_SYSTEM_PASSWORD: ${{secrets.SQL_PASSWORD}}
-            SQL_HOST: ${{secrets.SQL_HOST}}
-            SQL_PORT: ${{secrets.SQL_PORT}}
-    rabbit-2:
-        uses: ./.github/workflows/at-common-workflow.yml
-        needs: [ kafka-2 ]
-        with:
-            cf_host: benicia
-            cf_index: 2
-            binder: rabbit
-        secrets:
-            CF_USERNAME: ${{secrets.CF_USERNAME}}
-            CF_ENV_0_PASSWORD: ${{secrets.CF_ENV_0_PASSWORD}}
-            CF_ENV_1_PASSWORD: ${{secrets.CF_ENV_1_PASSWORD}}
-            CF_ENV_2_PASSWORD: ${{secrets.CF_ENV_2_PASSWORD}}
             SQL_USERNAME: ${{secrets.SQL_USERNAME}}
             SQL_PASSWORD: ${{secrets.SQL_PASSWORD}}
             SQL_SYSTEM_USERNAME: ${{secrets.SQL_USERNAME}}
@@ -134,9 +92,3 @@ jobs:
         steps:
             - name: Completed Env 1
               run: echo "Completed env-1"
-    completed-2:
-        needs: [ kafka-2, rabbit-2 ]
-        runs-on: ubuntu-latest
-        steps:
-            - name: Completed Env 2
-              run: echo "Completed env-2"

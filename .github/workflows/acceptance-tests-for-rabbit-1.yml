@@ -7,7 +7,7 @@ jobs:
     rabbit-1:
         uses: ./.github/workflows/at-common-workflow.yml
         with:
-            cf_host: avenal
+            cf_host: needles
             cf_index: 1
             binder: rabbit
         secrets:
