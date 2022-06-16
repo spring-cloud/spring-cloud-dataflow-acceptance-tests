@@ -14,7 +14,6 @@ jobs:
             CF_USERNAME: ${{secrets.CF_USERNAME}}
             CF_ENV_0_PASSWORD: ${{secrets.CF_ENV_0_PASSWORD}}
             CF_ENV_1_PASSWORD: ${{secrets.CF_ENV_1_PASSWORD}}
-            CF_ENV_2_PASSWORD: ${{secrets.CF_ENV_2_PASSWORD}}
             SQL_USERNAME: ${{secrets.SQL_USERNAME}}
             SQL_PASSWORD: ${{secrets.SQL_PASSWORD}}
             SQL_SYSTEM_USERNAME: ${{secrets.SQL_USERNAME}}
