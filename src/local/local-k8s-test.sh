@@ -3,10 +3,9 @@ SCDIR=$(dirname $0)
 if [ "$SCDIR" == "" ]; then
   SCDIR="."
 fi
-pushd "$SCDIR/../../acceptance-tests/custom-apps/timestamp-batch-with-drivers-template1"
+pushd "$SCDIR/../../acceptance-tests/custom-apps/timestamp-batch-with-drivers-template1"  > /dev/null
 ./gradlew build install
-popd
-# This assumes you are using minikube with helm from bitnami and used release name scdf and executed forward-scdf.sh
+popd > /dev/null # This assumes you are using minikube with helm from bitnami and used release name scdf and executed forward-scdf.sh
 if [ "$DATAFLOW_IP" == "" ]; then
   source "$SCDIR/k8s/export-dataflow-ip.sh"
 fi
