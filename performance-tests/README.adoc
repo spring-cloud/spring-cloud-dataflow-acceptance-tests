@@ -28,14 +28,13 @@ export ORG_SPRINGFRAMEWORK_CLOUD_DATAFLOW_STREAM_PERFORMANCE_STREAM_DEFINITIONS_
 #echo CLEANING UP
 #./run.sh clean
 echo RUNNING SETUP
-. ./run.sh setup -cc  
+. ./run.sh setup -cc
 
 # Run the set up
 echo INITIALIZING APPLICATIONS
-pushd ./performance-tests
+pushd ./performance-tests  > /dev/null
 ./initialize-cf-tile-tasks.sh
 ./initialize-cf-tile-streams.sh
-popd
-
+popd > /dev/null
 echo "SCDF Server URI : $SERVER_URI"
 ```

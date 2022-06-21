@@ -34,12 +34,19 @@ spec:
           httpGet:
             path: /actuator/health
             port: 7577
-          initialDelaySeconds: 45
+          initialDelaySeconds: 1
         readinessProbe:
           httpGet:
             path: /actuator/info
             port: 7577
-          initialDelaySeconds: 45
+          initialDelaySeconds: 1
+        startupProbe:
+          tcpSocket:
+            port: 7577
+          failureThreshold: 10
+          timeoutSeconds: 2
+          initialDelaySeconds: 50
+          periodSeconds: 3
         resources:
           limits:
             cpu: 1.0

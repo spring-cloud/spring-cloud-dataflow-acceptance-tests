@@ -34,27 +34,28 @@ fi
 if [ "$SCDF_PRO_VERSION" == "" ]; then
   SCDF_PRO_VERSION=1.5.0-SNAPSHOT
 fi
-sh "$SCDIR/load-image.sh" "busybox" "1"
-sh "$SCDIR/load-image.sh" "bitnami/kubectl" "1.23.6-debian-10-r0"
-sh "$SCDIR/load-image.sh" "mariadb" "10.4.22"
+LI_PATH=$(realpath $SCDIR)
+sh "$LI_PATH/load-image.sh" "busybox" "1"
+sh "$LI_PATH/load-image.sh" "bitnami/kubectl" "1.23.6-debian-10-r0"
+sh "$LI_PATH/load-image.sh" "mariadb" "10.4.22"
 if [ "$BINDER" == "kafka" ]; then
-  sh "$SCDIR/load-image.sh" "confluentinc/cp-kafka" "5.5.2"
-  sh "$SCDIR/load-image.sh" "confluentinc/cp-zookeeper" "5.5.2"
+  sh "$LI_PATH/load-image.sh" "confluentinc/cp-kafka" "5.5.2"
+  sh "$LI_PATH/load-image.sh" "confluentinc/cp-zookeeper" "5.5.2"
 else
-  sh "$SCDIR/load-image.sh" "rabbitmq" "3.6.10"
+  sh "$LI_PATH/load-image.sh" "rabbitmq" "3.6.10"
 fi
-sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-composed-task-runner" "$DATAFLOW_VERSION" false
-sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-skipper-server" "$SKIPPER_VERSION" true
+sh "$LI_PATH/load-image.sh" "springcloud/spring-cloud-dataflow-composed-task-runner" "$DATAFLOW_VERSION" false
+sh "$LI_PATH/load-image.sh" "springcloud/spring-cloud-skipper-server" "$SKIPPER_VERSION" true
 
 if [ "$USE_PRO" == "true" ]; then
-  sh "$SCDIR/load-image.sh" "springcloud/scdf-pro-server" "$SCDF_PRO_VERSION" true
+  sh "$LI_PATH/load-image.sh" "springcloud/scdf-pro-server" "$SCDF_PRO_VERSION" true
 else
-  sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-server" "$DATAFLOW_VERSION" true
+  sh "$LI_PATH/load-image.sh" "springcloud/spring-cloud-dataflow-server" "$DATAFLOW_VERSION" true
 fi
 
 ATDIR=$(pwd)
 
-pushd ../spring-cloud-dataflow
+pushd ../spring-cloud-dataflow  > /dev/null
 if [ "$BINDER" == "kafka" ]; then
   # Deploy Kafka
   kubectl create -f src/kubernetes/kafka/
@@ -66,7 +67,8 @@ fi
 kubectl create -f src/kubernetes/mariadb/
 
 if [ "$PROMETHEUS" != "false" ]; then
-  sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus" "2.10.0-SNAPSHOT"
+  echo "Loading Prometheus and Grafana"
+  sh "$LI_PATH/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus" "2.10.0-SNAPSHOT"
   kubectl create -f src/kubernetes/prometheus/prometheus-clusterroles.yaml
   kubectl create -f src/kubernetes/prometheus/prometheus-clusterrolebinding.yaml
   kubectl create -f src/kubernetes/prometheus/prometheus-serviceaccount.yaml
@@ -101,4 +103,4 @@ else
   kubectl create -f "$ATDIR/src/local/k8s/server-deployment.yaml"
 fi
 
-popd
+popd > /dev/null

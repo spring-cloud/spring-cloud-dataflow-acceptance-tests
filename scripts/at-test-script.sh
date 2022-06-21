@@ -85,7 +85,7 @@ elif [[ "$os" == "Darwin" ]]; then
   fi
 fi
 
-pushd $SETUP_TOOL_REPO
+pushd $SETUP_TOOL_REPO  > /dev/null
   export PYTHONPATH=./src:$PYTHONPATH
   echo $PWD
   python3 -m install.clean -v
@@ -100,8 +100,7 @@ pushd $SETUP_TOOL_REPO
   load_file "cf_scdf.properties"
   echo "Dataflow Server is live @ $SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI"
   echo "Running Tests..."
-popd
-
+popd > /dev/null
 set -e
 
 wget -qO- http://$SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI/apps/task/timestamp/2.0.1 --post-data="uri=maven://io.spring:timestamp-task:2.0.1"
@@ -110,8 +109,7 @@ wget -qO- http://$SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI/apps/task/timestamp-ba
 
 run_tests
 stat=$?
-pushd $SETUP_TOOL_REPO
+pushd $SETUP_TOOL_REPO  > /dev/null
     # If tests fail, clean up anyway.
     python3 -m install.clean -v
-popd
-exit $stat
+popd > /dev/nullexit $stat

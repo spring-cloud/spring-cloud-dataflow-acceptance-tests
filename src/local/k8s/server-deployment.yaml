@@ -35,12 +35,19 @@ spec:
             httpGet:
               path: /management/health
               port: 9393
-            initialDelaySeconds: 45
+            initialDelaySeconds: 1
           readinessProbe:
             httpGet:
               path: /management/info
               port: 9393
-            initialDelaySeconds: 45
+            initialDelaySeconds: 1
+          startupProbe:
+            tcpSocket:
+              port: 9393
+            failureThreshold: 10
+            initialDelaySeconds: 50
+            timeoutSeconds: 2
+            periodSeconds: 3
           resources:
             limits:
               cpu: 1.0

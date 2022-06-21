@@ -481,7 +481,7 @@ class DataFlowAT extends CommonTestBase {
             logger.info("streamPartitioning:deploying:{}", stream.getName());
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
-                // .failFast(() -> AwaitUtils.hasErrorInLog(offset)) // TODO
+                // .failFast(() -> AwaitUtils.hasErrorInLog(offset)) // TODO stream-applications#308
                 .until(() -> stream.getStatus().equals(DEPLOYED));
             logger.info("streamPartitioning:deployed:{}", stream.getName());
             String message = "How much wood would a woodchuck chuck if a woodchuck could chuck wood";
@@ -1147,6 +1147,7 @@ class DataFlowAT extends CommonTestBase {
             .put("app.*.endpoints.logfile.enabled", "true")
             .put("app.*.management.endpoints.web.exposure.include", "*")
             .put("app.*.spring.cloud.streamapp.security.enabled", "false");
+
 
         if (this.runtimeApps.getPlatformType().equalsIgnoreCase(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
             propertiesBuilder.put("app.*.server.port", "8080");

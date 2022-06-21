@@ -38,6 +38,14 @@ spec:
               path: /management/info
               port: 9393
             initialDelaySeconds: 45
+          startupProbe:
+            httpGet:
+              port: 9393
+              path: /management/health
+            failureThreshold: 3
+            timeoutSeconds: 3
+            initialDelaySeconds: 60
+            periodSeconds: 5
           resources:
             limits:
               cpu: 1.0
