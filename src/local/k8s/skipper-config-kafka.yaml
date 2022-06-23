@@ -9,12 +9,12 @@ data:
     logging:
       level:
         root: info
-        org:
-          springframework:
-            cloud: debug
-        io:
-          fabric8: debug
+        org.springframework.cloud: debug
+        io.fabric8: debug
     spring:
+      output:
+        ansi:
+          enabled: NEVER
       cloud:
         deployer:
           kubernetes:

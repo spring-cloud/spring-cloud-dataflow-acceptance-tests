@@ -87,7 +87,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -412,6 +411,7 @@ class DataFlowAT extends CommonTestBase {
     // -----------------------------------------------------------------------
     // STREAM TESTS
     // -----------------------------------------------------------------------
+
     /**
      * Target Data FLow platform to use for the testing:
      * https://dataflow.spring.io/docs/concepts/architecture/#platforms
@@ -916,16 +916,12 @@ class DataFlowAT extends CommonTestBase {
                 .until(() -> httpStream.getStatus().equals(DEPLOYED));
             logger.info("namedChannelDirectedGraph:deployed:{}", httpStream.getName());
             logger.info("namedChannelDirectedGraph:get-url:{}", httpStream.getName());
-            String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpStream.getName(), "http");
-            assertNotNull(httpAppUrl, "expected http url");
             AwaitUtils.StreamLog fooLogOffset = AwaitUtils.logOffset(fooLogStream, "log");
             AwaitUtils.StreamLog barLogOffset = AwaitUtils.logOffset(barLogStream, "log");
 
-            logger.info("namedChannelDirectedGraph:{},url={}", httpStream.getName(), httpAppUrl);
-            runtimeApps.httpPost(httpAppUrl, "abcd");
-            logger.info("namedChannelDirectedGraph:send:abcd -> {}", httpAppUrl);
-            runtimeApps.httpPost(httpAppUrl, "defg");
-            logger.info("namedChannelDirectedGraph:send:defg -> {}", httpAppUrl);
+            runtimeApps.httpPost(httpStream.getName(), "http", "abcd");
+            runtimeApps.httpPost(httpStream.getName(), "http", "defg");
+            logger.info("namedChannelDirectedGraph:sent:defg -> {}", httpStream.getName());
             Awaitility.await()
                 .failFast(() -> AwaitUtils.hasErrorInLog(fooLogOffset))
                 .until(() -> AwaitUtils.hasInLog(fooLogOffset, "abcd-foo"));
@@ -1041,9 +1037,9 @@ class DataFlowAT extends CommonTestBase {
             String message3 = "Test message 2 with double extension"; // length 36
 
             String httpAppUrl = runtimeApps.getApplicationInstanceUrl(stream.getName(), "http");
-            runtimeApps.httpPost(httpAppUrl, message1);
-            runtimeApps.httpPost(httpAppUrl, message2);
-            runtimeApps.httpPost(httpAppUrl, message3);
+            runtimeApps.httpPost(stream.getName(), "http", message1);
+            runtimeApps.httpPost(stream.getName(), "http", message2);
+            runtimeApps.httpPost(stream.getName(), "http", message3);
 
             // Wait for ~1 min for Micrometer to send first metrics to Influx.
             Awaitility.await()
@@ -1111,10 +1107,9 @@ class DataFlowAT extends CommonTestBase {
             String message2 = "Test message 2 with extension"; // length 29
             String message3 = "Test message 2 with double extension"; // length 36
 
-            String httpAppUrl = runtimeApps.getApplicationInstanceUrl(stream.getName(), "http");
-            runtimeApps.httpPost(httpAppUrl, message1);
-            runtimeApps.httpPost(httpAppUrl, message2);
-            runtimeApps.httpPost(httpAppUrl, message3);
+            runtimeApps.httpPost(stream.getName(), "http", message1);
+            runtimeApps.httpPost(stream.getName(), "http", message2);
+            runtimeApps.httpPost(stream.getName(), "http", message3);
 
             // Wait for ~1 min for Micrometer to send first metrics to Prometheus.
             Awaitility.await().until(() -> (int) JsonPath.parse(

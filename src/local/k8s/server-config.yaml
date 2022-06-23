@@ -9,9 +9,7 @@ data:
     logging:
       level:
         root: info
-        org:
-          springframework:
-            cloud: debug
+        org.springframework.cloud: debug
     management:
       metrics:
         export:
@@ -22,6 +20,9 @@ data:
               host: prometheus-proxy
               port: 7001
     spring:
+      output:
+        ansi:
+          enabled: NEVER
       cloud:
         deployer:
           kubernetes:
@@ -46,4 +47,3 @@ data:
         driverClassName: org.mariadb.jdbc.Driver
         testOnBorrow: true
         validationQuery: "SELECT 1"
-

@@ -33,4 +33,4 @@ echo "DATAFLOW_IP=$DATAFLOW_IP"
   -Dspring.cloud.dataflow.client.serverUri=$DATAFLOW_IP \
   -Dspring.cloud.dataflow.client.skipSslValidation=true \
   -Dtest=!DataFlowAT#streamAppCrossVersion \
-  -X clean test $EXTRA | tee build.log
+  -X clean test $EXTRA | tee build.log | grep -v -F "DEBUG"
