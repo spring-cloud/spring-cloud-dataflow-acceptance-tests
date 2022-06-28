@@ -15,11 +15,11 @@ case "$K8S_DRIVER" in
   ;;
 "tmc")
   if [ "$TMC_CLUSTER" == "" ]; then
-    echo "Cannot find environmental variable TMC_CLUSTER"
+    echo "Cannot find environmental variable TMC_CLUSTER" >&2
     exit 2
   fi
   if [ "$KUBECONFIG" == "" ]; then
-    echo "Please execute source $SCDIR/tmc/set-cluster.sh to establish KUBECONFIG"
+    echo "Please execute source $SCDIR/tmc/set-cluster.sh to establish KUBECONFIG" >&2
     exit 2
   fi
   ;;

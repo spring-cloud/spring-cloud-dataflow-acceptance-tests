@@ -9,9 +9,7 @@ data:
     logging:
       level:
         root: info
-        org:
-          springframework:
-            cloud: debug
+        org.springframework.cloud: debug
     management:
       metrics:
         export:
@@ -22,11 +20,14 @@ data:
               host: prometheus-proxy
               port: 7001
     spring:
+      output:
+        ansi:
+          enabled: NEVER
       cloud:
         deployer:
           kubernetes:
             imagePullPolicy: IfNotPresent
-            imagePullSecret: 'regcred'
+            imagePullSecret: registry-key
         dataflow:
           metrics.dashboard:
             url: 'http://localhost:3000'
@@ -36,7 +37,7 @@ data:
                 accounts:
                   default:
                     imagePullPolicy: IfNotPresent
-                    imagePullSecret: 'regcred'
+                    imagePullSecret: registry-key
                     limits:
                       memory: 1024Mi
       datasource:
@@ -46,4 +47,3 @@ data:
         driverClassName: org.mariadb.jdbc.Driver
         testOnBorrow: true
         validationQuery: "SELECT 1"
-

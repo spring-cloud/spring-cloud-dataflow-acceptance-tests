@@ -9,24 +9,18 @@ data:
     logging:
       level:
         root: info
-        org:
-          springframework:
-            cloud: debug
-        io:
-          fabric8: debug
+        org.springframework.cloud: debug
+        io.fabric8: debug
     spring:
+      output:
+        ansi:
+          enabled: NEVER
       cloud:
         deployer:
           kubernetes:
             imagePullPolicy: IfNotPresent
-            imagePullSecret: 'regcred'
-            readinessProbeDelay: 1
-            readinessProbeTimeout: 5
-            livenessProbeDelay: 1
-            livenessProbeTimeout: 2
-            startupHttpProbeDelay: 30
-            startupHttpProbeTimeout: 6
-            startupHttpProbeFailure: 11
+            imagePullSecret:
+              -name: registry-key
         skipper:
           server:
             platform:
@@ -34,11 +28,19 @@ data:
                 accounts:
                   default:
                     imagePullPolicy: IfNotPresent
-                    imagePullSecret: 'regcred'
-                    environmentVariables: 'SPRING_RABBITMQ_HOST=${RABBITMQ_SERVICE_HOST},SPRING_RABBITMQ_PORT=${RABBITMQ_SERVICE_PORT}'
+                    imagePullSecret:
+                      -name: registry-key
+                    environmentVariables: 'LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD=DEBUG,SPRING_CLOUD_CONFIG_ENABLED=false,SPRING_RABBITMQ_HOST=${RABBITMQ_SERVICE_HOST},SPRING_RABBITMQ_PORT=${RABBITMQ_SERVICE_PORT}'
                     limits:
                       memory: 1024Mi
-                      cpu: 500m
+                      cpu: 1.0
+                    readinessProbeDelay: 1
+                    readinessProbeTimeout: 5
+                    livenessProbeDelay: 1
+                    livenessProbeTimeout: 2
+                    startupProbeDelay: 20
+                    startupProbeTimeout: 5
+                    startupProbeFailure: 50
       datasource:
         url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/skipper
         username: root
