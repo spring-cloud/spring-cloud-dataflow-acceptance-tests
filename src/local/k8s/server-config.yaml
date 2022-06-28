@@ -27,7 +27,7 @@ data:
         deployer:
           kubernetes:
             imagePullPolicy: IfNotPresent
-            imagePullSecret: 'regcred'
+            imagePullSecret: registry-key
         dataflow:
           metrics.dashboard:
             url: 'http://localhost:3000'
@@ -37,7 +37,7 @@ data:
                 accounts:
                   default:
                     imagePullPolicy: IfNotPresent
-                    imagePullSecret: 'regcred'
+                    imagePullSecret: registry-key
                     limits:
                       memory: 1024Mi
       datasource:

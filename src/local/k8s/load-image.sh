@@ -6,7 +6,7 @@ fi
 set -e
 DONT_PULL=$3
 if [[ "$2" == "" ]]; then
-  echo "A TAG is required for $1"
+  echo "A TAG is required for $1" >&2
   exit 2
 fi
 IMAGE="$1:$2"
@@ -29,13 +29,13 @@ docker images | grep -F "$1" | grep -F "$2" >/dev/null
 EXISTS=$?
 set -e
 if [[ "$EXISTS" != 0 ]]; then
-  echo "Image not found $IMAGE"
+  echo "Image not found $IMAGE" >&2
   exit 2
 fi
 err=$(docker history "$IMAGE")
 rc=$?
 if [[ $rc -ne 0 ]]; then
-  echo "$err"
+  echo "$err" >&2
   exit 1
 fi
 echo "Loading:$IMAGE"

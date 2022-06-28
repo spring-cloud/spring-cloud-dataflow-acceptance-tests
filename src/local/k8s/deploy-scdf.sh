@@ -13,11 +13,12 @@ if [ "$K8S_DRIVER" == "" ]; then
 fi
 set -e
 if [ "$DOCKER_USER" == "" ] || [ "$DOCKER_SERVER" == "" ] || [ "$DOCKER_PASSWORD" == "" ]; then
-  echo "DOCKER_SERVER, DOCKER_USER, DOCKER_PASSWORD, DOCKER_EMAIL is required"
+  echo "DOCKER_SERVER, DOCKER_USER, DOCKER_PASSWORD, DOCKER_EMAIL is required" >&2
   exit 1
 fi
 
-kubectl create secret docker-registry regcred --docker-server=$DOCKER_SERVER --docker-username=$DOCKER_USER --docker-password=$DOCKER_PASSWORD --docker-email=$DOCKER_EMAIL
+kubectl create secret docker-registry registry-key --docker-server=$DOCKER_SERVER --docker-username=$DOCKER_USER --docker-password=$DOCKER_PASSWORD --docker-email=$DOCKER_EMAIL
+kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "registry-key"}]}'
 
 if [ "$USE_PRO" == "" ]; then
   USE_PRO=false
@@ -66,9 +67,11 @@ fi
 
 kubectl create -f src/kubernetes/mariadb/
 
-if [ "$PROMETHEUS" != "false" ]; then
+if [ "$PROMETHEUS" == "true" ]; then
   echo "Loading Prometheus and Grafana"
   sh "$LI_PATH/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus" "2.10.0-SNAPSHOT"
+  sh "$LI_PATH/load-image.sh" "prom/prometheus" "v2.12.0"
+  sh "$LI_PATH/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy" "0.11.0"
   kubectl create -f src/kubernetes/prometheus/prometheus-clusterroles.yaml
   kubectl create -f src/kubernetes/prometheus/prometheus-clusterrolebinding.yaml
   kubectl create -f src/kubernetes/prometheus/prometheus-serviceaccount.yaml

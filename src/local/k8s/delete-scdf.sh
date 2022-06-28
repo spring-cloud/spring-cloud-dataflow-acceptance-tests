@@ -16,4 +16,4 @@ kubectl delete clusterrolebinding scdftestrole
 kubectl delete clusterrole,clusterrolebinding,sa -l app=prometheus-proxy
 kubectl delete clusterrole,clusterrolebinding,sa -l app=prometheus
 kubectl delete all,cm,svc,secrets -l app=grafana
-kubectl delete secret regcred
+kubectl delete secret registry-key
