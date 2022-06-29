@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-SCDIR=$(dirname $0)
-if [ "$SCDIR" == "" ]; then
-  SCDIR="."
-fi
+start_time=$(date +%s)
+SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+LS_DIR=$(realpath $SCDIR)
 set -e
 if [ "$K8S_DRIVER" == "" ]; then
   K8S_DRIVER=kind
@@ -12,10 +11,10 @@ if [ "$BINDER" == "" ]; then
 fi
 export PLATFORM_TYPE=kubernetes
 if [ "$K8S_DRIVER" == "kind" ]; then
-  kubectl apply -f "$SCDIR/k8s/metallb-configmap.yaml"
+  kubectl apply -f "$LS_DIR/k8s/metallb-configmap.yaml"
 fi
-sh "$SCDIR/k8s/deploy-scdf.sh"
-sh "$SCDIR/load-images.sh"
+sh "$LS_DIR/k8s/deploy-scdf.sh"
+sh "$LS_DIR/load-images.sh"
 echo "Waiting for mariadb"
 kubectl rollout status deployment mariadb
 if [ "$BINDER" == "kafka" ]; then
@@ -31,10 +30,13 @@ kubectl rollout status deployment skipper
 echo "Waiting for dataflow"
 kubectl rollout status deployment scdf-server
 
-source "$SCDIR/k8s/export-dataflow-ip.sh"
+source "$LS_DIR/k8s/export-dataflow-ip.sh"
 if [ "$K8S_DRIVER" != "tmc" ]; then
-  source "$SCDIR/k8s/forward-scdf.sh"
+  source "$LS_DIR/k8s/forward-scdf.sh"
 fi
 sleep 2
-sh "$SCDIR/register-apps.sh"
+sh "$LS_DIR/register-apps.sh"
+end_time=$(date +%s)
+elapsed=$(( end_time - start_time ))
+echo "Complete deployment in $elapsed seconds"
 echo "Monitor pods using k9s and kail --ns=default | tee pods.log"

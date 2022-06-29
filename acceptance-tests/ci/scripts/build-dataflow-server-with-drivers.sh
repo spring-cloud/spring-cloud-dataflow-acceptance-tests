@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
-
-source $(dirname $0)/common.sh
+SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+source $SCDIR/common.sh
 repository=$(pwd)/distribution-repository
 
 pushd git-repo > /dev/null
