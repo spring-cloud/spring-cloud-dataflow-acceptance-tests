@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jayway.jsonpath.JsonPath;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
 import org.assertj.core.api.Condition;
@@ -82,9 +84,7 @@ import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationMa
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -126,7 +126,7 @@ class DataFlowAT extends CommonTestBase {
         logger.debug("before:start");
         logger.info("[platform = {}, type = {}]", runtimeApps.getPlatformName(), runtimeApps.getPlatformType());
         Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
-        Awaitility.setDefaultTimeout(Duration.ofMinutes(5));
+        Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
         registerTimestampTasks();
         resetTimestampVersion();
         logger.debug("before:end");
@@ -303,15 +303,10 @@ class DataFlowAT extends CommonTestBase {
             logger.info("multipleStreamApps:waiting-for-deployment:restaurant-test");
             destroy = stream;
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
-            Awaitility.await()
-                // .failFast(() -> AwaitUtils.hasErrorInLog(offset))
-                .until(() -> stream.getStatus().equals(DEPLOYED));
-
+            awaitDeployed(stream, offset);
             logger.info("multipleStreamApps:waiting for acceptPayment:restaurant-test");
             final AwaitUtils.StreamLog waitronLog = AwaitUtils.logOffset(stream, "waitron");
-            Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
-                .until(() -> AwaitUtils.hasInLog(waitronLog, "acceptPayment"));
+            awaitValueInLog(offset, waitronLog, "acceptPayment");
         } catch (AssertionError x) {
             throw x;
         } catch (Throwable x) {
@@ -449,7 +444,7 @@ class DataFlowAT extends CommonTestBase {
         ) {
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             logger.info("stream-transform-test:deploying:{}", stream.getName());
-            awaitStarting(stream);
+            awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
             logger.info("stream-transform-test:deployed:{}", stream.getName());
             String message = "Unique Test message: " + new Random().nextInt();
@@ -457,17 +452,11 @@ class DataFlowAT extends CommonTestBase {
             runtimeApps.httpPost(stream.getName(), "http", message);
             logger.info("stream-transform-test:sent:{}:{}", stream.getName(), message);
             final AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(stream, "log");
-            Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
-                .until(() -> AwaitUtils.hasInLog(logOffset, message.toUpperCase()));
+            awaitValueInLog(offset, logOffset, message.toUpperCase());
         }
         logger.info("stream-transform-test:done");
     }
 
-    private void awaitStarting(Stream stream) {
-        Awaitility.await()
-            .until(() -> starting.contains(stream.getStatus()));
-    }
 
     @Test
     public void streamPartitioning() {
@@ -489,7 +478,7 @@ class DataFlowAT extends CommonTestBase {
             .build())) {
             logger.info("streamPartitioning:deploying:{}", stream.getName());
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
-            awaitStarting(stream);
+            awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
             logger.info("streamPartitioning:deployed:{}", stream.getName());
             String message = "How much wood would a woodchuck chuck if a woodchuck could chuck wood";
@@ -547,7 +536,7 @@ class DataFlowAT extends CommonTestBase {
                 .put("version.ver-log", VERSION_3_0_1)
                 .build())) {
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
-            awaitStarting(stream);
+            awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
 
             // Helper supplier to retrieve the ver-log version from the stream's current manifest.
@@ -560,9 +549,7 @@ class DataFlowAT extends CommonTestBase {
             AwaitUtils.StreamLog verLogOffset = AwaitUtils.logOffset(stream, "ver-log");
             final String message1 = String.format("TEST MESSAGE 1-%s ", RANDOM_SUFFIX);
             runtimeApps.httpPost(stream.getName(), "http", message1);
-            Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
-                .until(() -> AwaitUtils.hasInLog(verLogOffset, message1));
+            awaitValueInLog(offset, verLogOffset, message1);
             assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_3_0_1);
             assertThat(stream.history().size()).isEqualTo(1L);
 
@@ -570,14 +557,12 @@ class DataFlowAT extends CommonTestBase {
             logger.info("stream-app-cross-version-test: UPDATE");
 
             stream.update(new DeploymentPropertiesBuilder().put("version.ver-log", VERSION_2_1_5).build());
-            awaitStarting(stream);
+            awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
 
             final String message2 = String.format("TEST MESSAGE 2-%s ", RANDOM_SUFFIX);
             runtimeApps.httpPost(stream.getName(), "http", message2);
-            Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
-                .until(() -> AwaitUtils.hasInLog(verLogOffset, message2));
+            awaitValueInLog(offset, verLogOffset, message2);
 
             assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_2_1_5);
             assertThat(stream.history().size()).isEqualTo(2);
@@ -586,14 +571,12 @@ class DataFlowAT extends CommonTestBase {
             logger.info("stream-app-cross-version-test: ROLLBACK");
 
             stream.rollback(0);
-            awaitStarting(stream);
+            awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
 
             final String message3 = String.format("TEST MESSAGE 3-%s ", RANDOM_SUFFIX);
             runtimeApps.httpPost(stream.getName(), "http", message3);
-            Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
-                .until(() -> AwaitUtils.hasInLog(verLogOffset, message3));
+            awaitValueInLog(offset, verLogOffset, message3);
             assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_3_0_1);
             assertThat(stream.history().size()).isEqualTo(3);
             logger.info("stream-app-cross-version-test: UNDEPLOY");
@@ -607,10 +590,54 @@ class DataFlowAT extends CommonTestBase {
             .getTotalElements()).isEqualTo(0L);
     }
 
+    private void awaitValueInLog(AwaitUtils.StreamLog streamOffset, AwaitUtils.StreamLog logOffset, final String value) {
+        if(streamOffset == logOffset) {
+            Awaitility.await()
+                .until(() -> AwaitUtils.hasInLog(logOffset, value));
+        } else {
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(streamOffset))
+                .until(() -> AwaitUtils.hasInLog(logOffset, value));
+        }
+    }
+
+    private void awaitStarting(Stream stream, AwaitUtils.StreamLog offset) {
+        final long startErrorCheck = System.currentTimeMillis() + 30_000L;
+        Awaitility.await("Deployment starting for " + stream.getName())
+            .failFast(() -> {
+                if (System.currentTimeMillis() > startErrorCheck) {
+                    AwaitUtils.hasErrorInLog(offset);
+                }
+            })
+            .until(() -> {
+                logger.debug("awaitStarting:{}:{}", stream.getName(), stream.getStatus());
+                try {
+                    return starting.contains(stream.getStatus());
+                } catch (Throwable x) {
+                    logger.debug("awaitStarting:ignoring:" + x);
+                    return false;
+                }
+            });
+    }
+
     private void awaitDeployed(Stream stream, AwaitUtils.StreamLog offset) {
-        Awaitility.await()
-            .failFast(() -> AwaitUtils.hasErrorInLog(offset))
-            .until(() -> stream.getStatus().equals(DEPLOYED));
+        final long startErrorCheck = System.currentTimeMillis() + 30_000L;
+        Awaitility.await("Deployment for " + stream.getName())
+            .failFast(() -> {
+                if (System.currentTimeMillis() >= startErrorCheck) {
+                    AwaitUtils.hasErrorInLog(offset);
+                }
+            })
+            .until(() -> {
+                try {
+                    return stream.getStatus().equals(DEPLOYED);
+                } catch (Throwable x) {
+                    if (System.currentTimeMillis() > startErrorCheck) {
+                        throw x;
+                    }
+                    return false;
+                }
+            });
     }
 
     @Test
@@ -643,7 +670,7 @@ class DataFlowAT extends CommonTestBase {
                 .build())) {
             logger.info("stream-lifecycle-test: await deployment");
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
-            awaitStarting(stream);
+            awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
             logger.info("stream-lifecycle-test:deployed");
             streamAssertions.accept(stream);
@@ -666,7 +693,7 @@ class DataFlowAT extends CommonTestBase {
                 .put("app.log.log.expression", "'Updated TICKTOCK - TIMESTAMP: '.concat(payload)")
                 .put("app.*.management.endpoints.web.exposure.include", "*")
                 .build());
-            awaitStarting(stream);
+            awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
 
             streamAssertions.accept(stream);
@@ -686,7 +713,7 @@ class DataFlowAT extends CommonTestBase {
             // ROLLBACK
             logger.info("stream-lifecycle-test: ROLLBACK");
             stream.rollback(0);
-            awaitStarting(stream);
+            awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
 
             streamAssertions.accept(stream);
@@ -744,7 +771,7 @@ class DataFlowAT extends CommonTestBase {
             .deploy(testDeploymentProperties("log", "time"))) {
             logger.info("stream-scaling-test:await deployment");
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
-            awaitStarting(stream);
+            awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
             logger.info("stream-scaling-test:deployed");
             final StreamApplication time = app("time");
@@ -757,7 +784,7 @@ class DataFlowAT extends CommonTestBase {
 
             // Scale up log
             stream.scaleApplicationInstances(log, 2, Collections.emptyMap());
-            awaitStarting(stream);
+            awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
             Awaitility.await().until(() -> stream.runtimeApps().get(log).size() == 2);
 
@@ -787,7 +814,7 @@ class DataFlowAT extends CommonTestBase {
             logger.info("namedChannelDestination:deploying:{}", httpStream.getName());
             AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(logStream);
             AwaitUtils.StreamLog httpOffset = AwaitUtils.logOffset(httpStream);
-            awaitStarting(logStream);
+            awaitStarting(logStream, logOffset);
             awaitDeployed(logStream, logOffset);
             logger.info("namedChannelDestination:deployed:{}", logStream.getName());
             awaitDeployed(httpStream, httpOffset);
@@ -822,7 +849,7 @@ class DataFlowAT extends CommonTestBase {
             logger.info("namedChannelTap:deploying:{}", tapStream.getName());
             AwaitUtils.StreamLog httpOffset = AwaitUtils.logOffset(httpLogStream);
             AwaitUtils.StreamLog tapOffset = AwaitUtils.logOffset(tapStream);
-            awaitStarting(httpLogStream);
+            awaitStarting(httpLogStream, httpOffset);
             awaitDeployed(httpLogStream, httpOffset);
             logger.info("namedChannelTap:deployed:{}", httpLogStream.getName());
             awaitDeployed(tapStream, tapOffset);
@@ -860,33 +887,24 @@ class DataFlowAT extends CommonTestBase {
             AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(logStream);
             AwaitUtils.StreamLog httpOffsetOne = AwaitUtils.logOffset(httpStreamOne);
             AwaitUtils.StreamLog httpOffsetTwo = AwaitUtils.logOffset(httpStreamTwo);
+            awaitStarting(logStream, logOffset);
+            awaitDeployed(logStream, logOffset);
 
-            Awaitility.await()
-                .until(() -> starting.contains(logOffset.getStatus()));
-            Awaitility.await()
-                .atMost(10L, TimeUnit.MINUTES)
-                .failFast(() -> AwaitUtils.hasErrorInLog(logOffset))
-                .until(() -> logStream.getStatus().equals(DEPLOYED));
-
-            Awaitility.await()
-                .until(() -> starting.contains(httpOffsetOne.getStatus()));
+            awaitStarting(httpStreamOne, httpOffsetOne);
             awaitDeployed(httpStreamOne, httpOffsetOne);
 
-            awaitStarting(httpStreamTwo);
+            awaitStarting(httpStreamTwo, httpOffsetTwo);
             awaitDeployed(httpStreamTwo, httpOffsetTwo);
 
             final String messageOne = "Unique Test message: " + new Random().nextInt();
             runtimeApps.httpPost(httpStreamOne.getName(), "http", messageOne);
 
-            Awaitility.await()
-                .until(() -> AwaitUtils.hasInLog(logOffset, messageOne));
+            awaitValueInLog(logOffset, logOffset, messageOne);
 
             final String messageTwo = "Unique Test message: " + new Random().nextInt();
             runtimeApps.httpPost(httpStreamTwo.getName(), "http", messageTwo);
 
-            Awaitility.await()
-                .until(() -> AwaitUtils.hasInLog(logOffset, messageTwo));
-
+            awaitValueInLog(logOffset, logOffset, messageTwo);
         }
     }
 
@@ -916,19 +934,16 @@ class DataFlowAT extends CommonTestBase {
             AwaitUtils.StreamLog barOffset = AwaitUtils.logOffset(barLogStream);
             AwaitUtils.StreamLog httpOffset = AwaitUtils.logOffset(httpStream);
 
-            awaitStarting(fooLogStream);
-            Awaitility.await()
-                .atMost(10L, TimeUnit.MINUTES)
-                .failFast(() -> AwaitUtils.hasErrorInLog(fooOffset))
-                .until(() -> fooLogStream.getStatus().equals(DEPLOYED));
+            awaitStarting(fooLogStream, fooOffset);
+            awaitDeployed(fooLogStream, fooOffset);
 
             logger.info("namedChannelDirectedGraph:deployed:{}", fooLogStream.getName());
 
-            awaitStarting(barLogStream);
+            awaitStarting(barLogStream, barOffset);
             awaitDeployed(barLogStream, barOffset);
             logger.info("namedChannelDirectedGraph:deployed:{}", barLogStream.getName());
 
-            awaitStarting(httpStream);
+            awaitStarting(httpStream, httpOffset);
             awaitDeployed(httpStream, httpOffset);
             logger.info("namedChannelDirectedGraph:deployed:{}", httpStream.getName());
 
@@ -936,19 +951,16 @@ class DataFlowAT extends CommonTestBase {
             AwaitUtils.StreamLog barLogOffset = AwaitUtils.logOffset(barLogStream, "log");
 
             runtimeApps.httpPost(httpStream.getName(), "http", "abcd");
+            logger.info("namedChannelDirectedGraph:sent:abcd -> {}", httpStream.getName());
             runtimeApps.httpPost(httpStream.getName(), "http", "defg");
             logger.info("namedChannelDirectedGraph:sent:defg -> {}", httpStream.getName());
-            Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(fooLogOffset))
-                .until(() -> AwaitUtils.hasInLog(fooLogOffset, "abcd-foo"));
-            Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(barLogOffset))
-                .until(() -> AwaitUtils.hasInLog(barLogOffset, "defg-bar"));
+            awaitValueInLog(fooLogOffset, fooLogOffset, "abcd-foo");
+            awaitValueInLog(barLogOffset, barLogOffset, "defg-bar");
         }
     }
 
     @Test
-    public void dataflowTaskLauncherSink() {
+    public void dataflowTaskLauncherSink() throws JsonProcessingException {
         if (this.runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.LOCAL_PLATFORM_TYPE)) {
             logger.warn("Skipping since it doesn't work local");
         } else {
@@ -991,14 +1003,12 @@ class DataFlowAT extends CommonTestBase {
                     .deploy(testDeploymentProperties("http"))) {
                     AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
 
-                    awaitStarting(stream);
+                    awaitStarting(stream, offset);
                     awaitDeployed(stream, offset);
 
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.setContentType(MediaType.APPLICATION_JSON);
-                    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-
-                    runtimeApps.httpPost(stream.getName(), "http", "{\"name\" : \"" + taskName + "\"}", headers);
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("name", taskName);
+                    runtimeApps.httpPostJson(stream.getName(), "http", data);
 
                     AtomicLong launchId = new AtomicLong();
                     Awaitility.await()
@@ -1045,7 +1055,7 @@ class DataFlowAT extends CommonTestBase {
             .deploy(testDeploymentProperties("http"))) {
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
 
-            awaitStarting(stream);
+            awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
 
             String message1 = "Test message 1"; // length 14
@@ -1116,7 +1126,7 @@ class DataFlowAT extends CommonTestBase {
             .deploy(testDeploymentProperties("http"))) {
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
 
-            awaitStarting(stream);
+            awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
 
             String message1 = "Test message 1"; // length 14
@@ -2639,11 +2649,8 @@ class DataFlowAT extends CommonTestBase {
                 .build())) {
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
 
-            awaitStarting(stream);
-            Awaitility.await(stream.getName() + " failed to deploy!")
-                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
-                .until(() -> stream.getStatus().equals(DEPLOYED));
-
+            awaitStarting(stream, offset);
+            awaitDeployed(stream, offset);
 
             Awaitility.await("Source not started")
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
