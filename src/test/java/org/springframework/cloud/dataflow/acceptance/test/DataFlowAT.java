@@ -33,7 +33,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -551,7 +550,7 @@ class DataFlowAT extends CommonTestBase {
             runtimeApps.httpPost(stream.getName(), "http", message1);
 
             awaitValueInLog(offset, verLogOffset, message1);
-            
+
             assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_3_0_1);
             assertThat(stream.history().size()).isEqualTo(1L);
 
@@ -580,7 +579,7 @@ class DataFlowAT extends CommonTestBase {
             final String message3 = String.format("TEST MESSAGE 3-%s ", RANDOM_SUFFIX);
             runtimeApps.httpPost(stream.getName(), "http", message3);
             awaitValueInLog(offset, verLogOffset, message3);
-            
+
             assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_3_0_1);
             assertThat(stream.history().size()).isEqualTo(3);
             logger.info("stream-app-cross-version-test: UNDEPLOY");
