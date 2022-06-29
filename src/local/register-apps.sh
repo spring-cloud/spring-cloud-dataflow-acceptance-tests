@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
-SCDIR=$(dirname $0)
-if [ "$SCDIR" == "" ]; then
-  SCDIR="."
-fi
+SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 set -e
 function dataflow_post() {
   echo "Invoking POST $1 >> $2"

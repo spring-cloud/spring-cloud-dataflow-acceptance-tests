@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-source $(dirname $0)/common.sh
+source $(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/common.sh
 
 pushd git-repo > /dev/null
 pushd $BASE_PATH > /dev/null

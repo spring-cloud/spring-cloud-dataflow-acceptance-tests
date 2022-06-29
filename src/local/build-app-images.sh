@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-SCDIR=$(dirname $0)
-if [ "$SCDIR" == "" ]; then
-  SCDIR="."
-fi
+SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+
 set -e
 pushd "$SCDIR/../../../spring-cloud-dataflow-samples/restaurant-stream-apps"  > /dev/null
 pushd scdf-app-kitchen  > /dev/null

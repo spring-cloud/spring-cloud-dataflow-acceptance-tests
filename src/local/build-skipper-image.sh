@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
-SCDIR=$(dirname $0)
-if [ "$SCDIR" == "" ]; then
-  SCDIR="."
-fi
+SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 if [ "$SKIPPER_VERSION" == "" ]; then
   SKIPPER_VERSION=2.9.0-SNAPSHOT
 fi

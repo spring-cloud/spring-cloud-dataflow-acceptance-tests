@@ -26,3 +26,9 @@ kubectl delete clusterrole,clusterrolebinding,sa -l app=prometheus
 kubectl delete all,cm,svc,secrets -l app=grafana
 kubectl delete secret registry-key
 kubectl delete secrets mariadb
+echo "stopping port forward"
+kubectl_pid=$(ps aux | grep 'kubectl' | grep 'port\-forward' | awk '{print $2}')
+if [ "$kubectl_pid" != "" ]
+then
+  kill $kubectl_pid
+fi
