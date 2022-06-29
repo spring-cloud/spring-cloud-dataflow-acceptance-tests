@@ -549,7 +549,9 @@ class DataFlowAT extends CommonTestBase {
             AwaitUtils.StreamLog verLogOffset = AwaitUtils.logOffset(stream, "ver-log");
             final String message1 = String.format("TEST MESSAGE 1-%s ", RANDOM_SUFFIX);
             runtimeApps.httpPost(stream.getName(), "http", message1);
+
             awaitValueInLog(offset, verLogOffset, message1);
+            
             assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_3_0_1);
             assertThat(stream.history().size()).isEqualTo(1L);
 
@@ -562,6 +564,7 @@ class DataFlowAT extends CommonTestBase {
 
             final String message2 = String.format("TEST MESSAGE 2-%s ", RANDOM_SUFFIX);
             runtimeApps.httpPost(stream.getName(), "http", message2);
+
             awaitValueInLog(offset, verLogOffset, message2);
 
             assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_2_1_5);
@@ -577,6 +580,7 @@ class DataFlowAT extends CommonTestBase {
             final String message3 = String.format("TEST MESSAGE 3-%s ", RANDOM_SUFFIX);
             runtimeApps.httpPost(stream.getName(), "http", message3);
             awaitValueInLog(offset, verLogOffset, message3);
+            
             assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_3_0_1);
             assertThat(stream.history().size()).isEqualTo(3);
             logger.info("stream-app-cross-version-test: UNDEPLOY");
@@ -589,6 +593,7 @@ class DataFlowAT extends CommonTestBase {
             .orElse(new PagedModel.PageMetadata(0, 0, 0))
             .getTotalElements()).isEqualTo(0L);
     }
+
 
     private void awaitValueInLog(AwaitUtils.StreamLog streamOffset, AwaitUtils.StreamLog logOffset, final String value) {
         if(streamOffset == logOffset) {
