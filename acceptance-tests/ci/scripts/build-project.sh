@@ -2,7 +2,7 @@
 set -e
 
 n=0
-source $(dirname $0)/common.sh
+source $(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/common.sh
 repository=$(pwd)/distribution-repository
 triggers=$(pwd)/triggers
 buildversion=`date '+%Y-%m-%d-%H-%M-%S'`
