@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+start_time=$(date +%s)
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 set -e
 if [ "$K8S_DRIVER" == "" ]; then
@@ -23,7 +24,7 @@ case "$K8S_DRIVER" in
 *)
   echo "Creating Minikube cluster with $K8S_DRIVER"
   # K8S_DRIVER=kvm2, docker, vmware, virtualbox, podman, vmwarefusion
-  minikube start --cpus=6 --memory=10g --driver=$K8S_DRIVER
+  minikube start --cpus=8 --memory=12g --driver=$K8S_DRIVER
   echo "Please run 'minikube tunnel' in a separate shell to ensure a LoadBalancer is active."
   ;;
 esac
@@ -32,6 +33,9 @@ RC=$?
 if [ "$RC" != "0" ]; then
   kubectl create -f "$SCDIR/k8s/default-ns.yaml"
 fi
-if [ "$K8S_DRIVER" == "kind" ]; then
+if [ "$K8S_DRIVER" != "tmc" ]; then
   sh "$SCDIR/k8s/setup-metallb.sh"
 fi
+end_time=$(date +%s)
+elapsed=$(( end_time - start_time ))
+echo "Kubernetes on $K8S_DRIVER running in $elapsed seconds"

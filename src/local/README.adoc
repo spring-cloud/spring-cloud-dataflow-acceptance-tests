@@ -40,19 +40,24 @@ If you want to use a locally built application you can invoke
 
 == Create Configure k8s environment
 
-Configure and start minikube or kind for Spring Cloud Dataflow.
+You can invoke one of the following scripts to choose the type of installation you are targeting:
 
-You can change the type of driver used by setting `K8S_DRIVER` to one of `kind, tmc, kvm2, docker, vmware, virtualbox, podman, vmwarefusion`, the default is `kind`.
+* `use-mk.sh <driver>`
+* `use-mk-docker.sh`
+* `use-mk-kvm2.sh`
+* `use-kind.sh`
+* `use-tmc.sh <cluster-name>`
 
-=== TMC Cluster in Cloud
-
-When using TMC Cluster configure `TMC_CLUSTER` environmental variable with cluster name:
+Since these scripts export environmental variable they need to be executes as in the following example:
 
 [source,shell]
 ....
-export TMC_CLUSTER=<cluster name>
-source ./src/local/tmc/set-cluster.sh
+source ./src/local/use-mk.sh kvm2
 ....
+
+=== TMC Cluster in Cloud
+
+The cluster must exist before use.
 
 === Local Cluster
 
@@ -81,6 +86,8 @@ For minikube launch a new shell and execute `minikube tunnel`
 ....
 
 === Delete the cluster
+
+This script will also delete the TMC cluster if you have configured one.
 
 [source,shell]
 ....

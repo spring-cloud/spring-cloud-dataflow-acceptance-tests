@@ -3,19 +3,24 @@ FWSCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 SC_PATH=$(realpath $FWSCDIR)
 set -e
 echo "Waiting for dataflow"
-kubectl rollout status deployment scdf-server
-source $SC_PATH/export-dataflow-ip.sh
-while true
-do
-  STATUS=$(curl -s -o /dev/null -w '%{http_code}' $DATAFLOW_IP)
-  if [ $STATUS -eq 200 ]; then
-    echo "$DATAFLOW_IP active"
-    break
-  else
-    echo "Waiting for $DATAFLOW_IP $STATUS"
-  fi
-  sleep 3
-done
+if [ "$K8S_DRIVER" == "" ]; then
+  K8S_DRIVER=kind
+fi
+if [ "$USE_PRO" == "true" ]; then
+  kubectl rollout status deployment scdf-spring-cloud-dataflow-server
+else
+  kubectl rollout status deployment scdf-server
+fi
+kubectl_pid=$(ps aux | grep 'kubectl' | grep 'port\-forward' | awk '{print $2}')
+if [ "$kubectl_pid" != "" ]
+then
+  kill $kubectl_pid
+fi
+kubectl_pid=$(ps aux | grep 'kubectl' | grep 'port\-forward' | awk '{print $2}')
+if [ "$kubectl_pid" != "" ]
+then
+  kill $kubectl_pid
+fi
 kubectl port-forward --namespace default svc/scdf-server "9393:9393" &
 if [ "$PROMETHEUS" == "true" ]; then
   kubectl port-forward --namespace default svc/grafana "3000:3000" &

@@ -13,8 +13,12 @@ export PLATFORM_TYPE=kubernetes
 if [ "$K8S_DRIVER" == "kind" ]; then
   kubectl apply -f "$LS_DIR/k8s/metallb-configmap.yaml"
 fi
+
 sh "$LS_DIR/k8s/deploy-scdf.sh"
-sh "$LS_DIR/load-images.sh"
+
+if [ "$K8S_DRIVER" != "tmc" ]; then
+  sh "$LS_DIR/load-images.sh"
+fi
 echo "Waiting for mariadb"
 kubectl rollout status deployment mariadb
 if [ "$BINDER" == "kafka" ]; then
@@ -30,9 +34,10 @@ kubectl rollout status deployment skipper
 echo "Waiting for dataflow"
 kubectl rollout status deployment scdf-server
 
-source "$LS_DIR/k8s/export-dataflow-ip.sh"
 if [ "$K8S_DRIVER" != "tmc" ]; then
   source "$LS_DIR/k8s/forward-scdf.sh"
+else
+  source "$LS_DIR/k8s/export-dataflow-ip.sh"
 fi
 sleep 2
 sh "$LS_DIR/register-apps.sh"
