@@ -9,6 +9,7 @@ function dataflow_post() {
   if [ "$rc" != "0" ]; then
     echo "$RC : $result"
     echo ""
+    exit $RC
   fi
 }
 
@@ -46,7 +47,7 @@ else
 fi
 
 echo "DATAFLOW_IP=$DATAFLOW_IP"
-dataflow_post "uri=https://repo.spring.io/artifactory/$RELEASE_SNAPSHOT/org/springframework/cloud/stream/app/stream-applications-descriptor/$STREAM_APPS_VERSION/stream-applications-descriptor-$STREAM_APPS_VERSION.stream-apps-$BROKER_NAME-$TYPE" "$DATAFLOW_IP/apps"
+dataflow_post "uri=https://repo.spring.io/artifactory/libs-$RELEASE_SNAPSHOT/org/springframework/cloud/stream/app/stream-applications-descriptor/$STREAM_APPS_VERSION/stream-applications-descriptor-$STREAM_APPS_VERSION.stream-apps-$BROKER_NAME-$TYPE" "$DATAFLOW_IP/apps"
 if [ "$TYPE" == "docker" ]; then
   dataflow_post "uri=docker:springcloudtask/timestamp-task:2.0.2" "$DATAFLOW_IP/apps/task/timestamp/2.0.2"
   dataflow_post "uri=docker:springcloudtask/timestamp-batch-task:2.0.2" "$DATAFLOW_IP/apps/task/timestamp-batch/2.0.2"

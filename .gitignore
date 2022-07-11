@@ -61,4 +61,4 @@ acceptance-tests/.vscode/*
 !acceptance-tests/.vscode/launch.json
 !acceptance-tests/.vscode/extensions.json
 .vscode
-/src/helm/
+*.zip
