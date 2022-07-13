@@ -204,7 +204,7 @@
                         <version>3.0.0-M4</version>
                         <configuration>
                             <includes>
-                                <include>**/org.springframework.cloud.dataflow.acceptance.test.DataFlowAT.aboutTestInfo</include>
+                                <include>**/*DataFlowAT</include>
                             </includes>
                         </configuration>
                     </plugin>
