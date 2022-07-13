@@ -20,7 +20,7 @@ if [ "$1" != "" ]; then
     EXTRA="-P test-3-of-3"
     ;;
     info)
-    EXTRA="-P test-info"
+    EXTRA="-P test-info -Dtest=org.springframework.cloud.dataflow.acceptance.test.DataFlowAT#aboutTestInfo"
     ;;
     *)
     EXTRA="-P test-all -Dtest=$1"
