@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+if [ "$NS" == "" ]; then
+  echo "NS not defined" >&2
+  exit 2
+fi
 start_time=$(date +%s)
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 LS_DIR=$(realpath $SCDIR)
@@ -20,19 +24,19 @@ if [ "$K8S_DRIVER" != "tmc" ]; then
   sh "$LS_DIR/load-images.sh"
 fi
 echo "Waiting for mariadb"
-kubectl rollout status deployment mariadb
+kubectl rollout status deployment --namespace "$NS" mariadb
 if [ "$BINDER" == "kafka" ]; then
   echo "Waiting for Kafka and Zookeeper"
-  kubectl rollout status deployment kafka-zk
-  kubectl rollout status sts kafka-broker
+  kubectl rollout status deployment --namespace "$NS" kafka-zk
+  kubectl rollout status sts --namespace "$NS" kafka-broker
 else
   echo "Waiting for rabbitmq"
-  kubectl rollout status deployment rabbitmq
+  kubectl rollout status deployment --namespace "$NS" rabbitmq
 fi
 echo "Waiting for skipper"
-kubectl rollout status deployment skipper
+kubectl rollout status deployment --namespace "$NS" skipper
 echo "Waiting for dataflow"
-kubectl rollout status deployment scdf-server
+kubectl rollout status deployment --namespace "$NS" scdf-server
 
 if [ "$K8S_DRIVER" != "tmc" ]; then
   source "$LS_DIR/k8s/forward-scdf.sh"

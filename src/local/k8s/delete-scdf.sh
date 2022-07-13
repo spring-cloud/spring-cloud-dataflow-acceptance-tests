@@ -1,34 +1,25 @@
 #!/usr/bin/env bash
-kubectl delete all -l app=skipper
-kubectl delete all,cm -l app=scdf-server
-kubectl delete all -l app=mariadb
+kubectl delete all --namespace "$NS" -l app=skipper
+kubectl delete all,cm --namespace "$NS" -l app=scdf-server
+kubectl delete all --namespace "$NS" -l app=mariadb
 
 if [ "$BINDER" == "" ] || [ "$BINDER" == "rabbit" ]; then
-  kubectl delete all -l app=rabbitmq
+  kubectl delete all --namespace "$NS" -l app=rabbitmq
 else
-  kubectl delete all -l app=kafka
+  kubectl delete all --namespace "$NS" -l app=kafka
 fi
 
 if [ "$PROMETHEUS" == "true" ]; then
-  kubectl delete all -l app=prometheus
-  kubectl delete all -l app=grafana
+  kubectl delete all --namespace "$NS" -l app=prometheus
+  kubectl delete all --namespace "$NS" -l app=grafana
 fi
 
-# For some reason these remain behind
-kubectl delete persistentvolumeclaims mariadb
-kubectl delete role scdf-role
-kubectl delete rolebinding scdf-rb
-kubectl delete serviceaccount scdf-sa
-kubectl delete configmap skipper
-kubectl delete clusterrolebinding scdftestrole
-kubectl delete clusterrole,clusterrolebinding,sa -l app=prometheus-proxy
-kubectl delete clusterrole,clusterrolebinding,sa -l app=prometheus
-kubectl delete all,cm,svc,secrets -l app=grafana
-kubectl delete secret registry-key
-kubectl delete secrets mariadb
+kubectl delete all --namespace "$NS" --all
+kubectl delete pvc --namespace "$NS" --all
 echo "stopping port forward"
 kubectl_pid=$(ps aux | grep 'kubectl' | grep 'port\-forward' | awk '{print $2}')
 if [ "$kubectl_pid" != "" ]
 then
   kill $kubectl_pid
 fi
+kubectl delete namespace "$NS"

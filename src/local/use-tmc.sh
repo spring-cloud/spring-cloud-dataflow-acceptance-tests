@@ -14,3 +14,9 @@ echo "Connecting to $TMC_CLUSTER"
 tmc cluster auth kubeconfig get $TMC_CLUSTER > $HOME/.kube/config
 export KUBECONFIG=$HOME/.kube/config
 echo "KUBECONFIG set"
+if [ "$2" == "" ]; then
+  export NS=scdf
+else
+  export NS=$2
+fi
+echo "Namespace: $NS"

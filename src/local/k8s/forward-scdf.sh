@@ -7,9 +7,9 @@ if [ "$K8S_DRIVER" == "" ]; then
   K8S_DRIVER=kind
 fi
 if [ "$USE_PRO" == "true" ]; then
-  kubectl rollout status deployment scdf-spring-cloud-dataflow-server
+  kubectl rollout status deployment --namespace "$NS" scdf-spring-cloud-dataflow-server
 else
-  kubectl rollout status deployment scdf-server
+  kubectl rollout status deployment --namespace "$NS" scdf-server
 fi
 kubectl_pid=$(ps aux | grep 'kubectl' | grep 'port\-forward' | awk '{print $2}')
 if [ "$kubectl_pid" != "" ]
@@ -21,9 +21,9 @@ if [ "$kubectl_pid" != "" ]
 then
   kill $kubectl_pid
 fi
-kubectl port-forward --namespace default svc/scdf-server "9393:9393" &
+kubectl port-forward --namespace "$NS" svc/scdf-server "9393:9393" &
 if [ "$PROMETHEUS" == "true" ]; then
-  kubectl port-forward --namespace default svc/grafana "3000:3000" &
+  kubectl port-forward --namespace "$NS" svc/grafana "3000:3000" &
 fi
 
 export DATAFLOW_IP="http://localhost:9393"

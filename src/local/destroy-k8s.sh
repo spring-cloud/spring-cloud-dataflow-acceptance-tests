@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-sh "$SCDIR/k8s/delete-scdf.sh"
 kubectl_pid=$(ps aux | grep 'kubectl' | grep 'port\-forward' | awk '{print $2}')
 if [ "$kubectl_pid" != "" ]
 then
@@ -15,8 +14,8 @@ case "$K8S_DRIVER" in
   kind delete cluster
   ;;
 "tmc")
+  sh "$SCDIR/k8s/delete-scdf.sh"
   sh "$SCDIR/tmc/delete-cluster.sh"
-  tmc cluster delete "$TMC_CLUSTER"
   ;;
 *)
   minikube delete

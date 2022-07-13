@@ -11,3 +11,9 @@ if [ "$sourced" == "0" ]; then
 fi
 export K8S_DRIVER=$1
 export KUBECONFIG=
+if [ "$2" == "" ]; then
+  export NS=scdf
+else
+  export NS=$2
+fi
+echo "Namespace: $NS"

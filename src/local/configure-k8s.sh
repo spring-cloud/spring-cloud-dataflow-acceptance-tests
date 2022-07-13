@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+if [ "$NS" == "" ]; then
+  echo "NS not defined" >&2
+  exit 2
+fi
 start_time=$(date +%s)
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 set -e
@@ -28,10 +32,10 @@ case "$K8S_DRIVER" in
   echo "Please run 'minikube tunnel' in a separate shell to ensure a LoadBalancer is active."
   ;;
 esac
-kubectl get namespaces | grep default > /dev/null
+kubectl get namespaces | grep "$NS" > /dev/null
 RC=$?
 if [ "$RC" != "0" ]; then
-  kubectl create -f "$SCDIR/k8s/default-ns.yaml"
+  kubectl create namespace "$NS"
 fi
 if [ "$K8S_DRIVER" != "tmc" ]; then
   sh "$SCDIR/k8s/setup-metallb.sh"
