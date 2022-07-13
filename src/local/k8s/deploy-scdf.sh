@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+if [ "$NS" == "" ]; then
+  echo "NS not defined" >&2
+  exit 2
+fi
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 
 if [ "$BINDER" == "" ]; then
@@ -9,14 +13,20 @@ if [ "$K8S_DRIVER" == "" ]; then
   K8S_DRIVER=kind
 fi
 set -e
-
+COUNT=$(kubectl get namespace | grep -c "$NS")
+if [ "$COUNT" == "0" ]; then
+  echo "Creating namespace $NS"
+  kubectl create namespace "$NS"
+else
+  echo "Namespace $NS exists"
+fi
 if [ "$K8S_DRIVER" != "tmc" ]; then
   if [ "$DOCKER_USER" == "" ] || [ "$DOCKER_SERVER" == "" ] || [ "$DOCKER_PASSWORD" == "" ]; then
     echo "DOCKER_SERVER, DOCKER_USER, DOCKER_PASSWORD, DOCKER_EMAIL is required" >&2
     exit 1
   fi
-  kubectl create secret docker-registry registry-key --docker-server=$DOCKER_SERVER --docker-username=$DOCKER_USER --docker-password=$DOCKER_PASSWORD --docker-email=$DOCKER_EMAIL
-  kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "registry-key"}]}'
+  kubectl create secret docker-registry registry-key --namespace "$NS" --docker-server=$DOCKER_SERVER --docker-username=$DOCKER_USER --docker-password=$DOCKER_PASSWORD --docker-email=$DOCKER_EMAIL
+  kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "registry-key"}]}'  --namespace "$NS"
 fi
 
 if [ "$USE_PRO" == "" ]; then
@@ -60,13 +70,13 @@ ATDIR=$(pwd)
 pushd $LI_PATH/../../../../spring-cloud-dataflow  > /dev/null
 if [ "$BINDER" == "kafka" ]; then
   # Deploy Kafka
-  kubectl create -f src/kubernetes/kafka/
+  kubectl create --namespace "$NS" -f src/kubernetes/kafka/
 else
   # Deploy Rabbit
-  kubectl create -f src/kubernetes/rabbitmq/
+  kubectl create --namespace "$NS" -f src/kubernetes/rabbitmq/
 fi
 
-kubectl create -f src/kubernetes/mariadb/
+kubectl create --namespace "$NS" -f src/kubernetes/mariadb/
 
 if [ "$PROMETHEUS" == "true" ]; then
   echo "Loading Prometheus and Grafana"
@@ -75,38 +85,38 @@ if [ "$PROMETHEUS" == "true" ]; then
     sh "$LI_PATH/load-image.sh" "prom/prometheus" "v2.12.0"
     sh "$LI_PATH/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy" "0.11.0"
   fi
-  kubectl create -f src/kubernetes/prometheus/prometheus-clusterroles.yaml
-  kubectl create -f src/kubernetes/prometheus/prometheus-clusterrolebinding.yaml
-  kubectl create -f src/kubernetes/prometheus/prometheus-serviceaccount.yaml
-  kubectl create -f src/kubernetes/prometheus-proxy/
-  kubectl create -f src/kubernetes/prometheus/prometheus-configmap.yaml
-  kubectl create -f src/kubernetes/prometheus/prometheus-deployment.yaml
-  kubectl create -f src/kubernetes/prometheus/prometheus-service.yaml
-  kubectl create -f src/kubernetes/grafana/
+  kubectl create --namespace "$NS" -f src/kubernetes/prometheus/prometheus-clusterroles.yaml
+  kubectl create --namespace "$NS" -f src/kubernetes/prometheus/prometheus-clusterrolebinding.yaml
+  kubectl create --namespace "$NS" -f src/kubernetes/prometheus/prometheus-serviceaccount.yaml
+  kubectl create --namespace "$NS" -f src/kubernetes/prometheus-proxy/
+  kubectl create --namespace "$NS" -f src/kubernetes/prometheus/prometheus-configmap.yaml
+  kubectl create --namespace "$NS" -f src/kubernetes/prometheus/prometheus-deployment.yaml
+  kubectl create --namespace "$NS" -f src/kubernetes/prometheus/prometheus-service.yaml
+  kubectl create --namespace "$NS" -f src/kubernetes/grafana/
 fi
 
 # Deploy Spring Cloud Dataflow
-kubectl create -f src/kubernetes/server/server-roles.yaml
-kubectl create -f src/kubernetes/server/server-rolebinding.yaml
-kubectl create -f src/kubernetes/server/service-account.yaml
-kubectl create -f "$ATDIR/src/local/k8s/server-config.yaml"
+kubectl create --namespace "$NS" -f src/kubernetes/server/server-roles.yaml
+kubectl create --namespace "$NS" -f src/kubernetes/server/server-rolebinding.yaml
+kubectl create --namespace "$NS" -f src/kubernetes/server/service-account.yaml
+kubectl create --namespace "$NS" -f "$ATDIR/src/local/k8s/server-config.yaml"
 # Deploy Spring Cloud Skipper
 if [ "$BINDER" == "kafka" ]; then
-  kubectl create -f "$ATDIR/src/local/k8s/skipper-config-kafka.yaml"
+  kubectl create --namespace "$NS" -f "$ATDIR/src/local/k8s/skipper-config-kafka.yaml"
 else
-  kubectl create -f "$ATDIR/src/local/k8s/skipper-config-rabbit.yaml"
+  kubectl create --namespace "$NS" -f "$ATDIR/src/local/k8s/skipper-config-rabbit.yaml"
 fi
-kubectl create -f "$ATDIR/src/local/k8s/skipper-deployment.yaml"
-kubectl create -f "$ATDIR/src/local/k8s/skipper-svc.yaml"
+kubectl create --namespace "$NS" -f "$ATDIR/src/local/k8s/skipper-deployment.yaml"
+kubectl create --namespace "$NS" -f "$ATDIR/src/local/k8s/skipper-svc.yaml"
 
 # Start DataFlow
-kubectl create clusterrolebinding scdftestrole --clusterrole cluster-admin --user=system:serviceaccount:default:scdf-sa
+kubectl create --namespace "$NS" clusterrolebinding scdftestrole --clusterrole cluster-admin --user=system:serviceaccount:default:scdf-sa
 
-kubectl create -f "$ATDIR/src/local/k8s/server-svc.yaml"
+kubectl create --namespace "$NS" -f "$ATDIR/src/local/k8s/server-svc.yaml"
 if [ "$USE_PRO" == "true" ]; then
-  kubectl create -f "$ATDIR/src/local/k8s/server-deployment-pro.yaml"
+  kubectl create --namespace "$NS" -f "$ATDIR/src/local/k8s/server-deployment-pro.yaml"
 else
-  kubectl create -f "$ATDIR/src/local/k8s/server-deployment.yaml"
+  kubectl create --namespace "$NS" -f "$ATDIR/src/local/k8s/server-deployment.yaml"
 fi
 
 popd > /dev/null

@@ -49,6 +49,7 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
@@ -235,6 +236,7 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @EnabledIfEnvironmentVariable(named = "BINDER", matches = "rabbit")
+    @Tag("group3")
     public void multipleStreamApps() {
         if (this.runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
             registerApp("kitchen", "docker:springcloudstream/scdf-app-kitchen:1.0.0-SNAPSHOT");
@@ -320,6 +322,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group2")
     public void timestampTask() {
         logger.info("task-timestamp-test:start");
         assertTaskRegistration("testtimestamp");
@@ -350,6 +353,7 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @EnabledIfEnvironmentVariable(named = "SCDF_CR_TEST", matches = "true")
+    @Tag("group4")
     public void githubContainerRegistryTests() {
         containerRegistryTests("github-log-sink",
             "docker:ghcr.io/tzolov/log-sink-rabbit:3.1.0-SNAPSHOT");
@@ -357,6 +361,7 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @EnabledIfEnvironmentVariable(named = "SCDF_CR_TEST", matches = "true")
+    @Tag("group4")
     public void azureContainerRegistryTests() {
         containerRegistryTests("azure-log-sink",
             "docker:scdftest.azurecr.io/springcloudstream/log-sink-rabbit:3.1.0-SNAPSHOT");
@@ -364,6 +369,7 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @EnabledIfEnvironmentVariable(named = "SCDF_CR_TEST", matches = "true")
+    @Tag("group4")
     public void harborContainerRegistryTests() {
         containerRegistryTests("harbor-log-sink",
             "docker:projects.registry.vmware.com/scdf/scdftest/log-sink-rabbit:3.1.0-SNAPSHOT");
@@ -433,6 +439,7 @@ class DataFlowAT extends CommonTestBase {
     public static final Set<String> starting = new HashSet<>(Arrays.asList(DEPLOYING, PARTIAL, DEPLOYED));
 
     @Test
+    @Tag("group6")
     public void streamTransform() {
         logger.info("stream-transform-test:start");
         try (Stream stream = Stream.builder(dataFlowOperations)
@@ -464,6 +471,7 @@ class DataFlowAT extends CommonTestBase {
 
 
     @Test
+    @Tag("group1")
     public void streamPartitioning() {
         logger.info("stream-partitioning-test:start (aka. WoodChuckTests)");
         StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
@@ -524,6 +532,7 @@ class DataFlowAT extends CommonTestBase {
     @Test
     @Order(Integer.MIN_VALUE + 10)
     @DisabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
+    @Tag("group3")
     public void streamAppCrossVersion() {
 
         final String VERSION_2_1_5 = "2.1.5.RELEASE";
@@ -668,12 +677,14 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group2")
     public void streamLifecycle() {
         streamLifecycleHelper(1, s -> {
         });
     }
 
     @Test
+    @Tag("group1")
     public void streamLifecycleWithTwoInstance() {
         final int numberOfInstancePerApp = 2;
         streamLifecycleHelper(numberOfInstancePerApp, stream -> {
@@ -789,6 +800,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group2")
     public void streamScaling() {
         logger.info("stream-scaling-test");
         try (Stream stream = Stream.builder(dataFlowOperations)
@@ -824,6 +836,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group6")
     public void namedChannelDestination() {
         logger.info("stream-named-channel-destination-test");
         try (
@@ -865,6 +878,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group2")
     public void namedChannelTap() {
         logger.info("stream-named-channel-tap-test");
         try (
@@ -905,6 +919,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group1")
     public void namedChannelManyToOne() {
         logger.info("stream-named-channel-many-to-one-test");
         try (
@@ -954,6 +969,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group4")
     public void namedChannelDirectedGraph() {
         logger.info("stream-named-channel-directed-graph-test");
         try (
@@ -1011,6 +1027,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group5")
     public void dataflowTaskLauncherSink() throws JsonProcessingException {
         if (this.runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.LOCAL_PLATFORM_TYPE)) {
             logger.warn("Skipping since it doesn't work local");
@@ -1087,6 +1104,7 @@ class DataFlowAT extends CommonTestBase {
     // STREAM METRICS TESTS
     // -----------------------------------------------------------------------
     @Test
+    @Tag("group4")
     public void analyticsCounterInflux() {
 
         if (!influxPresent()) {
@@ -1165,6 +1183,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group5")
     public void analyticsCounterPrometheus() throws IOException {
 
         if (!runtimeApps.isAppRegistered("analytics", ApplicationType.sink)) {
@@ -1295,6 +1314,7 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "local")
+    @Tag("group6")
     public void runBatchRemotePartitionJobLocal() {
         logger.info("runBatchRemotePartitionJob - local");
 
@@ -1315,6 +1335,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group1")
     public void taskMetricsPrometheus() throws IOException {
         if (!prometheusPresent()) {
             logger.info("task-metrics-test: SKIP - no metrics configured!");
@@ -1361,6 +1382,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group5")
     public void composedTask() {
         logger.info("task-composed-task-runner-test");
 
@@ -1408,6 +1430,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group4")
     public void multipleComposedTaskWithArguments() {
         logger.info("task-multiple-composed-task-with-arguments-test");
 
@@ -1460,6 +1483,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group3")
     public void ctrLaunchTest() {
         logger.info("composed-task-ctrLaunch-test");
 
@@ -1510,6 +1534,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group4")
     public void ctrFailedGraph() {
         logger.info("composed-task-ctrFailedGraph-test");
         mixedSuccessfulFailedAndUnknownExecutions("ctrFailedGraph",
@@ -1521,6 +1546,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group1")
     public void ctrSplit() {
         logger.info("composed-task-split-test");
         allSuccessfulExecutions("ComposedTask Split Test",
@@ -1529,6 +1555,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group1")
     public void ctrSequential() {
         logger.info("composed-task-sequential-test");
         allSuccessfulExecutions("ComposedTask Sequential Test",
@@ -1537,6 +1564,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group5")
     public void ctrSequentialTransitionAndSplitWithScenarioFailed() {
         logger.info("composed-task-SequentialTransitionAndSplitWithScenarioFailed-test");
         mixedSuccessfulFailedAndUnknownExecutions(
@@ -1549,6 +1577,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group5")
     public void ctrSequentialTransitionAndSplitWithScenarioOk() {
         logger.info("composed-task-SequentialTransitionAndSplitWithScenarioOk-test");
         mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Transition And Split With Scenario Ok Test",
@@ -1560,6 +1589,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group1")
     public void ctrNestedSplit() {
         logger.info("composed-task-NestedSplit");
         allSuccessfulExecutions("ctrNestedSplit",
@@ -1568,6 +1598,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group5")
     public void testEmbeddedFailedGraph() {
         logger.info("composed-task-EmbeddedFailedGraph-test");
         mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Embedded Failed Graph Test",
@@ -1581,6 +1612,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group5")
     public void twoSplitTest() {
         logger.info("composed-task-twoSplit-test");
         allSuccessfulExecutions("twoSplitTest",
@@ -1589,6 +1621,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group4")
     public void sequentialAndSplitTest() {
         logger.info("composed-task-sequentialAndSplit-test");
         allSuccessfulExecutions("sequentialAndSplitTest",
@@ -1597,6 +1630,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group6")
     public void sequentialTransitionAndSplitFailedInvalidTest() {
         logger.info("composed-task-sequentialTransitionAndSplitFailedInvalid-test");
         mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Transition And Split Failed Invalid Test",
@@ -1608,6 +1642,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group3")
     public void sequentialAndSplitWithFlowTest() {
         logger.info("composed-task-sequentialAndSplitWithFlow-test");
         allSuccessfulExecutions("sequentialAndSplitWithFlowTest",
@@ -1616,6 +1651,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group3")
     public void sequentialAndFailedSplitTest() {
         logger.info("composed-task-sequentialAndFailedSplit-test");
 
@@ -1700,6 +1736,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group6")
     public void failedBasicTransitionTest() {
         logger.info("composed-task-failedBasicTransition-test");
         mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Failed Basic Transition Test",
@@ -1711,6 +1748,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group2")
     public void successBasicTransitionTest() {
         logger.info("composed-task-successBasicTransition-test");
         mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Success Basic Transition Test",
@@ -1722,6 +1760,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group3")
     public void basicTransitionWithTransitionTest() {
         logger.info("composed-task-basicTransitionWithTransition-test");
         mixedSuccessfulFailedAndUnknownExecutions("basicTransitionWithTransitionTest",
@@ -1733,6 +1772,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group2")
     public void wildCardOnlyInLastPositionTest() {
         logger.info("composed-task-wildCardOnlyInLastPosition-test");
         mixedSuccessfulFailedAndUnknownExecutions("wildCardOnlyInLastPositionTest",
@@ -1744,6 +1784,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group6")
     public void failedCTRRetryTest() {
         logger.info("composed-task-failedCTRRetry-test");
 
@@ -1821,6 +1862,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group6")
     public void basicBatchSuccessTest() {
         // Verify Batch runs successfully
         logger.info("basic-batch-success-test");
@@ -1879,6 +1921,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group1")
     public void basicBatchSuccessRestartTest() {
         // Verify that batch restart on success fails
         try (Task task = Task.builder(dataFlowOperations)
@@ -1912,6 +1955,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group6")
     public void basicBatchFailRestartTest() {
         // Verify Batch runs successfully
         logger.info("basic-batch-fail-restart-test");
@@ -1957,6 +2001,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group1")
     public void testLaunchOfDefaultThenVersion() {
         // Scenario: I want to create a task app with 2 versions using default version
         // Given A task with 2 versions
@@ -1980,6 +2025,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group3")
     public void testCreateTaskWithTwoVersionsLaunchDefaultVersion() {
         // Scenario: I want to create a task app with 2 versions using default version
         // Given A task with 2 versions
@@ -1996,6 +2042,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group6")
     public void testLaunchOfNewVersionThenPreviousVersion() {
         // Scenario: I want to create a task app with 2 versions run new version then default
         // Given A task with 2 versions
@@ -2017,6 +2064,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group5")
     public void testWhenNoVersionIsSpecifiedPreviousVersionShouldBeUsed() {
         // Scenario: When no version is specified previous used version should be used.
         // Given A task with 2 versions
@@ -2038,6 +2086,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group4")
     public void testCreateTaskWithOneVersionLaunchInvalidVersion() {
         // Scenario: I want to create a task app with 1 version run invalid version
         // Given A task with 1 versions
@@ -2051,6 +2100,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group5")
     public void testInvalidVersionUsageShouldNotAffectSubsequentDefaultLaunch() {
         // Scenario: Invalid version usage should not affect subsequent default launch
         // Given A task with 1 versions
@@ -2071,6 +2121,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group5")
     public void testDeletePreviouslyUsedVersionShouldFailIfRelaunched() {
         // Scenario: Deleting a previously used version should fail if relaunched.
         // Given A task with 2 versions
@@ -2092,6 +2143,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group3")
     public void testChangingTheAppDefaultVersionRunningBetweenChangesShouldBeSuccessful() {
         // Scenario: Changing the app default version and running between changes should be
         // successful
@@ -2117,6 +2169,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group1")
     public void testRollingBackDefaultToPreviousVersionAndRunningShouldBeSuccessful() {
         // Scenario: Rolling back default to previous version and running should be successful
         // Given A task with 2 versions
@@ -2149,6 +2202,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group2")
     public void testUnregisteringAppShouldPreventTaskDefinitionLaunch() {
         // Scenario: Unregistering app should prevent task definition launch
         // Given A task with 1 versions
@@ -2243,6 +2297,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group5")
     public void basicTaskWithPropertiesTest() {
         logger.info("basic-task-with-properties-test");
         String testPropertyKey = "app.testtimestamp.test-prop-key";
@@ -2271,6 +2326,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group5")
     public void taskLaunchInvalidTaskDefinition() {
         logger.info("task-launch-invalid-task-definition");
         Exception exception = assertThrows(DataFlowClientException.class, () -> {
@@ -2284,6 +2340,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group1")
     public void taskLaunchWithArguments() {
         // Launch task with args and verify that they are being used.
         // Verify Batch runs successfully
@@ -2314,6 +2371,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group4")
     public void taskDefinitionDelete() {
         logger.info("task-definition-delete");
         final String taskName;
@@ -2334,6 +2392,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group1")
     public void taskDefinitionDeleteWithCleanup() {
         Task task = Task.builder(dataFlowOperations)
             .name(randomTaskName())
@@ -2352,6 +2411,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group6")
     public void testDeleteSingleTaskExecution() {
         // Scenario: I want to delete a single task execution
         // Given A task definition exists
@@ -2369,6 +2429,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group3")
     public void testDeleteMultipleTaskExecution() {
         // Scenario: I want to delete 3 task executions
         // Given A task definition exists
@@ -2391,6 +2452,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group3")
     public void testDeleteAllTaskExecutionsShouldClearAllTaskExecutions() {
         // Scenario: Delete all task executions should clear all task executions
         // Given A task definition exists
@@ -2408,6 +2470,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group4")
     public void testDataFlowUsesLastAvailableTaskExecutionForItsProperties() {
         // Scenario: Task Launch should use last available task execution for its properties
         // Given A task definition exists
@@ -2431,6 +2494,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group3")
     public void testDataFlowUsesAllPropertiesRegardlessIfPreviousExecutionWasDeleted() {
         // Scenario: Task Launch should use last available task execution for its properties after
         // deleting previous version
@@ -2466,6 +2530,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group4")
     public void testDeletingComposedTaskExecutionDeletesAllItsChildTaskExecutions() {
         // Deleting a Composed Task Execution deletes all of its child task executions
         // Given A composed task definition exists of "AAA && BBB"
@@ -2492,6 +2557,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group4")
     public void testDeletingBatchTaskExecutionDeletesAllOfItsBatchRecords() {
         // Given A batch task definition exists
         // And 1 task execution exist
@@ -2517,6 +2583,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group3")
     public void testRestartingBatchTaskExecutionThatHasBeenDeleted() {
         // Restarting a Batch Task Execution that has been deleted
         // Given A batch task definition exists
@@ -2702,6 +2769,7 @@ class DataFlowAT extends CommonTestBase {
     @Test
     @EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
     @DisabledIfSystemProperty(named = "SKIP_CLOUD_CONFIG", matches = "true")
+    @Tag("group3")
     public void streamWithConfigServer() {
 
         logger.info("stream-server-config-test");
