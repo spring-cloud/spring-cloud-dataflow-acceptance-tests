@@ -212,7 +212,7 @@
             </build>
         </profile>
         <profile>
-            <id>test-groups</id>
+            <id>test-1-of-6</id>
             <build>
                 <plugins>
                     <plugin>
@@ -220,7 +220,97 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <version>3.0.0-M4</version>
                         <configuration>
-                            <groups>${test-groups}</groups>
+                            <groups>group1</groups>
+                            <includes>
+                                <include>**/*AT</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>test-2-of-6</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>3.0.0-M4</version>
+                        <configuration>
+                            <groups>group2</groups>
+                            <includes>
+                                <include>**/*AT</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>test-3-of-6</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>3.0.0-M4</version>
+                        <configuration>
+                            <groups>group3</groups>
+                            <includes>
+                                <include>**/*AT</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>test-4-of-6</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>3.0.0-M4</version>
+                        <configuration>
+                            <groups>group4</groups>
+                            <includes>
+                                <include>**/*AT</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>test-5-of-6</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>3.0.0-M4</version>
+                        <configuration>
+                            <groups>group5</groups>
+                            <includes>
+                                <include>**/*AT</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>test-6-of-6</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>3.0.0-M4</version>
+                        <configuration>
+                            <groups>group6</groups>
                             <includes>
                                 <include>**/*AT</include>
                             </includes>
