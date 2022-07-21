@@ -27,7 +27,7 @@
         <javadoc.opts>-Xdoclint:none</javadoc.opts>
         <checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>
         <checkstyle.header.file>etc/checkstyle/checkstyle-header.txt</checkstyle.header.file>
-
+        <test-groups>group1,group2,group3,group4,group5,group6</test-groups>
         <dataflow.version>2.10.0-SNAPSHOT</dataflow.version>
         <app.starters.support.version>2.5.0</app.starters.support.version>
         <spring-cloud-deployer-cloudfoundry.version>[2.7,)</spring-cloud-deployer-cloudfoundry.version>
