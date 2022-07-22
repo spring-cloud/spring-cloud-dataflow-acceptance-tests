@@ -27,10 +27,10 @@
         <javadoc.opts>-Xdoclint:none</javadoc.opts>
         <checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>
         <checkstyle.header.file>etc/checkstyle/checkstyle-header.txt</checkstyle.header.file>
-        <test-groups>group1,group2,group3,group4,group5,group6</test-groups>
         <dataflow.version>2.10.0-SNAPSHOT</dataflow.version>
         <app.starters.support.version>2.5.0</app.starters.support.version>
         <spring-cloud-deployer-cloudfoundry.version>[2.7,)</spring-cloud-deployer-cloudfoundry.version>
+        <maven-failsafe-plugin.groups>group1,group2,group3,group4,group5,group6</maven-failsafe-plugin.groups>
     </properties>
     <dependencies>
         <dependency>
@@ -144,11 +144,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
+                <version>3.12.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>2.17</version>
+                <version>3.1.2</version>
                 <executions>
                     <execution>
                         <id>checkstyle-validation</id>
@@ -165,6 +166,36 @@
                         </goals>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>8.45.1</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M4</version>
+                <configuration>
+                    <skip>true</skip>
+                    <groups>${maven-failsafe-plugin.groups}</groups>
+                    <!-- we use failsafe to run integration tests -->
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.0.0-M4</version>
+                <configuration>
+                    <groups>${maven-failsafe-plugin.groups}</groups>
+                    <rerunFailingTestsCount>1</rerunFailingTestsCount>
+                    <groups>${maven-failsafe-plugin.groups}</groups>
+                    <includes>
+                        <include>**/*AT</include>
+                    </includes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -173,115 +204,31 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.0.0-M4</version>
+                <configuration>
+                    <linkXRef>false</linkXRef>
+                </configuration>
             </plugin>
         </plugins>
     </reporting>
     <profiles>
         <profile>
-            <id>test-all</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.0.0-M4</version>
-                        <configuration>
-                            <includes>
-                                <include>**/*AT</include>
-                            </includes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>test-info</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.0.0-M4</version>
-                        <configuration>
-                            <includes>
-                                <include>**/*DataFlowAT</include>
-                            </includes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>test-groups</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.0.0-M4</version>
-                        <configuration>
-                            <groups>${test-groups}</groups>
-                            <includes>
-                                <include>**/*AT</include>
-                            </includes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
             <id>test-1-of-3</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.0.0-M4</version>
-                        <configuration>
-                            <groups>group1,group6</groups>
-                            <includes>
-                                <include>**/*AT</include>
-                            </includes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
+            <properties>
+                <maven-failsafe-plugin.groups>group1,group6</maven-failsafe-plugin.groups>
+            </properties>
         </profile>
         <profile>
             <id>test-2-of-3</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.0.0-M4</version>
-                        <configuration>
-                            <groups>group2,group5</groups>
-                            <includes>
-                                <include>**/*AT</include>
-                            </includes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
+            <properties>
+                <maven-failsafe-plugin.groups>group2,group5</maven-failsafe-plugin.groups>
+            </properties>
         </profile>
         <profile>
             <id>test-3-of-3</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.0.0-M4</version>
-                        <configuration>
-                            <groups>group3,group4</groups>
-                            <includes>
-                                <include>**/*AT</include>
-                            </includes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
+            <properties>
+                <maven-failsafe-plugin.groups>group3,group4</maven-failsafe-plugin.groups>
+            </properties>
         </profile>
         <profile>
             <id>spring</id>

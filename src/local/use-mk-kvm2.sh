@@ -7,7 +7,7 @@ fi
 export K8S_DRIVER=kvm2
 export KUBECONFIG=
 if [ "$1" == "" ]; then
-  export NS=scdf
+  export NS=default
 else
   export NS=$1
 fi

@@ -14,7 +14,7 @@ case "$K8S_DRIVER" in
   kind delete cluster
   ;;
 "tmc")
-  sh "$SCDIR/k8s/delete-scdf.sh"
+  sh "$SCDIR/delete-scdf.sh"
   sh "$SCDIR/tmc/delete-cluster.sh"
   ;;
 *)

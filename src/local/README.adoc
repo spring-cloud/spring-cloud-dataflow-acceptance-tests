@@ -75,14 +75,14 @@ For minikube launch a new shell and execute `minikube tunnel`
 
 [source,shell]
 ....
-./src/local/launch-scdf.sh
+source ./src/local/launch-scdf.sh
 ....
 
 === Delete the deployment from the cluster.
 
 [source,shell]
 ....
-./src/local/k8s/delete-scdf.sh
+./src/local/delete-scdf.sh
 ....
 
 === Delete the cluster
