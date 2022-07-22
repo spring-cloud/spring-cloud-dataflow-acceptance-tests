@@ -7,7 +7,7 @@ fi
 export K8S_DRIVER=docker
 export KUBECONFIG=
 if [ "$1" == "" ]; then
-  export NS=scdf
+  export NS=default
 else
   export NS=$1
 fi

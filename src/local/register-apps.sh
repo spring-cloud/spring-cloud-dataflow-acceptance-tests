@@ -21,7 +21,7 @@ if [ "$PLATFORM_TYPE" == "" ]; then
 fi
 
 if [ "$DATAFLOW_IP" == "" ]; then
-  source "$SCDIR/k8s/export-dataflow-ip.sh"
+  source "$SCDIR/export-dataflow-ip.sh"
 fi
 if [ "$BINDER" == "kafka" ]; then
   export BROKER=kafka

@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 if [ "$NS" == "" ]; then
   echo "NS not defined" >&2
-  exit 2
+  exit 0
 fi
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+PARENT=$(realpath "$SCDIR/../../..")
 
 if [ "$BINDER" == "" ]; then
   export BINDER="rabbit"
@@ -12,7 +13,7 @@ fi
 if [ "$K8S_DRIVER" == "" ]; then
   K8S_DRIVER=kind
 fi
-set -e
+set +e
 COUNT=$(kubectl get namespace | grep -c "$NS")
 if [ "$COUNT" == "0" ]; then
   echo "Creating namespace $NS"
@@ -44,30 +45,32 @@ fi
 if [ "$SCDF_PRO_VERSION" == "" ]; then
   SCDF_PRO_VERSION=1.5.0-SNAPSHOT
 fi
-LI_PATH=$(realpath $SCDIR)
+K8S_PATH=$(realpath $SCDIR/k8s)
 
+echo "K8S_PATH=$K8S_PATH"
+
+set -e
 if [ "$K8S_DRIVER" != "tmc" ]; then
-  sh "$LI_PATH/load-image.sh" "busybox" "1"
-  sh "$LI_PATH/load-image.sh" "bitnami/kubectl" "1.23.6-debian-10-r0"
-  sh "$LI_PATH/load-image.sh" "mariadb" "10.4.22"
+  sh "$SCDIR/load-image.sh" "busybox" "1"
+  sh "$SCDIR/load-image.sh" "bitnami/kubectl" "1.23.6-debian-10-r0"
+  sh "$SCDIR/load-image.sh" "mariadb" "10.4.22"
   if [ "$BINDER" == "kafka" ]; then
-    sh "$LI_PATH/load-image.sh" "confluentinc/cp-kafka" "5.5.2"
-    sh "$LI_PATH/load-image.sh" "confluentinc/cp-zookeeper" "5.5.2"
+    sh "$SCDIR/load-image.sh" "confluentinc/cp-kafka" "5.5.2"
+    sh "$SCDIR/load-image.sh" "confluentinc/cp-zookeeper" "5.5.2"
   else
-    sh "$LI_PATH/load-image.sh" "rabbitmq" "3.6.10"
+    sh "$SCDIR/load-image.sh" "rabbitmq" "3.6.10"
   fi
-  sh "$LI_PATH/load-image.sh" "springcloud/spring-cloud-dataflow-composed-task-runner" "$DATAFLOW_VERSION" false
-  sh "$LI_PATH/load-image.sh" "springcloud/spring-cloud-skipper-server" "$SKIPPER_VERSION" true
+  sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-composed-task-runner" "$DATAFLOW_VERSION" false
+  sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-skipper-server" "$SKIPPER_VERSION" true
 
   if [ "$USE_PRO" == "true" ]; then
-    sh "$LI_PATH/load-image.sh" "springcloud/scdf-pro-server" "$SCDF_PRO_VERSION" true
+    sh "$SCDIR/load-image.sh" "springcloud/scdf-pro-server" "$SCDF_PRO_VERSION" true
   else
-    sh "$LI_PATH/load-image.sh" "springcloud/spring-cloud-dataflow-server" "$DATAFLOW_VERSION" true
+    sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-server" "$DATAFLOW_VERSION" true
   fi
 fi
-ATDIR=$(pwd)
 
-pushd $LI_PATH/../../../../spring-cloud-dataflow  > /dev/null
+pushd $PARENT/spring-cloud-dataflow  > /dev/null
 if [ "$BINDER" == "kafka" ]; then
   # Deploy Kafka
   kubectl create --namespace "$NS" -f src/kubernetes/kafka/
@@ -81,9 +84,9 @@ kubectl create --namespace "$NS" -f src/kubernetes/mariadb/
 if [ "$PROMETHEUS" == "true" ]; then
   echo "Loading Prometheus and Grafana"
   if [ "$K8S_DRIVER" != "tmc" ]; then
-    sh "$LI_PATH/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus" "2.10.0-SNAPSHOT"
-    sh "$LI_PATH/load-image.sh" "prom/prometheus" "v2.12.0"
-    sh "$LI_PATH/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy" "0.11.0"
+    sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus" "2.10.0-SNAPSHOT"
+    sh "$SCDIR/load-image.sh" "prom/prometheus" "v2.12.0"
+    sh "$SCDIR/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy" "0.11.0"
   fi
   kubectl create --namespace "$NS" -f src/kubernetes/prometheus/prometheus-clusterroles.yaml
   kubectl create --namespace "$NS" -f src/kubernetes/prometheus/prometheus-clusterrolebinding.yaml
@@ -96,27 +99,28 @@ if [ "$PROMETHEUS" == "true" ]; then
 fi
 
 # Deploy Spring Cloud Dataflow
+set +e
 kubectl create --namespace "$NS" -f src/kubernetes/server/server-roles.yaml
 kubectl create --namespace "$NS" -f src/kubernetes/server/server-rolebinding.yaml
 kubectl create --namespace "$NS" -f src/kubernetes/server/service-account.yaml
-kubectl create --namespace "$NS" -f "$ATDIR/src/local/k8s/server-config.yaml"
+kubectl apply --namespace "$NS" -f "$K8S_PATH/server-config.yaml"
 # Deploy Spring Cloud Skipper
 if [ "$BINDER" == "kafka" ]; then
-  kubectl create --namespace "$NS" -f "$ATDIR/src/local/k8s/skipper-config-kafka.yaml"
+  kubectl apply --namespace "$NS" -f "$K8S_PATH/skipper-config-kafka.yaml"
 else
-  kubectl create --namespace "$NS" -f "$ATDIR/src/local/k8s/skipper-config-rabbit.yaml"
+  kubectl apply --namespace "$NS" -f "$K8S_PATH/skipper-config-rabbit.yaml"
 fi
-kubectl create --namespace "$NS" -f "$ATDIR/src/local/k8s/skipper-deployment.yaml"
-kubectl create --namespace "$NS" -f "$ATDIR/src/local/k8s/skipper-svc.yaml"
+kubectl create --namespace "$NS" -f "$K8S_PATH/skipper-deployment.yaml"
+kubectl create --namespace "$NS" -f "$K8S_PATH/skipper-svc.yaml"
 
 # Start DataFlow
 kubectl create --namespace "$NS" clusterrolebinding scdftestrole --clusterrole cluster-admin --user=system:serviceaccount:default:scdf-sa
 
-kubectl create --namespace "$NS" -f "$ATDIR/src/local/k8s/server-svc.yaml"
+kubectl create --namespace "$NS" -f "$K8S_PATH/server-svc.yaml"
 if [ "$USE_PRO" == "true" ]; then
-  kubectl create --namespace "$NS" -f "$ATDIR/src/local/k8s/server-deployment-pro.yaml"
+  kubectl create --namespace "$NS" -f "$K8S_PATH/server-deployment-pro.yaml"
 else
-  kubectl create --namespace "$NS" -f "$ATDIR/src/local/k8s/server-deployment.yaml"
+  kubectl create --namespace "$NS" -f "$K8S_PATH/server-deployment.yaml"
 fi
 
 popd > /dev/null
