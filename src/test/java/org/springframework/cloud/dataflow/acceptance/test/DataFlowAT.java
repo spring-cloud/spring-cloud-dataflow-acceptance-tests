@@ -53,7 +53,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -157,6 +156,7 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @Order(Integer.MIN_VALUE)
+    @Tag("all")
     public void aboutTestInfo() {
         logger.info("Available platforms: " + dataFlowOperations.streamOperations().listPlatforms().stream()
             .map(d -> String.format("[name: %s, type: %s]", d.getName(), d.getType()))
@@ -175,8 +175,9 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @DisabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "kubernetes")
+    @Tag("all")
     public void applicationMetadataMavenTests() {
-        logger.info("application-metadata-maven-test");
+        logger.info("application-metadata-maven-test:start");
 
         // Maven app with metadata
         DetailedAppRegistrationResource mavenAppWithJarMetadata = dataFlowOperations.appRegistryOperations()
@@ -191,12 +192,14 @@ class DataFlowAT extends CommonTestBase {
         assertThat(mavenAppWithoutMetadata.getOptions()).describedAs("mavenAppWithoutMetadata").hasSize(8);
         // unregister the test apps
         dataFlowOperations.appRegistryOperations().unregister("maven-app-without-metadata", ApplicationType.sink);
+        logger.info("application-metadata-maven-test:end");
     }
 
     @Test
-    @DisabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
+    @EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
+    @Tag("all")
     public void applicationMetadataDockerTests() {
-        logger.info("application-metadata-docker-test");
+        logger.info("application-metadata-docker-test:start");
 
         // Docker app with container image metadata
         dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata",
@@ -237,12 +240,14 @@ class DataFlowAT extends CommonTestBase {
             ApplicationType.source);
         dataFlowOperations.appRegistryOperations().unregister("docker-app-without-metadata", ApplicationType.sink);
         dataFlowOperations.appRegistryOperations().unregister("docker-app-with-jar-metadata", ApplicationType.sink);
+        logger.info("application-metadata-docker-test:start");
     }
 
     @Test
-    @EnabledIfEnvironmentVariable(named = "BINDER", matches = "rabbit")
+    @EnabledIfSystemProperty(named = "BINDER", matches = "rabbit")
     @Tag("group3")
     public void multipleStreamApps() {
+        logger.info("multiple-stream-apps-test:start");
         if (this.runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
             registerApp("kitchen", "docker:springcloudstream/scdf-app-kitchen:1.0.0-SNAPSHOT");
             registerApp("customer", "docker:springcloudstream/scdf-app-customer:1.0.0-SNAPSHOT");
@@ -323,7 +328,7 @@ class DataFlowAT extends CommonTestBase {
                 destroy.destroy();
             }
         }
-        logger.info("multipleStreamApps:done:restaurant-test");
+        logger.info("multiple-stream-apps-test:end");
     }
 
     @Test
@@ -353,31 +358,37 @@ class DataFlowAT extends CommonTestBase {
             // All
             task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
         }
-        logger.info("task-timestamp-test:done");
+        logger.info("task-timestamp-test:end");
     }
 
     @Test
-    @EnabledIfEnvironmentVariable(named = "SCDF_CR_TEST", matches = "true")
+    @EnabledIfSystemProperty(named = "SCDF_CR_TEST", matches = "true")
     @Tag("group4")
     public void githubContainerRegistryTests() {
+        logger.info("github-container-registry-tests:start");
         containerRegistryTests("github-log-sink",
             "docker:ghcr.io/tzolov/log-sink-rabbit:3.1.0-SNAPSHOT");
+        logger.info("github-container-registry-tests:start");
     }
 
     @Test
-    @EnabledIfEnvironmentVariable(named = "SCDF_CR_TEST", matches = "true")
+    @EnabledIfSystemProperty(named = "SCDF_CR_TEST", matches = "true")
     @Tag("group4")
     public void azureContainerRegistryTests() {
+        logger.info("azure-container-registry-tests:start");
         containerRegistryTests("azure-log-sink",
             "docker:scdftest.azurecr.io/springcloudstream/log-sink-rabbit:3.1.0-SNAPSHOT");
+        logger.info("azure-container-registry-tests:end");
     }
 
     @Test
-    @EnabledIfEnvironmentVariable(named = "SCDF_CR_TEST", matches = "true")
+    @EnabledIfSystemProperty(named = "SCDF_CR_TEST", matches = "true")
     @Tag("group4")
     public void harborContainerRegistryTests() {
+        logger.info("harbor-container-registry-tests:start");
         containerRegistryTests("harbor-log-sink",
             "docker:projects.registry.vmware.com/scdf/scdftest/log-sink-rabbit:3.1.0-SNAPSHOT");
+        logger.info("harbor-container-registry-tests:end");
     }
 
     private void containerRegistryTests(String appName, String appUrl) {
@@ -399,6 +410,7 @@ class DataFlowAT extends CommonTestBase {
     // PLATFORM TESTS
     // -----------------------------------------------------------------------
     @Test
+    @Tag("all")
     public void featureInfo() {
         logger.info("platform-feature-info-test:start");
         AboutResource about = dataFlowOperations.aboutOperation().get();
@@ -409,6 +421,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("all")
     public void appsCount() {
         logger.info("platform-apps-count-test:start");
         assertThat(dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements())
@@ -442,7 +455,31 @@ class DataFlowAT extends CommonTestBase {
     public static final String PARTIAL = "partial";
 
     public static final Set<String> starting = new HashSet<>(Arrays.asList(DEPLOYING, PARTIAL, DEPLOYED));
-
+    @Test
+    @Tag("group6")
+    public void streamReDeploy() {
+        logger.info("stream-redeploy-test:start");
+        for(int i = 0; i < 2; i++) {
+            try (Stream stream = Stream.builder(dataFlowOperations)
+                .name("redeploy-test")
+                .definition("http | log")
+                .create()
+                .deploy(testDeploymentProperties("http", "log"))
+            ) {
+                final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
+                logger.info("stream-redeploy-test:deploying:{}", stream.getName());
+                awaitStarting(stream, offset);
+                awaitDeployed(stream, offset);
+                logger.info("stream-redeploy-test:deployed:{}", stream.getName());
+                stream.undeploy();
+                Awaitility.await()
+                    .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                    .until(() -> stream.getStatus().equals(UNDEPLOYED));
+                logger.info("stream-redeploy-test:undeployed:{}", stream.getName());
+            }
+        }
+        logger.info("stream-redeploy-test:end");
+    }
     @Test
     @Tag("group6")
     public void streamTransform() {
@@ -539,7 +576,7 @@ class DataFlowAT extends CommonTestBase {
     @DisabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
     @Tag("group3")
     public void streamAppCrossVersion() {
-
+        logger.info("stream-app-cross-version:start");
         final String VERSION_2_1_5 = "2.1.5.RELEASE";
         final String VERSION_3_0_1 = "3.0.1";
 
@@ -628,8 +665,32 @@ class DataFlowAT extends CommonTestBase {
         assertThat(Optional.ofNullable(dataFlowOperations.streamOperations().list().getMetadata())
             .orElse(new PagedModel.PageMetadata(0, 0, 0))
             .getTotalElements()).isEqualTo(0L);
+        logger.info("stream-app-cross-version:end");
     }
 
+    @Test
+    @Tag("group2")
+    public void streamLifecycle() {
+        logger.info("stream-lifecycle:start");
+        streamLifecycleHelper(1, s -> {
+        });
+        logger.info("stream-lifecycle:end");
+    }
+
+    @Test
+    @Tag("group1")
+    public void streamLifecycleWithTwoInstance() {
+        logger.info("stream-lifecycle-with-two-instances:start");
+        final int numberOfInstancePerApp = 2;
+        streamLifecycleHelper(numberOfInstancePerApp, stream -> {
+            Map<StreamApplication, Map<String, String>> streamApps = stream.runtimeApps();
+            assertThat(streamApps.size()).isEqualTo(2);
+            for (Map<String, String> instanceMap : streamApps.values()) {
+                assertThat(instanceMap.size()).isEqualTo(numberOfInstancePerApp); // every apps should have 2 instances.
+            }
+        });
+        logger.info("stream-lifecycle-with-two-instances:end");
+    }
 
     private void awaitValueInLog(AwaitUtils.StreamLog streamOffset, AwaitUtils.StreamLog logOffset, final String value) {
         if(streamOffset == logOffset) {
@@ -681,25 +742,6 @@ class DataFlowAT extends CommonTestBase {
             });
     }
 
-    @Test
-    @Tag("group2")
-    public void streamLifecycle() {
-        streamLifecycleHelper(1, s -> {
-        });
-    }
-
-    @Test
-    @Tag("group1")
-    public void streamLifecycleWithTwoInstance() {
-        final int numberOfInstancePerApp = 2;
-        streamLifecycleHelper(numberOfInstancePerApp, stream -> {
-            Map<StreamApplication, Map<String, String>> streamApps = stream.runtimeApps();
-            assertThat(streamApps.size()).isEqualTo(2);
-            for (Map<String, String> instanceMap : streamApps.values()) {
-                assertThat(instanceMap.size()).isEqualTo(numberOfInstancePerApp); // every apps should have 2 instances.
-            }
-        });
-    }
 
     private void streamLifecycleHelper(int appInstanceCount, Consumer<Stream> streamAssertions) {
         logger.info("stream-lifecycle-test: DEPLOY");
@@ -807,7 +849,7 @@ class DataFlowAT extends CommonTestBase {
     @Test
     @Tag("group2")
     public void streamScaling() {
-        logger.info("stream-scaling-test");
+        logger.info("stream-scaling-test:start");
         try (Stream stream = Stream.builder(dataFlowOperations)
             .name("stream-scaling-test")
             .definition("time | log --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
@@ -838,12 +880,13 @@ class DataFlowAT extends CommonTestBase {
             assertThat(streamApps.get(time).size()).isEqualTo(1);
             assertThat(streamApps.get(log).size()).isEqualTo(2);
         }
+        logger.info("stream-scaling-test:end");
     }
 
     @Test
     @Tag("group6")
     public void namedChannelDestination() {
-        logger.info("stream-named-channel-destination-test");
+        logger.info("stream-named-channel-destination-test:start");
         try (
             Stream httpStream = Stream.builder(dataFlowOperations)
                 .name("http-destination-source")
@@ -880,12 +923,13 @@ class DataFlowAT extends CommonTestBase {
                 logger.warn("Older version may fail with " + x);
             }
         }
+        logger.info("stream-named-channel-destination-test:end");
     }
 
     @Test
     @Tag("group2")
     public void namedChannelTap() {
-        logger.info("stream-named-channel-tap-test");
+        logger.info("named-channel-tap:start");
         try (
             Stream httpLogStream = Stream.builder(dataFlowOperations)
                 .name("taphttp")
@@ -921,12 +965,13 @@ class DataFlowAT extends CommonTestBase {
                 logger.warn("Older version may fail with " + x);
             }
         }
+        logger.info("named-channel-tap:end");
     }
 
     @Test
     @Tag("group1")
     public void namedChannelManyToOne() {
-        logger.info("stream-named-channel-many-to-one-test");
+        logger.info("named-channel-many-to-one:start");
         try (
             Stream logStream = Stream.builder(dataFlowOperations)
                 .name("many-to-one")
@@ -971,12 +1016,13 @@ class DataFlowAT extends CommonTestBase {
                 logger.warn("Older version may fail with " + x);
             }
         }
+        logger.info("named-channel-many-to-one:end");
     }
 
     @Test
     @Tag("group4")
     public void namedChannelDirectedGraph() {
-        logger.info("stream-named-channel-directed-graph-test");
+        logger.info("named-channel-directed-graph:start");
         try (
             Stream fooLogStream = Stream.builder(dataFlowOperations)
                 .name("directed-graph-destination1")
@@ -1029,11 +1075,13 @@ class DataFlowAT extends CommonTestBase {
                 logger.warn("Older version may fail with " + x);
             }
         }
+        logger.info("named-channel-directed-graph:end");
     }
 
     @Test
     @Tag("group5")
     public void dataflowTaskLauncherSink() throws JsonProcessingException {
+        logger.info("dataflow-task-launcher-sink:start");
         if (this.runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.LOCAL_PLATFORM_TYPE)) {
             logger.warn("Skipping since it doesn't work local");
         } else {
@@ -1103,6 +1151,7 @@ class DataFlowAT extends CommonTestBase {
                 }
             }
         }
+        logger.info("dataflow-task-launcher-sink:start");
     }
 
     // -----------------------------------------------------------------------
@@ -1111,9 +1160,10 @@ class DataFlowAT extends CommonTestBase {
     @Test
     @Tag("group4")
     public void analyticsCounterInflux() {
-
+        logger.info("analytics-counter-influx:start");
         if (!influxPresent()) {
             logger.info("stream-analytics-test: SKIP - no InfluxDB metrics configured!");
+            return;
         }
 
         Assumptions.assumeTrue(influxPresent());
@@ -1185,14 +1235,16 @@ class DataFlowAT extends CommonTestBase {
                 logger.warn("Older version may fail with " + x);
             }
         }
+        logger.info("analytics-counter-influx:end");
     }
 
     @Test
     @Tag("group5")
     public void analyticsCounterPrometheus() throws IOException {
-
+        logger.info("analytics-counter-prometheus:start");
         if (!runtimeApps.isAppRegistered("analytics", ApplicationType.sink)) {
             logger.info("stream-analytics-prometheus-test: SKIP - no analytics app registered!");
+            return;
         }
 
         Assumptions.assumeTrue(runtimeApps.isAppRegistered("analytics", ApplicationType.sink),
@@ -1241,6 +1293,7 @@ class DataFlowAT extends CommonTestBase {
                 logger.warn("Older version may fail with " + x);
             }
         }
+        logger.info("analytics-counter-prometheus:end");
     }
 
     /**
@@ -1321,8 +1374,7 @@ class DataFlowAT extends CommonTestBase {
     @EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "local")
     @Tag("group6")
     public void runBatchRemotePartitionJobLocal() {
-        logger.info("runBatchRemotePartitionJob - local");
-
+        logger.info("run-batch-remote-partition-job-local:start");
         TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
         try (Task task = taskBuilder
             .name(randomTaskName())
@@ -1337,13 +1389,16 @@ class DataFlowAT extends CommonTestBase {
             assertThat(task.execution(launchId).isPresent()).isTrue();
             assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
         }
+        logger.info("run-batch-remote-partition-job-local:end");
     }
 
     @Test
     @Tag("group1")
     public void taskMetricsPrometheus() throws IOException {
+        logger.info("task-metrics-prometheus:start");
         if (!prometheusPresent()) {
             logger.info("task-metrics-test: SKIP - no metrics configured!");
+            return;
         }
 
         Assumptions.assumeTrue(prometheusPresent());
@@ -1384,12 +1439,13 @@ class DataFlowAT extends CommonTestBase {
             JsonAssertions.assertThatJson(pqlTaskMetricsQuery.get())
                 .isEqualTo(resourceToString("classpath:/task_metrics_system_cpu_usage.json"));
         }
+        logger.info("task-metrics-prometheus:end");
     }
 
     @Test
     @Tag("group5")
     public void composedTask() {
-        logger.info("task-composed-task-runner-test");
+        logger.info("task-composed-task-runner:start");
 
         TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
 
@@ -1432,12 +1488,13 @@ class DataFlowAT extends CommonTestBase {
             assertThat(taskBuilder.allTasks().size()).isEqualTo(3);
         }
         assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
+        logger.info("task-composed-task-runner:end");
     }
 
     @Test
     @Tag("group4")
     public void multipleComposedTaskWithArguments() {
-        logger.info("task-multiple-composed-task-with-arguments-test");
+        logger.info("task-multiple-composed-task-with-arguments:start");
 
         TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
         try (Task task = taskBuilder
@@ -1485,12 +1542,13 @@ class DataFlowAT extends CommonTestBase {
             assertThat(taskBuilder.allTasks().size()).isEqualTo(3);
         }
         assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
+        logger.info("task-multiple-composed-task-with-arguments:end");
     }
 
     @Test
     @Tag("group3")
     public void ctrLaunchTest() {
-        logger.info("composed-task-ctrLaunch-test");
+        logger.info("ctr-launch:start");
 
         TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
         try (Task task = taskBuilder
@@ -1536,42 +1594,46 @@ class DataFlowAT extends CommonTestBase {
             });
         }
         assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
+        logger.info("ctr-launch:end");
     }
 
     @Test
     @Tag("group4")
     public void ctrFailedGraph() {
-        logger.info("composed-task-ctrFailedGraph-test");
+        logger.info("ctr-failed-graph:start");
         mixedSuccessfulFailedAndUnknownExecutions("ctrFailedGraph",
             "scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false && testtimestamp",
             TaskExecutionStatus.ERROR,
             emptyList(), // successful
             asList("scenario"), // failed
-            asList("testtimestamp")); // not-run
+            asList("testtimestamp"));
+        logger.info("ctr-failed-graph:end");// not-run
     }
 
     @Test
     @Tag("group1")
     public void ctrSplit() {
-        logger.info("composed-task-split-test");
+        logger.info("ctr-split:start");
         allSuccessfulExecutions("ComposedTask Split Test",
             "<t1:timestamp || t2:timestamp || t3:timestamp>",
             "t1", "t2", "t3");
+        logger.info("ctr-split:end");
     }
 
     @Test
     @Tag("group1")
     public void ctrSequential() {
-        logger.info("composed-task-sequential-test");
+        logger.info("ctr-sequential:start");
         allSuccessfulExecutions("ComposedTask Sequential Test",
             "t1: testtimestamp && t2: testtimestamp && t3: testtimestamp",
             "t1", "t2", "t3");
+        logger.info("ctr-sequential:end");
     }
 
     @Test
     @Tag("group5")
     public void ctrSequentialTransitionAndSplitWithScenarioFailed() {
-        logger.info("composed-task-SequentialTransitionAndSplitWithScenarioFailed-test");
+        logger.info("ctr-sequential-transition-and-split-withScenario-failed:start");
         mixedSuccessfulFailedAndUnknownExecutions(
             "ComposedTask Sequential Transition And Split With Scenario Failed Test",
             "t1: testtimestamp && scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false 'FAILED'->t3: testtimestamp && <t4: testtimestamp || t5: testtimestamp> && t6: testtimestamp",
@@ -1579,18 +1641,20 @@ class DataFlowAT extends CommonTestBase {
             asList("t1", "t3"), // successful
             asList("scenario"), // failed
             asList("t4", "t5", "t6")); // not-run
+        logger.info("ctr-sequential-transition-and-split-withScenario-failed:end");
     }
 
     @Test
     @Tag("group5")
     public void ctrSequentialTransitionAndSplitWithScenarioOk() {
-        logger.info("composed-task-SequentialTransitionAndSplitWithScenarioOk-test");
+        logger.info("ctr-sequential-transition-and-split-with-scenario-ok:start");
         mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Transition And Split With Scenario Ok Test",
             "t1: testtimestamp && t2: scenario 'FAILED'->t3: testtimestamp && <t4: testtimestamp || t5: testtimestamp> && t6: testtimestamp",
             TaskExecutionStatus.COMPLETE,
             asList("t1", "t2", "t4", "t5", "t6"), // successful
             emptyList(), // failed
             asList("t3")); // not-run
+        logger.info("ctr-sequential-transition-and-split-with-scenario-ok:start");
     }
 
     @Test
@@ -1743,25 +1807,27 @@ class DataFlowAT extends CommonTestBase {
     @Test
     @Tag("group6")
     public void failedBasicTransitionTest() {
-        logger.info("composed-task-failedBasicTransition-test");
+        logger.info("failed-basic-transition-test:start");
         mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Failed Basic Transition Test",
             "b: scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false 'FAILED' -> t1: testtimestamp * ->t2: testtimestamp",
             TaskExecutionStatus.COMPLETE,
             asList("t1"), // successful
             asList("b"), // failed
             asList("t2")); // not-run
+        logger.info("failed-basic-transition-test:end");
     }
 
     @Test
     @Tag("group2")
     public void successBasicTransitionTest() {
-        logger.info("composed-task-successBasicTransition-test");
+        logger.info("success-basic-transition-test:start");
         mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Success Basic Transition Test",
             "b: scenario --io.spring.launch-batch-job=false 'FAILED' -> t1: testtimestamp * ->t2: testtimestamp",
             TaskExecutionStatus.COMPLETE,
             asList("b", "t2"), // successful
             emptyList(), // failed
             asList("t1")); // not-run
+        logger.info("success-basic-transition-test:end");
     }
 
     @Test
@@ -2776,7 +2842,6 @@ class DataFlowAT extends CommonTestBase {
     @DisabledIfSystemProperty(named = "SKIP_CLOUD_CONFIG", matches = "true")
     @Tag("group3")
     public void streamWithConfigServer() {
-
         logger.info("stream-server-config-test");
 
         try (Stream stream = Stream.builder(dataFlowOperations)
@@ -2804,5 +2869,10 @@ class DataFlowAT extends CommonTestBase {
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.logs(app("log")).contains("TICKTOCK CLOUD CONFIG - TIMESTAMP:"));
         }
+    }
+    @Test
+    @Tag("groupF")
+    void willFail() {
+        fail("Fails on purpose");
     }
 }

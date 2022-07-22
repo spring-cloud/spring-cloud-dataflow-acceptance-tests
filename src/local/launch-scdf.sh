@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
+(return 0 2>/dev/null) && sourced=1 || sourced=0
+if [ "$sourced" == "0" ]; then
+  echo "This script must be invoked using: source $0 $*"
+  exit 1
+fi
 if [ "$NS" == "" ]; then
   echo "NS not defined" >&2
-  exit 2
+  return 2
 fi
 start_time=$(date +%s)
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 LS_DIR=$(realpath $SCDIR)
+K8S_PATH="$LS_DIR/k8s"
 set -e
 if [ "$K8S_DRIVER" == "" ]; then
   K8S_DRIVER=kind
@@ -15,10 +21,10 @@ if [ "$BINDER" == "" ]; then
 fi
 export PLATFORM_TYPE=kubernetes
 if [ "$K8S_DRIVER" == "kind" ]; then
-  kubectl apply -f "$LS_DIR/k8s/metallb-configmap.yaml"
+  kubectl apply -f "$K8S_PATH/metallb-configmap.yaml"
 fi
 
-sh "$LS_DIR/k8s/deploy-scdf.sh"
+sh "$LS_DIR/deploy-scdf.sh"
 
 if [ "$K8S_DRIVER" != "tmc" ]; then
   sh "$LS_DIR/load-images.sh"
@@ -39,11 +45,12 @@ echo "Waiting for dataflow"
 kubectl rollout status deployment --namespace "$NS" scdf-server
 
 if [ "$K8S_DRIVER" != "tmc" ]; then
-  source "$LS_DIR/k8s/forward-scdf.sh"
+  source "$LS_DIR/forward-scdf.sh"
+  # waiting for port-forwarding to be active
+  sleep 2
 else
-  source "$LS_DIR/k8s/export-dataflow-ip.sh"
+  source "$LS_DIR/export-dataflow-ip.sh"
 fi
-sleep 2
 sh "$LS_DIR/register-apps.sh"
 end_time=$(date +%s)
 elapsed=$(( end_time - start_time ))

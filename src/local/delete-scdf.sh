@@ -13,7 +13,7 @@ if [ "$PROMETHEUS" == "true" ]; then
   kubectl delete all --namespace "$NS" -l app=prometheus
   kubectl delete all --namespace "$NS" -l app=grafana
 fi
-
+kubectl delete secrets --namespace "$NS" --all
 kubectl delete all --namespace "$NS" --all
 kubectl delete pvc --namespace "$NS" --all
 echo "stopping port forward"
@@ -22,4 +22,6 @@ if [ "$kubectl_pid" != "" ]
 then
   kill $kubectl_pid
 fi
-kubectl delete namespace "$NS"
+if [ "$NS" != "default" ]; then
+  kubectl delete namespace "$NS"
+fi

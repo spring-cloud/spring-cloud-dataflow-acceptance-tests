@@ -30,12 +30,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,11 +99,13 @@ public class TaskScheduleAT extends CommonTestBase {
 
     @Test
     @Order(Integer.MIN_VALUE)
+    @Tag("all")
     public void testConfigurationInfo() {
         logger.info(platformInfo);
     }
 
     @Test
+    @Tag("group6")
     public void listTest() {
         logger.info("schedule-list-test");
 
@@ -134,6 +136,7 @@ public class TaskScheduleAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group5")
     public void filterByTaskTest() {
         logger.info("schedule-find-by-task-test");
 
@@ -168,6 +171,7 @@ public class TaskScheduleAT extends CommonTestBase {
     }
 
     @Test
+    @Tag("group4")
     public void scheduleLifeCycle() {
         logger.info("schedule-lifecycle-test");
 

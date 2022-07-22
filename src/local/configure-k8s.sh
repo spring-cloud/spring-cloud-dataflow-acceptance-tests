@@ -5,6 +5,7 @@ if [ "$NS" == "" ]; then
 fi
 start_time=$(date +%s)
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+K8S_PATH=$(realpath $SCDIR/k8s)
 set -e
 if [ "$K8S_DRIVER" == "" ]; then
   K8S_DRIVER=kind
@@ -38,7 +39,7 @@ if [ "$RC" != "0" ]; then
   kubectl create namespace "$NS"
 fi
 if [ "$K8S_DRIVER" != "tmc" ]; then
-  sh "$SCDIR/k8s/setup-metallb.sh"
+  sh "$SCDIR/setup-metallb.sh"
 fi
 end_time=$(date +%s)
 elapsed=$(( end_time - start_time ))

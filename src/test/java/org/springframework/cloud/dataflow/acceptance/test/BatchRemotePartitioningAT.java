@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.UUID;
 
 import org.awaitility.Awaitility;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +29,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,8 +85,7 @@ public class BatchRemotePartitioningAT extends CommonTestBase {
     @EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
     @Tag("group2")
     public void runBatchRemotePartitionJobCloudFoundry() {
-        logger.info("runBatchRemotePartitionJob - cloudfoundry");
-
+        logger.info("run-batch-remote-partition-job-cloudFoundry:start");
         final String prefix = CFConnectionProperties.CLOUDFOUNDRY_PROPERTIES;
         String taskDefinition = TASK_NAME +
             String.format(" --%s.%s=%s", prefix, "username", cfConnectionProperties.getUsername()) +
@@ -113,13 +110,14 @@ public class BatchRemotePartitioningAT extends CommonTestBase {
             assertThat(task.execution(launchId).isPresent()).isTrue();
             assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
         }
+        logger.info("run-batch-remote-partition-job-cloudFoundry:end");
     }
 
     @Test
-    @EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "kubernetes")
+    @EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
     @Tag("group2")
     public void runBatchRemotePartitionJobKubernetes() {
-        logger.info("runBatchRemotePartitionJob - kubernetes");
+        logger.info("run-batch-remote-partition-job-kubernetes:start");
 
         TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
         try (Task task = taskBuilder
@@ -136,6 +134,7 @@ public class BatchRemotePartitioningAT extends CommonTestBase {
             assertThat(task.execution(launchId).isPresent()).isTrue();
             assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
         }
+        logger.info("run-batch-remote-partition-job-kubernetes:end");
     }
 
     private static String randomName() {
