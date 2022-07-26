@@ -109,7 +109,7 @@ jobs:
           SQL_SERVICE_NAME: ${{ inputs.sql_service_name }}
           SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_SYSTEM_PASSWORD }}
           SQL_SYSTEM_USERNAME: ${{ secrets.SQL_SYSTEM_USERNAME }}
-          SQL_DATAFLOW_DB_NAME: "dataflow_${{ inputs.binder }}_${{ inputs.cf_index }}"
+          SQL_DATAFLOW_DB_NAME: "dataflow_pro_1_5_0_${{ inputs.binder }}_${{ inputs.cf_index }}"
           KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
           KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
           KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
@@ -146,7 +146,7 @@ jobs:
           SQL_SERVICE_NAME: ${{ inputs.sql_service_name }}
           SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_SYSTEM_PASSWORD }}
           SQL_SYSTEM_USERNAME: ${{ secrets.SQL_SYSTEM_USERNAME }}
-          SQL_DATAFLOW_DB_NAME: "dataflow_${{ inputs.binder }}_${{ inputs.cf_index }}"
+          SQL_DATAFLOW_DB_NAME: "dataflow_pro_1_5_0_${{ inputs.binder }}_${{ inputs.cf_index }}"
           KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
           KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
           KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
