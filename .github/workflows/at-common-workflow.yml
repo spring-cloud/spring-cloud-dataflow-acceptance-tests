@@ -64,7 +64,7 @@ on:
 jobs:
   acceptance-tests:
     concurrency:
-      group: env-${{ input.cf_index }}
+      group: env-${{ inputs.cf_index }}
       cancel-in-progress: false
     environment: ${{inputs.environment}}
     # The type of runner that the job will run on
