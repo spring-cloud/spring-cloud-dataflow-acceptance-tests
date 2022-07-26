@@ -125,7 +125,7 @@ jobs:
           ./scripts/at-test-script.sh
           echo "Completed Acceptance Tests"
       - name: Cleanup
-        if: ${{ always{} }}
+        if: ${{ always() }}
         env:
           # DEBUG: true
           SCHEDULER: ${{ inputs.scheduler }}
