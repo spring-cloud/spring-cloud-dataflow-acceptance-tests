@@ -4,19 +4,19 @@ on:
   workflow_dispatch:
 
 jobs:
-    rabbit-0:
-        uses: ./.github/workflows/at-common-workflow.yml
-        with:
-             cf_host: halfmoonbay
-             cf_index: 0
-             binder: rabbit
-        secrets:
-            CF_USERNAME: ${{secrets.CF_USERNAME}}
-            CF_ENV_0_PASSWORD: ${{secrets.CF_ENV_0_PASSWORD}}
-            CF_ENV_1_PASSWORD: ${{secrets.CF_ENV_1_PASSWORD}}
-            SQL_USERNAME: ${{secrets.SQL_USERNAME}}
-            SQL_PASSWORD: ${{secrets.SQL_PASSWORD}}
-            SQL_SYSTEM_USERNAME: ${{secrets.SQL_USERNAME}}
-            SQL_SYSTEM_PASSWORD: ${{secrets.SQL_PASSWORD}}
-            SQL_HOST: ${{secrets.SQL_HOST}}
-            SQL_PORT: ${{secrets.SQL_PORT}}
+  rabbit-0:
+    uses: ./.github/workflows/at-common-workflow.yml
+    with:
+      cf_host: halfmoonbay
+      cf_index: 0
+      binder: rabbit
+    secrets:
+      CF_USERNAME: ${{secrets.CF_USERNAME}}
+      CF_ENV_0_PASSWORD: ${{secrets.CF_ENV_0_PASSWORD}}
+      CF_ENV_1_PASSWORD: ${{secrets.CF_ENV_1_PASSWORD}}
+      SQL_USERNAME: ${{secrets.SQL_USERNAME}}
+      SQL_PASSWORD: ${{secrets.SQL_PASSWORD}}
+      SQL_SYSTEM_USERNAME: ${{secrets.SQL_USERNAME}}
+      SQL_SYSTEM_PASSWORD: ${{secrets.SQL_PASSWORD}}
+      SQL_HOST: ${{secrets.SQL_HOST}}
+      SQL_PORT: ${{secrets.SQL_PORT}}

@@ -2,155 +2,154 @@ name: SCDF Acceptance Tests Common Workflow
 
 # Controls when the workflow will run
 on:
-    workflow_call:
-        secrets:
-           CF_USERNAME:
-             required: true
-           CF_ENV_0_PASSWORD:
-             required: true
-           CF_ENV_1_PASSWORD:
-             required: true
-           SQL_USERNAME:
-             required: false
-           SQL_PASSWORD:
-             required: false
-           SQL_SYSTEM_USERNAME:
-             required: false
-           SQL_SYSTEM_PASSWORD:
-             required: false
-           SQL_HOST:
-             required: false
-           SQL_PORT:
-             required: false
-           KAFKA_USERNAME:
-             required: false
-           KAFKA_PASSWORD:
-             required: false
-           KAFKA_BROKER_ADDRESS:
-             required: false
+  workflow_call:
+    secrets:
+      CF_USERNAME:
+        required: true
+      CF_ENV_0_PASSWORD:
+        required: true
+      CF_ENV_1_PASSWORD:
+        required: true
+      SQL_USERNAME:
+        required: false
+      SQL_PASSWORD:
+        required: false
+      SQL_SYSTEM_USERNAME:
+        required: false
+      SQL_SYSTEM_PASSWORD:
+        required: false
+      SQL_HOST:
+        required: false
+      SQL_PORT:
+        required: false
+      KAFKA_USERNAME:
+        required: false
+      KAFKA_PASSWORD:
+        required: false
+      KAFKA_BROKER_ADDRESS:
+        required: false
 
-        inputs:
-            sql_provider:
-              default: postgresql
-              required: false
-              type: string
-            sql_service_name:
-              required: false
-              type: string
-            sql_system_user:
-              required: false
-              type: string
-            sql_system_password:
-              required: false
-              type: string
-            scheduler:
-              default: true
-              required: false
-              type: boolean
-            environment:
-              default: scdf_at
-              required: false
-              type: string
-            binder:
-                required: true
-                type: string
-            cf_host:
-                required: true
-                type: string
-            cf_index:
-                required: true
-                type: string
+    inputs:
+      sql_provider:
+        default: postgresql
+        required: false
+        type: string
+      sql_service_name:
+        required: false
+        type: string
+      sql_system_user:
+        required: false
+        type: string
+      sql_system_password:
+        required: false
+        type: string
+      scheduler:
+        default: true
+        required: false
+        type: boolean
+      environment:
+        default: scdf_at
+        required: false
+        type: string
+      binder:
+        required: true
+        type: string
+      cf_host:
+        required: true
+        type: string
+      cf_index:
+        required: true
+        type: string
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-    acceptance-tests:
-        environment: ${{inputs.environment}}
-        # The type of runner that the job will run on
-        runs-on: ubuntu-latest
-        # Steps represent a sequence of tasks that will be executed as part of the job
-        steps:
-            # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-            - uses: actions/checkout@v3
-            - name: 'Ensure scripts executable'
-              shell: bash
-              run: chmod a+x ./scripts/*.sh
-            - uses: actions/setup-java@v2
-              with:
-                  java-version: '8.0.292+10'
-                  cache: maven
-                  distribution: liberica
-            - uses: stCarolas/setup-maven@v4.3
-              with:
-                  maven-version: 3.8.2
-            # Runs a single command using the runners shell
-            - name: resolve cf-password
-              env:
-                PASSWORD_KEY: ${{ format('CF_ENV_{0}_PASSWORD', inputs.cf_index) }}
-              run : echo "SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD=${{ secrets[env.PASSWORD_KEY] }}" >> $GITHUB_ENV
-            - name: run the test script
-              env:
-                  # DEBUG: true
-                  SCHEDULER : ${{ inputs.scheduler }}
-                  BINDER : ${{ inputs.binder }}
-                  MAVEN_REPOS: '{"repo1":"https://repo.spring.io/libs-snapshot"}'
-                  SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE : ${{ inputs.binder }}
-                  SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
-                  SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: scdf-scheduler
-                  SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: "https://api.sys.${{ inputs.cf_host }}.cf-app.com"
-                  SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: "apps.${{ inputs.cf_host }}.cf-app.com"
-                  SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: p-dataflow
-                  SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME: ${{ secrets.CF_USERNAME }}
-
-                  # Postgres SQL Properties
-                  SQL_HOST: ${{ secrets.SQL_HOST }}
-                  SQL_PORT: ${{ secrets.SQL_PORT }}
-                  SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
-                  SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
-                  SQL_PROVIDER: ${{ inputs.sql_provider }}
-                  SQL_SERVICE_NAME: ${{ inputs.sql_service_name }}
-                  SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_SYSTEM_PASSWORD }}
-                  SQL_SYSTEM_USERNAME: ${{ secrets.SQL_SYSTEM_USERNAME }}
-                  SQL_DATAFLOW_DB_NAME: "dataflow_pro_1_5_0_${{ inputs.binder }}_${{ inputs.cf_index }}"
-                  KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
-                  KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
-                  KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
-                  PLATFORM : tile
-              run: |
-                echo "Building timestamp-batch-with-drivers-template1"
-                pushd acceptance-tests/custom-apps/timestamp-batch-with-drivers-template1 > /dev/null
-                    ./gradlew build install
-                popd > /dev/null
-                echo "Starting Acceptance Tests"
-                export SETUP_TOOL_REPO="scdf_cf_setup"
-                echo "SETUP_TOOL_REPO=$SETUP_TOOL_REPO" >> $GITHUB_ENV
-                ./scripts/at-test-script.sh
-                echo "Completed Acceptance Tests"
-            - name: Cleanup
-              env:
-                # DEBUG: true
-                SCHEDULER: ${{ inputs.scheduler }}
-                BINDER: ${{ inputs.binder }}
-                MAVEN_REPOS: '{"repo1":"https://repo.spring.io/libs-snapshot"}'
-                SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: ${{ inputs.binder }}
-                SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
-                SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: scdf-scheduler
-                SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: "https://api.sys.${{ inputs.cf_host }}.cf-app.com"
-                SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: "apps.${{ inputs.cf_host }}.cf-app.com"
-                SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: p-dataflow
-                SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME: ${{ secrets.CF_USERNAME }}
-
-                # Postgres SQL Properties
-                SQL_HOST: ${{ secrets.SQL_HOST }}
-                SQL_PORT: ${{ secrets.SQL_PORT }}
-                SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
-                SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
-                SQL_PROVIDER: ${{ inputs.sql_provider }}
-                SQL_SERVICE_NAME: ${{ inputs.sql_service_name }}
-                SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_SYSTEM_PASSWORD }}
-                SQL_SYSTEM_USERNAME: ${{ secrets.SQL_SYSTEM_USERNAME }}
-                SQL_DATAFLOW_DB_NAME: "dataflow_pro_1_5_0_${{ inputs.binder }}_${{ inputs.cf_index }}"
-                KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
-                KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
-                KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
-                PLATFORM: tile
-              shell: bash
-              run: ./scripts/at-cleanup.sh
+  acceptance-tests:
+    concurrency:
+      group: env-${{ input.cf_index }}
+      cancel-in-progress: false
+    environment: ${{inputs.environment}}
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      - name: 'Ensure scripts executable'
+        shell: bash
+        run: chmod a+x ./scripts/*.sh
+      - uses: actions/setup-java@v2
+        with:
+          java-version: '8.0.292+10'
+          cache: maven
+          distribution: liberica
+      - uses: jvalkeal/setup-maven@v1
+        with:
+          maven-version: 3.8.2
+      - name: resolve cf-password
+        env:
+          PASSWORD_KEY: ${{ format('CF_ENV_{0}_PASSWORD', inputs.cf_index) }}
+        run: echo "SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD=${{ secrets[env.PASSWORD_KEY] }}" >> $GITHUB_ENV
+      - name: run the test script
+        env:
+          # DEBUG: true
+          SCHEDULER: ${{ inputs.scheduler }}
+          BINDER: ${{ inputs.binder }}
+          MAVEN_REPOS: '{"repo1":"https://repo.spring.io/libs-snapshot"}'
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: ${{ inputs.binder }}
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: scdf-scheduler
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: "https://api.sys.${{ inputs.cf_host }}.cf-app.com"
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: "apps.${{ inputs.cf_host }}.cf-app.com"
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: p-dataflow
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME: ${{ secrets.CF_USERNAME }}
+          SQL_HOST: ${{ secrets.SQL_HOST }}
+          SQL_PORT: ${{ secrets.SQL_PORT }}
+          SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+          SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
+          SQL_PROVIDER: ${{ inputs.sql_provider }}
+          SQL_SERVICE_NAME: ${{ inputs.sql_service_name }}
+          SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_SYSTEM_PASSWORD }}
+          SQL_SYSTEM_USERNAME: ${{ secrets.SQL_SYSTEM_USERNAME }}
+          SQL_DATAFLOW_DB_NAME: "dataflow_${{ inputs.binder }}_${{ inputs.cf_index }}"
+          KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
+          KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
+          KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
+          PLATFORM: tile
+        run: |
+          echo "Building timestamp-batch-with-drivers-template1"
+          pushd acceptance-tests/custom-apps/timestamp-batch-with-drivers-template1 > /dev/null
+              ./gradlew build install
+          popd > /dev/null
+          echo "Starting Acceptance Tests"
+          export SETUP_TOOL_REPO="scdf_cf_setup"
+          echo "SETUP_TOOL_REPO=$SETUP_TOOL_REPO" >> $GITHUB_ENV
+          ./scripts/at-test-script.sh
+          echo "Completed Acceptance Tests"
+      - name: Cleanup
+        if: ${{ always{} }}
+        env:
+          # DEBUG: true
+          SCHEDULER: ${{ inputs.scheduler }}
+          BINDER: ${{ inputs.binder }}
+          MAVEN_REPOS: '{"repo1":"https://repo.spring.io/libs-snapshot"}'
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: ${{ inputs.binder }}
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: scdf-scheduler
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: "https://api.sys.${{ inputs.cf_host }}.cf-app.com"
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: "apps.${{ inputs.cf_host }}.cf-app.com"
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: p-dataflow
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME: ${{ secrets.CF_USERNAME }}
+          SQL_HOST: ${{ secrets.SQL_HOST }}
+          SQL_PORT: ${{ secrets.SQL_PORT }}
+          SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+          SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
+          SQL_PROVIDER: ${{ inputs.sql_provider }}
+          SQL_SERVICE_NAME: ${{ inputs.sql_service_name }}
+          SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_SYSTEM_PASSWORD }}
+          SQL_SYSTEM_USERNAME: ${{ secrets.SQL_SYSTEM_USERNAME }}
+          SQL_DATAFLOW_DB_NAME: "dataflow_${{ inputs.binder }}_${{ inputs.cf_index }}"
+          KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
+          KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
+          KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
+          PLATFORM: tile
+        shell: bash
+        run: ./scripts/at-cleanup.sh
