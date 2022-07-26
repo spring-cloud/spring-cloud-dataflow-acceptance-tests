@@ -1,32 +1,29 @@
-
 name: Spring Cloud Dataflow Acceptance Tests
 
 on:
-    schedule:
-        -   cron: "0 0 * * *"
-    # Allows you to run this workflow manually from the Actions tab
-    workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
-    kafka-0:
-        uses: ./.github/workflows/acceptance-tests-for-kafka-0.yml
-    kafka-1:
-        uses: ./.github/workflows/acceptance-tests-for-kafka-1.yml
-    rabbit-0:
-        needs: [ kafka-0 ]
-        uses: ./.github/workflows/acceptance-tests-for-rabbit-0.yml
-    rabbit-1:
-        needs: [ kafka-1 ]
-        uses: ./.github/workflows/acceptance-tests-for-rabbit-1.yml
-    completed-0:
-        needs: [ kafka-0, rabbit-0 ]
-        runs-on: ubuntu-latest
-        steps:
-            - name: Completed Env 0
-              run: echo "Completed env-0"
-    completed-1:
-        needs: [ kafka-1, rabbit-1 ]
-        runs-on: ubuntu-latest
-        steps:
-            - name: Completed Env 1
-              run: echo "Completed env-1"
+  kafka-0:
+    uses: ./.github/workflows/acceptance-tests-for-kafka-0.yml
+  kafka-1:
+    uses: ./.github/workflows/acceptance-tests-for-kafka-1.yml
+  rabbit-0:
+    uses: ./.github/workflows/acceptance-tests-for-rabbit-0.yml
+  rabbit-1:
+    uses: ./.github/workflows/acceptance-tests-for-rabbit-1.yml
+  completed:
+    needs: [ kafka-0, rabbit-0 ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Completed Env 0
+        run: echo "Completed env-0"
+  completed-1:
+    needs: [ kafka-1, rabbit-1 ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Completed Env 1
+        run: echo "Completed env-1"
