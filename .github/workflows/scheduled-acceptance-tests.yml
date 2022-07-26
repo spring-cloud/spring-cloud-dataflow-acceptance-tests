@@ -2,8 +2,7 @@ name: Acceptance Tests for SCDF
 
 on:
   schedule:
-    - cron: "0 0 * * *"
-  # Allows you to run this workflow manually from the Actions tab
+    - cron: "0 2 * * *"
   workflow_dispatch:
 
 jobs:
