@@ -124,6 +124,30 @@ jobs:
           echo "SETUP_TOOL_REPO=$SETUP_TOOL_REPO" >> $GITHUB_ENV
           ./scripts/at-test-script.sh
           echo "Completed Acceptance Tests"
+      - name: Upload Unit Test Results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-surefire-${{ inputs.binder }}-${{ inputs.cf_index }}-${{ github.run_number }}-${{ github.run_attempt }}
+          path: './**/target/surefire-reports/**/*.*'
+          retention-days: 7
+          if-no-files-found: ignore
+      - name: Upload Integration Test Results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-failsafe-${{ inputs.binder }}-${{ inputs.cf_index }}-${{ github.run_number }}-${{ github.run_attempt }}
+          path: './**/target/failsafe-reports/**/*.*'
+          retention-days: 7
+          if-no-files-found: ignore
+      - name: Upload Test Site
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-site-${{ inputs.binder }}-${{ inputs.cf_index }}-${{ github.run_number }}-${{ github.run_attempt }}-failsafe-report.html
+          path: './**/target/site/failsafe-report.html'
+          retention-days: 7
+          if-no-files-found: ignore
       - name: Cleanup
         if: ${{ always() }}
         env:
