@@ -1,4 +1,3 @@
-
 name: SCDF Acceptance Tests Common Workflow
 
 # Controls when the workflow will run
@@ -71,6 +70,9 @@ jobs:
         steps:
             # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
             - uses: actions/checkout@v3
+            - name: 'Ensure scripts executable'
+              shell: bash
+              run: chmod a+x ./scripts/*.sh
             - uses: actions/setup-java@v2
               with:
                   java-version: '8.0.292+10'
@@ -118,5 +120,37 @@ jobs:
                     ./gradlew build install
                 popd > /dev/null
                 echo "Starting Acceptance Tests"
+                export SETUP_TOOL_REPO="scdf_cf_setup"
+                echo "SETUP_TOOL_REPO=$SETUP_TOOL_REPO" >> $GITHUB_ENV
                 ./scripts/at-test-script.sh
                 echo "Completed Acceptance Tests"
+            - name: Cleanup
+              env:
+                # DEBUG: true
+                SCHEDULER: ${{ inputs.scheduler }}
+                BINDER: ${{ inputs.binder }}
+                MAVEN_REPOS: '{"repo1":"https://repo.spring.io/libs-snapshot"}'
+                SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: ${{ inputs.binder }}
+                SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
+                SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: scdf-scheduler
+                SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: "https://api.sys.${{ inputs.cf_host }}.cf-app.com"
+                SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: "apps.${{ inputs.cf_host }}.cf-app.com"
+                SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: p-dataflow
+                SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME: ${{ secrets.CF_USERNAME }}
+
+                # Postgres SQL Properties
+                SQL_HOST: ${{ secrets.SQL_HOST }}
+                SQL_PORT: ${{ secrets.SQL_PORT }}
+                SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+                SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
+                SQL_PROVIDER: ${{ inputs.sql_provider }}
+                SQL_SERVICE_NAME: ${{ inputs.sql_service_name }}
+                SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_SYSTEM_PASSWORD }}
+                SQL_SYSTEM_USERNAME: ${{ secrets.SQL_SYSTEM_USERNAME }}
+                SQL_DATAFLOW_DB_NAME: "dataflow_pro_1_5_0_${{ inputs.binder }}_${{ inputs.cf_index }}"
+                KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
+                KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
+                KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
+                PLATFORM: tile
+              shell: bash
+              run: ./scripts/at-cleanup.sh

@@ -9,77 +9,15 @@ on:
 
 jobs:
     kafka-0:
-        uses: ./.github/workflows/at-common-workflow.yml
-        with:
-            cf_host: halfmoonbay
-            cf_index: 0
-            binder: kafka
-        secrets:
-            CF_USERNAME: ${{secrets.CF_USERNAME}}
-            CF_ENV_0_PASSWORD: ${{secrets.CF_ENV_0_PASSWORD}}
-            CF_ENV_1_PASSWORD: ${{secrets.CF_ENV_1_PASSWORD}}
-            SQL_USERNAME: ${{secrets.SQL_USERNAME}}
-            SQL_PASSWORD: ${{secrets.SQL_PASSWORD}}
-            SQL_SYSTEM_USERNAME: ${{secrets.SQL_USERNAME}}
-            SQL_SYSTEM_PASSWORD: ${{secrets.SQL_PASSWORD}}
-            SQL_HOST: ${{secrets.SQL_HOST}}
-            SQL_PORT: ${{secrets.SQL_PORT}}
-            KAFKA_USERNAME: ${{secrets.KAFKA_USERNAME}}
-            KAFKA_PASSWORD: ${{secrets.KAFKA_PASSWORD}}
-            KAFKA_BROKER_ADDRESS: ${{secrets.KAFKA_BROKER_ADDRESS}}
+        uses: ./.github/workflows/acceptance-tests-for-kafka-0.yml
     kafka-1:
-        uses: ./.github/workflows/at-common-workflow.yml
-        with:
-            cf_host: needles
-            cf_index: 1
-            binder: kafka
-        secrets:
-            CF_USERNAME: ${{secrets.CF_USERNAME}}
-            CF_ENV_0_PASSWORD: ${{secrets.CF_ENV_0_PASSWORD}}
-            CF_ENV_1_PASSWORD: ${{secrets.CF_ENV_1_PASSWORD}}
-            SQL_USERNAME: ${{secrets.SQL_USERNAME}}
-            SQL_PASSWORD: ${{secrets.SQL_PASSWORD}}
-            SQL_SYSTEM_USERNAME: ${{secrets.SQL_USERNAME}}
-            SQL_SYSTEM_PASSWORD: ${{secrets.SQL_PASSWORD}}
-            SQL_HOST: ${{secrets.SQL_HOST}}
-            SQL_PORT: ${{secrets.SQL_PORT}}
-            KAFKA_USERNAME: ${{secrets.KAFKA_USERNAME}}
-            KAFKA_PASSWORD: ${{secrets.KAFKA_PASSWORD}}
-            KAFKA_BROKER_ADDRESS: ${{secrets.KAFKA_BROKER_ADDRESS}}
+        uses: ./.github/workflows/acceptance-tests-for-kafka-1.yml
     rabbit-0:
-        uses: ./.github/workflows/at-common-workflow.yml
         needs: [ kafka-0 ]
-        with:
-            cf_host: halfmoonbay
-            cf_index: 0
-            binder: rabbit
-        secrets:
-            CF_USERNAME: ${{secrets.CF_USERNAME}}
-            CF_ENV_0_PASSWORD: ${{secrets.CF_ENV_0_PASSWORD}}
-            CF_ENV_1_PASSWORD: ${{secrets.CF_ENV_1_PASSWORD}}
-            SQL_USERNAME: ${{secrets.SQL_USERNAME}}
-            SQL_PASSWORD: ${{secrets.SQL_PASSWORD}}
-            SQL_SYSTEM_USERNAME: ${{secrets.SQL_USERNAME}}
-            SQL_SYSTEM_PASSWORD: ${{secrets.SQL_PASSWORD}}
-            SQL_HOST: ${{secrets.SQL_HOST}}
-            SQL_PORT: ${{secrets.SQL_PORT}}
+        uses: ./.github/workflows/acceptance-tests-for-rabbit-0.yml
     rabbit-1:
-        uses: ./.github/workflows/at-common-workflow.yml
         needs: [ kafka-1 ]
-        with:
-            cf_host: needles
-            cf_index: 1
-            binder: rabbit
-        secrets:
-            CF_USERNAME: ${{secrets.CF_USERNAME}}
-            CF_ENV_0_PASSWORD: ${{secrets.CF_ENV_0_PASSWORD}}
-            CF_ENV_1_PASSWORD: ${{secrets.CF_ENV_1_PASSWORD}}
-            SQL_USERNAME: ${{secrets.SQL_USERNAME}}
-            SQL_PASSWORD: ${{secrets.SQL_PASSWORD}}
-            SQL_SYSTEM_USERNAME: ${{secrets.SQL_USERNAME}}
-            SQL_SYSTEM_PASSWORD: ${{secrets.SQL_PASSWORD}}
-            SQL_HOST: ${{secrets.SQL_HOST}}
-            SQL_PORT: ${{secrets.SQL_PORT}}
+        uses: ./.github/workflows/acceptance-tests-for-rabbit-1.yml
     completed-0:
         needs: [ kafka-0, rabbit-0 ]
         runs-on: ubuntu-latest
