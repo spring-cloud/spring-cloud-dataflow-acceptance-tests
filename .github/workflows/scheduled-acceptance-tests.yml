@@ -1,4 +1,4 @@
-name: Spring Cloud Dataflow Acceptance Tests
+name: Acceptance Tests for SCDF
 
 on:
   schedule:
