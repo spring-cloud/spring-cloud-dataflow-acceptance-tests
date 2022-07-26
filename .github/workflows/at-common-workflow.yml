@@ -116,6 +116,7 @@ jobs:
                 echo "Building timestamp-batch-with-drivers-template1"
                 pushd acceptance-tests/custom-apps/timestamp-batch-with-drivers-template1 > /dev/null
                     ./gradlew build install
-                popd > /dev/null                echo "Starting Acceptance Tests"
+                popd > /dev/null
+                echo "Starting Acceptance Tests"
                 ./scripts/at-test-script.sh
                 echo "Completed Acceptance Tests"
