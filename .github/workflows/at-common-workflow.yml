@@ -1,4 +1,4 @@
-name: SCDF Acceptance Tests Common Workflow
+name: at-common-workflow
 
 # Controls when the workflow will run
 on:
