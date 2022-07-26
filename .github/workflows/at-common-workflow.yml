@@ -88,7 +88,38 @@ jobs:
         env:
           PASSWORD_KEY: ${{ format('CF_ENV_{0}_PASSWORD', inputs.cf_index) }}
         run: echo "SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD=${{ secrets[env.PASSWORD_KEY] }}" >> $GITHUB_ENV
-      - name: run the test script
+      - name: Setup Environment ${{ inputs.binder }}-${{ inputs.cf_index }}
+        env:
+          # DEBUG: true
+          SCHEDULER: ${{ inputs.scheduler }}
+          BINDER: ${{ inputs.binder }}
+          MAVEN_REPOS: '{"repo1":"https://repo.spring.io/libs-snapshot"}'
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: ${{ inputs.binder }}
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: scdf-scheduler
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: "https://api.sys.${{ inputs.cf_host }}.cf-app.com"
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: "apps.${{ inputs.cf_host }}.cf-app.com"
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: p-dataflow
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME: ${{ secrets.CF_USERNAME }}
+          SQL_HOST: ${{ secrets.SQL_HOST }}
+          SQL_PORT: ${{ secrets.SQL_PORT }}
+          SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+          SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
+          SQL_PROVIDER: ${{ inputs.sql_provider }}
+          SQL_SERVICE_NAME: ${{ inputs.sql_service_name }}
+          SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_SYSTEM_PASSWORD }}
+          SQL_SYSTEM_USERNAME: ${{ secrets.SQL_SYSTEM_USERNAME }}
+          SQL_DATAFLOW_DB_NAME: "dataflow_pro_1_5_0_${{ inputs.binder }}_${{ inputs.cf_index }}"
+          KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
+          KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
+          KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
+          PLATFORM: tile
+        run: |
+          echo "Setup Environment"
+          export SETUP_TOOL_REPO="scdf_cf_setup"
+          echo "SETUP_TOOL_REPO=$SETUP_TOOL_REPO" >> $GITHUB_ENV
+          ./scripts/at-setup.sh
+      - name: Execute Tests
         env:
           # DEBUG: true
           SCHEDULER: ${{ inputs.scheduler }}
@@ -117,11 +148,9 @@ jobs:
         run: |
           echo "Building timestamp-batch-with-drivers-template1"
           pushd acceptance-tests/custom-apps/timestamp-batch-with-drivers-template1 > /dev/null
-              ./gradlew build install
+            ./gradlew build install
           popd > /dev/null
-          echo "Starting Acceptance Tests"
-          export SETUP_TOOL_REPO="scdf_cf_setup"
-          echo "SETUP_TOOL_REPO=$SETUP_TOOL_REPO" >> $GITHUB_ENV
+          echo "Starting  Acceptance Tests"
           ./scripts/at-test-script.sh
           echo "Completed Acceptance Tests"
       - name: Upload Unit Test Results
