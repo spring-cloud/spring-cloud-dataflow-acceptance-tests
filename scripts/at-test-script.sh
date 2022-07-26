@@ -1,7 +1,6 @@
 #!/bin/bash
 # default exit code
 stat=0
-SETUP_TOOL_REPO="scdf_cf_setup"
 echo "SETUP_TOOL_REPO=$SETUP_TOOL_REPO"
 echo "SQL_DATAFLOW_DB_NAME=$SQL_DATAFLOW_DB_NAME"
 echo "SQL_SKIPPER_DB_NAME=$SQL_SKIPPER_DB_NAME"
@@ -89,22 +88,19 @@ pushd $SETUP_TOOL_REPO  > /dev/null
   export PYTHONPATH=./src:$PYTHONPATH
   echo $PWD
   python3 -m install.clean -v
-  if [[ $? > 0 ]]; then
+  RC=$?
+  if [[ $RC -gt 0 ]]; then
     exit 1
   fi
 
   python3 -m install.setup -v --initializeDB
-  if [[ $? > 0 ]]; then
+  RC=$?
+  if [[ $RC -gt 0 ]]; then
     exit 1
   fi
   load_file "cf_scdf.properties"
   echo "Dataflow Server is live @ $SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI"
   echo "Running Tests..."
 popd > /dev/null
-
+set -e
 run_tests
-stat=$?
-pushd $SETUP_TOOL_REPO  > /dev/null
-    # If tests fail, clean up anyway.
-    python3 -m install.clean -v
-popd > /dev/nullexit $stat
