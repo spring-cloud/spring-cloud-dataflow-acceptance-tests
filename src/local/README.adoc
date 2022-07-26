@@ -75,7 +75,8 @@ For minikube launch a new shell and execute `minikube tunnel`
 
 [source,shell]
 ....
-source ./src/local/launch-scdf.sh
+./src/local/launch-scdf.sh
+source ./src/local/export-dataflow-ip.sh
 ....
 
 === Delete the deployment from the cluster.
