@@ -60,16 +60,11 @@ on:
       cf_index:
         required: true
         type: string
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+
 jobs:
   acceptance-tests:
-    concurrency:
-      group: env-${{ inputs.cf_index }}
-      cancel-in-progress: false
-    environment: ${{inputs.environment}}
-    # The type of runner that the job will run on
+    environment: env-${{ inputs.cf_host }}
     runs-on: ubuntu-latest
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
@@ -78,7 +73,7 @@ jobs:
         run: chmod a+x ./scripts/*.sh
       - uses: actions/setup-java@v2
         with:
-          java-version: '8.0.292+10'
+          java-version: '1.8'
           cache: maven
           distribution: liberica
       - uses: jvalkeal/setup-maven@v1
