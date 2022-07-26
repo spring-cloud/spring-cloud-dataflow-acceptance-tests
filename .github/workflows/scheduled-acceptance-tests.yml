@@ -46,6 +46,7 @@ jobs:
       KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
       KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
   rabbit-0:
+    needs: [ kafka-0 ]
     uses: ./.github/workflows/at-common-workflow.yml
     with:
       cf_host: 'halfmoonbay'
@@ -62,6 +63,7 @@ jobs:
       SQL_HOST: ${{ secrets.SQL_HOST }}
       SQL_PORT: ${{ secrets.SQL_PORT }}
   rabbit-1:
+    needs: [ kafka-1 ]
     uses: ./.github/workflows/at-common-workflow.yml
     with:
       cf_host: 'needles'
