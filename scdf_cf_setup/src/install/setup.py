@@ -91,7 +91,7 @@ def setup(args):
 
         dataflow_uri = runtime_properties['SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI']
         setup_certs(installation.config_props.cert_host)
-        # register_apps(cf, installation, dataflow_uri)
+        register_apps(cf, installation, dataflow_uri)
         return runtime_properties
     except SystemExit:
         parser.print_help()

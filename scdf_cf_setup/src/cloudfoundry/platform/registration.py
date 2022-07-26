@@ -40,7 +40,7 @@ def register_apps(cf, installation, server_uri, app_import_path='app-imports.pro
 
 
 class AppRegistrations:
-    DEFAULT_DATAFLOW_VERSION = '2.10.0-M1'
+    DEFAULT_DATAFLOW_VERSION = '2.10.0-SNAPSHOT'
 
     def __init__(self, cf, config_props, server_uri, app_import_path='app-imports.properties'):
         self.headers = headers = {'Authorization': cf.oauth_token()}

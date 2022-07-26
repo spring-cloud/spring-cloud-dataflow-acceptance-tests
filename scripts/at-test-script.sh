@@ -102,22 +102,6 @@ pushd $SETUP_TOOL_REPO  > /dev/null
   echo "Running Tests..."
 popd > /dev/null
 
-set -e
-# latest snapshot
-STREAM_APPS_VERSION=2021.1.3-SNAPSHOT
-# latest release
-# STREAM_APPS_VERSION=2021.1.2
-if [[ "$STREAM_APPS_VERSION" == *"SNAPSHOT"* ]]; then
-  RELEASE_SNAPSHOT=snapshot
-else
-  RELEASE_SNAPSHOT=release
-fi
-
-wget -qO- http://$SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI/apps --post-data="uri=https://repo.spring.io/artifactory/$RELEASE_SNAPSHOT/org/springframework/cloud/stream/app/stream-applications-descriptor/$STREAM_APPS_VERSION/stream-applications-descriptor-$STREAM_APPS_VERSION.stream-apps-$BROKER_NAME-maven"
-wget -qO- http://$SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI/apps/task/timestamp/2.0.1 --post-data="uri=maven://io.spring:timestamp-task:2.0.1"
-wget -qO- http://$SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI/apps/task/timestamp/2.0.2 --post-data="uri=maven://io.spring:timestamp-task:2.0.2"
-wget -qO- http://$SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI/apps/task/timestamp-batch/2.0.2 --post-data="uri=maven://io.spring:/timestamp-batch-task:2.0.2"
-
 run_tests
 stat=$?
 pushd $SETUP_TOOL_REPO  > /dev/null
