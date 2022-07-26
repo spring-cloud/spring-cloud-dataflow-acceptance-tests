@@ -86,7 +86,7 @@ fi
 
 pushd $SETUP_TOOL_REPO  > /dev/null
   export PYTHONPATH=./src:$PYTHONPATH
-  echo $PWD
+  echo "PYTHONPATH=$PYTHONPATH" >> $GITHUB_ENV
   python3 -m install.clean -v
   RC=$?
   if [[ $RC -gt 0 ]]; then
@@ -100,7 +100,7 @@ pushd $SETUP_TOOL_REPO  > /dev/null
   fi
   load_file "cf_scdf.properties"
   echo "Dataflow Server is live @ $SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI"
-  echo "Running Tests..."
 popd > /dev/null
+echo "Running Tests..."
 set -e
 run_tests
