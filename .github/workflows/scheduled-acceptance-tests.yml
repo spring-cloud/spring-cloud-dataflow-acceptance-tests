@@ -47,7 +47,6 @@ jobs:
       KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
   rabbit-0:
     uses: ./.github/workflows/at-common-workflow.yml
-    needs: [ kafka-0 ]
     with:
       cf_host: 'halfmoonbay'
       cf_index: 0
@@ -64,7 +63,6 @@ jobs:
       SQL_PORT: ${{ secrets.SQL_PORT }}
   rabbit-1:
     uses: ./.github/workflows/at-common-workflow.yml
-    needs: [ kafka-1 ]
     with:
       cf_host: 'needles'
       cf_index: 1
@@ -80,14 +78,8 @@ jobs:
       SQL_HOST: ${{ secrets.SQL_HOST }}
       SQL_PORT: ${{ secrets.SQL_PORT }}
   completed:
-    needs: [ kafka-0, rabbit-0 ]
+    needs: [ kafka-0, rabbit-0, kafka-1, rabbit-1 ]
     runs-on: ubuntu-latest
     steps:
-      - name: Completed Env 0
-        run: echo "Completed env-0"
-  completed-1:
-    needs: [ kafka-1, rabbit-1 ]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Completed Env 1
-        run: echo "Completed env-1"
+      - name: Completed
+        run: echo "Completed"
