@@ -4,6 +4,42 @@ stat=0
 echo "SETUP_TOOL_REPO=$SETUP_TOOL_REPO"
 echo "SQL_DATAFLOW_DB_NAME=$SQL_DATAFLOW_DB_NAME"
 echo "SQL_SKIPPER_DB_NAME=$SQL_SKIPPER_DB_NAME"
+# override completely by providing a correct value
+if [ "$BINDER" == "rabbit" ]; then
+  export BROKER=rabbitmq
+else
+  export BROKER=$BINDER
+fi
+if [ "$BROKER" = "rabbitmq" ]; then
+  export BROKERNAME=rabbit
+else
+  export BROKERNAME=$BROKER
+fi
+if [ "$BROKERNAME" = "" ]; then
+  echo "Error expected BROKERNAME from $BROKER" >&2
+  exit 2
+fi
+
+export STREAM_APPS_URI=
+# change to RELEASE to use the latest version or any specific version
+STREAM_APPS_VERSION=2021.1.3-SNAPSHOT
+# will default if blank
+REPO=
+if [[ "$STREAM_APPS_VERSION" = *"SNAPSHOT"* ]]; then
+  REPO=https://repo.spring.io/artifactory/libs-snapshot
+elif [[ "$STREAM_APPS_VERSION" = "RELEASE" ]]; then
+  REPO=
+else
+  REPO=https://repo.spring.io/artifactory/libs-release
+fi
+if [[ "$STREAM_APPS_URI" = "" ]]; then
+  if [[ "$REPO" != "" ]]; then
+    export STREAM_APPS_URI="$REPO/org/springframework/cloud/stream/app/stream-applications-descriptor/$STREAM_APPS_VERSION/stream-applications-descriptor-$STREAM_APPS_VERSION.stream-apps-$BROKERNAME-maven"
+  else
+    export STREAM_APPS_URI=https://dataflow.spring.io/$BROKER-maven-latest
+  fi
+fi
+echo "Registering $STREAM_APPS_URI"
 
 python3 -m pip install --upgrade pip | grep -v 'Requirement already satisfied'
 pip3 install -r $SETUP_TOOL_REPO/requirements.txt | grep -v 'Requirement already satisfied'
@@ -79,4 +115,6 @@ pushd $SETUP_TOOL_REPO  > /dev/null
   fi
   load_file "cf_scdf.properties"
   echo "Dataflow Server is live @ $SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI"
+  # need to find value for spring.cloud.dataflow.client.authentication.access-token
+  # env SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_ACCESS_TOKEN
 popd > /dev/null
