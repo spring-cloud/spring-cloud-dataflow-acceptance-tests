@@ -113,7 +113,8 @@ jobs:
           echo "Setup Environment"
           export SETUP_TOOL_REPO="scdf_cf_setup"
           echo "SETUP_TOOL_REPO=$SETUP_TOOL_REPO" >> $GITHUB_ENV
-          ./scripts/at-setup.sh
+          source ./scripts/at-setup.sh
+          echo "SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI=$SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI" >> $GITHUB_ENV
       - name: Execute Tests
         env:
           # DEBUG: true
