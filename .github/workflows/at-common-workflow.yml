@@ -63,7 +63,7 @@ on:
 
 jobs:
   acceptance-tests:
-    environment: env-${{ inputs.cf_host }}
+    environment: scdf_at
     runs-on: ubuntu-latest
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
