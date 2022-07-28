@@ -53,6 +53,7 @@ class ConfigurationProperties(EnvironmentAware):
                  config_server_enabled=False,
                  task_services=['mysql'],
                  stream_services=['rabbit'],
+                 stream_apps_uri=None,
                  task_apps_uri='https://dataflow.spring.io/task-maven-latest',
                  cert_host=None,
                  service_key_name='scdf_cf_setup'
@@ -71,12 +72,16 @@ class ConfigurationProperties(EnvironmentAware):
         self.config_server_enabled = config_server_enabled
         self.task_services = task_services
         self.stream_services = stream_services
+        self.task_apps_uri = task_apps_uri
+        self.stream_apps_uri = stream_apps_uri
         self.cert_host = cert_host
         self.service_key_name = service_key_name
 
-        if self.binder == 'rabbit':
-            self.stream_apps_uri = 'https://dataflow.spring.io/rabbitmq-maven-latest'
-        elif self.binder == 'kafka':
-            self.stream_apps_uri = 'https://dataflow.spring.io/kafka-maven-latest'
+        if self.stream_apps_uri is None:
+            if self.binder == 'rabbit':
+                self.stream_apps_uri = 'https://dataflow.spring.io/rabbitmq-maven-latest'
+            elif self.binder == 'kafka':
+                self.stream_apps_uri = 'https://dataflow.spring.io/kafka-maven-latest'
 
-        self.task_apps_uri = 'https://dataflow.spring.io/task-foo'
+        if self.task_apps_uri is None:
+            self.task_apps_uri = 'https://dataflow.spring.io/task-maven-latest'

@@ -116,5 +116,10 @@ pushd $SETUP_TOOL_REPO  > /dev/null
   load_file "cf_scdf.properties"
   echo "Dataflow Server is live @ $SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI"
   # need to find value for spring.cloud.dataflow.client.authentication.access-token
+  # spring.cloud.dataflow.client.authentication.token-uri
+  # spring.cloud.dataflow.client.authentication.oauth2.clientRegistrationId
+  # spring.cloud.dataflow.client.authentication.oauth2.username
+  # spring.cloud.dataflow.client.authentication.oauth2.password;
+
   # env SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_ACCESS_TOKEN
 popd > /dev/null
