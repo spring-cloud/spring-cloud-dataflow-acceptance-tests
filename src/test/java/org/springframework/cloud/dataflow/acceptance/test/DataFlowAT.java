@@ -47,6 +47,7 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
@@ -573,6 +574,7 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @Order(Integer.MIN_VALUE + 10)
+    @Disabled // all tests are excluding this test
     @DisabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
     @Tag("group3")
     public void streamAppCrossVersion() {

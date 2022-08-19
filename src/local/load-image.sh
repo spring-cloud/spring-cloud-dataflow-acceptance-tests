@@ -4,7 +4,7 @@ if [ "$K8S_DRIVER" == "" ]; then
 fi
 
 set -e
-if [ "$K8S_DRIVER" != "tmc" ]; then
+if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
   DONT_PULL=$3
   if [[ "$2" == "" ]]; then
     echo "A TAG is required for $1" >&2
@@ -46,6 +46,9 @@ if [ "$K8S_DRIVER" != "tmc" ]; then
     ;;
   "tce")
     kind load docker-image "$IMAGE" --name scdf-local
+    ;;
+  "gke")
+    echo "gcr push will be supported soon"
     ;;
   "tmc")
     echo "not supported in TMC"
