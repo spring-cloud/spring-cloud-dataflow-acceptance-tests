@@ -39,7 +39,7 @@ kubectl rollout status deployment --namespace "$NS" skipper
 echo "Waiting for dataflow"
 kubectl rollout status deployment --namespace "$NS" scdf-server
 
-if [ "$K8S_DRIVER" != "tmc" ]; then
+if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
   source "$LS_DIR/forward-scdf.sh"
   # waiting for port-forwarding to be active
   sleep 2

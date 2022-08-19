@@ -21,7 +21,7 @@ if [ "$COUNT" == "0" ]; then
 else
   echo "Namespace $NS exists"
 fi
-if [ "$K8S_DRIVER" != "tmc" ]; then
+if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
   if [ "$DOCKER_USER" == "" ] || [ "$DOCKER_SERVER" == "" ] || [ "$DOCKER_PASSWORD" == "" ]; then
     echo "DOCKER_SERVER, DOCKER_USER, DOCKER_PASSWORD, DOCKER_EMAIL is required" >&2
     exit 1
@@ -50,7 +50,7 @@ K8S_PATH=$(realpath $SCDIR/k8s)
 echo "K8S_PATH=$K8S_PATH"
 
 set -e
-if [ "$K8S_DRIVER" != "tmc" ]; then
+if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
   sh "$SCDIR/load-image.sh" "busybox" "1"
   sh "$SCDIR/load-image.sh" "bitnami/kubectl" "1.23.6-debian-10-r0"
   sh "$SCDIR/load-image.sh" "mariadb" "10.4.22"
@@ -83,7 +83,7 @@ kubectl create --namespace "$NS" -f src/kubernetes/mariadb/
 
 if [ "$PROMETHEUS" == "true" ]; then
   echo "Loading Prometheus and Grafana"
-  if [ "$K8S_DRIVER" != "tmc" ]; then
+  if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
     sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus" "2.10.0-SNAPSHOT"
     sh "$SCDIR/load-image.sh" "prom/prometheus" "v2.12.0"
     sh "$SCDIR/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy" "0.11.0"

@@ -16,11 +16,13 @@ fi
 kubectl delete secrets --namespace "$NS" --all
 kubectl delete all --namespace "$NS" --all
 kubectl delete pvc --namespace "$NS" --all
-echo "stopping port forward"
-kubectl_pid=$(ps aux | grep 'kubectl' | grep 'port\-forward' | awk '{print $2}')
-if [ "$kubectl_pid" != "" ]
-then
-  kill $kubectl_pid
+if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
+  echo "stopping port forward"
+  kubectl_pid=$(ps aux | grep 'kubectl' | grep 'port\-forward' | awk '{print $2}')
+  if [ "$kubectl_pid" != "" ]
+  then
+    kill $kubectl_pid
+  fi
 fi
 if [ "$NS" != "default" ]; then
   kubectl delete namespace "$NS"

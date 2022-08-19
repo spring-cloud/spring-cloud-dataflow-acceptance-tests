@@ -13,6 +13,10 @@ case "$K8S_DRIVER" in
 "kind")
   kind delete cluster
   ;;
+"gke")
+  sh "$SCDIR/delete-scdf.sh"
+  sh "$SCDIR/tmc/delete-cluster.sh"
+  ;;
 "tmc")
   sh "$SCDIR/delete-scdf.sh"
   sh "$SCDIR/tmc/delete-cluster.sh"
