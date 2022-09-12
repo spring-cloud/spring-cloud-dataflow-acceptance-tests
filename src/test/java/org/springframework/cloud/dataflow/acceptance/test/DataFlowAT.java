@@ -483,6 +483,7 @@ class DataFlowAT extends CommonTestBase {
     }
     @Test
     @Tag("group6")
+    @Tag("smoke")
     public void streamTransform() {
         logger.info("stream-transform-test:start");
         try (Stream stream = Stream.builder(dataFlowOperations)
@@ -672,6 +673,7 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @Tag("group2")
+    @Tag("smoke")
     public void streamLifecycle() {
         logger.info("stream-lifecycle:start");
         streamLifecycleHelper(1, s -> {
@@ -930,6 +932,7 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @Tag("group2")
+    @Tag("smoke")
     public void namedChannelTap() {
         logger.info("named-channel-tap:start");
         try (
@@ -1082,6 +1085,7 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @Tag("group5")
+    @Tag("smoke")
     public void dataflowTaskLauncherSink() throws JsonProcessingException {
         logger.info("dataflow-task-launcher-sink:start");
         if (this.runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.LOCAL_PLATFORM_TYPE)) {
@@ -1549,6 +1553,7 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @Tag("group3")
+    @Tag("smoke")
     public void ctrLaunchTest() {
         logger.info("ctr-launch:start");
 

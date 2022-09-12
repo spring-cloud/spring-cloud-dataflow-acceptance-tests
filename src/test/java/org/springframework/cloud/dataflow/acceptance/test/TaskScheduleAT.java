@@ -172,6 +172,7 @@ public class TaskScheduleAT extends CommonTestBase {
 
     @Test
     @Tag("group4")
+    @Tag("smoke")
     public void scheduleLifeCycle() {
         logger.info("schedule-lifecycle-test");
 
