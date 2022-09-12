@@ -84,6 +84,7 @@ public class BatchRemotePartitioningAT extends CommonTestBase {
     @Test
     @EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
     @Tag("group2")
+    @Tag("smoke")
     public void runBatchRemotePartitionJobCloudFoundry() {
         logger.info("run-batch-remote-partition-job-cloudFoundry:start");
         final String prefix = CFConnectionProperties.CLOUDFOUNDRY_PROPERTIES;
@@ -116,6 +117,7 @@ public class BatchRemotePartitioningAT extends CommonTestBase {
     @Test
     @EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
     @Tag("group2")
+    @Tag("smoke")
     public void runBatchRemotePartitionJobKubernetes() {
         logger.info("run-batch-remote-partition-job-kubernetes:start");
 
