@@ -483,7 +483,6 @@ class DataFlowAT extends CommonTestBase {
     }
     @Test
     @Tag("group6")
-    @Tag("smoke")
     public void streamTransform() {
         logger.info("stream-transform-test:start");
         try (Stream stream = Stream.builder(dataFlowOperations)
@@ -932,7 +931,6 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @Tag("group2")
-    @Tag("smoke")
     public void namedChannelTap() {
         logger.info("named-channel-tap:start");
         try (
