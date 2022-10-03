@@ -19,26 +19,38 @@ package org.springframework.cloud.dataflow.acceptance.test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
-import org.springframework.context.annotation.Import;
+import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
+import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.TestPropertySource;
 
-@SpringBootApplication(exclude = CloudFoundryDeployerAutoConfiguration.class)
+
+@SpringBootApplication(exclude = {
+    CloudFoundryDeployerAutoConfiguration.class,
+    KubernetesAutoConfiguration.class,
+    LocalDeployerAutoConfiguration.class
+})
 public class TestConfig {
-	@ConditionalOnProperty(value = "PLATFORM_TYPE", havingValue = "local", matchIfMissing = true)
-	static class TestConfigLocal {
+    @ConditionalOnProperty(value = "PLATFORM_TYPE", havingValue = "local", matchIfMissing = true)
+    @TestPropertySource("classpath:application-local.yml")
+    @Configuration
+    // @Import(LocalDeployerAutoConfiguration.class)
+    static class TestConfigLocal {
 
-	}
+    }
 
-	@ConditionalOnProperty(value = "PLATFORM_TYPE", havingValue = "kubernetes")
-	static class TestConfigKubernetes {
+    @ConditionalOnProperty(value = "PLATFORM_TYPE", havingValue = "kubernetes")
+    @TestPropertySource("classpath:application-k8s.yml")
+    @Configuration
+    // @Import(KubernetesAutoConfiguration.class)
+    static class TestConfigKubernetes {
 
-	}
+    }
 
-	@ConditionalOnProperty(value = "PLATFORM_TYPE", havingValue = "cloudfoundry")
-	@Import(CloudFoundryDeployerAutoConfiguration.class)
-	static class TestConfigCloudFoundry {
+    @ConditionalOnProperty(value = "PLATFORM_TYPE", havingValue = "cloudfoundry")
+    @Configuration
+    // @Import(CloudFoundryDeployerAutoConfiguration.class)
+    static class TestConfigCloudFoundry {
 
-	}
-
-
-
+    }
 }
