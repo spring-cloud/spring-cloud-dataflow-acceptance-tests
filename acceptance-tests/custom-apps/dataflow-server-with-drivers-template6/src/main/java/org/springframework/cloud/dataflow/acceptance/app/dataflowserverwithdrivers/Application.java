@@ -22,24 +22,18 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
-import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
-import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
-import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
 
 @SpringBootApplication(exclude = {
-		SessionAutoConfiguration.class,
-		ManagementWebSecurityAutoConfiguration.class,
-		SecurityAutoConfiguration.class,
-		UserDetailsServiceAutoConfiguration.class,
-		LocalDeployerAutoConfiguration.class,
-		CloudFoundryDeployerAutoConfiguration.class,
-		KubernetesAutoConfiguration.class
+    SessionAutoConfiguration.class,
+    ManagementWebSecurityAutoConfiguration.class,
+    SecurityAutoConfiguration.class,
+    UserDetailsServiceAutoConfiguration.class
 })
 @EnableDataFlowServer
 public class Application {
 
-	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
 }
 

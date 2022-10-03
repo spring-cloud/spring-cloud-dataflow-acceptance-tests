@@ -27,9 +27,6 @@ import org.springframework.cloud.deployer.resource.docker.DockerResourceLoader;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
-import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
-import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
-import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -42,11 +39,7 @@ import org.springframework.core.io.ResourceLoader;
  *
  * @author David Turanski
  */
-@SpringBootApplication(exclude = {
-		CloudFoundryDeployerAutoConfiguration.class,
-		LocalDeployerAutoConfiguration.class,
-		KubernetesAutoConfiguration.class
-})
+@SpringBootApplication()
 public class BatchRemotePartitionApplication {
 
 	public static void main(String[] args) {

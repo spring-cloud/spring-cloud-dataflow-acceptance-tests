@@ -76,6 +76,7 @@ import org.springframework.cloud.dataflow.rest.client.dsl.task.Task;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskBuilder;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
+import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
@@ -842,7 +843,9 @@ class DataFlowAT extends CommonTestBase {
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(3).equals(DELETED));
 
-            assertThat(dataFlowOperations.streamOperations().list().getMetadata().getTotalElements()).isEqualTo(1L);
+            PagedModel<StreamDefinitionResource> list = dataFlowOperations.streamOperations().list();
+            System.out.println("definitions:" + list.getContent());
+            assertThat(list.getMetadata().getTotalElements()).isEqualTo(1L);
             // DESTROY
         }
         logger.info("stream-lifecycle-test: DESTROY");
