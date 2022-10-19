@@ -47,6 +47,7 @@ You can invoke one of the following scripts to choose the type of installation y
 * `use-mk-kvm2.sh`
 * `use-kind.sh`
 * `use-tmc.sh <cluster-name>`
+* `use-gke.sh <cluster-name>`
 
 Since these scripts export environmental variable they need to be executes as in the following example:
 
@@ -55,7 +56,7 @@ Since these scripts export environmental variable they need to be executes as in
 source ./src/local/use-mk.sh kvm2
 ....
 
-=== TMC Cluster in Cloud
+=== TMC or GKE Cluster in Cloud
 
 The cluster must exist before use.
 
@@ -72,6 +73,20 @@ For kind follow instruction to update `./src/local/k8s/metallb-configmap.yaml`
 For minikube launch a new shell and execute `minikube tunnel`
 
 === Deploy Spring Cloud Data Flow.
+
+==== Configure Broker
+[source,shell]
+....
+export BROKER=<broker> # <1>
+....
+<1> <broker> one of `kafka` or `rabbitmq`
+
+==== Configure Database
+[source,shell]
+....
+export DATABASE=<database> # <1>
+....
+<1> <database> one of `mariadb` or `postgresql`
 
 [source,shell]
 ....

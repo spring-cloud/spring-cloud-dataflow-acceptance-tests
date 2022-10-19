@@ -48,13 +48,16 @@ spec:
           initialDelaySeconds: 50
           periodSeconds: 3
         resources:
-          limits:
-            cpu: 1.0
-            memory: 1024Mi
           requests:
             cpu: 0.5
             memory: 640Mi
         env:
+          - name: LANG
+            value: en_US.UTF-8
+          - name: LC_ALL
+            value: en_US.UTF-8
+          - name: JAVA_OPTS
+            value: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
           - name: SPRING_PROFILES_ACTIVE
             value: 'kubernetes'
           - name: SERVER_PORT
@@ -76,7 +79,7 @@ spec:
         imagePullPolicy: IfNotPresent
         command: ['sh', '-c', 'until nc -w3 -z mariadb 3306; do echo waiting for mariadb; sleep 3; done;']
       - name: init-mariadb-database
-        image: mariadb:10.4.22
+        image: mariadb:10.4
         env:
         - name: MARIADB_PWD
           valueFrom:

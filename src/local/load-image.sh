@@ -42,10 +42,11 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
   echo "Loading:$IMAGE"
   case "$K8S_DRIVER" in
   "kind")
+    echo "Loading $IMAGE to kind"
     kind load docker-image "$IMAGE" "$IMAGE"
     ;;
   "tce")
-    kind load docker-image "$IMAGE" --name scdf-local
+    echo "Harbor push will be supported soon"
     ;;
   "gke")
     echo "gcr push will be supported soon"
@@ -54,6 +55,18 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
     echo "not supported in TMC"
     ;;
   *)
+    echo "Loading $IMAGE to minikube"
+    DOCKER_IDS=$(docker images | grep -F "$1" | grep -F "$2" | awk '{print $3}')
+    MK_IDS=$(minikube image ls --format=table | grep -F "$1" | grep -F "$2" | awk '{print $6}')
+    for did in $DOCKER_IDS; do
+      for mid in $MK_IDS; do
+        # Docker id may be shorter than Minikube id.
+        if [ "${mid:0:12}" == "${did:0:12}" ]; then
+          echo "$IMAGE already uploaded"
+          exit 0
+        fi
+      done
+    done
     minikube image load "$IMAGE"
     ;;
   esac

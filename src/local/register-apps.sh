@@ -23,11 +23,16 @@ fi
 if [ "$DATAFLOW_IP" == "" ]; then
   source "$SCDIR/export-dataflow-ip.sh"
 fi
-if [ "$BINDER" == "kafka" ]; then
+case $BROKER in
+"" | "kafka")
   export BROKER=kafka
-else
+  ;;
+"rabbit" | "rabbitmq")
   export BROKER=rabbitmq
-fi
+  ;;
+*)
+  echo "BROKER=$BROKER not supported"
+esac
 
 if [ "$BROKER" = "rabbitmq" ]; then
   BROKER_NAME=rabbit
