@@ -39,14 +39,13 @@ case "$K8S_DRIVER" in
   echo "Please run 'minikube tunnel' in a separate shell to ensure a LoadBalancer is active."
   ;;
 esac
-kubectl get namespaces | grep "$NS" > /dev/null
-RC=$?
-if [ "$RC" != "0" ]; then
+COUNT=$(kubectl get namespaces | grep -c "$NS")
+if ((COUNT == 0)); then
   kubectl create namespace "$NS"
 fi
-if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
+if [ "$K8S_DRIVER" == "kind" ]; then
   sh "$SCDIR/setup-metallb.sh"
 fi
 end_time=$(date +%s)
-elapsed=$(( end_time - start_time ))
+elapsed=$((end_time - start_time))
 echo "Kubernetes on $K8S_DRIVER running in $elapsed seconds"

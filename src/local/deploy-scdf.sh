@@ -6,9 +6,31 @@ fi
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 PARENT=$(realpath "$SCDIR/../../..")
 
-if [ "$BINDER" == "" ]; then
-  export BINDER="rabbit"
-fi
+case $BROKER in
+  "kafka")
+    export BROKER="kafka"
+    ;;
+  "rabbit" | "rabbitmq")
+    export BROKER="rabbit"
+    ;;
+  "")
+    export BROKER="kafka"
+    ;;
+  *)
+    echo "BROKER=$BROKER not supported"
+    ;;
+esac
+
+case $DATABASE in
+  "mariadb")
+    ;;
+  "")
+    export DATABASE=mariadb
+    ;;
+  *)
+    echo "DATABASE=$DATABASE not supported"
+    ;;
+esac
 
 if [ "$K8S_DRIVER" == "" ]; then
   K8S_DRIVER=kind
@@ -53,13 +75,30 @@ set -e
 if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
   sh "$SCDIR/load-image.sh" "busybox" "1"
   sh "$SCDIR/load-image.sh" "bitnami/kubectl" "1.23.6-debian-10-r0"
-  sh "$SCDIR/load-image.sh" "mariadb" "10.4.22"
-  if [ "$BINDER" == "kafka" ]; then
+  case $DATABASE in
+  "mariadb")
+    sh "$SCDIR/load-image.sh" "mariadb" "10.4"
+    ;;
+  "postgres" | "postgresql")
+    sh "$SCDIR/load-image.sh" "postgresql" "10"
+    ;;
+  *)
+    echo "DATABASE=$DATABASE not supported"
+    ;;
+  esac
+  case $BROKER in
+  "kafka")
     sh "$SCDIR/load-image.sh" "confluentinc/cp-kafka" "5.5.2"
     sh "$SCDIR/load-image.sh" "confluentinc/cp-zookeeper" "5.5.2"
-  else
+    ;;
+  "rabbit" | "rabbitmq")
     sh "$SCDIR/load-image.sh" "rabbitmq" "3.6.10"
-  fi
+    ;;
+  *)
+    echo "BROKER=$BROKER not supported"
+    ;;
+  esac
+
   sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-composed-task-runner" "$DATAFLOW_VERSION" false
   sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-skipper-server" "$SKIPPER_VERSION" true
 
@@ -71,13 +110,17 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
 fi
 
 pushd $PARENT/spring-cloud-dataflow  > /dev/null
-if [ "$BINDER" == "kafka" ]; then
-  # Deploy Kafka
-  kubectl create --namespace "$NS" -f src/kubernetes/kafka/
-else
-  # Deploy Rabbit
-  kubectl create --namespace "$NS" -f src/kubernetes/rabbitmq/
-fi
+case $BROKER in
+  "kafka")
+    kubectl create --namespace "$NS" -f src/kubernetes/kafka/
+    ;;
+  "rabbit" | "rabbitmq")
+    kubectl create --namespace "$NS" -f src/kubernetes/rabbitmq/
+    ;;
+  *)
+    echo "BROKER=$BROKER not supported"
+    ;;
+esac
 
 kubectl create --namespace "$NS" -f src/kubernetes/mariadb/
 
@@ -105,7 +148,7 @@ kubectl create --namespace "$NS" -f src/kubernetes/server/server-rolebinding.yam
 kubectl create --namespace "$NS" -f src/kubernetes/server/service-account.yaml
 kubectl apply --namespace "$NS" -f "$K8S_PATH/server-config.yaml"
 # Deploy Spring Cloud Skipper
-if [ "$BINDER" == "kafka" ]; then
+if [ "$BROKER" == "kafka" ]; then
   kubectl apply --namespace "$NS" -f "$K8S_PATH/skipper-config-kafka.yaml"
 else
   kubectl apply --namespace "$NS" -f "$K8S_PATH/skipper-config-rabbit.yaml"

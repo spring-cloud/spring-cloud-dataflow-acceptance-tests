@@ -1,22 +1,18 @@
 #!/usr/bin/env bash
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-if [ "$BINDER" == "" ]; then
-  export BINDER=rabbit
-else
-  export BINDER=kafka
-fi
+case $BROKER in
+"" | "kafka")
+  export BROKER=kafka
+  export BROKER_NAME=kafka
+  ;;
+"rabbit" | "rabbitmq")
+  export BROKER=rabbitmq
+  export BROKER_NAME=rabbit
+  ;;
+*)
+  echo "BROKER=$BROKER not supported"
+esac
 
-if [ "$BINDER" == "kafka" ]; then
-  BROKER=kafka
-else
-  BROKER=rabbitmq
-fi
-
-if [ "$BROKER" = "rabbitmq" ]; then
-  BROKER_NAME=rabbit
-else
-  BROKER_NAME=$BROKER
-fi
 STREAM_APPS_VERSION="3.2.2-SNAPSHOT"
 
 if [ "$BROKER" == "rabbitmq" ]; then

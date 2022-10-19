@@ -9,7 +9,7 @@ data:
     logging:
       level:
         root: info
-        org.springframework.cloud: debug
+        org.springframework: debug
     management:
       metrics:
         export:
@@ -47,3 +47,7 @@ data:
         driverClassName: org.mariadb.jdbc.Driver
         testOnBorrow: true
         validationQuery: "SELECT 1"
+        hikari:
+          data-source-properties:
+            useUnicode: true
+            characterEncoding: 'UTF-8'
