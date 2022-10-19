@@ -11,8 +11,8 @@ set -e
 if [ "$K8S_DRIVER" == "" ]; then
   K8S_DRIVER=kind
 fi
-if [ "$BINDER" == "" ]; then
-  export BINDER="rabbit"
+if [ "$BROKER" == "" ]; then
+  export BROKER="kafka"
 fi
 export PLATFORM_TYPE=kubernetes
 if [ "$K8S_DRIVER" == "kind" ]; then
@@ -26,7 +26,7 @@ if [ "$K8S_DRIVER" != "tmc" ]; then
 fi
 echo "Waiting for mariadb"
 kubectl rollout status deployment --namespace "$NS" mariadb
-if [ "$BINDER" == "kafka" ]; then
+if [ "$BROKER" == "kafka" ]; then
   echo "Waiting for Kafka and Zookeeper"
   kubectl rollout status deployment --namespace "$NS" kafka-zk
   kubectl rollout status sts --namespace "$NS" kafka-broker
@@ -39,7 +39,7 @@ kubectl rollout status deployment --namespace "$NS" skipper
 echo "Waiting for dataflow"
 kubectl rollout status deployment --namespace "$NS" scdf-server
 
-if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
+if [ "$K8S_DRIVER" == "kind" ]; then
   source "$LS_DIR/forward-scdf.sh"
   # waiting for port-forwarding to be active
   sleep 2
