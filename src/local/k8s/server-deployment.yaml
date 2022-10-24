@@ -54,10 +54,10 @@ spec:
               memory: 1024Mi
           env:
             - name: LANG
-              value: en_US.UTF-8
+              value: en_US.utf8
             - name: LC_ALL
-              value: en_US.UTF-8
-            - name: JAVA_OPTS
+              value: en_US.utf8
+            - name: JDK_JAVA_OPTIONS
               value: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
             - name: KUBERNETES_NAMESPACE
               valueFrom:
