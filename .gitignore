@@ -62,3 +62,5 @@ acceptance-tests/.vscode/*
 !acceptance-tests/.vscode/extensions.json
 .vscode
 *.zip
+workspace/
+workspaces/
