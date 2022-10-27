@@ -6,7 +6,7 @@ if [ "$sourced" == "0" ]; then
 fi
 if [ "$1" == "" ]; then
   echo "Expected parameter providing MiniKube driver type."
-  echo "Choose one of kvm2, docker, vmware, virtualbox, podman, vmwarefusion"
+  echo "Choose one of kvm2, docker, vmware, virtualbox, podman, vmwarefusion, hyperkit"
   return 2
 fi
 export K8S_DRIVER=$1

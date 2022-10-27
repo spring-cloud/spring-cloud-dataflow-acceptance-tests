@@ -42,16 +42,12 @@ if [ "$1" != "" ]; then
   esac
 fi
 
-if [ "$BINDER" == "" ]; then
-  export BINDER=rabbit
-else
+if [ "$BROKER" == "kafka" ]; then
   export BINDER=kafka
-fi
-if [ "$BINDER" == "kafka" ]; then
-  export BROKER=kafka
 else
-  export BROKER=rabbit
+  export BINDER=rabbit
 fi
+
 echo "DATAFLOW_IP=$DATAFLOW_IP"
 pushd $(realpath $SCDIR/../..)
 echo "EXTRA=$EXTRA" | tee build.log
