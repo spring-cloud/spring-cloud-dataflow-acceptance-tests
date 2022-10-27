@@ -6,6 +6,15 @@ You will need to install kubectl and then kind or minikube for a local cluster.
 
 _How do I choose between minikube and kind? kind will generally provide quicker setup and teardown time than Minikube. There is little to choose in terms of performance between the 2 apart from being able to configure limits on CPUs and memory when deploying minikube. So in the case where you have memory constraints minikube will be a better option._
 
+== Steps
+* Choose Kubernetes provider. Kind, Minikube or remote GKE or TMC
+* Decide the namespace to use for deployment if not `default`
+* Configure Kubernetes and loadbalancer.
+* Choose Broker with `export BROKER=kafka|rabbitmq`
+* Build or Pull container images for Skipper and Data Flow Server.
+* Deploy and Launch Spring Cloud Data Flow.
+* Export Data Flow Server address to env.
+
 === Kubectl
 
 You will need to https://kubernetes.io/docs/tasks/tools/[install] kubectl in order to configure the Kubernetes cluster
@@ -49,16 +58,19 @@ You can invoke one of the following scripts to choose the type of installation y
 * `use-tmc.sh <cluster-name>`
 * `use-gke.sh <cluster-name>`
 
+NOTE: <driver> must be one of `kvm2`, `docker`, `vmware`, `virtualbox`, `vmwarefusion` or `hyperkit`. `docker` is the recommended option for local development.
+
+
 Since these scripts export environmental variable they need to be executes as in the following example:
 
 [source,shell]
 ....
-source ./src/local/use-mk.sh kvm2
+source ./src/local/use-mk.sh vmware
 ....
 
 === TMC or GKE Cluster in Cloud
 
-The cluster must exist before use.
+The cluster must exist before use and you should use the relevant cli to login before executing `source ./use-gke.sh`
 
 === Local Cluster
 
@@ -69,8 +81,9 @@ When using a local kind or minikube cluster:
 ./src/local/configure-k8s.sh
 ....
 
-For kind follow instruction to update `./src/local/k8s/metallb-configmap.yaml`
-For minikube launch a new shell and execute `minikube tunnel`
+* For kind follow instruction to update `./src/local/k8s/metallb-configmap.yaml`
+
+* For minikube launch a new shell and execute `minikube tunnel`
 
 === Deploy Spring Cloud Data Flow.
 
@@ -136,9 +149,13 @@ The following list of utilities may prove useful.
 | build-scdf-pro-image.sh | Build a docker image from the local repo of Dataflow Pro. Set `USE_PRO=true` in environment to use Dataflow Pro
 | build-skipper-image.sh | Build a docker image from the local repo of Skipper.
 | configure-k8s.sh | Configure the Kubernetes environment based on your configuration of K8S_DRIVER.
+| delete-scdf.sh | Delete all Kubernetes resources create by the deployment.
 | destroy-k8s.sh | Delete cluster, kind or minikube.
+| export-dataflow-ip.sh | Export the url of the data flow server to `DATAFLOW_IP`
+| export-http-url.sh | Export the url of an http source of a specific flow by name to `HTTP_APP_URL`
 | launch-scdf.sh | Configure and deploy all the containers for Spring Cloud Dataflow
 | load-images.sh | Load all container images required by tests into kind or minikube to ensure you have control over what is used.
+| load-image.sh | Load a specific container image into local kind or minikube.
 | local-k8s-test.sh | Execute acceptance tests against cluster where DATAFLOW_IP is pointing.
 | register-apps.sh | Register the Task and Stream apps used by the unit tests.
 |===
