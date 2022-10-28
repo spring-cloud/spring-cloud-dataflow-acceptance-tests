@@ -136,7 +136,7 @@ The following list of utilities may prove useful.
 
 == Scripts
 
-[cols="5,8"]
+[cols="5m,7"]
 |===
 |Script |Description
 
