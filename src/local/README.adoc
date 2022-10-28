@@ -103,7 +103,7 @@ export DATABASE=<database> # <1>
 
 [source,shell]
 ....
-./src/local/launch-scdf.sh
+./src/local/install-scdf.sh
 source ./src/local/export-dataflow-ip.sh
 ....
 
@@ -153,7 +153,7 @@ The following list of utilities may prove useful.
 | destroy-k8s.sh | Delete cluster, kind or minikube.
 | export-dataflow-ip.sh | Export the url of the data flow server to `DATAFLOW_IP`
 | export-http-url.sh | Export the url of an http source of a specific flow by name to `HTTP_APP_URL`
-| launch-scdf.sh | Configure and deploy all the containers for Spring Cloud Dataflow
+| install-scdf.sh | Configure and deploy all the containers for Spring Cloud Dataflow
 | load-images.sh | Load all container images required by tests into kind or minikube to ensure you have control over what is used.
 | load-image.sh | Load a specific container image into local kind or minikube.
 | local-k8s-test.sh | Execute acceptance tests against cluster where DATAFLOW_IP is pointing.
