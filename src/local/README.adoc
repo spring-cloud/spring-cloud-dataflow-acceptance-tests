@@ -6,6 +6,12 @@ You will need to install kubectl and then kind or minikube for a local cluster.
 
 _How do I choose between minikube and kind? kind will generally provide quicker setup and teardown time than Minikube. There is little to choose in terms of performance between the 2 apart from being able to configure limits on CPUs and memory when deploying minikube. So in the case where you have memory constraints minikube will be a better option._
 
+=== macOS
+
+Install realpath from https://ports.macports.org/port/realpath/[Macports] or `brew install realpath`
+
+NOTE: The scripts have been developed for and tested on Bash.
+
 == Steps
 * Choose Kubernetes provider. Kind, Minikube or remote GKE or TMC
 * Decide the namespace to use for deployment if not `default`
@@ -34,6 +40,8 @@ Minikube uses one of a selection of drivers to provide a virtualization environm
 
 * https://minikube.sigs.k8s.io/docs/start/[Installation]
 * https://minikube.sigs.k8s.io/docs/start/#loadbalancer-deployments[LoadBalancer]
+
+NOTE: Delete existing Minikube installation if you have any. `minikube delete`
 
 === Remote TMC Cluster
 
@@ -133,6 +141,18 @@ The following list of utilities may prove useful.
 | https://k9scli.io/[k9s] | k9s is a text based monitor to explore the Kubernetes cluster.
 | https://github.com/boz/kail[kail] | Extra and tail the logs of various pods based on various naming criteria.
 |===
+
+=== `kail`
+
+
+* Using kail to log activity related to a specific stream.
+```shell
+kail --label=spring-group-id=<stream-name>
+```
+* Using kail to log all pods in specific namespace.
+```shell
+kail --ns=<namespace>
+```
 
 == Scripts
 

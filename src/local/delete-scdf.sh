@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 
 kubectl delete deployments --all $WAIT --namespace="$NS"
 kubectl delete statefulsets --all $WAIT --namespace="$NS"

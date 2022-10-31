@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 
 get_db_service_instance() {
   service=$(cf services | grep p-dataflow-relational | awk '{print $1}')

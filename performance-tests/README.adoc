@@ -5,7 +5,7 @@ This module contains code to create CF tasks that populate the SCDF database wit
 The platform initialization relies on The acceptance test code to set up SCDF on CF, then run scripts to build and deploy the tasks from the corresponding Java apps:
 
 ```
-#!/usr/bin/env bash
+#!/usr/bin/bash
 export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL=${bamboo.CLOUDFOUNDRY_URL}
 export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG=${bamboo.CLOUDFOUNDRY_ORG}
 export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE=${bamboo.CLOUDFOUNDRY_SPACE}

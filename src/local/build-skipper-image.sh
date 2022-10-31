@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 if [ "$SKIPPER_VERSION" = "" ]; then
   SKIPPER_VERSION=2.9.0-SNAPSHOT

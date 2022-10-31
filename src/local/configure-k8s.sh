@@ -1,4 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
+
+bold="\033[1m"
+dim="\033[2m"
+end="\033[0m"
+
 if [ "$NS" = "" ]; then
   echo "NS not defined" >&2
   exit 2
@@ -18,13 +23,13 @@ case "$K8S_DRIVER" in
   ;;
 "gke")
   if [ "$GKE_CLUSTER" = "" ]; then
-    echo "Cannot find environmental variable GKE_CLUSTER" >&2
+    echo "${bold}Cannot find environmental variable GKE_CLUSTER${end}" >&2
     exit 2
   fi
   ;;
 "tmc")
   if [ "$TMC_CLUSTER" = "" ]; then
-    echo "Cannot find environmental variable TMC_CLUSTER" >&2
+    echo "${bold}Cannot find environmental variable TMC_CLUSTER${end}" >&2
     exit 2
   fi
   if [ "$KUBECONFIG" = "" ]; then
@@ -36,7 +41,7 @@ case "$K8S_DRIVER" in
   echo "Creating Minikube cluster with $K8S_DRIVER"
   # K8S_DRIVER=kvm2, docker, vmware, virtualbox, podman, vmwarefusion or hyperkit
   minikube start --cpus=8 --memory=16g "--driver=$K8S_DRIVER" "--kubernetes-version=$K8S_VERSION"
-  echo "Please run 'minikube tunnel' in a separate shell to ensure a LoadBalancer is active."
+  echo "Please run ${bold}'minikube tunnel'${end} in a separate shell to ensure a LoadBalancer is active."
   ;;
 esac
 COUNT=$(kubectl get namespaces | grep -c "$NS")
@@ -48,4 +53,4 @@ if [ "$K8S_DRIVER" = "kind" ]; then
 fi
 end_time=$(date +%s)
 elapsed=$((end_time - start_time))
-echo "Kubernetes on $K8S_DRIVER running in $elapsed seconds"
+echo "Kubernetes on $K8S_DRIVER running in ${bold}$elapsed${end} seconds"

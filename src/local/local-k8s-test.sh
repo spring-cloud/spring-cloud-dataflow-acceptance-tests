@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-if [ "$1" == "-h" ]; then
+#!/usr/bin/bash
+if [ "$1" = "-h" ]; then
   echo "Usage $0 <test>"
   echo "  where test:"
   echo "    n for test-n-of-3"
@@ -12,11 +12,11 @@ SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 pushd "$SCDIR/../../acceptance-tests/custom-apps/timestamp-batch-with-drivers-template1"  > /dev/null
 ./gradlew build install
 popd > /dev/null # This assumes you are using minikube with helm from bitnami and used release name scdf and executed forward-scdf.sh
-if [ "$DATAFLOW_IP" == "" ]; then
+if [ "$DATAFLOW_IP" = "" ]; then
   echo "DATAFLOW_IP not defined"
   exit 1
 fi
-if [ "$EXTRA" == "" ]; then
+if [ "$EXTRA" = "" ]; then
   export EXTRA="-P test-all"
 fi
 if [ "$1" != "" ]; then
@@ -42,7 +42,7 @@ if [ "$1" != "" ]; then
   esac
 fi
 
-if [ "$BROKER" == "kafka" ]; then
+if [ "$BROKER" = "kafka" ]; then
   export BINDER=kafka
 else
   export BINDER=rabbit

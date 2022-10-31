@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 if [ "$DATAFLOW_VERSION" = "" ]; then
   DATAFLOW_VERSION=2.10.0-SNAPSHOT

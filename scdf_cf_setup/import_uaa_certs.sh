@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 if [[ -z "$1" ]]; then
   echo "No cert_host provided"
   echo "Usage $0 cert_host"
