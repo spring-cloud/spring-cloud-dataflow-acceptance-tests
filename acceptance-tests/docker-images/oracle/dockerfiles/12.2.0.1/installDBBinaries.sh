@@ -6,14 +6,14 @@
 # Since: December, 2016
 # Author: gerald.venzl@oracle.com
 # Description: Sets up the unix environment for DB installation.
-# 
+#
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
-# 
+#
 
 EDITION=$1
 
 # Check whether edition has been passed on
-if [ "$EDITION" == "" ]; then
+if [ "$EDITION" = "" ]; then
    echo "ERROR: No edition has been passed on!"
    echo "Please specify the correct edition!"
    exit 1;
@@ -27,14 +27,14 @@ if [ "$EDITION" != "EE" -a "$EDITION" != "SE2" ]; then
 fi;
 
 # Check whether ORACLE_BASE is set
-if [ "$ORACLE_BASE" == "" ]; then
+if [ "$ORACLE_BASE" = "" ]; then
    echo "ERROR: ORACLE_BASE has not been set!"
    echo "You have to have the ORACLE_BASE environment variable set to a valid value!"
    exit 1;
 fi;
 
 # Check whether ORACLE_HOME is set
-if [ "$ORACLE_HOME" == "" ]; then
+if [ "$ORACLE_HOME" = "" ]; then
    echo "ERROR: ORACLE_HOME has not been set!"
    echo "You have to have the ORACLE_HOME environment variable set to a valid value!"
    exit 1;

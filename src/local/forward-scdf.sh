@@ -5,10 +5,10 @@ FWSCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 SC_PATH=$(realpath $FWSCDIR)
 set -e
 echo "Waiting for dataflow"
-if [ "$K8S_DRIVER" == "" ]; then
+if [ "$K8S_DRIVER" = "" ]; then
   K8S_DRIVER=kind
 fi
-if [ "$USE_PRO" == "true" ]; then
+if [ "$USE_PRO" = "true" ]; then
   kubectl rollout status deployment --namespace "$NS" scdf-spring-cloud-dataflow-server
 else
   kubectl rollout status deployment --namespace "$NS" scdf-server
@@ -24,7 +24,7 @@ then
   kill $kubectl_pid
 fi
 kubectl port-forward --namespace "$NS" svc/scdf-server "9393:9393" &
-if [ "$PROMETHEUS" == "true" ]; then
+if [ "$PROMETHEUS" = "true" ]; then
   kubectl port-forward --namespace "$NS" svc/grafana "3000:3000" &
 fi
 

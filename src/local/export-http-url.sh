@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 PARENT=$(realpath "$SCDIR/../../..")
-if [ "$DATAFLOW_IP" == "" ]; then
+if [ "$DATAFLOW_IP" = "" ]; then
   source $SCDIR/export-dataflow-ip.sh
 fi
-if [ "$1" == "" ]; then
+if [ "$1" = "" ]; then
   echo "Name of stream is required"
   exit 1
 fi

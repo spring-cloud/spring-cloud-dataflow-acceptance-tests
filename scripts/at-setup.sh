@@ -5,7 +5,7 @@ echo "SETUP_TOOL_REPO=$SETUP_TOOL_REPO"
 echo "SQL_DATAFLOW_DB_NAME=$SQL_DATAFLOW_DB_NAME"
 echo "SQL_SKIPPER_DB_NAME=$SQL_SKIPPER_DB_NAME"
 # override completely by providing a correct value
-if [ "$BINDER" == "rabbit" ]; then
+if [ "$BINDER" = "rabbit" ]; then
   export BROKER=rabbitmq
 else
   export BROKER=$BINDER
@@ -73,7 +73,7 @@ if [[ ! -z "$SQL_PROVIDER" ]]; then
 fi
 
 os=$(uname)
-if [[ "$os" == "Linux" ]]; then
+if [[ "$os" = "Linux" ]]; then
     if ! command -v cf &> /dev/null
     then
       echo "Installing CloudFoundry CLI"
@@ -82,14 +82,14 @@ if [[ "$os" == "Linux" ]]; then
       sudo apt-get update
       sudo apt-get install cf-cli
     fi
-    if [[ "$SQL_PROVIDER" == "oracle" ]]; then
+    if [[ "$SQL_PROVIDER" = "oracle" ]]; then
       echo "Installing ORACLE components"
       wget -q https://download.oracle.com/otn_software/linux/instantclient/215000/instantclient-basiclite-linux.x64-21.5.0.0.0dbru.zip
       unzip instantclient-basiclite-linux.x64-21.5.0.0.0dbru.zip
       export LD_LIBRARY_PATH=$PWD/instantclient_21_5
     fi
-elif [[ "$os" == "Darwin" ]]; then
-  if [[ "$SQL_PROVIDER" == "oracle" ]] ; then
+elif [[ "$os" = "Darwin" ]]; then
+  if [[ "$SQL_PROVIDER" = "oracle" ]] ; then
     if [[ ! -d "./instantclient_19_8" ]]; then
       echo "Installing ORACLE components"
       wget -q https://download.oracle.com/otn_software/mac/instantclient/198000/instantclient-basiclite-macos.x64-19.8.0.0.0dbru.zip

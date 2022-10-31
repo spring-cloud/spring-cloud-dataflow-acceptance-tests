@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [ "$NS" == "" ]; then
+if [ "$NS" = "" ]; then
   echo "NS not defined" >&2
   exit 0
 fi
@@ -32,19 +32,19 @@ case $DATABASE in
     ;;
 esac
 
-if [ "$K8S_DRIVER" == "" ]; then
+if [ "$K8S_DRIVER" = "" ]; then
   K8S_DRIVER=kind
 fi
 set +e
 COUNT=$(kubectl get namespace | grep -c "$NS")
-if [ "$COUNT" == "0" ]; then
+if [ "$COUNT" = "0" ]; then
   echo "Creating namespace $NS"
   kubectl create namespace "$NS"
 else
   echo "Namespace $NS exists"
 fi
 if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
-  if [ "$DOCKER_USER" == "" ] || [ "$DOCKER_SERVER" == "" ] || [ "$DOCKER_PASSWORD" == "" ]; then
+  if [ "$DOCKER_USER" = "" ] || [ "$DOCKER_SERVER" = "" ] || [ "$DOCKER_PASSWORD" = "" ]; then
     echo "DOCKER_SERVER, DOCKER_USER, DOCKER_PASSWORD, DOCKER_EMAIL is required" >&2
     exit 1
   fi
@@ -52,19 +52,19 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
   kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "registry-key"}]}'  --namespace "$NS"
 fi
 
-if [ "$USE_PRO" == "" ]; then
+if [ "$USE_PRO" = "" ]; then
   USE_PRO=false
 fi
 
-if [ "$DATAFLOW_VERSION" == "" ]; then
+if [ "$DATAFLOW_VERSION" = "" ]; then
   DATAFLOW_VERSION=2.10.0-SNAPSHOT
 fi
 
-if [ "$SKIPPER_VERSION" == "" ]; then
+if [ "$SKIPPER_VERSION" = "" ]; then
   SKIPPER_VERSION=2.9.0-SNAPSHOT
 fi
 
-if [ "$SCDF_PRO_VERSION" == "" ]; then
+if [ "$SCDF_PRO_VERSION" = "" ]; then
   SCDF_PRO_VERSION=1.5.0-SNAPSHOT
 fi
 K8S_PATH=$(realpath $SCDIR/k8s)
@@ -102,7 +102,7 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
   sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-composed-task-runner" "$DATAFLOW_VERSION" false
   sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-skipper-server" "$SKIPPER_VERSION" true
 
-  if [ "$USE_PRO" == "true" ]; then
+  if [ "$USE_PRO" = "true" ]; then
     sh "$SCDIR/load-image.sh" "springcloud/scdf-pro-server" "$SCDF_PRO_VERSION" true
   else
     sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-server" "$DATAFLOW_VERSION" true
@@ -124,7 +124,7 @@ esac
 
 kubectl create --namespace "$NS" -f src/kubernetes/mariadb/
 
-if [ "$PROMETHEUS" == "true" ]; then
+if [ "$PROMETHEUS" = "true" ]; then
   echo "Loading Prometheus and Grafana"
   if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
     sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus" "2.10.0-SNAPSHOT"
@@ -148,7 +148,7 @@ kubectl create --namespace "$NS" -f src/kubernetes/server/server-rolebinding.yam
 kubectl create --namespace "$NS" -f src/kubernetes/server/service-account.yaml
 kubectl apply --namespace "$NS" -f "$K8S_PATH/server-config.yaml"
 # Deploy Spring Cloud Skipper
-if [ "$BROKER" == "kafka" ]; then
+if [ "$BROKER" = "kafka" ]; then
   kubectl apply --namespace "$NS" -f "$K8S_PATH/skipper-config-kafka.yaml"
 else
   kubectl apply --namespace "$NS" -f "$K8S_PATH/skipper-config-rabbit.yaml"
@@ -160,7 +160,7 @@ kubectl create --namespace "$NS" -f "$K8S_PATH/skipper-svc.yaml"
 kubectl create --namespace "$NS" clusterrolebinding scdftestrole --clusterrole cluster-admin --user=system:serviceaccount:default:scdf-sa
 
 kubectl create --namespace "$NS" -f "$K8S_PATH/server-svc.yaml"
-if [ "$USE_PRO" == "true" ]; then
+if [ "$USE_PRO" = "true" ]; then
   kubectl create --namespace "$NS" -f "$K8S_PATH/server-deployment-pro.yaml"
 else
   kubectl create --namespace "$NS" -f "$K8S_PATH/server-deployment.yaml"
