@@ -5,7 +5,7 @@ if [ "$kubectl_pid" != "" ]
 then
   kill $kubectl_pid
 fi
-if [ "$K8S_DRIVER" == "" ]; then
+if [ "$K8S_DRIVER" = "" ]; then
   K8S_DRIVER=kind
 fi
 

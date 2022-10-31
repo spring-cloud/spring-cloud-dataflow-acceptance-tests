@@ -15,7 +15,7 @@ esac
 
 STREAM_APPS_VERSION="3.2.2-SNAPSHOT"
 
-if [ "$BROKER" == "rabbitmq" ]; then
+if [ "$BROKER" = "rabbitmq" ]; then
   # Sample Stream Apps
   echo "Loading Sample Stream Apps images"
   sh "$SCDIR/load-image.sh" "springcloudstream/scdf-app-kitchen" "1.0.0-SNAPSHOT" true

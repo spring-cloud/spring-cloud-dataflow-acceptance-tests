@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-if [ "$DATAFLOW_VERSION" == "" ]; then
+if [ "$DATAFLOW_VERSION" = "" ]; then
   DATAFLOW_VERSION=2.10.0-SNAPSHOT
 fi
 pushd "$SCDIR/../../../spring-cloud-dataflow"  > /dev/null

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [ "$K8S_DRIVER" == "" ]; then
+if [ "$K8S_DRIVER" = "" ]; then
   K8S_DRIVER=kind
 fi
 

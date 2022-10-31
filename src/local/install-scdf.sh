@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [ "$NS" == "" ]; then
+if [ "$NS" = "" ]; then
   echo "NS not defined" >&2
   exit 2
 fi
@@ -8,14 +8,14 @@ SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 LS_DIR=$(realpath $SCDIR)
 K8S_PATH="$LS_DIR/k8s"
 set -e
-if [ "$K8S_DRIVER" == "" ]; then
+if [ "$K8S_DRIVER" = "" ]; then
   K8S_DRIVER=kind
 fi
-if [ "$BROKER" == "" ]; then
+if [ "$BROKER" = "" ]; then
   export BROKER="kafka"
 fi
 export PLATFORM_TYPE=kubernetes
-if [ "$K8S_DRIVER" == "kind" ]; then
+if [ "$K8S_DRIVER" = "kind" ]; then
   kubectl apply -f "$K8S_PATH/metallb-configmap.yaml"
 fi
 
@@ -26,7 +26,7 @@ if [ "$K8S_DRIVER" != "tmc" ]; then
 fi
 echo "Waiting for mariadb"
 kubectl rollout status deployment --namespace "$NS" mariadb
-if [ "$BROKER" == "kafka" ]; then
+if [ "$BROKER" = "kafka" ]; then
   echo "Waiting for Kafka and Zookeeper"
   kubectl rollout status deployment --namespace "$NS" kafka-zk
   kubectl rollout status sts --namespace "$NS" kafka-broker
@@ -39,7 +39,7 @@ kubectl rollout status deployment --namespace "$NS" skipper
 echo "Waiting for dataflow"
 kubectl rollout status deployment --namespace "$NS" scdf-server
 
-if [ "$K8S_DRIVER" == "kind" ]; then
+if [ "$K8S_DRIVER" = "kind" ]; then
   source "$LS_DIR/forward-scdf.sh"
   # waiting for port-forwarding to be active
   sleep 2
