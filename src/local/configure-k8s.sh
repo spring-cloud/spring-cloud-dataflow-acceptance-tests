@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [ "$NS" == "" ]; then
+if [ "$NS" = "" ]; then
   echo "NS not defined" >&2
   exit 2
 fi
@@ -7,7 +7,7 @@ start_time=$(date +%s)
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 K8S_PATH=$(realpath $SCDIR/k8s)
 set -e
-if [ "$K8S_DRIVER" == "" ]; then
+if [ "$K8S_DRIVER" = "" ]; then
   K8S_DRIVER=kind
 fi
 K8S_VERSION=1.24.6
@@ -17,17 +17,17 @@ case "$K8S_DRIVER" in
   kind create cluster --image "kindest/node:v$K8S_VERSION"
   ;;
 "gke")
-  if [ "$GKE_CLUSTER" == "" ]; then
+  if [ "$GKE_CLUSTER" = "" ]; then
     echo "Cannot find environmental variable GKE_CLUSTER" >&2
     exit 2
   fi
   ;;
 "tmc")
-  if [ "$TMC_CLUSTER" == "" ]; then
+  if [ "$TMC_CLUSTER" = "" ]; then
     echo "Cannot find environmental variable TMC_CLUSTER" >&2
     exit 2
   fi
-  if [ "$KUBECONFIG" == "" ]; then
+  if [ "$KUBECONFIG" = "" ]; then
     echo "Please execute source $SCDIR/tmc/set-cluster.sh to establish KUBECONFIG" >&2
     exit 2
   fi
@@ -43,7 +43,7 @@ COUNT=$(kubectl get namespaces | grep -c "$NS")
 if ((COUNT == 0)); then
   kubectl create namespace "$NS"
 fi
-if [ "$K8S_DRIVER" == "kind" ]; then
+if [ "$K8S_DRIVER" = "kind" ]; then
   sh "$SCDIR/setup-metallb.sh"
 fi
 end_time=$(date +%s)
