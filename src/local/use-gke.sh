@@ -26,7 +26,7 @@ if [ "$REGION" = "" ]; then
   return 1
 fi
 print "\rConnecting to $GKE_CLUSTER at $REGION"
-gcloud container clusters get-credentials $GKE_CLUSTER --region $REGION > $HOME/.kube/config
-export KUBECONFIG=$HOME/.kube/config
-echo "KUBECONFIG set"
+export KUBECONFIG=$HOME/.kube/config-gke
+gcloud container clusters get-credentials $GKE_CLUSTER --region $REGION
+echo "KUBECONFIG set to $KUBECONFIG"
 echo "Namespace: $NS"
