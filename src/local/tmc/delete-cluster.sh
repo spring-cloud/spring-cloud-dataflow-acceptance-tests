@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 if [ "$TMC_CLUSTER" = "" ]; then
   echo "TMC_CLUSTER environmental variable not found" >&2
   exit 2

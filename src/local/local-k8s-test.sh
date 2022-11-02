@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 if [ "$1" = "-h" ]; then
   echo "Usage $0 <test>"
   echo "  where test:"

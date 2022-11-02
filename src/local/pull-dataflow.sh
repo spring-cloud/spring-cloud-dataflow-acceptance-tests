@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 if [ "$DATAFLOW_VERSION" = "" ]; then
   DATAFLOW_VERSION=2.10.0-SNAPSHOT
 fi
