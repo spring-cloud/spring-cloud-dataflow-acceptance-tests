@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 if [ "$NS" = "" ]; then
   echo "NS not defined" >&2
   exit 2

@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 bold="\033[1m"
 dim="\033[2m"

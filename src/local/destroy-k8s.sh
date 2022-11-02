@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 kubectl_pid=$(ps aux | grep 'kubectl' | grep 'port\-forward' | awk '{print $2}')
 if [ "$kubectl_pid" != "" ]
