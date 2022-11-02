@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 if [ "$K8S_DRIVER" = "" ]; then
   K8S_DRIVER=kind
 fi
@@ -6,7 +6,7 @@ fi
 set -e
 if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
   DONT_PULL=$3
-  if [[ "$2" == "" ]]; then
+  if [[ "$2" = "" ]]; then
     echo "A TAG is required for $1" >&2
     exit 2
   fi
@@ -61,7 +61,7 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
     for did in $DOCKER_IDS; do
       for mid in $MK_IDS; do
         # Docker id may be shorter than Minikube id.
-        if [ "${mid:0:12}" == "${did:0:12}" ]; then
+        if [ "${mid:0:12}" = "${did:0:12}" ]; then
           echo "$IMAGE already uploaded"
           exit 0
         fi

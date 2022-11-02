@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 case $BROKER in
 "" | "kafka")

@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # export TMC_CLUSTER=scdf-manual-empty-1654874129329054695
-if [ "$TMC_CLUSTER" == "" ]; then
+if [ "$TMC_CLUSTER" = "" ]; then
   echo "Configure TMC_CLUSTER with the cluster name" >&2
   exit 1
 fi

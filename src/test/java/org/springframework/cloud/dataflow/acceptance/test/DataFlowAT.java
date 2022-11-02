@@ -513,6 +513,39 @@ class DataFlowAT extends CommonTestBase {
         logger.info("stream-transform-test:done");
     }
 
+    @Test
+    @Tag("group6")
+    @Tag("smoke")
+    public void streamScriptEncoding() {
+        final String dsl = new String("http | script --script-processor.language=groovy --script-processor.script=payload+'嗨你好世界' | log");
+        logger.info("stream-script-test:start");
+        try (Stream stream = Stream.builder(dataFlowOperations)
+            .name("script-test")
+            .definition(dsl)
+            .create()
+            .deploy(testDeploymentProperties("http"))
+        ) {
+            final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
+            logger.info("stream-script-test:deploying:{}", stream.getName());
+            awaitStarting(stream, offset);
+            awaitDeployed(stream, offset);
+            logger.info("stream-script-test:deployed:{}", stream.getName());
+            String message = "Unique Test message: " + new Random().nextInt();
+
+            runtimeApps.httpPost(stream.getName(), "http", message);
+            logger.info("stream-script-test:sent:{}:{}", stream.getName(), message);
+            final AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(stream, "log");
+            awaitValueInLog(offset, logOffset, message + "嗨你好世界");
+        } catch (Throwable x) {
+            if(x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+                throw x;
+            } else {
+                logger.warn("Older version may fail with " + x);
+            }
+        }
+        logger.info("stream-script-test:done");
+    }
+
 
     @Test
     @Tag("group1")

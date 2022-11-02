@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 if [ "$SCDF_PRO_VERSION" = "" ]; then
   SCDF_PRO_VERSION=1.5.0-SNAPSHOT

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 (return 0 2>/dev/null) && sourced=1 || sourced=0
 
 FWSCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")

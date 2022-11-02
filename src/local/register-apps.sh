@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 set -e
 function dataflow_post() {
@@ -16,11 +16,11 @@ function dataflow_post() {
 if [ "$1" != "" ]; then
   PLATFORM_TYPE=$1
 fi
-if [ "$PLATFORM_TYPE" == "" ]; then
+if [ "$PLATFORM_TYPE" = "" ]; then
   PLATFORM_TYPE=kubernetes
 fi
 
-if [ "$DATAFLOW_IP" == "" ]; then
+if [ "$DATAFLOW_IP" = "" ]; then
   source "$SCDIR/export-dataflow-ip.sh"
 fi
 case $BROKER in
@@ -53,7 +53,7 @@ fi
 
 echo "DATAFLOW_IP=$DATAFLOW_IP"
 dataflow_post "uri=https://repo.spring.io/$RELEASE_SNAPSHOT/org/springframework/cloud/stream/app/stream-applications-descriptor/$STREAM_APPS_VERSION/stream-applications-descriptor-$STREAM_APPS_VERSION.stream-apps-$BROKER_NAME-$TYPE" "$DATAFLOW_IP/apps"
-if [ "$TYPE" == "docker" ]; then
+if [ "$TYPE" = "docker" ]; then
   dataflow_post "uri=docker:springcloudtask/timestamp-task:2.0.2" "$DATAFLOW_IP/apps/task/timestamp/2.0.2"
   dataflow_post "uri=docker:springcloudtask/timestamp-batch-task:2.0.2" "$DATAFLOW_IP/apps/task/timestamp-batch/2.0.2"
   dataflow_post "uri=docker:springcloudtask/scenario-task:0.0.1-SNAPSHOT" "$DATAFLOW_IP/apps/task/scenario/0.0.1-SNAPSHOT"
