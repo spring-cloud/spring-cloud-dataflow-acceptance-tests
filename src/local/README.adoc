@@ -59,21 +59,25 @@ If you want to use a locally built application you can invoke
 
 You can invoke one of the following scripts to choose the type of installation you are targeting:
 
-* `use-mk.sh <driver>`
-* `use-mk-docker.sh`
-* `use-mk-kvm2.sh`
-* `use-kind.sh`
-* `use-tmc.sh <cluster-name>`
-* `use-gke.sh <cluster-name>`
+[source,shell]
+----
+use-kind.sh [<namespace>]
+use-mk-docker.sh [<namespace>]
+use-mk-kvm2.sh [<namespace>]
+use-mk.sh <driver> [<namespace>] # <1>
+use-tmc.sh <cluster-name> [<namespace>]
+use-gke.sh <cluster-name> [<namespace>]
+----
+<1> `<namespace>` will be `default` if not provided.
+
 
 NOTE: <driver> must be one of `kvm2`, `docker`, `vmware`, `virtualbox`, `vmwarefusion` or `hyperkit`. `docker` is the recommended option for local development.
-
 
 Since these scripts export environmental variable they need to be executes as in the following example:
 
 [source,shell]
 ....
-source ./src/local/use-mk.sh vmware
+source ./src/local/use-mk.sh vmware test-ns
 ....
 
 === TMC or GKE Cluster in Cloud
@@ -89,7 +93,7 @@ When using a local kind or minikube cluster:
 ./src/local/configure-k8s.sh
 ....
 
-* For kind follow instruction to update `./src/local/k8s/metallb-configmap.yaml`
+* For kind follow instruction to update `./src/local/k8s/metallb-configmap.yaml` and then apply using `kubectl apply -f ./src/local/k8s/metallb-configmap.yaml`
 
 * For minikube launch a new shell and execute `minikube tunnel`
 
