@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 pushd $SETUP_TOOL_REPO  > /dev/null
     echo "PYTHONPATH=$PYTHONPATH"
     echo "Cleanup CF environment"
