@@ -10,30 +10,35 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
     echo "A TAG is required for $1" >&2
     exit 2
   fi
-  IMAGE="$1:$2"
+  TAG=$2
+  NAME=$1
+  IMAGE="$NAME:$TAG"
   set +e
-  docker images | grep -F "$1" | grep -F "$2" >/dev/null
-  EXISTS=$?
+  COUNT=$(docker images 2> /dev/null | grep -F "$NAME" | grep -c -F "$TAG")
   set -e
-  if [ "$DONT_PULL" != "true" ]; then
-    if [[ "$2" == *"SNAPSHOT"* ]] || [[ "$2" == *"latest"* ]] || [[ "$EXISTS" != "0" ]]; then
+  if [ "$DONT_PULL" = "true" ]; then
+    if ((COUNT == 0)); then
+      echo "ERROR:Image not found $IMAGE" >&2
+      exit 2
+    else
+      echo "Not pulling:$IMAGE"
+    fi
+  elif [ "$DONT_PULL" = "" ]; then
+    if ((COUNT == 0)) || [[ "$TAG" == *"SNAPSHOT"* ]] || [[ "$TAG" == *"latest"* ]]; then
       echo "Pulling:$IMAGE"
       docker pull "$IMAGE"
     else
       echo "Exists:$IMAGE"
     fi
-  else
-    echo "Not pulling:$IMAGE"
   fi
   set +e
-  docker images | grep -F "$1" | grep -F "$2" >/dev/null
-  EXISTS=$?
+  COUNT=$(docker images 2> /dev/null | grep -F "$NAME" | grep -c -F "$TAG")
   set -e
-  if [[ "$EXISTS" != 0 ]]; then
-    echo "Image not found $IMAGE" >&2
-    exit 2
+  if ((COUNT == 0)); then
+    echo "WARN:Image Not found:$IMAGE"
+    exit 0
   fi
-  err=$(docker history "$IMAGE")
+  err=$(docker history "$IMAGE" 2> /dev/null)
   rc=$?
   if [[ $rc -ne 0 ]]; then
     echo "$err" >&2
@@ -56,8 +61,8 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
     ;;
   *)
     echo "Loading $IMAGE to minikube"
-    DOCKER_IDS=$(docker images | grep -F "$1" | grep -F "$2" | awk '{print $3}')
-    MK_IDS=$(minikube image ls --format=table | grep -F "$1" | grep -F "$2" | awk '{print $6}')
+    DOCKER_IDS=$(docker images | grep -F "$NAME" | grep -F "$TAG" | awk '{print $3}')
+    MK_IDS=$(minikube image ls --format=table | grep -F "$NAME" | grep -F "$TAG" | awk '{print $6}')
     for did in $DOCKER_IDS; do
       for mid in $MK_IDS; do
         # Docker id may be shorter than Minikube id.
