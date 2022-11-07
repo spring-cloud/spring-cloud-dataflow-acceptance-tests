@@ -52,7 +52,7 @@ https://tanzu.vmware.com/mission-control[Tanzu Mission Control]
 For local development you need control of the containers used in the local environment. In order to ensure to manage the specific versions of data flow and skipper containers you can set SKIPPER_VERSION and DATAFLOW_VERSION environmental variable and then invoke `./src/local/pull-dataflow.sh` and `./src/local/pull-skipper.sh`
 
 If you want to use a locally built application you can invoke
-`./src/loca/build-skipper-image.sh` or `./src/local/build-dataflow.sh`
+`./src/local/build-skipper-image.sh` or `./src/local/build-dataflow.sh`
 
 
 == Create Configure k8s environment
@@ -73,7 +73,7 @@ use-gke.sh <cluster-name> [<namespace>]
 
 NOTE: <driver> must be one of `kvm2`, `docker`, `vmware`, `virtualbox`, `vmwarefusion` or `hyperkit`. `docker` is the recommended option for local development.
 
-Since these scripts export environmental variable they need to be executes as in the following example:
+Since these scripts export environmental variable they need to be executed as in the following example:
 
 [source,shell]
 ....
@@ -111,7 +111,7 @@ export BROKER=<broker> # <1>
 ....
 export DATABASE=<database> # <1>
 ....
-<1> <database> one of `mariadb` or `postgresql`
+<1> Currently only `mariadb` is supported and is the default.   In the future we will add `postgresql`
 
 [source,shell]
 ....
