@@ -62,7 +62,7 @@ if [ "$DATAFLOW_VERSION" = "" ]; then
 fi
 
 if [ "$SKIPPER_VERSION" = "" ]; then
-  SKIPPER_VERSION=2.10.0-SNAPSHOT
+  SKIPPER_VERSION=2.9.0-SNAPSHOT
 fi
 
 if [ "$SCDF_PRO_VERSION" = "" ]; then
