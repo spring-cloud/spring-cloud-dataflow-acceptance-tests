@@ -1,7 +1,7 @@
 #!/bin/bash
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 if [ "$SKIPPER_VERSION" = "" ]; then
-  SKIPPER_VERSION=2.10.0-SNAPSHOT
+  SKIPPER_VERSION=2.9.0-SNAPSHOT
 fi
 
 pushd "$SCDIR/../../../spring-cloud-skipper" > /dev/null
