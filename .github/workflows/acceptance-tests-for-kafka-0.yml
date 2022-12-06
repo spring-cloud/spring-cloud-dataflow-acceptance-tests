@@ -7,7 +7,7 @@ jobs:
   kafka-0:
     uses: ./.github/workflows/at-common-workflow.yml
     with:
-      cf_host: halfmoonbay
+      cf_host: bellgardens
       cf_index: 0
       binder: kafka
     secrets:
