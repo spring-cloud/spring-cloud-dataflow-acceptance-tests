@@ -9,7 +9,13 @@ SKIP_SSL_VALIDATION="$SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDAT
 if [[ -z "$SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION" ]]; then
   SKIP_SSL_VALIDATION="false"
 fi
-
+# TODO determine which are required and set environment variables. in .github/workflows/at-common-workflow.yml:126
+  # need to find value for spring.cloud.dataflow.client.authentication.access-token
+  # spring.cloud.dataflow.client.authentication.token-uri
+  # spring.cloud.dataflow.client.authentication.oauth2.clientRegistrationId
+  # spring.cloud.dataflow.client.authentication.oauth2.username
+  # spring.cloud.dataflow.client.authentication.oauth2.password;
+  # env SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_ACCESS_TOKEN
 ./mvnw -U -B -Dspring.profiles.active=blah -Dtest=$TESTS \
   -DSKIP_CLOUD_CONFIG=true -Dtest.docker.compose.disable.extension=true -Dspring.cloud.dataflow.client.serverUri=$SERVER_URI \
   -Dspring.cloud.dataflow.client.skipSslValidation=$SKIP_SSL_VALIDATION -Dtest.platform.connection.platformName=default \
