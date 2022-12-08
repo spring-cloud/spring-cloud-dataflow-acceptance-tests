@@ -29,6 +29,7 @@ case $DATABASE in
     ;;
   *)
     echo "DATABASE=$DATABASE not supported"
+    exit 1;
     ;;
 esac
 
@@ -80,7 +81,7 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
     sh "$SCDIR/load-image.sh" "mariadb" "10.4"
     ;;
   "postgres" | "postgresql")
-    sh "$SCDIR/load-image.sh" "postgresql" "10"
+    sh "$SCDIR/load-image.sh" "postgres" "10"
     ;;
   *)
     echo "DATABASE=$DATABASE not supported"
