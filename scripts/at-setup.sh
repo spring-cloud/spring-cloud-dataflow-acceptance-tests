@@ -48,19 +48,18 @@ load_file() {
   filename=$1
   echo "exporting required env variables from $filename :"
   while IFS='=' read -r var value; do
-  if ! [[ $var == \#* ]]; then
-    # only the un-set variables are exported
-    if [ -z ${!var} ]; then
-      export $var="$(eval echo $value)"
+    if ! [[ $var == \#* ]]; then
+      # only the un-set variables are exported
+      if [ -z ${!var} ]; then
+        export $var="$(eval echo $value)"
+      fi
     fi
-  fi
-  done < "$filename"
+  done <"$filename"
 }
 
 ARGS=$@
 #This consumes $@ so save to ARGS first
-while [[ $# > 0 && -z $SQL_PROVIDER ]]
-do
+while [[ $# > 0 && -z $SQL_PROVIDER ]]; do
   key="$1"
   if [[ $key = "--sqlProvider" ]]; then
     SQL_PROVIDER="$2"
@@ -74,22 +73,21 @@ fi
 
 os=$(uname)
 if [[ "$os" = "Linux" ]]; then
-    if ! command -v cf &> /dev/null
-    then
-      echo "Installing CloudFoundry CLI"
-      wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
-      echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
-      sudo apt-get update
-      sudo apt-get install cf-cli
-    fi
-    if [[ "$SQL_PROVIDER" = "oracle" ]]; then
-      echo "Installing ORACLE components"
-      wget -q https://download.oracle.com/otn_software/linux/instantclient/215000/instantclient-basiclite-linux.x64-21.5.0.0.0dbru.zip
-      unzip instantclient-basiclite-linux.x64-21.5.0.0.0dbru.zip
-      export LD_LIBRARY_PATH=$PWD/instantclient_21_5
-    fi
+  if ! command -v cf &>/dev/null; then
+    echo "Installing CloudFoundry CLI"
+    wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
+    echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+    sudo apt-get update
+    sudo apt-get install cf-cli
+  fi
+  if [[ "$SQL_PROVIDER" = "oracle" ]]; then
+    echo "Installing ORACLE components"
+    wget -q https://download.oracle.com/otn_software/linux/instantclient/215000/instantclient-basiclite-linux.x64-21.5.0.0.0dbru.zip
+    unzip instantclient-basiclite-linux.x64-21.5.0.0.0dbru.zip
+    export LD_LIBRARY_PATH=$PWD/instantclient_21_5
+  fi
 elif [[ "$os" = "Darwin" ]]; then
-  if [[ "$SQL_PROVIDER" = "oracle" ]] ; then
+  if [[ "$SQL_PROVIDER" = "oracle" ]]; then
     if [[ ! -d "./instantclient_19_8" ]]; then
       echo "Installing ORACLE components"
       wget -q https://download.oracle.com/otn_software/mac/instantclient/198000/instantclient-basiclite-macos.x64-19.8.0.0.0dbru.zip
@@ -99,27 +97,41 @@ elif [[ "$os" = "Darwin" ]]; then
   fi
 fi
 
-pushd $SETUP_TOOL_REPO  > /dev/null
-  export PYTHONPATH=./src:$PYTHONPATH
-  echo "PYTHONPATH=$PYTHONPATH" >> $GITHUB_ENV
-  python3 -m install.clean -v
-  RC=$?
-  if [[ $RC -gt 0 ]]; then
-    exit 1
-  fi
+pushd $SETUP_TOOL_REPO >/dev/null
+export PYTHONPATH=./src:$PYTHONPATH
+echo "PYTHONPATH=$PYTHONPATH" >>$GITHUB_ENV
+python3 -m install.clean -v
+RC=$?
+if [[ $RC -gt 0 ]]; then
+  exit 1
+fi
 
-  python3 -m install.setup -v --initializeDB
-  RC=$?
-  if [[ $RC -gt 0 ]]; then
-    exit 1
-  fi
-  load_file "cf_scdf.properties"
-  echo "Dataflow Server is live @ $SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI"
-  # need to find value for spring.cloud.dataflow.client.authentication.access-token
-  # spring.cloud.dataflow.client.authentication.token-uri
-  # spring.cloud.dataflow.client.authentication.oauth2.clientRegistrationId
-  # spring.cloud.dataflow.client.authentication.oauth2.username
-  # spring.cloud.dataflow.client.authentication.oauth2.password;
+python3 -m install.setup -v --initializeDB
+RC=$?
+if [[ $RC -gt 0 ]]; then
+  exit 1
+fi
+load_file "cf_scdf.properties"
+echo "Dataflow Server is live @ $SPRING_CLOUD_DATAFLOW_CLIENT_SERVER_URI"
+if [ "$SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_ACCESS_TOKEN" != "" ]; then
+  echo "SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_ACCESS_TOKEN present"
+else
+  echo "SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_ACCESS_TOKEN blank"
+fi
+if [ "$SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_TOKEN_URI" != "" ]; then
+  echo "SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_TOKEN_URI present"
+else
+  echo "SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_TOKEN_URI present"
+fi
+if [ "$SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_CLIENT_ID" != "" ]; then
+  echo "SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_CLIENT_ID present"
+else
+  echo "SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_CLIENT_ID present"
+fi
+if [ "$SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_CLIENT_SECRET" != "" ]; then
+  echo "SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_CLIENT_SECRET present"
+else
+  echo "SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_CLIENT_SECRET present"
+fi
 
-  # env SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_ACCESS_TOKEN
-popd > /dev/null
+popd >/dev/null
