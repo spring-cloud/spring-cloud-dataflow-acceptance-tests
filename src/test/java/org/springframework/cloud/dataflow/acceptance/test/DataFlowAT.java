@@ -555,12 +555,12 @@ class DataFlowAT extends CommonTestBase {
             .name("partitioning-test")
             .definition("http | splitter --expression=payload.split(' ') | log")
             .create();
-
+        final int partitions = 3;
         try (Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder()
             .putAll(testDeploymentProperties("http", "log"))
             .put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
             // Create 2 log instances with partition key computed from the payload.
-            .put("deployer.log.count", "2")
+            .put("deployer.log.count", Integer.toString(partitions))
             .put("app.splitter.producer.partitionKeyExpression", "payload")
             .put("app.log.spring.cloud.stream.kafka.bindings.input.consumer.autoRebalanceEnabled", "false")
             .put("app.log.logging.pattern.level",
@@ -575,8 +575,22 @@ class DataFlowAT extends CommonTestBase {
             logger.info("streamPartitioning:sending:{}:{}", stream.getName(), message);
             runtimeApps.httpPost(stream.getName(), "http", message);
             logger.info("streamPartitioning:sent:{}:{}", stream.getName(), message);
-            final List<String> woodChuck0 = asList("WOODCHUCK-0", "How", "chuck");
-            final List<String> woodChuck1 = asList("WOODCHUCK-1", "much", "wood", "would", "if", "a", "woodchuck", "could");
+            final Map<String, List<String>> expectations = new HashMap<>();
+            Arrays.stream(message.split(" ")).forEach(msg -> {
+                int partition = Math.abs(msg.hashCode() % partitions);
+                String key = "WOODCHUCK-" + partition;
+                List<String> list = expectations.get(key);
+                if(list == null) {
+                    list = new ArrayList<>();
+                    list.add(key);
+                    expectations.put(key, list);
+                }
+                if(!list.contains(msg)) {
+                    list.add(msg);
+                }
+            });
+            expectations.values().forEach(expectation -> logger.info("Expectation:{}", expectation));
+            assertThat(expectations.size()).isEqualTo(partitions);
             Awaitility.await()
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> {
@@ -584,11 +598,13 @@ class DataFlowAT extends CommonTestBase {
                     if(logMap != null) {
                         Collection<String> logs = logMap.values();
                         logger.info("streamPartitioning:logs:{}", logs);
-                        return (logs.size() == 2) && logs.stream()
+                        return (logs.size() == partitions) && logs.stream()
                             // partition order is undetermined
-                            .map(log -> (log.contains("WOODCHUCK-0"))
-                                ? woodChuck0.stream().allMatch(log::contains)
-                                : woodChuck1.stream().allMatch(log::contains)
+                            .map(log -> expectations.values()
+                                .stream()
+                                .allMatch(expect ->
+                                    expect.stream().allMatch(log::contains)
+                                )
                             )
                             .reduce(Boolean::logicalAnd)
                             .orElse(false);
@@ -596,6 +612,93 @@ class DataFlowAT extends CommonTestBase {
                         return false;
                     }
                 });
+        } catch (Throwable x) {
+            if(x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+                throw x;
+            } else {
+                logger.warn("Older version may fail with " + x);
+            }
+        }
+        logger.info("stream-partitioning-test:done (aka. WoodChuckTests)");
+    }
+
+    @Test
+    @Tag("group3")
+    public void streamPartitioningNamed() {
+        logger.info("stream-partitioning-named-test:start (aka. WoodChuckTests)");
+
+        final String message = "How much wood would a woodchuck chuck if a woodchuck could chuck wood";
+        final int partitions = 3;
+        final Map<String, List<String>> expectations = new HashMap<>();
+        Arrays.stream(message.split(" ")).forEach(msg -> {
+            int partition = Math.abs(msg.hashCode() % partitions);
+            String key = "WOODCHUCK-" + partition;
+            List<String> list = expectations.get(key);
+            if(list == null) {
+                list = new ArrayList<>();
+                list.add(key);
+                expectations.put(key, list);
+            }
+            if(!list.contains(msg)) {
+                list.add(msg);
+            }
+        });
+        expectations.values().forEach(expectation -> logger.info("Expectation:{}", expectation));
+        assertThat(expectations.size()).isEqualTo(partitions);
+        StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
+            .name("partitioning-named-test")
+            .definition("http | splitter --expression=payload.split(' ') > :topic1")
+            .create();
+        StreamDefinition streamDefinitionLog = Stream.builder(dataFlowOperations).name("partitioning-named-log").definition(":topic1 > log").create();
+
+        try (Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder()
+            .putAll(testDeploymentProperties("http"))
+            .put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
+            .put("app.splitter.producer.partitionKeyExpression", "payload")
+            .build())) {
+            try(Stream logStream = streamDefinition.deploy(new DeploymentPropertiesBuilder()
+                .putAll(testDeploymentProperties("log"))
+                .put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
+                .put("deployer.log.count", Integer.toString(partitions))
+                .put("app.log.spring.cloud.stream.kafka.bindings.input.consumer.autoRebalanceEnabled", "false")
+                .put("app.log.logging.pattern.level", "WOODCHUCK-${INSTANCE_INDEX:${CF_INSTANCE_INDEX:${spring.cloud.stream.instanceIndex:666}}} %5p")
+                .build())) {
+                logger.info("streamPartitioning:deploying:{}", stream.getName());
+                final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
+                logger.info("streamPartitioning:deploying:{}", logStream.getName());
+                final AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(logStream);
+                awaitStarting(stream, offset);
+                awaitStarting(logStream, logOffset);
+                awaitDeployed(stream, offset);
+                logger.info("streamPartitioning:deployed:{}", stream.getName());
+                awaitDeployed(logStream, logOffset);
+                logger.info("streamPartitioning:deployed:{}", logStream.getName());
+                logger.info("streamPartitioning:sending:{}:{}", stream.getName(), message);
+                runtimeApps.httpPost(stream.getName(), "http", message);
+                logger.info("streamPartitioning:sent:{}:{}", stream.getName(), message);
+
+                Awaitility.await()
+                    .failFast(() -> AwaitUtils.hasErrorInLog(logOffset))
+                    .until(() -> {
+                        Map<String, String> logMap = runtimeApps.applicationInstanceLogs(logStream.getName(), "log");
+                        if (logMap != null) {
+                            Collection<String> logs = logMap.values();
+                            logger.info("streamPartitioning:logs:{}", logs);
+                            return (logs.size() == partitions) && logs.stream()
+                                // partition order is undetermined
+                                .map(log -> expectations.values()
+                                    .stream()
+                                    .allMatch(expect ->
+                                        expect.stream().allMatch(log::contains)
+                                    )
+                                )
+                                .reduce(Boolean::logicalAnd)
+                                .orElse(false);
+                        } else {
+                            return false;
+                        }
+                    });
+            }
         } catch (Throwable x) {
             if(x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
