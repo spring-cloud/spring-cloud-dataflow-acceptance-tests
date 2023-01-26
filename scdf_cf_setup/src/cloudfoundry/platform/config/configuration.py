@@ -48,7 +48,7 @@ class ConfigurationProperties(EnvironmentAware):
                  deploy_wait_sec=20,
                  max_retries=60,  # 20 min max wait time for a service or app to come up
                  buildpack='java_buildpack_offline',
-                 maven_repos={'repo1': 'https://repo.spring.io/libs-snapshot'},
+                 maven_repos={'repo1': 'https://repo.spring.io/snapshot'},
                  jbp_jre_version="{ jre: { version: 1.8.+ }}",
                  config_server_enabled=False,
                  task_services=['mysql'],

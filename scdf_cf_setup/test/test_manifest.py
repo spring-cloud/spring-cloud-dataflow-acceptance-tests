@@ -53,7 +53,7 @@ class TestManifest(unittest.TestCase):
         platform_accounts_key = 'spring.cloud.dataflow.task.platform.cloudfoundry.accounts'
         saj = spring_application_json(installation=self.installation(), app_deployment=deployment,
                                       platform_accounts_key=platform_accounts_key)
-        self.assertEqual({"remoteRepositories": {"repo0": {"url": "https://repo.spring.io/libs-snapshot"}}},
+        self.assertEqual({"remoteRepositories": {"repo0": {"url": "https://repo.spring.io/snapshot"}}},
                          saj['maven'])
         self.assertEqual({'url': 'https://api.mycf.org', 'org': 'org', 'space': 'space',
                           'domain': 'apps.mycf.org', 'username': 'user', 'password': 'password'},
@@ -127,7 +127,7 @@ class TestManifest(unittest.TestCase):
             skipper_version='2.9.0-SNAPSHOT',
             skipper_jar_path='test/skipper.jar',
             dataflow_jar_path='test/dataflow.jar',
-            maven_repos={'repo0': 'https://repo.spring.io/libs-snapshot'},
+            maven_repos={'repo0': 'https://repo.spring.io/snapshot'},
             platform='cloudfoundry',
             task_services=['mysql'],
             stream_services=['rabbit'])

@@ -156,7 +156,7 @@ export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD=password
 # SERVICE_KEY_NAME is used to create/delete service keys
 #
 #export SERVICE_KEY_NAME='scdf-at'
-#export MAVEN_REPOS='{"repo1":"https://repo.spring.io/libs-snapshot"}'
+#export MAVEN_REPOS='{"repo1":"https://repo.spring.io/snapshot"}'
 #
 # External DB configuration (
 #

@@ -10,7 +10,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=spring
       - SPRING_DATASOURCE_PASSWORD=spring
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.jdbc.Driver
-      - SPRING_APPLICATION_JSON={"maven":{"remote-repositories":{"libs-snapshot":{"url":"https://repo.spring.io/libs-snapshot"}}}}
+      - SPRING_APPLICATION_JSON={"maven":{"remote-repositories":{"snapshot":{"url":"https://repo.spring.io/snapshot"}}}}
     ports:
       - 9393
     external_links:
