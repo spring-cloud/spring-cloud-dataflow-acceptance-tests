@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Import(DataFlowOperationsATConfiguration.class)
 public class CommonTestBase {
-    public static final String CURRENT_VERSION_NUMBER = "2.0.1";
+    public static final String CURRENT_VERSION_NUMBER = "2.0.2";
     protected static final Logger logger = LoggerFactory.getLogger(DataFlowAT.class);
     /**
      * Test properties
