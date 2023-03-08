@@ -56,7 +56,7 @@ class TestConfigProperties(unittest.TestCase):
                                                                'MAX_RETRIES': '10'})
         self.assertEqual(60, test_config.deploy_wait_sec)
         self.assertEqual(10, test_config.max_retries)
-        self.assertEqual(test_config.maven_repos['repo1'], 'https://repo.spring.io/snapshot')
+        self.assertEqual(test_config.maven_repos['repo1'], 'https://repo.spring.io/libs-snapshot')
 
     def test_assert_required_keys(self):
         with self.assertRaises(ValueError):

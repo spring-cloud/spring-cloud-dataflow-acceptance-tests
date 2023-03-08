@@ -103,11 +103,11 @@ def deploy(cf, application_name, manifest_path, create_manifest, installation, p
 
 
 def download_server_jars(config_props, shell):
-    skipper_url = 'https://repo.spring.io/snapshot/org/springframework/cloud/spring-cloud-skipper-server/%s/spring-cloud-skipper-server-%s.jar' \
+    skipper_url = 'https://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-skipper-server/%s/spring-cloud-skipper-server-%s.jar' \
                   % (config_props.skipper_version, config_props.skipper_version)
     download_maven_jar(skipper_url, config_props.skipper_jar_path, shell)
 
-    dataflow_url = 'https://repo.spring.io/snapshot/org/springframework/cloud/spring-cloud-dataflow-server/%s/spring-cloud-dataflow-server-%s.jar' \
+    dataflow_url = 'https://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server/%s/spring-cloud-dataflow-server-%s.jar' \
                    % (config_props.dataflow_version, config_props.dataflow_version)
     download_maven_jar(dataflow_url, config_props.dataflow_jar_path, shell)
 
