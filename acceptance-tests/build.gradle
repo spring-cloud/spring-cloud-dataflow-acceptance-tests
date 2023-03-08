@@ -63,8 +63,8 @@ buildscript {
 	}
 	repositories {
 		mavenCentral()
-		maven { url "https://repo.spring.io/snapshot" }
-		maven { url "https://repo.spring.io/milestone" }
+		maven { url "https://repo.spring.io/libs-snapshot" }
+		maven { url "https://repo.spring.io/libs-milestone" }
 		maven { url "https://dl.bintray.com/palantir/releases" }
 	}
 	dependencies {
@@ -120,8 +120,8 @@ configure(allprojects) {
 	repositories {
 		mavenLocal()
 		mavenCentral()
-		maven { url "https://repo.spring.io/snapshot" }
-		maven { url "https://repo.spring.io/milestone" }
+		maven { url "https://repo.spring.io/libs-snapshot" }
+		maven { url "https://repo.spring.io/libs-milestone" }
 		maven { url "https://dl.bintray.com/palantir/releases" }
 	}
 

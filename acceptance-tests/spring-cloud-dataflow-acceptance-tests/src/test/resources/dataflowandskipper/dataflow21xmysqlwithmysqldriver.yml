@@ -11,7 +11,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=spring
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.jdbc.Driver
       - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=http://skipper:7577/api
-      - SPRING_APPLICATION_JSON={"maven":{"remote-repositories":{"snapshot":{"url":"https://repo.spring.io/snapshot"}}}}
+      - SPRING_APPLICATION_JSON={"maven":{"remote-repositories":{"central":{"url":"https://repo.maven.apache.org/maven2"},"snapshot":{"url":"https://repo.spring.io/libs-snapshot"}}}}
     ports:
       - 9393
     external_links:
