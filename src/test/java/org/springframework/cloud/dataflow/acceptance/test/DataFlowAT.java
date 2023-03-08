@@ -34,6 +34,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -79,6 +80,7 @@ import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationR
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
@@ -458,11 +460,12 @@ class DataFlowAT extends CommonTestBase {
     public static final String PARTIAL = "partial";
 
     public static final Set<String> starting = new HashSet<>(Arrays.asList(DEPLOYING, PARTIAL, DEPLOYED));
+
     @Test
     @Tag("group6")
     public void streamReDeploy() {
         logger.info("stream-redeploy-test:start");
-        for(int i = 0; i < 2; i++) {
+        for (int i = 0; i < 2; i++) {
             try (Stream stream = Stream.builder(dataFlowOperations)
                 .name("redeploy-test")
                 .definition("http | log")
@@ -483,6 +486,7 @@ class DataFlowAT extends CommonTestBase {
         }
         logger.info("stream-redeploy-test:end");
     }
+
     @Test
     @Tag("group6")
     public void streamTransform() {
@@ -505,7 +509,7 @@ class DataFlowAT extends CommonTestBase {
             final AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(stream, "log");
             awaitValueInLog(offset, logOffset, message.toUpperCase());
         } catch (Throwable x) {
-            if(x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -538,7 +542,7 @@ class DataFlowAT extends CommonTestBase {
             final AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(stream, "log");
             awaitValueInLog(offset, logOffset, message + "嗨你好世界");
         } catch (Throwable x) {
-            if(x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -581,12 +585,12 @@ class DataFlowAT extends CommonTestBase {
                 int partition = Math.abs(msg.hashCode() % partitions);
                 String key = "WOODCHUCK-" + partition;
                 List<String> list = expectations.get(key);
-                if(list == null) {
+                if (list == null) {
                     list = new ArrayList<>();
                     list.add(key);
                     expectations.put(key, list);
                 }
-                if(!list.contains(msg)) {
+                if (!list.contains(msg)) {
                     list.add(msg);
                 }
             });
@@ -596,7 +600,7 @@ class DataFlowAT extends CommonTestBase {
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> {
                     Map<String, String> logMap = runtimeApps.applicationInstanceLogs(stream.getName(), "log");
-                    if(logMap != null) {
+                    if (logMap != null) {
                         Collection<String> logs = logMap.values();
                         logger.info("streamPartitioning:logs:{}", logs);
                         return (logs.size() == partitions) && logs.stream()
@@ -614,7 +618,7 @@ class DataFlowAT extends CommonTestBase {
                     }
                 });
         } catch (Throwable x) {
-            if(x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -635,12 +639,12 @@ class DataFlowAT extends CommonTestBase {
             int partition = Math.abs(msg.hashCode() % partitions);
             String key = "WOODCHUCK-" + partition;
             List<String> list = expectations.get(key);
-            if(list == null) {
+            if (list == null) {
                 list = new ArrayList<>();
                 list.add(key);
                 expectations.put(key, list);
             }
-            if(!list.contains(msg)) {
+            if (!list.contains(msg)) {
                 list.add(msg);
             }
         });
@@ -657,7 +661,7 @@ class DataFlowAT extends CommonTestBase {
             .put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
             .put("app.splitter.producer.partitionKeyExpression", "payload")
             .build())) {
-            try(Stream logStream = streamDefinition.deploy(new DeploymentPropertiesBuilder()
+            try (Stream logStream = streamDefinition.deploy(new DeploymentPropertiesBuilder()
                 .putAll(testDeploymentProperties("log"))
                 .put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
                 .put("deployer.log.count", Integer.toString(partitions))
@@ -701,7 +705,7 @@ class DataFlowAT extends CommonTestBase {
                     });
             }
         } catch (Throwable x) {
-            if(x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -792,7 +796,7 @@ class DataFlowAT extends CommonTestBase {
             assertThat(stream.history().size()).isEqualTo(3);
             logger.info("stream-app-cross-version-test: UNDEPLOY");
         } catch (Throwable x) {
-            if(x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -834,7 +838,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     private void awaitValueInLog(AwaitUtils.StreamLog streamOffset, AwaitUtils.StreamLog logOffset, final String value) {
-        if(streamOffset == logOffset) {
+        if (streamOffset == logOffset) {
             Awaitility.await()
                 .until(() -> AwaitUtils.hasInLog(logOffset, value));
         } else {
@@ -1060,7 +1064,7 @@ class DataFlowAT extends CommonTestBase {
                 .until(() -> logStream.logs(app("log")).contains(message));
             logger.info("namedChannelDestination:found:{} in {}", message, logStream.getName());
         } catch (Throwable x) {
-            if(x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -1102,7 +1106,7 @@ class DataFlowAT extends CommonTestBase {
                 .failFast(() -> AwaitUtils.hasErrorInLog(tapOffset))
                 .until(() -> tapStream.logs(app("log")).contains(message));
         } catch (Throwable x) {
-            if(x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -1153,7 +1157,7 @@ class DataFlowAT extends CommonTestBase {
 
             awaitValueInLog(logOffset, logOffset, messageTwo);
         } catch (Throwable x) {
-            if(x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -1212,7 +1216,7 @@ class DataFlowAT extends CommonTestBase {
             awaitValueInLog(fooLogOffset, fooLogOffset, "abcd-foo");
             awaitValueInLog(barLogOffset, barLogOffset, "defg-bar");
         } catch (Throwable x) {
-            if(x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -1288,7 +1292,7 @@ class DataFlowAT extends CommonTestBase {
                     assertThat(task.execution(id).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
                 }
             } catch (Throwable x) {
-                if(x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+                if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                     throw x;
                 } else {
                     logger.warn("Older version may fail with " + x);
@@ -1373,7 +1377,7 @@ class DataFlowAT extends CommonTestBase {
             JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[2][7]")
                 .isIn(messageLengths);
         } catch (Throwable x) {
-            if(x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -1431,7 +1435,7 @@ class DataFlowAT extends CommonTestBase {
                     + "/api/v1/query?query=my_http_analytics_total"))
                 .isEqualTo(resourceToString("classpath:/my_http_analytics_total.json"));
         } catch (Throwable x) {
-            if(x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -2507,7 +2511,14 @@ class DataFlowAT extends CommonTestBase {
             .stream()
             .max(Comparator.comparing(TaskExecutionResource::getEndTime))
             .orElseThrow(() -> new RuntimeException("Cannot find task:" + task.getTaskName()));
-        assertThat(last.getResourceUrl()).endsWith(version);
+        int start = last.getResourceUrl().indexOf('[');
+        int end = last.getResourceUrl().indexOf(']');
+        if (start >= 0 && end >= 0 && start < end) {
+            final String uri = last.getResourceUrl().substring(start + 1, end);
+            assertThat(uri).endsWith(":" + version);
+        } else {
+            assertThat(last.getResourceUrl()).contains(version);
+        }
     }
 
     private void validateSpecifiedVersion(Task task, String version, int countExpected) {
@@ -2855,12 +2866,25 @@ class DataFlowAT extends CommonTestBase {
             });
     }
 
-    private void verifyTaskDefAndTaskExecutionCount(String taskName, int taskDefCount, int taskExecCount) {
-        assertThat(dataFlowOperations.taskOperations().executionList().getContent().stream()
-            .filter(taskExecution -> taskExecution.getTaskName() != null
-                && taskExecution.getTaskName().equals(taskName))
-            .collect(Collectors.toList()).size()).isEqualTo(taskExecCount);
-        assertThat(dataFlowOperations.taskOperations().list().getContent().size()).isEqualTo(taskDefCount);
+    private void verifyTaskDefAndTaskExecutionCount(final String taskName, int taskDefCount, int taskExecCount) {
+        Awaitility.await()
+            .atMost(60, TimeUnit.SECONDS)
+            .until(() -> {
+                List<TaskExecutionResource> executions = dataFlowOperations.taskOperations()
+                    .executionList()
+                    .getContent()
+                    .stream()
+                    .filter(taskExecution -> taskExecution.getTaskName() != null && taskExecution.getTaskName().equals(taskName))
+                    .collect(Collectors.toList());
+                List<TaskDefinitionResource> definitions = dataFlowOperations.taskOperations()
+                    .list()
+                    .getContent()
+                    .stream()
+                    .filter(taskDefinitionResource -> taskDefinitionResource.getName().equals(taskName))
+                    .collect(Collectors.toList());
+                return (executions.size() == taskExecCount) &&
+                    (definitions.size() == taskDefCount);
+            });
     }
 
     private void allSuccessfulExecutions(String taskDescription, String taskDefinition, String... childLabels) {
@@ -3019,6 +3043,7 @@ class DataFlowAT extends CommonTestBase {
                 .until(() -> stream.logs(app("log")).contains("TICKTOCK CLOUD CONFIG - TIMESTAMP:"));
         }
     }
+
     @Test
     @Tag("groupF")
     void willFail() {
