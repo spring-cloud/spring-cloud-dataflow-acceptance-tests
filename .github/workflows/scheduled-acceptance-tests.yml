@@ -9,7 +9,7 @@ jobs:
   kafka-0:
     uses: ./.github/workflows/at-common-workflow.yml
     with:
-      cf_host: 'bellgardens'
+      cf_host: 'lompoc'
       cf_index: 0
       binder: 'kafka'
     secrets:
@@ -28,7 +28,7 @@ jobs:
   kafka-1:
     uses: ./.github/workflows/at-common-workflow.yml
     with:
-      cf_host: 'sanbruno'
+      cf_host: 'calistoga'
       cf_index: 1
       binder: 'kafka'
     secrets:
@@ -48,7 +48,7 @@ jobs:
     needs: [ kafka-0 ]
     uses: ./.github/workflows/at-common-workflow.yml
     with:
-      cf_host: 'bellgardens'
+      cf_host: 'lompoc'
       cf_index: 0
       binder: 'rabbit'
     secrets:
@@ -65,7 +65,7 @@ jobs:
     needs: [ kafka-1 ]
     uses: ./.github/workflows/at-common-workflow.yml
     with:
-      cf_host: 'sanbruno'
+      cf_host: 'calistoga'
       cf_index: 1
       binder: 'rabbit'
     secrets:
