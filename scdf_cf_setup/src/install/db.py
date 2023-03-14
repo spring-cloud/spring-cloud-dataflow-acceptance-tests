@@ -50,7 +50,7 @@ def init_postgres_db(db_config, dbname):
                 live_connections = cur.fetchone()[0]
                 logger.debug("DB %s has %d live connections" % (dbname, live_connections))
 
-            cur.execute("DROP DATABASE IF EXISTS '%s';" % dbname)
+            cur.execute("DROP DATABASE IF EXISTS %s;" % dbname)
             cur.execute("CREATE DATABASE %s;" % dbname)
             logger.info("completed initialization of postgresql DB %s" % dbname)
     except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
