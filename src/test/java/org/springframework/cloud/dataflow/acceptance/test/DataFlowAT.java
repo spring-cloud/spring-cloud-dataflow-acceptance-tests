@@ -144,7 +144,7 @@ class DataFlowAT extends CommonTestBase {
             dataFlowOperations.streamOperations().destroyAll();
             logger.info("Destroyed all streams");
         } catch (Exception e) {
-            logger.error("after:" + e.getMessage());
+            logger.error("after:" + e.getMessage(), e);
         } finally {
             try {
                 dataFlowOperations.taskOperations().list().forEach(taskDefinitionResource -> {
@@ -153,7 +153,7 @@ class DataFlowAT extends CommonTestBase {
                 });
                 logger.info("Destroyed all tasks and execution history");
             } catch (Exception e) {
-                logger.error("after:" + e.getMessage());
+                logger.error("after:" + e.getMessage(), e);
             }
         }
         logger.debug("after:end");
