@@ -2,6 +2,7 @@ name: Acceptance Tests for SCDF
 
 on:
   schedule:
+    # 4:00 UTC Mon - Fri
     - cron: "0 4 * * 1-5"
   workflow_dispatch:
 
