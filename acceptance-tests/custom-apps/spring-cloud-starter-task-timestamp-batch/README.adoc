@@ -1,0 +1,40 @@
+//tag::ref-doc[]
+= Timestamp Batch Task
+
+A batch job task that executes 2 jobs each job prints out the job name and a timestamp to `stdout`. Intended to primarily be used for testing.
+
+== Options
+
+// see syntax (soon to be automatically generated) in spring-cloud-stream starters
+The **$$timestamp$$** $$task$$ has the following options:
+
+//tag::configuration-properties[]
+$$timestamp.format$$:: $$The timestamp format, "yyyy-MM-dd HH:mm:ss.SSS" by default.$$ *($$String$$, default: `$$yyyy-MM-dd HH:mm:ss.SSS$$`)*
+//end::configuration-properties[]
+
+== Building with Maven
+
+```
+$ ./mvnw clean install -PgenerateApps
+$ cd apps/timestamp-batch-task
+$ ./mvnw clean package
+```
+
+== Example
+```
+java -jar timestamp-batch-task-<version>.jar
+```
+
+WARNING: Launching a composed task with timestamp-batch app as it is, more than once, may lead task into ERROR status. 
+This is due to JobInstanceAlreadyCompleteException, as JobInstance won't be unique, if JobParameters remain the same. +
+One of the way to handle this is to utilize JobParametersIncrementer as below: +
+jobBuilderFactory.get("job1").incrementer(new RunIdIncrementer()) +
+jobBuilderFactory.get("job2").incrementer(new RunIdIncrementer()) +
+In this case RunIdIncrementer will allow the app to be launched multiple times, each having its own JobInstance 
+
+
+== Contributing
+
+We welcome contributions! Follow this https://github.com/spring-cloud-task-app-starters/app-starters-release/blob/master/spring-cloud-task-app-starters-docs/src/main/asciidoc/contributing.adoc[link] for more information on how to contribute.
+
+//end::ref-doc[]

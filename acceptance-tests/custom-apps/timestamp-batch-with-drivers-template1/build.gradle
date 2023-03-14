@@ -6,7 +6,7 @@ buildscript {
 		oracleJdbcDriverVersion = project.properties['oracleJdbcDriverVersion'] ?: '12.2.0.1'
 		db2JdbcDriverVersion = project.properties['db2JdbcDriverVersion'] ?: '11.5.7.0'
 		mysqlJdbcDriverVersion = project.properties['mysqlJdbcDriverVersion'] ?: '8.0.16'
-		springCloudTaskAppVersion = project.properties['springCloudTaskAppVersion'] ?: '2.1.1.BUILD-SNAPSHOT'
+		springCloudTaskAppVersion = project.properties['springCloudTaskAppVersion'] ?: '2.1.1.RELEASE'
 	}
 	repositories {
 		mavenCentral()
