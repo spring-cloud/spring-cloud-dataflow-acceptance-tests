@@ -51,7 +51,10 @@ else
 fi
 
 echo "DATAFLOW_IP=$DATAFLOW_IP"
+pushd "$ROOTDIR" || exit $?
 echo "EXTRA=$EXTRA" | tee build.log
+echo "ROOTDIR=$ROOTDIR" | tee -a build.log
+echo "PWD=$(pwd)" | tee -a build.log
 ./mvnw -Dspring.profiles.active=blah \
   -DPLATFORM_TYPE=kubernetes \
   -DNAMESPACE=$NS \
@@ -62,4 +65,5 @@ echo "EXTRA=$EXTRA" | tee build.log
   -Dspring.cloud.dataflow.client.skipSslValidation=true \
   -Dtest=!DataFlowAT#streamAppCrossVersion \
   -X clean test verify $EXTRA | tee -a build.log | grep -v -F "DEBUG"
-./mvnw surefire-report:failsafe-report-only
+./mvnw surefire-report:failsafe-report-only | tee -a build.log
+popd
