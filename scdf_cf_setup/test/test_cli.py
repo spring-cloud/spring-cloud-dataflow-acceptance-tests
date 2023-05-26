@@ -99,8 +99,8 @@ class TestCommands(unittest.TestCase):
                                                      username="user",
                                                      password="password")
         config_props = ConfigurationProperties()
-        config_props.dataflow_version = '2.1.0-SNAPSHOT'
-        config_props.skipper_version = '2.9.0-SNAPSHOT'
+        config_props.dataflow_version = '2.11.0-SNAPSHOT'
+        config_props.skipper_version = '2.11.0-SNAPSHOT'
         config_props.platform = 'cloudfoundry'
         return InstallationContext(deployer_config=deployer_config,
                                    config_props=config_props,

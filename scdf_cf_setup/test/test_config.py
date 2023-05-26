@@ -50,13 +50,13 @@ class TestConfigProperties(unittest.TestCase):
         InstallationContext.from_env_vars(merged_env([deployer_env(), standalone_test_env()]))
 
     def test_env_present_test_config(self):
-        test_config = ConfigurationProperties.from_env_vars(env={'DATAFLOW_VERSION': '2.10.0-SNAPSHOT',
-                                                               'SKIPPER_VERSION': '2.9.0-SNAPSHOT',
+        test_config = ConfigurationProperties.from_env_vars(env={'DATAFLOW_VERSION': '2.11.0-SNAPSHOT',
+                                                               'SKIPPER_VERSION': '2.11.0-SNAPSHOT',
                                                                'DEPLOY_WAIT_SEC': '60',
                                                                'MAX_RETRIES': '10'})
         self.assertEqual(60, test_config.deploy_wait_sec)
         self.assertEqual(10, test_config.max_retries)
-        self.assertEqual(test_config.maven_repos['repo1'], 'https://repo.spring.io/libs-snapshot')
+        self.assertEqual(test_config.maven_repos['repo1'], 'https://repo.spring.io/snapshot')
 
     def test_assert_required_keys(self):
         with self.assertRaises(ValueError):
@@ -90,8 +90,8 @@ def deployer_config():
 
 
 def standalone_test_env():
-    return {'DATAFLOW_VERSION': '2.10.0-SNAPSHOT',
-            'SKIPPER_VERSION': '2.9.0-SNAPSHOT',
+    return {'DATAFLOW_VERSION': '2.11.0-SNAPSHOT',
+            'SKIPPER_VERSION': '2.11.0-SNAPSHOT',
             'PLATFORM': 'cloudfoundry'}
 
 

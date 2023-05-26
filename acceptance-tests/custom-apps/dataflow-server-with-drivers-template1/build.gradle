@@ -13,7 +13,7 @@ buildscript {
 	}
 	repositories {
 		mavenCentral()
-		maven { url 'https://repo.springsource.org/plugins-release' }
+		maven { url 'https://repo.spring.io/plugins-release' }
 	}
 	dependencies {
 		classpath("io.spring.gradle:propdeps-plugin:0.0.8")
@@ -38,9 +38,8 @@ jar {
 repositories {
 	mavenLocal()
 	mavenCentral()
-	maven { url "https://repo.springsource.org/libs-snapshot" }
-	maven { url "https://repo.springsource.org/libs-release" }
-	maven { url "https://repo.springsource.org/libs-milestone" }
+	maven { url "https://repo.spring.io/snapshot" }
+	maven { url "https://repo.spring.io/milestone" }
 
 }
 
