@@ -22,15 +22,15 @@ fi
 
 export STREAM_APPS_URI=
 # change to RELEASE to use the latest version or any specific version
-STREAM_APPS_VERSION=2021.1.3-SNAPSHOT
+STREAM_APPS_VERSION=2021.1.2
 # will default if blank
 REPO=
 if [[ "$STREAM_APPS_VERSION" = *"SNAPSHOT"* ]]; then
-  REPO=https://repo.spring.io/artifactory/libs-snapshot
+  REPO=https://repo.spring.io/artifactory/snapshot
 elif [[ "$STREAM_APPS_VERSION" = "RELEASE" ]]; then
   REPO=
 else
-  REPO=https://repo.spring.io/artifactory/libs-release
+  REPO=https://repo1.maven.org/maven2
 fi
 if [[ "$STREAM_APPS_URI" = "" ]]; then
   if [[ "$REPO" != "" ]]; then
