@@ -123,8 +123,8 @@ class TestManifest(unittest.TestCase):
                                                      env=deployer_env
                                                      )
         config_props = ConfigurationProperties(
-            dataflow_version='2.11.0-SNAPSHOT',
-            skipper_version='2.11.0-SNAPSHOT',
+            dataflow_version='2.10.4-SNAPSHOT',
+            skipper_version='2.9.4-SNAPSHOT',
             skipper_jar_path='test/skipper.jar',
             dataflow_jar_path='test/dataflow.jar',
             maven_repos={'repo0': 'https://repo.spring.io/snapshot'},

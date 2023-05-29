@@ -18,7 +18,7 @@
     <properties>
         <checkstyle.config.location>../../etc/checkstyle/checkstyle.xml</checkstyle.config.location>
         <checkstyle.header.file>../../etc/checkstyle/checkstyle-header.txt</checkstyle.header.file>
-        <dataflow.version>2.11.0-SNAPSHOT</dataflow.version>
+        <dataflow.version>2.10.4-SNAPSHOT</dataflow.version>
         <java-cfenv.version>2.3.0</java-cfenv.version>
     </properties>
 
