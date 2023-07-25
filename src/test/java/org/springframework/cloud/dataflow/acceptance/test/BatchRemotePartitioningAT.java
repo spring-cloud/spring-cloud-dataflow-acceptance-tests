@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.acceptance.test;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.awaitility.Awaitility;
@@ -38,6 +39,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.Task;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskBuilder;
+import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.context.annotation.Configuration;
@@ -104,12 +107,13 @@ public class BatchRemotePartitioningAT extends CommonTestBase {
             .description("runBatchRemotePartitionJob - cloudfoundry")
             .build()) {
 
-            long launchId = task.launch(Collections.EMPTY_MAP, Arrays.asList("--platform=cloudfoundry"));
+            LaunchResponseResource launch = task.launch(Collections.EMPTY_MAP, Arrays.asList("--platform=cloudfoundry"));
 
-            Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
+            Awaitility.await().until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             assertThat(task.executions().size()).isEqualTo(1);
-            assertThat(task.execution(launchId).isPresent()).isTrue();
-            assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+            Optional<TaskExecutionResource> taskExecution = task.execution(launch.getExecutionId(), launch.getSchemaTarget());
+            assertThat(taskExecution).isPresent();
+            assertThat(taskExecution.get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
         }
         logger.info("run-batch-remote-partition-job-cloudFoundry:end");
     }
@@ -128,13 +132,13 @@ public class BatchRemotePartitioningAT extends CommonTestBase {
             .description("runBatchRemotePartitionJob - kubernetes")
             .build()) {
 
-            long launchId = task.launch(Collections.singletonMap("deployer.*.kubernetes.deployment-service-account-name", testProperties.getPlatform().getConnection().getPlatformName()),
+            LaunchResponseResource launch = task.launch(Collections.singletonMap("deployer.*.kubernetes.deployment-service-account-name", testProperties.getPlatform().getConnection().getPlatformName()),
                 Arrays.asList("--platform=kubernetes", "--artifact=docker://springcloud/batch-remote-partition:0.0.2-SNAPSHOT"));
 
-            Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
+            Awaitility.await().until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             assertThat(task.executions().size()).isEqualTo(1);
-            assertThat(task.execution(launchId).isPresent()).isTrue();
-            assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+            assertThat(task.execution(launch.getExecutionId(), launch.getSchemaTarget()).isPresent()).isTrue();
+            assertThat(task.execution(launch.getExecutionId(), launch.getSchemaTarget()).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
         }
         logger.info("run-batch-remote-partition-job-kubernetes:end");
     }

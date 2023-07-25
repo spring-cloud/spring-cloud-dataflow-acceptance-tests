@@ -41,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @Import(DataFlowOperationsATConfiguration.class)
 public class CommonTestBase {
     public static final String CURRENT_VERSION_NUMBER = "2.0.2";
+    public static final String BOOT3_VERSION_NUMBER = "3.0.0";
     protected static final Logger logger = LoggerFactory.getLogger(DataFlowAT.class);
     /**
      * Test properties
@@ -104,9 +105,13 @@ public class CommonTestBase {
         if (this.runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
             registerTask("testtimestamp", "docker:springcloudtask/timestamp-task", CURRENT_VERSION_NUMBER);
             registerTask("testtimestamp-batch", "docker:springcloudtask/timestamp-batch-task", CURRENT_VERSION_NUMBER);
+            registerTask("testtimestamp3", "docker:springcloudtask/timestamp-task", BOOT3_VERSION_NUMBER);
+            registerTask("testtimestamp-batch3", "docker:springcloudtask/timestamp-batch-task", BOOT3_VERSION_NUMBER);
         } else {
             registerTask("testtimestamp", "maven://io.spring:timestamp-task", CURRENT_VERSION_NUMBER);
             registerTask("testtimestamp-batch", "maven://io.spring:timestamp-batch-task", CURRENT_VERSION_NUMBER);
+            registerTask("testtimestamp3", "maven://io.spring:timestamp-task", BOOT3_VERSION_NUMBER);
+            registerTask("testtimestamp-batch3", "maven://io.spring:timestamp-batch-task", BOOT3_VERSION_NUMBER);
         }
     }
 }
