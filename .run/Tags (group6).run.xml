@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Tags (group6 )" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
+  <configuration default="false" name="Tags (group6)" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
     <output_file path="$PROJECT_DIR$/fulltest6.log" is_save="true" />
     <module name="spring-cloud-dataflow-acceptance-tests" />
     <extension name="coverage">
@@ -15,8 +15,8 @@
       <option name="IS_IGNORE_MISSING_FILES" value="false" />
       <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
       <ENTRIES>
-        <ENTRY IS_ENABLED="true" PARSER="runconfig" />
-        <ENTRY IS_ENABLED="true" PARSER="env" PATH=".env" />
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH=".env" />
       </ENTRIES>
     </extension>
     <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">

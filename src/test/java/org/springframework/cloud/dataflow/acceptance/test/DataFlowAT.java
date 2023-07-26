@@ -78,7 +78,7 @@ import org.springframework.cloud.dataflow.rest.client.dsl.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.Task;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskBuilder;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
-import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
+import org.springframework.cloud.dataflow.rest.resource.JobExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
@@ -86,6 +86,7 @@ import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -96,8 +97,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -190,7 +189,12 @@ class DataFlowAT extends CommonTestBase {
 
         // Maven app without metadata
         dataFlowOperations.appRegistryOperations()
-            .register("maven-app-without-metadata", ApplicationType.sink, "maven://org.springframework.cloud.stream.app:file-sink-kafka:3.0.1", null, true);
+            .register("maven-app-without-metadata",
+                ApplicationType.sink,
+                "maven://org.springframework.cloud.stream.app:file-sink-kafka:3.0.1",
+                null,
+                AppBootSchemaVersion.BOOT2,
+                true);
         DetailedAppRegistrationResource mavenAppWithoutMetadata = dataFlowOperations.appRegistryOperations()
             .info("maven-app-without-metadata", ApplicationType.sink, false);
         assertThat(mavenAppWithoutMetadata.getOptions()).describedAs("mavenAppWithoutMetadata").hasSize(8);
@@ -207,7 +211,12 @@ class DataFlowAT extends CommonTestBase {
 
         // Docker app with container image metadata
         dataFlowOperations.appRegistryOperations()
-            .register("docker-app-with-container-metadata", ApplicationType.source, "docker:springcloudstream/time-source-kafka:2.1.4.RELEASE", null, true);
+            .register("docker-app-with-container-metadata",
+                ApplicationType.source,
+                "docker:springcloudstream/time-source-kafka:2.1.4.RELEASE",
+                null,
+                AppBootSchemaVersion.BOOT2,
+                true);
         DetailedAppRegistrationResource dockerAppWithContainerMetadata = dataFlowOperations.appRegistryOperations()
             .info("docker-app-with-container-metadata", ApplicationType.source, false);
         assertThat(dockerAppWithContainerMetadata.getOptions()).hasSize(6);
@@ -218,6 +227,7 @@ class DataFlowAT extends CommonTestBase {
                 ApplicationType.source,
                 "docker:springcloudstream/http-source-rabbit:2.1.3.RELEASE",
                 null,
+                AppBootSchemaVersion.BOOT2,
                 true);
         DetailedAppRegistrationResource dockerAppWithContainerMetadataWithEscapeChars = dataFlowOperations.appRegistryOperations()
             .info("docker-app-with-container-metadata-escape-chars", ApplicationType.source, false);
@@ -225,7 +235,12 @@ class DataFlowAT extends CommonTestBase {
 
         // Docker app without metadata
         dataFlowOperations.appRegistryOperations()
-            .register("docker-app-without-metadata", ApplicationType.sink, "docker:springcloudstream/file-sink-kafka:2.1.1.RELEASE", null, true);
+            .register("docker-app-without-metadata",
+                ApplicationType.sink,
+                "docker:springcloudstream/file-sink-kafka:2.1.1.RELEASE",
+                null,
+                AppBootSchemaVersion.BOOT2,
+                true);
         DetailedAppRegistrationResource dockerAppWithoutMetadata = dataFlowOperations.appRegistryOperations()
             .info("docker-app-without-metadata", ApplicationType.sink, false);
         assertThat(dockerAppWithoutMetadata.getOptions()).hasSize(0);
@@ -236,6 +251,7 @@ class DataFlowAT extends CommonTestBase {
                 ApplicationType.sink,
                 "docker:springcloudstream/file-sink-kafka:2.1.1.RELEASE",
                 "maven://org.springframework.cloud.stream.app:file-sink-kafka:jar:metadata:2.1.1.RELEASE",
+                AppBootSchemaVersion.BOOT2,
                 true);
         DetailedAppRegistrationResource dockerAppWithJarMetadata = dataFlowOperations.appRegistryOperations()
             .info("docker-app-with-jar-metadata", ApplicationType.sink, false);
@@ -278,7 +294,6 @@ class DataFlowAT extends CommonTestBase {
         logger.info("multipleStreamApps:define:restaurant-test");
         StreamDefinition streamDefinition = Stream.builder(dataFlowOperations).name("restaurant-test").definition("kitchen || waitron || customer").create();
         logger.info("multipleStreamApps:deploy:restaurant-test");
-        StreamApplication waitron = new StreamApplication("waitron");
         Stream destroy = null;
         try {
             final Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder().putAll(testDeploymentProperties("waitron"))
@@ -394,7 +409,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group4")
     public void githubContainerRegistryTests() {
         logger.info("github-container-registry-tests:start");
-        containerRegistryTests("github-log-sink", "docker:ghcr.io/tzolov/log-sink-rabbit:3.1.0-SNAPSHOT");
+        containerRegistryTests("github-log-sink", "docker:ghcr.io/tzolov/log-sink-rabbit:3.1.0-SNAPSHOT", AppBootSchemaVersion.BOOT2);
         logger.info("github-container-registry-tests:start");
     }
 
@@ -403,7 +418,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group4")
     public void azureContainerRegistryTests() {
         logger.info("azure-container-registry-tests:start");
-        containerRegistryTests("azure-log-sink", "docker:scdftest.azurecr.io/springcloudstream/log-sink-rabbit:3.1.0-SNAPSHOT");
+        containerRegistryTests("azure-log-sink", "docker:scdftest.azurecr.io/springcloudstream/log-sink-rabbit:3.1.0-SNAPSHOT", AppBootSchemaVersion.BOOT2);
         logger.info("azure-container-registry-tests:end");
     }
 
@@ -412,15 +427,15 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group4")
     public void harborContainerRegistryTests() {
         logger.info("harbor-container-registry-tests:start");
-        containerRegistryTests("harbor-log-sink", "docker:projects.registry.vmware.com/scdf/scdftest/log-sink-rabbit:3.1.0-SNAPSHOT");
+        containerRegistryTests("harbor-log-sink", "docker:projects.registry.vmware.com/scdf/scdftest/log-sink-rabbit:3.1.0-SNAPSHOT", AppBootSchemaVersion.BOOT2);
         logger.info("harbor-container-registry-tests:end");
     }
 
-    private void containerRegistryTests(String appName, String appUrl) {
+    private void containerRegistryTests(String appName, String appUrl, AppBootSchemaVersion bootVersion) {
         logger.info("application-metadata-{}-container-registry-test:start", appName);
 
         // Docker app with container image metadata
-        dataFlowOperations.appRegistryOperations().register(appName, ApplicationType.sink, appUrl, null, true);
+        dataFlowOperations.appRegistryOperations().register(appName, ApplicationType.sink, appUrl, null, bootVersion, true);
         DetailedAppRegistrationResource dockerAppWithContainerMetadata = dataFlowOperations.appRegistryOperations().info(appName, ApplicationType.sink, false);
         assertThat(dockerAppWithContainerMetadata.getOptions()).hasSize(3);
 
@@ -535,7 +550,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group6")
     @Tag("smoke")
     public void streamScriptEncoding() {
-        final String dsl = new String("http | script --script-processor.language=groovy --script-processor.script=payload+'嗨你好世界' | log");
+        final String dsl = "http | script --script-processor.language=groovy --script-processor.script=payload+'嗨你好世界' | log";
         logger.info("stream-script-test:start");
         try (Stream stream = Stream.builder(dataFlowOperations).name("script-test").definition(dsl).create().deploy(testDeploymentProperties("http"))) {
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
@@ -653,7 +668,7 @@ class DataFlowAT extends CommonTestBase {
             .name("partitioning-named-test")
             .definition("http | splitter --expression=payload.split(' ') > :topic1")
             .create();
-        StreamDefinition streamDefinitionLog = Stream.builder(dataFlowOperations).name("partitioning-named-log").definition(":topic1 > log").create();
+        Stream.builder(dataFlowOperations).name("partitioning-named-log").definition(":topic1 > log").create();
 
         try (Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder().putAll(testDeploymentProperties("http"))
             .put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
@@ -1723,28 +1738,30 @@ class DataFlowAT extends CommonTestBase {
             assertThat(task.executions().size()).isEqualTo(1);
             List<TaskExecutionResource> executions = new ArrayList<>(task.executions());
             assertThat(executions.size()).isEqualTo(1);
-
+            final TaskExecutionResource executionResource = executions.get(0);
+            assertThat(executionResource).isNotNull();
+            assertThat(executionResource.getJobExecutionIds().size()).isEqualTo(1);
 
             // There is an Error deserialization issue related to backward compatibility with SCDF
             // 2.6.x
             // The Exception thrown by the 2.6.x servers can not be deserialized by the
             // VndErrorResponseErrorHandler in 2.8+ clients.
-            Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
-                Exception exception = assertThrows(DataFlowClientException.class, () -> {
-                    dataFlowOperations.jobOperations().executionRestart(executions.get(0).getExecutionId(), executions.get(0).getSchemaTarget());
-                });
-                assertTrue(exception.getMessage().contains(" and state 'COMPLETED' is not restartable"));
-            });
+            Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () ->
+                assertThatThrownBy(() ->
+                    dataFlowOperations.jobOperations().executionRestart(executionResource.getJobExecutionIds().get(0), executionResource.getSchemaTarget())
+                ).isInstanceOf(DataFlowClientException.class)
+                    .hasMessageContaining(" and state 'COMPLETED' is not restartable"));
         }
         assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
         logger.info("ctr-launch:end");
     }
+
     @Test
     @Tag("group3")
     @Tag("smoke")
     public void ctrLaunchTestBoot3() {
         logger.info("ctr-launch3:start");
-        if(supportBoot3Jobs()) {
+        if (supportBoot3Jobs()) {
             TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
             try (Task task = taskBuilder.name(randomTaskName()).definition("a: testtimestamp3 && b: testtimestamp").description("ctrLaunchTest").build()) {
 
@@ -1777,18 +1794,19 @@ class DataFlowAT extends CommonTestBase {
                 assertThat(task.executions().size()).isEqualTo(1);
                 List<TaskExecutionResource> executions = new ArrayList<>(task.executions());
                 assertThat(executions.size()).isEqualTo(1);
-
+                final TaskExecutionResource executionResource = executions.get(0);
+                assertThat(executionResource).isNotNull();
+                assertThat(executionResource.getJobExecutionIds().size()).isEqualTo(1);
 
                 // There is an Error deserialization issue related to backward compatibility with SCDF
                 // 2.6.x
                 // The Exception thrown by the 2.6.x servers can not be deserialized by the
                 // VndErrorResponseErrorHandler in 2.8+ clients.
-                Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
-                    Exception exception = assertThrows(DataFlowClientException.class, () -> {
-                        dataFlowOperations.jobOperations().executionRestart(executions.get(0).getExecutionId(), executions.get(0).getSchemaTarget());
-                    });
-                    assertTrue(exception.getMessage().contains(" and state 'COMPLETED' is not restartable"));
-                });
+                Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () ->
+                    assertThatThrownBy(() ->
+                        dataFlowOperations.jobOperations().executionRestart(executionResource.getJobExecutionIds().get(0), executionResource.getSchemaTarget())
+                    ).isInstanceOf(DataFlowClientException.class)
+                        .hasMessageContaining(" and state 'COMPLETED' is not restartable"));
             }
             assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
             logger.info("ctr-launch:end");
@@ -1816,7 +1834,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group4")
     public void ctrFailedGraphBoot3() {
         logger.info("ctr-failed-graph3:start");
-        if(supportBoot3Jobs()) {
+        if (supportBoot3Jobs()) {
             mixedSuccessfulFailedAndUnknownExecutions("ctrFailedGraph",
                 "scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false && testtimestamp3",
                 TaskExecutionStatus.ERROR,
@@ -1831,6 +1849,7 @@ class DataFlowAT extends CommonTestBase {
         }
 
     }
+
     @Test
     @Tag("group1")
     public void ctrSplit() {
@@ -1843,7 +1862,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group1")
     public void ctrSplitBoot3() {
         logger.info("ctr-split3:start");
-        if(supportBoot3Jobs()) {
+        if (supportBoot3Jobs()) {
             allSuccessfulExecutions("ComposedTask Split Test", "<t1:testtimestamp3 || t2:timestamp || t3:testtimestamp3>", "t1", "t2", "t3");
             logger.info("ctr-split3:end");
         } else {
@@ -1863,7 +1882,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group1")
     public void ctrSequentialBoot3() {
         logger.info("ctr-sequential3:start");
-        if(supportBoot3Jobs()) {
+        if (supportBoot3Jobs()) {
             allSuccessfulExecutions("ComposedTask Sequential Test", "t1: testtimestamp3 && t2: testtimestamp && t3: testtimestamp3", "t1", "t2", "t3");
             logger.info("ctr-sequential3:end");
         } else {
@@ -1890,7 +1909,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group5")
     public void ctrSequentialTransitionAndSplitWithScenarioFailedBoot3() {
         logger.info("ctr-sequential-transition-and-split-withScenario-failed3:start");
-        if(supportBoot3Jobs()) {
+        if (supportBoot3Jobs()) {
             mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Transition And Split With Scenario Failed Test",
                 "t1: testtimestamp3 && scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false 'FAILED'->t3: testtimestamp3 && <t4: testtimestamp || t5: testtimestamp3> && t6: testtimestamp3",
                 TaskExecutionStatus.COMPLETE,
@@ -1924,7 +1943,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group5")
     public void ctrSequentialTransitionAndSplitWithScenarioOkBoot3() {
         logger.info("ctr-sequential-transition-and-split-with-scenario-ok3:start");
-        if(supportBoot3Jobs()) {
+        if (supportBoot3Jobs()) {
             mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Transition And Split With Scenario Ok Test",
                 "t1: testtimestamp3 && t2: scenario 'FAILED'->t3: testtimestamp && <t4: testtimestamp3 || t5: testtimestamp> && t6: testtimestamp3",
                 TaskExecutionStatus.COMPLETE,
@@ -1955,7 +1974,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group1")
     public void ctrNestedSplitBoot3() {
         logger.info("composed-task-NestedSplit3");
-        if(supportBoot3Jobs()) {
+        if (supportBoot3Jobs()) {
             allSuccessfulExecutions("ctrNestedSplit",
                 "<<t1: testtimestamp || t2: testtimestamp3 > && t3: testtimestamp || t4: testtimestamp3>",
                 "t1",
@@ -2000,7 +2019,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group5")
     public void twoSplitTestBoot3() {
         logger.info("composed-task-twoSplit-test3");
-        if(supportBoot3Jobs()) {
+        if (supportBoot3Jobs()) {
             allSuccessfulExecutions("twoSplitTest",
                 "<t1: testtimestamp3 ||t2: testtimestamp||t3: testtimestamp3> && <t4: testtimestamp||t5: testtimestamp3>",
                 "t1",
@@ -2012,6 +2031,7 @@ class DataFlowAT extends CommonTestBase {
             logger.warn("composed-task-twoSplit-test3:skipped:" + runtimeApps.getDataflowServerVersion());
         }
     }
+
     @Test
     @Tag("group4")
     public void sequentialAndSplitTest() {
@@ -2024,11 +2044,12 @@ class DataFlowAT extends CommonTestBase {
             "t4",
             "t5");
     }
+
     @Test
     @Tag("group4")
     public void sequentialAndSplitTestBoot3() {
         logger.info("composed-task-sequentialAndSplit-test3");
-        if(supportBoot3Jobs()) {
+        if (supportBoot3Jobs()) {
             allSuccessfulExecutions("sequentialAndSplitTest",
                 "<t1: testtimestamp3 && <t2: testtimestamp || t3: testtimestamp3 || t4: testtimestamp> && t5: testtimestamp3>",
                 "t1",
@@ -2059,7 +2080,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group6")
     public void sequentialTransitionAndSplitFailedInvalidTestBoot3() {
         logger.info("composed-task-sequentialTransitionAndSplitFailedInvalid-test3");
-        if(supportBoot3Jobs()) {
+        if (supportBoot3Jobs()) {
             mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Transition And Split Failed Invalid Test",
                 "t1: testtimestamp && b:scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false 'FAILED' -> t2: testtimestamp3 && t3: testtimestamp && t4: testtimestamp3 && <t5: testtimestamp || t6: testtimestamp> && t7: testtimestamp3",
                 TaskExecutionStatus.COMPLETE,
@@ -2072,11 +2093,12 @@ class DataFlowAT extends CommonTestBase {
             logger.warn("composed-task-sequentialTransitionAndSplitFailedInvalid-test3:skipped:" + runtimeApps.getDataflowServerVersion());
         }
     }
+
     @Test
     @Tag("group3")
     public void sequentialAndSplitWithFlowTestBoot3() {
         logger.info("composed-task-sequentialAndSplitWithFlow-test3");
-        if(supportBoot3Jobs()) {
+        if (supportBoot3Jobs()) {
             allSuccessfulExecutions("sequentialAndSplitWithFlowTest",
                 "t1: testtimestamp && <t2: testtimestamp3 && t3: testtimestamp || t4: testtimestamp3 ||t5: testtimestamp> && t6: testtimestamp3",
                 "t1",
@@ -2159,9 +2181,9 @@ class DataFlowAT extends CommonTestBase {
             });
 
             // Not run tasks
-            childTasksBySuffix(task, "t4").forEach(childTask -> {
-                assertThat(childTask.executions().size()).isEqualTo(0);
-            });
+            childTasksBySuffix(task, "t4").forEach(childTask ->
+                assertThat(childTask.executions().size()).isEqualTo(0)
+            );
 
             // Parent Task
             assertThat(taskBuilder.allTasks().size()).isEqualTo(task.composedTaskChildTasks().size() + 1);
@@ -2231,7 +2253,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group6")
     public void failedBasicTransitionTestBoot3() {
         logger.info("failed-basic-transition-test3:start");
-        if(supportBoot3Jobs()) {
+        if (supportBoot3Jobs()) {
             mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Failed Basic Transition Test",
                 "b: scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false 'FAILED' -> t1: testtimestamp3 * ->t2: testtimestamp3",
                 TaskExecutionStatus.COMPLETE,
@@ -2245,6 +2267,7 @@ class DataFlowAT extends CommonTestBase {
             logger.warn("failed-basic-transition-test3:skipped:" + runtimeApps.getDataflowServerVersion());
         }
     }
+
     @Test
     @Tag("group2")
     public void successBasicTransitionTest() {
@@ -2264,7 +2287,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group2")
     public void successBasicTransitionTestBoot3() {
         logger.info("success-basic-transition-test3:start");
-        if(supportBoot3Jobs()) {
+        if (supportBoot3Jobs()) {
             mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Success Basic Transition Test",
                 "b: scenario --io.spring.launch-batch-job=false 'FAILED' -> t1: testtimestamp3 * ->t2: testtimestamp",
                 TaskExecutionStatus.COMPLETE,
@@ -2311,7 +2334,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group2")
     public void wildCardOnlyInLastPositionTestBoot3() {
         logger.info("composed-task-wildCardOnlyInLastPosition-test3");
-        if(supportBoot3Jobs()) {
+        if (supportBoot3Jobs()) {
             mixedSuccessfulFailedAndUnknownExecutions("wildCardOnlyInLastPositionTest",
                 "b1: scenario --io.spring.launch-batch-job=false 'FAILED' -> t1: testtimestamp3  && b2: scenario --io.spring.launch-batch-job=false * ->t3: testtimestamp3 ",
                 TaskExecutionStatus.COMPLETE,
@@ -2324,6 +2347,7 @@ class DataFlowAT extends CommonTestBase {
             logger.warn("composed-task-wildCardOnlyInLastPosition-test3:skipped:" + runtimeApps.getDataflowServerVersion());
         }
     }
+
     @Test
     @Tag("group6")
     public void failedCTRRetryTest() {
@@ -2366,9 +2390,9 @@ class DataFlowAT extends CommonTestBase {
             });
 
             // Not run tasks
-            childTasksBySuffix(task, "t1").forEach(childTask -> {
-                assertThat(childTask.executions().size()).isEqualTo(0);
-            });
+            childTasksBySuffix(task, "t1").forEach(childTask ->
+                assertThat(childTask.executions().size()).isEqualTo(0)
+            );
 
             // Parent Task
             assertThat(taskBuilder.allTasks().size()).isEqualTo(task.composedTaskChildTasks().size() + 1);
@@ -2439,17 +2463,17 @@ class DataFlowAT extends CommonTestBase {
         return result;
     }
 
-    private void validateSuccessfulTaskLaunch(Task task, long launchId, String schemaTarget) {
-
-        validateSuccessfulTaskLaunch(task, launchId, schemaTarget, 1);
+    private TaskExecutionResource validateSuccessfulTaskLaunch(Task task, long launchId, String schemaTarget) {
+        return validateSuccessfulTaskLaunch(task, launchId, schemaTarget, 1);
     }
 
-    private void validateSuccessfulTaskLaunch(Task task, long launchId, String schemaTarget, int sizeExpected) {
+    private TaskExecutionResource validateSuccessfulTaskLaunch(Task task, long launchId, String schemaTarget, int sizeExpected) {
         Awaitility.await().until(() -> task.executionStatus(launchId, schemaTarget) == TaskExecutionStatus.COMPLETE);
         assertThat(task.executions().size()).isEqualTo(sizeExpected);
         Optional<TaskExecutionResource> taskExecution = task.execution(launchId, schemaTarget);
         assertThat(taskExecution.isPresent()).isTrue();
         assertThat(taskExecution.get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+        return taskExecution.get();
     }
 
     private void verifySuccessfulJobAndStepScenario(Task task, String stepName) {
@@ -2484,17 +2508,19 @@ class DataFlowAT extends CommonTestBase {
             verifySuccessfulJobAndStepScenario(task, stepName);
 
             // Attempt a job restart
-            List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
+            Optional<TaskExecutionResource> taskExecutionResource = task.executions().stream().findFirst();
+            assertThat(taskExecutionResource).isPresent();
+            final List<Long> jobExecutionIds = taskExecutionResource.get().getJobExecutionIds();
 
             // There is an Error deserialization issue related to backward compatibility with SCDF
             // 2.6.x
             // The Exception thrown by the 2.6.x servers can not be deserialized by the
             // VndErrorResponseErrorHandler in 2.8+ clients.
             Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
-                Exception exception = assertThrows(DataFlowClientException.class, () -> {
-                    dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0), launch.getSchemaTarget());
-                });
-                assertTrue(exception.getMessage().contains(" and state 'COMPLETED' is not restartable"));
+                assertThatThrownBy(() ->
+                    dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0), launch.getSchemaTarget())
+                ).isInstanceOf(DataFlowClientException.class)
+                    .hasMessageContaining(" and state 'COMPLETED' is not restartable");
             });
         }
     }
@@ -2517,12 +2543,9 @@ class DataFlowAT extends CommonTestBase {
             LaunchResponseResource launch = task.launch(args);
 
             // Verify task
-            validateSuccessfulTaskLaunch(task, launch.getExecutionId(), launch.getSchemaTarget());
-
-            // Verify that batch app that fails can be restarted
-
-            // Attempt a job restart
-            List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
+            TaskExecutionResource taskExecutionResource = validateSuccessfulTaskLaunch(task, launch.getExecutionId(), launch.getSchemaTarget());
+            assertThat(taskExecutionResource).isNotNull();
+            List<Long> jobExecutionIds = taskExecutionResource.getJobExecutionIds();
             // There is an Error deserialization issue related to backward compatibility with SCDF
             // 2.6.x
             // The Exception thrown by the 2.6.x servers can not be deserialized by the
@@ -2530,13 +2553,19 @@ class DataFlowAT extends CommonTestBase {
             Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
                 dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0), launch.getSchemaTarget());
                 // Wait for job to start
-                Awaitility.await().until(() -> task.jobExecutionResources().size() == 2);
+                Awaitility.await().until(() -> task.thinkJobExecutionResources().size() == 2);
                 // Wait for task for the job to complete
-                Awaitility.await().until(() -> task.executions().stream().findFirst().get().getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE);
-                assertThat(task.jobExecutionResources().size()).isEqualTo(2);
-                List<JobExecutionResource> jobExecutionResources = new ArrayList<>(task.jobInstanceResources().stream().findFirst().get().getJobExecutions());
-                List<BatchStatus> batchStatuses = new ArrayList<>();
-                jobExecutionResources.forEach(jobExecutionResource -> batchStatuses.add(jobExecutionResource.getJobExecution().getStatus()));
+                Awaitility.await().until(() -> {
+                    Optional<TaskExecutionResource> executionResource = task.executions().stream().findFirst();
+                    return executionResource.filter(resource -> resource.getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE).isPresent();
+                });
+                Collection<JobExecutionThinResource> resources = task.thinkJobExecutionResources();
+                assertThat(resources.size()).isEqualTo(2);
+
+                Set<BatchStatus> batchStatuses = resources.stream()
+                    .map(JobExecutionThinResource::getStatus)
+                    .collect(Collectors.toSet());
+
                 assertThat(batchStatuses).contains(BatchStatus.FAILED);
                 assertThat(batchStatuses).contains(BatchStatus.COMPLETED);
             });
@@ -2639,8 +2668,10 @@ class DataFlowAT extends CommonTestBase {
         // Then Task should fail
         minimumVersionCheck("testCreateTaskWithOneVersionLaunchInvalidVersion");
         try (Task task = createTaskDefinition()) {
-            assertThatThrownBy(() -> task.launch(Collections.singletonMap("version.testtimestamp", TEST_VERSION_NUMBER), null)).isInstanceOf(
-                DataFlowClientException.class).hasMessageContaining("Unknown task app: testtimestamp");
+            assertThatThrownBy(() ->
+                task.launch(Collections.singletonMap("version.testtimestamp", TEST_VERSION_NUMBER), null)
+            ).isInstanceOf(DataFlowClientException.class)
+                .hasMessageContaining("Unknown task app: testtimestamp");
         }
     }
 
@@ -2656,8 +2687,10 @@ class DataFlowAT extends CommonTestBase {
         // And It launches the specified version
         minimumVersionCheck("testInvalidVersionUsageShouldNotAffectSubsequentDefaultLaunch");
         Task task = createTaskDefinition();
-        assertThatThrownBy(() -> task.launch(Collections.singletonMap("version.testtimestamp", TEST_VERSION_NUMBER),
-            null)).isInstanceOf(DataFlowClientException.class).hasMessageContaining("Unknown task app: testtimestamp");
+        assertThatThrownBy(() ->
+            task.launch(Collections.singletonMap("version.testtimestamp", TEST_VERSION_NUMBER), null)
+        ).isInstanceOf(DataFlowClientException.class)
+            .hasMessageContaining("Unknown task app: testtimestamp");
 
         LaunchResponseResource launch = task.launch();
         validateSuccessfulTaskLaunch(task, launch.getExecutionId(), launch.getSchemaTarget(), 1);
@@ -2682,8 +2715,10 @@ class DataFlowAT extends CommonTestBase {
         LaunchResponseResource launch = task.launch(Collections.singletonMap("version.testtimestamp", TEST_VERSION_NUMBER), null);
         validateSuccessfulTaskLaunch(task, launch.getExecutionId(), launch.getSchemaTarget());
         resetTimestampVersion();
-        assertThatThrownBy(() -> task.launch(Collections.singletonMap("version.testtimestamp", TEST_VERSION_NUMBER),
-            null)).isInstanceOf(DataFlowClientException.class).hasMessageContaining("Unknown task app: testtimestamp");
+        assertThatThrownBy(() ->
+            task.launch(Collections.singletonMap("version.testtimestamp", TEST_VERSION_NUMBER), null)
+        ).isInstanceOf(DataFlowClientException.class)
+            .hasMessageContaining("Unknown task app: testtimestamp");
     }
 
     @Test
@@ -2763,7 +2798,9 @@ class DataFlowAT extends CommonTestBase {
         AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
         appRegistryOperations.unregister("testtimestamp", ApplicationType.task, CURRENT_VERSION_NUMBER);
 
-        assertThatThrownBy(task::launch).isInstanceOf(DataFlowClientException.class).hasMessageContaining("Unknown task app: testtimestamp");
+        assertThatThrownBy(task::launch)
+            .isInstanceOf(DataFlowClientException.class)
+            .hasMessageContaining("Unknown task app: testtimestamp");
     }
 
     private Task createTaskDefinition() {
@@ -2889,10 +2926,10 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group5")
     public void taskLaunchInvalidTaskDefinition() {
         logger.info("task-launch-invalid-task-definition");
-        Exception exception = assertThrows(DataFlowClientException.class, () -> {
-            Task.builder(dataFlowOperations).name(randomTaskName()).definition("foobar").description("Test scenario with invalid task definition").build();
-        });
-        assertTrue(exception.getMessage().contains("The 'task:foobar' application could not be found."));
+        assertThatThrownBy(() ->
+            Task.builder(dataFlowOperations).name(randomTaskName()).definition("foobar").description("Test scenario with invalid task definition").build()
+        ).isInstanceOf(DataFlowClientException.class)
+            .hasMessageContaining("The 'task:foobar' application could not be found.");
     }
 
     @Test
@@ -3143,7 +3180,9 @@ class DataFlowAT extends CommonTestBase {
             assertThat(task.jobStepExecutions(jobExecutionIds.get(0), taskExecution.get().getSchemaTarget()).size()).isEqualTo(1);
             safeCleanupTaskExecution(task, launch.getExecutionId(), launch.getSchemaTarget());
             verifyAllSpecifiedTaskExecutions(task, launches, false);
-            assertThatThrownBy(() -> task.jobStepExecutions(jobExecutionIds.get(0), launch.getSchemaTarget())).isInstanceOf(DataFlowClientException.class)
+            assertThatThrownBy(() ->
+                task.jobStepExecutions(jobExecutionIds.get(0), launch.getSchemaTarget())
+            ).isInstanceOf(DataFlowClientException.class)
                 .hasMessageContaining("No JobExecution with id=");
         }
     }
@@ -3171,7 +3210,9 @@ class DataFlowAT extends CommonTestBase {
                 assertThat(task.jobStepExecutions(jobExecutionIds.get(0), taskExecution.get().getSchemaTarget()).size()).isEqualTo(1);
                 safeCleanupTaskExecution(task, launch.getExecutionId(), launch.getSchemaTarget());
                 verifyAllSpecifiedTaskExecutions(task, launches, false);
-                assertThatThrownBy(() -> task.jobStepExecutions(jobExecutionIds.get(0), launch.getSchemaTarget())).isInstanceOf(DataFlowClientException.class)
+                assertThatThrownBy(() ->
+                    task.jobStepExecutions(jobExecutionIds.get(0), launch.getSchemaTarget())
+                ).isInstanceOf(DataFlowClientException.class)
                     .hasMessageContaining("No JobExecution with id=");
             }
         } else {
@@ -3199,8 +3240,10 @@ class DataFlowAT extends CommonTestBase {
             assertThat(taskExecution.get().getJobExecutionIds().size()).isEqualTo(2);
             assertThat(task.jobStepExecutions(taskExecution.get().getJobExecutionIds().get(0), launch.getSchemaTarget()).size()).isEqualTo(1);
             safeCleanupTaskExecution(task, launch.getExecutionId(), launch.getSchemaTarget());
-            assertThatThrownBy(() -> this.dataFlowOperations.jobOperations()
-                .executionRestart(taskExecution.get().getJobExecutionIds().get(0), launch.getSchemaTarget())).isInstanceOf(DataFlowClientException.class)
+            assertThatThrownBy(() ->
+                this.dataFlowOperations.jobOperations()
+                    .executionRestart(taskExecution.get().getJobExecutionIds().get(0), launch.getSchemaTarget())
+            ).isInstanceOf(DataFlowClientException.class)
                 .hasMessageContaining("There is no JobExecution with id=");
         }
 
@@ -3306,9 +3349,9 @@ class DataFlowAT extends CommonTestBase {
             });
 
             // Not run tasks
-            childTasksBySuffix(task, unknownTasks.toArray(new String[0])).forEach(childTask -> {
-                assertThat(childTask.executions().size()).isEqualTo(0);
-            });
+            childTasksBySuffix(task, unknownTasks.toArray(new String[0])).forEach(childTask ->
+                assertThat(childTask.executions().size()).isEqualTo(0)
+            );
 
             // Parent Task
             assertThat(taskBuilder.allTasks().size()).isEqualTo(task.composedTaskChildTasks().size() + 1);
@@ -3325,7 +3368,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     private void safeCleanupAllTaskExecutions(Task task) {
-        doSafeCleanupTasks(() -> task.cleanupAllTaskExecutions());
+        doSafeCleanupTasks(task::cleanupAllTaskExecutions);
     }
 
     private void safeCleanupTaskExecution(Task task, long taskExecutionId, String schemaTarget) {
