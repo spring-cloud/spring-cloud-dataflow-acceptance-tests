@@ -29,6 +29,7 @@ import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientProperties;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -63,7 +64,7 @@ public class CommonTestBase {
     @Autowired
     protected DataFlowClientProperties dataFlowClientProperties;
 
-    protected void registerApp(String name, String url) {
+    protected void registerApp(String name, String url, AppBootSchemaVersion bootVersion) {
         try {
             dataFlowOperations.appRegistryOperations().unregister(name, ApplicationType.app);
         } catch (DataFlowClientException x) {
@@ -72,7 +73,7 @@ public class CommonTestBase {
             }
         }
         try {
-            dataFlowOperations.appRegistryOperations().register(name, ApplicationType.app, url, null, true);
+            dataFlowOperations.appRegistryOperations().register(name, ApplicationType.app, url, null,  bootVersion, true);
             logger.info("registerApp:{}:{}", name, url);
         } catch (DataFlowClientException x) {
             if (!x.toString().contains("exists")) {
@@ -84,11 +85,11 @@ public class CommonTestBase {
         }
     }
 
-    protected void registerTask(String name, String artefact, String version) {
+    protected void registerTask(String name, String artefact, String version, AppBootSchemaVersion bootVersion) {
         AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
         try {
             String uri = artefact + ":" + version;
-            appRegistryOperations.register(name, ApplicationType.task, uri, null, false);
+            appRegistryOperations.register(name, ApplicationType.task, uri, null,  bootVersion,false);
             logger.info("registerTask:{}:{}", name, uri);
         } catch (DataFlowClientException x) {
             if (!x.toString().contains("already registered")) {
@@ -103,15 +104,15 @@ public class CommonTestBase {
 
     protected void registerTimestampTasks() {
         if (this.runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
-            registerTask("testtimestamp", "docker:springcloudtask/timestamp-task", CURRENT_VERSION_NUMBER);
-            registerTask("testtimestamp-batch", "docker:springcloudtask/timestamp-batch-task", CURRENT_VERSION_NUMBER);
-            registerTask("testtimestamp3", "docker:springcloudtask/timestamp-task", BOOT3_VERSION_NUMBER);
-            registerTask("testtimestamp-batch3", "docker:springcloudtask/timestamp-batch-task", BOOT3_VERSION_NUMBER);
+            registerTask("testtimestamp", "docker:springcloudtask/timestamp-task", CURRENT_VERSION_NUMBER, AppBootSchemaVersion.BOOT2);
+            registerTask("testtimestamp-batch", "docker:springcloudtask/timestamp-batch-task", CURRENT_VERSION_NUMBER, AppBootSchemaVersion.BOOT2);
+            registerTask("testtimestamp3", "docker:springcloudtask/timestamp-task", BOOT3_VERSION_NUMBER, AppBootSchemaVersion.BOOT3);
+            registerTask("testtimestamp-batch3", "docker:springcloudtask/timestamp-batch-task", BOOT3_VERSION_NUMBER, AppBootSchemaVersion.BOOT3);
         } else {
-            registerTask("testtimestamp", "maven://io.spring:timestamp-task", CURRENT_VERSION_NUMBER);
-            registerTask("testtimestamp-batch", "maven://io.spring:timestamp-batch-task", CURRENT_VERSION_NUMBER);
-            registerTask("testtimestamp3", "maven://io.spring:timestamp-task", BOOT3_VERSION_NUMBER);
-            registerTask("testtimestamp-batch3", "maven://io.spring:timestamp-batch-task", BOOT3_VERSION_NUMBER);
+            registerTask("testtimestamp", "maven://io.spring:timestamp-task", CURRENT_VERSION_NUMBER, AppBootSchemaVersion.BOOT2);
+            registerTask("testtimestamp-batch", "maven://io.spring:timestamp-batch-task", CURRENT_VERSION_NUMBER, AppBootSchemaVersion.BOOT2);
+            registerTask("testtimestamp3", "maven://io.spring:timestamp-task", BOOT3_VERSION_NUMBER, AppBootSchemaVersion.BOOT3);
+            registerTask("testtimestamp-batch3", "maven://io.spring:timestamp-batch-task", BOOT3_VERSION_NUMBER, AppBootSchemaVersion.BOOT3);
         }
     }
 }

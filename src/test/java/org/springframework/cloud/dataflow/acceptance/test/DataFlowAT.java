@@ -37,14 +37,12 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jayway.jsonpath.JsonPath;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
-import org.assertj.core.api.Condition;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
@@ -150,7 +148,11 @@ class DataFlowAT extends CommonTestBase {
             try {
                 dataFlowOperations.taskOperations().list().forEach(taskDefinitionResource -> {
                     logger.info("Destroying task {} and execution history", taskDefinitionResource.getName());
-                    dataFlowOperations.taskOperations().destroy(taskDefinitionResource.getName(), true);
+                    try {
+                        dataFlowOperations.taskOperations().destroy(taskDefinitionResource.getName(), true);
+                    } catch (DataFlowClientException x) {
+                        logger.warn("destroy:" + taskDefinitionResource.getName() + ":" + x);
+                    }
                 });
                 logger.info("Destroyed all tasks and execution history");
             } catch (Exception e) {
@@ -271,13 +273,13 @@ class DataFlowAT extends CommonTestBase {
     public void multipleStreamApps() {
         logger.info("multiple-stream-apps-test:start");
         if (this.runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
-            registerApp("kitchen", "docker:springcloudstream/scdf-app-kitchen:1.0.0-SNAPSHOT");
-            registerApp("customer", "docker:springcloudstream/scdf-app-customer:1.0.0-SNAPSHOT");
-            registerApp("waitron", "docker:springcloudstream/scdf-app-waitron:1.0.0-SNAPSHOT");
+            registerApp("kitchen", "docker:springcloudstream/scdf-app-kitchen:1.0.0-SNAPSHOT", AppBootSchemaVersion.BOOT2);
+            registerApp("customer", "docker:springcloudstream/scdf-app-customer:1.0.0-SNAPSHOT", AppBootSchemaVersion.BOOT2);
+            registerApp("waitron", "docker:springcloudstream/scdf-app-waitron:1.0.0-SNAPSHOT", AppBootSchemaVersion.BOOT2);
         } else {
-            registerApp("kitchen", "maven:io.spring:scdf-app-kitchen:1.0.0-SNAPSHOT");
-            registerApp("customer", "maven:io.spring:scdf-app-customer:1.0.0-SNAPSHOT");
-            registerApp("waitron", "maven:io.spring:scdf-app-waitron:1.0.0-SNAPSHOT");
+            registerApp("kitchen", "maven:io.spring:scdf-app-kitchen:1.0.0-SNAPSHOT", AppBootSchemaVersion.BOOT2);
+            registerApp("customer", "maven:io.spring:scdf-app-customer:1.0.0-SNAPSHOT", AppBootSchemaVersion.BOOT2);
+            registerApp("waitron", "maven:io.spring:scdf-app-waitron:1.0.0-SNAPSHOT", AppBootSchemaVersion.BOOT2);
         }
         try {
             logger.info("multipleStreamApps:check:restaurant-test");
@@ -350,7 +352,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group2")
     public void timestampTask() {
         logger.info("task-timestamp-test:start");
-        assertTaskRegistration("testtimestamp");
+        assertTaskRegistration("testtimestamp", AppBootSchemaVersion.BOOT2);
         try (Task task = Task.builder(dataFlowOperations).name(randomTaskName()).definition("testtimestamp").description("Test timestamp task").build()) {
 
             // task first launch
@@ -378,7 +380,7 @@ class DataFlowAT extends CommonTestBase {
     public void timestampTaskBoot3() {
         logger.info("task-timestamp3-test:start");
         if (supportBoot3Jobs()) {
-            assertTaskRegistration("testtimestamp3");
+            assertTaskRegistration("testtimestamp3", AppBootSchemaVersion.BOOT3);
             try (Task task = Task.builder(dataFlowOperations).name(randomTaskName()).definition("testtimestamp3").description("Test timestamp task").build()) {
 
                 // task first launch
@@ -427,7 +429,9 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group4")
     public void harborContainerRegistryTests() {
         logger.info("harbor-container-registry-tests:start");
-        containerRegistryTests("harbor-log-sink", "docker:projects.registry.vmware.com/scdf/scdftest/log-sink-rabbit:3.1.0-SNAPSHOT", AppBootSchemaVersion.BOOT2);
+        containerRegistryTests("harbor-log-sink",
+            "docker:projects.registry.vmware.com/scdf/scdftest/log-sink-rabbit:3.1.0-SNAPSHOT",
+            AppBootSchemaVersion.BOOT2);
         logger.info("harbor-container-registry-tests:end");
     }
 
@@ -898,10 +902,14 @@ class DataFlowAT extends CommonTestBase {
             logger.info("stream-lifecycle-test:deployed");
             streamAssertions.accept(stream);
 
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() -> stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:"));
+            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
+                stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:")
+            );
 
             assertThat(stream.history().size()).isEqualTo(1L);
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() -> stream.history().get(1).equals(DEPLOYED));
+            Awaitility.await().failFast(() ->
+                AwaitUtils.hasErrorInLog(offset)).until(() -> stream.history().get(1).equals(DEPLOYED)
+            );
 
             assertThat(stream.logs()).contains("TICKTOCK - TIMESTAMP:");
             assertThat(stream.logs(app("log"))).contains("TICKTOCK - TIMESTAMP:");
@@ -916,11 +924,17 @@ class DataFlowAT extends CommonTestBase {
 
             streamAssertions.accept(stream);
 
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() -> stream.logs(app("log")).contains("Updated TICKTOCK - TIMESTAMP:"));
+            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
+                stream.logs(app("log")).contains("Updated TICKTOCK - TIMESTAMP:")
+            );
 
             assertThat(stream.history().size()).isEqualTo(2);
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() -> stream.history().get(1).equals(DELETED));
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() -> stream.history().get(2).equals(DEPLOYED));
+            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
+                stream.history().get(1).equals(DELETED)
+            );
+            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
+                stream.history().get(2).equals(DEPLOYED)
+            );
 
             // ROLLBACK
             logger.info("stream-lifecycle-test: ROLLBACK");
@@ -930,32 +944,52 @@ class DataFlowAT extends CommonTestBase {
 
             streamAssertions.accept(stream);
 
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() -> stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:"));
+            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
+                stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:")
+            );
 
             assertThat(stream.history().size()).isEqualTo(3);
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() -> stream.history().get(1).equals(DELETED));
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() -> stream.history().get(2).equals(DELETED));
+            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
+                stream.history().get(1).equals(DELETED)
+            );
+            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
+                stream.history().get(2).equals(DELETED)
+            );
             Awaitility.await().until(() -> starting.contains(stream.history().get(3)));
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() -> stream.history().get(3).equals(DEPLOYED));
+            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
+                stream.history().get(3).equals(DEPLOYED)
+            );
 
             // UNDEPLOY
             logger.info("stream-lifecycle-test: UNDEPLOY");
             stream.undeploy();
 
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() -> stream.getStatus().equals(UNDEPLOYED));
+            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
+                stream.getStatus().equals(UNDEPLOYED)
+            );
 
             assertThat(stream.history().size()).isEqualTo(3);
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() -> stream.history().get(1).equals(DELETED));
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() -> stream.history().get(2).equals(DELETED));
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() -> stream.history().get(3).equals(DELETED));
+            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
+                stream.history().get(1).equals(DELETED)
+            );
+            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
+                stream.history().get(2).equals(DELETED)
+            );
+            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
+                stream.history().get(3).equals(DELETED)
+            );
 
             PagedModel<StreamDefinitionResource> list = dataFlowOperations.streamOperations().list();
             System.out.println("definitions:" + list.getContent());
-            assertThat(list.getMetadata().getTotalElements()).isEqualTo(1L);
+            PagedModel.PageMetadata metadata = list.getMetadata();
+            assertThat(metadata).isNotNull();
+            assertThat(metadata.getTotalElements()).isEqualTo(1L);
             // DESTROY
         }
         logger.info("stream-lifecycle-test: DESTROY");
-        assertThat(dataFlowOperations.streamOperations().list().getMetadata().getTotalElements()).isEqualTo(0L);
+        PagedModel.PageMetadata metadata = dataFlowOperations.streamOperations().list().getMetadata();
+        assertThat(metadata).isNotNull();
+        assertThat(metadata.getTotalElements()).isEqualTo(0L);
     }
 
     @Test
@@ -1003,11 +1037,14 @@ class DataFlowAT extends CommonTestBase {
             .name("http-destination-source")
             .definition("http > :LOG-DESTINATION")
             .create()
-            .deploy(testDeploymentProperties("http")); Stream logStream = Stream.builder(dataFlowOperations)
-            .name("log-destination-sink")
-            .definition(":LOG-DESTINATION > log")
-            .create()
-            .deploy(testDeploymentProperties("log"))) {
+            .deploy(testDeploymentProperties("http"));
+
+             Stream logStream = Stream.builder(dataFlowOperations)
+                 .name("log-destination-sink")
+                 .definition(":LOG-DESTINATION > log")
+                 .create()
+                 .deploy(testDeploymentProperties("log"))
+        ) {
             logger.info("namedChannelDestination:deploying:{}", logStream.getName());
             logger.info("namedChannelDestination:deploying:{}", httpStream.getName());
             AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(logStream);
@@ -1044,11 +1081,14 @@ class DataFlowAT extends CommonTestBase {
             .name("taphttp")
             .definition("http | log")
             .create()
-            .deploy(testDeploymentProperties("http")); Stream tapStream = Stream.builder(dataFlowOperations)
-            .name("tapstream")
-            .definition(":taphttp.http > log")
-            .create()
-            .deploy(testDeploymentProperties("log"))) {
+            .deploy(testDeploymentProperties("http"));
+
+             Stream tapStream = Stream.builder(dataFlowOperations)
+                 .name("tapstream")
+                 .definition(":taphttp.http > log")
+                 .create()
+                 .deploy(testDeploymentProperties("log"))
+        ) {
             logger.info("namedChannelTap:deploying:{}", httpLogStream.getName());
             logger.info("namedChannelTap:deploying:{}", tapStream.getName());
             AwaitUtils.StreamLog httpOffset = AwaitUtils.logOffset(httpLogStream);
@@ -1082,15 +1122,18 @@ class DataFlowAT extends CommonTestBase {
             .name("many-to-one")
             .definition(":MANY-TO-ONE-DESTINATION > log")
             .create()
-            .deploy(testDeploymentProperties("log")); Stream httpStreamOne = Stream.builder(dataFlowOperations)
-            .name("http-source-1")
-            .definition("http > :MANY-TO-ONE-DESTINATION")
-            .create()
-            .deploy(testDeploymentProperties("http")); Stream httpStreamTwo = Stream.builder(dataFlowOperations)
-            .name("http-source-2")
-            .definition("http > :MANY-TO-ONE-DESTINATION")
-            .create()
-            .deploy(testDeploymentProperties("http"))) {
+            .deploy(testDeploymentProperties("log"));
+             Stream httpStreamOne = Stream.builder(dataFlowOperations)
+                 .name("http-source-1")
+                 .definition("http > :MANY-TO-ONE-DESTINATION")
+                 .create()
+                 .deploy(testDeploymentProperties("http"));
+             Stream httpStreamTwo = Stream.builder(dataFlowOperations)
+                 .name("http-source-2")
+                 .definition("http > :MANY-TO-ONE-DESTINATION")
+                 .create()
+                 .deploy(testDeploymentProperties("http"))
+        ) {
             AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(logStream);
             AwaitUtils.StreamLog httpOffsetOne = AwaitUtils.logOffset(httpStreamOne);
             AwaitUtils.StreamLog httpOffsetTwo = AwaitUtils.logOffset(httpStreamTwo);
@@ -1126,19 +1169,23 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group4")
     public void namedChannelDirectedGraph() {
         logger.info("named-channel-directed-graph:start");
-        try (Stream fooLogStream = Stream.builder(dataFlowOperations)
-            .name("directed-graph-destination1")
-            .definition(":foo > transform --expression=payload+'-foo' | log")
-            .create()
-            .deploy(testDeploymentProperties("log")); Stream barLogStream = Stream.builder(dataFlowOperations)
-            .name("directed-graph-destination2")
-            .definition(":bar > transform --expression=payload+'-bar' | log")
-            .create()
-            .deploy(testDeploymentProperties("log")); Stream httpStream = Stream.builder(dataFlowOperations)
-            .name("directed-graph-http-source")
-            .definition("http | router --expression=payload.contains('a')?'foo':'bar'")
-            .create()
-            .deploy(testDeploymentProperties("http"))) {
+        try (
+            Stream fooLogStream = Stream.builder(dataFlowOperations)
+                .name("directed-graph-destination1")
+                .definition(":foo > transform --expression=payload+'-foo' | log")
+                .create()
+                .deploy(testDeploymentProperties("log"));
+            Stream barLogStream = Stream.builder(dataFlowOperations)
+                .name("directed-graph-destination2")
+                .definition(":bar > transform --expression=payload+'-bar' | log")
+                .create()
+                .deploy(testDeploymentProperties("log"));
+            Stream httpStream = Stream.builder(dataFlowOperations)
+                .name("directed-graph-http-source")
+                .definition("http | router --expression=payload.contains('a')?'foo':'bar'")
+                .create()
+                .deploy(testDeploymentProperties("http"))
+        ) {
             logger.info("namedChannelDirectedGraph:deploying:{}", httpStream.getName());
             logger.info("namedChannelDirectedGraph:deploying:{}", fooLogStream.getName());
             logger.info("namedChannelDirectedGraph:deploying:{}", barLogStream.getName());
@@ -1211,13 +1258,21 @@ class DataFlowAT extends CommonTestBase {
                 runtimeApps.getDataflowServerVersion());
 
             String taskName = randomTaskName();
-            try (Task task = Task.builder(dataFlowOperations).name(taskName).definition("testtimestamp").description("Test timestamp task").build()) {
+            try (
+                Task task = Task.builder(dataFlowOperations)
+                    .name(taskName)
+                    .definition("testtimestamp")
+                    .description("Test timestamp task")
+                    .build()
+            ) {
                 logger.info("dataflowTaskLauncherSink:deploying:{}", dataflowTaskLauncherAppName);
-                try (Stream stream = Stream.builder(dataFlowOperations)
-                    .name("tasklauncher-test")
-                    .definition("http | " + dataflowTaskLauncherAppName + " --trigger.initialDelay=100 --trigger.maxPeriod=1000 " + "--spring.cloud.dataflow.client.serverUri=" + dataFlowClientProperties.getServerUri())
-                    .create()
-                    .deploy(testDeploymentProperties("http"))) {
+                try (
+                    Stream stream = Stream.builder(dataFlowOperations)
+                        .name("tasklauncher-test")
+                        .definition("http | " + dataflowTaskLauncherAppName + " --trigger.initialDelay=100 --trigger.maxPeriod=1000 " + "--spring.cloud.dataflow.client.serverUri=" + dataFlowClientProperties.getServerUri())
+                        .create()
+                        .deploy(testDeploymentProperties("http"))
+                ) {
                     AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
 
                     awaitStarting(stream, offset);
@@ -1276,11 +1331,13 @@ class DataFlowAT extends CommonTestBase {
 
         logger.info("stream-analytics-influx-test");
 
-        try (Stream stream = Stream.builder(dataFlowOperations)
-            .name("httpAnalyticsInflux")
-            .definition("http | analytics --analytics.name=my_http_analytics --analytics.tag.expression.msgSize=payload.length()")
-            .create()
-            .deploy(testDeploymentProperties("http"))) {
+        try (
+            Stream stream = Stream.builder(dataFlowOperations)
+                .name("httpAnalyticsInflux")
+                .definition("http | analytics --analytics.name=my_http_analytics --analytics.tag.expression.msgSize=payload.length()")
+                .create()
+                .deploy(testDeploymentProperties("http"))
+        ) {
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
 
             awaitStarting(stream, offset);
@@ -1353,11 +1410,13 @@ class DataFlowAT extends CommonTestBase {
 
         logger.info("stream-analytics-prometheus-test");
 
-        try (Stream stream = Stream.builder(dataFlowOperations)
-            .name("httpAnalyticsPrometheus")
-            .definition("http | analytics --analytics.name=my_http_analytics --analytics.tag.expression.msgSize=payload.length()")
-            .create()
-            .deploy(testDeploymentProperties("http"))) {
+        try (
+            Stream stream = Stream.builder(dataFlowOperations)
+                .name("httpAnalyticsPrometheus")
+                .definition("http | analytics --analytics.name=my_http_analytics --analytics.tag.expression.msgSize=payload.length()")
+                .create()
+                .deploy(testDeploymentProperties("http"))
+        ) {
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
 
             awaitStarting(stream, offset);
@@ -1436,9 +1495,6 @@ class DataFlowAT extends CommonTestBase {
         return runtimeApps.isServicePresent(testProperties.getPlatform().getConnection().getInfluxUrl() + "/ping");
     }
 
-    public static Condition<String> condition(Predicate predicate) {
-        return new Condition<>(predicate, "");
-    }
 
     protected StreamApplication app(String appName) {
         return new StreamApplication(appName);
@@ -2471,7 +2527,7 @@ class DataFlowAT extends CommonTestBase {
         Awaitility.await().until(() -> task.executionStatus(launchId, schemaTarget) == TaskExecutionStatus.COMPLETE);
         assertThat(task.executions().size()).isEqualTo(sizeExpected);
         Optional<TaskExecutionResource> taskExecution = task.execution(launchId, schemaTarget);
-        assertThat(taskExecution.isPresent()).isTrue();
+        assertThat(taskExecution).isPresent();
         assertThat(taskExecution.get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
         return taskExecution.get();
     }
@@ -2830,9 +2886,9 @@ class DataFlowAT extends CommonTestBase {
 
     private void registerTimestamp(String versionNumber) {
         if (this.runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
-            registerTask("testtimestamp", "docker:springcloudtask/timestamp-task", versionNumber);
+            registerTask("testtimestamp", "docker:springcloudtask/timestamp-task", versionNumber, AppBootSchemaVersion.BOOT2);
         } else {
-            registerTask("testtimestamp", "maven://io.spring:timestamp-task", versionNumber);
+            registerTask("testtimestamp", "maven://io.spring:timestamp-task", versionNumber, AppBootSchemaVersion.BOOT2);
         }
     }
 
@@ -2841,11 +2897,13 @@ class DataFlowAT extends CommonTestBase {
         appRegistryOperations.makeDefault("testtimestamp", ApplicationType.task, version);
     }
 
-    private void assertTaskRegistration(String name) {
+    private void assertTaskRegistration(String name, AppBootSchemaVersion bootVersion) {
         try {
             AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
             DetailedAppRegistrationResource resource = appRegistryOperations.info(name, ApplicationType.task, false);
             logger.info("assertTaskRegistration:{}:{}", name, resource.getLinks());
+            assertThat(resource).isNotNull();
+            assertThat(resource.getBootVersion()).isEqualTo(bootVersion);
         } catch (DataFlowClientException x) {
             fail(x.getMessage());
         }
@@ -2861,9 +2919,9 @@ class DataFlowAT extends CommonTestBase {
             }
         }
         if (this.runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
-            registerTask("testtimestamp", "docker:springcloudtask/timestamp-task", CURRENT_VERSION_NUMBER);
+            registerTask("testtimestamp", "docker:springcloudtask/timestamp-task", CURRENT_VERSION_NUMBER, AppBootSchemaVersion.BOOT2);
         } else {
-            registerTask("testtimestamp", "maven://io.spring:timestamp-task", CURRENT_VERSION_NUMBER);
+            registerTask("testtimestamp", "maven://io.spring:timestamp-task", CURRENT_VERSION_NUMBER, AppBootSchemaVersion.BOOT2);
         }
         setDefaultVersionForTimestamp(CURRENT_VERSION_NUMBER);
     }
@@ -3084,12 +3142,14 @@ class DataFlowAT extends CommonTestBase {
                 1);
             verifyAllSpecifiedTaskExecutions(task, firstLaunchIds, true);
             LaunchResponseResource launchResponse = task.launch();
-            assertThat(task.execution(launchResponse.getExecutionId(), launchResponse.getSchemaTarget()).isPresent()).isTrue();
+            assertThat(task.execution(launchResponse.getExecutionId(), launchResponse.getSchemaTarget()))
+                .withFailMessage("expected task execution for " + launchResponse.getExecutionId() + ":" + launchResponse.getSchemaTarget())
+                .isPresent();
             validateSuccessfulTaskLaunch(task, launchResponse.getExecutionId(), launchResponse.getSchemaTarget(), 2);
             Optional<TaskExecutionResource> taskExecution = task.execution(launchResponse.getExecutionId(), launchResponse.getSchemaTarget());
             assertThat(taskExecution).isPresent();
             Map<String, String> properties = taskExecution.get().getAppProperties();
-            assertThat(properties.containsKey("firstkey")).isTrue();
+            assertThat(properties).containsKey("firstkey");
         }
     }
 
@@ -3112,20 +3172,24 @@ class DataFlowAT extends CommonTestBase {
             verifyAllSpecifiedTaskExecutions(task, firstLaunchIds, true);
             LaunchResponseResource launch = task.launch(Collections.singletonMap("app.testtimestamp.secondkey", "secondvalue"),
                 Collections.emptyList());
-            assertThat(task.execution(launch.getExecutionId(), launch.getSchemaTarget()).isPresent()).isTrue();
+            assertThat(task.execution(launch.getExecutionId(), launch.getSchemaTarget()))
+                .withFailMessage("expected task execution for " + launch.getExecutionId() + ":" + launch.getSchemaTarget())
+                .isPresent();
             validateSuccessfulTaskLaunch(task, launch.getExecutionId(), launch.getSchemaTarget(), 2);
             safeCleanupTaskExecution(task, launch.getExecutionId(), launch.getSchemaTarget());
-            assertThat(task.execution(launch.getExecutionId(), launch.getSchemaTarget()).isPresent()).isFalse();
+            assertThat(task.execution(launch.getExecutionId(), launch.getSchemaTarget())).isNotPresent();
 
             LaunchResponseResource thirdResponse = task.launch(Collections.singletonMap("app.testtimestamp.thirdkey", "thirdvalue"), Collections.emptyList());
-            assertThat(task.execution(thirdResponse.getExecutionId(), thirdResponse.getSchemaTarget()).isPresent()).isTrue();
+            assertThat(task.execution(thirdResponse.getExecutionId(), thirdResponse.getSchemaTarget()))
+                .withFailMessage("expected task execution for " + thirdResponse.getExecutionId() + ":" + thirdResponse.getSchemaTarget())
+                .isPresent();
             validateSuccessfulTaskLaunch(task, thirdResponse.getExecutionId(), thirdResponse.getSchemaTarget(), 2);
             Optional<TaskExecutionResource> taskExecution = task.execution(thirdResponse.getExecutionId(), thirdResponse.getSchemaTarget());
             assertThat(taskExecution).isPresent();
             Map<String, String> properties = taskExecution.get().getAppProperties();
-            assertThat(properties.containsKey("firstkey")).isTrue();
-            assertThat(properties.containsKey("secondkey")).isFalse();
-            assertThat(properties.containsKey("thirdkey")).isTrue();
+            assertThat(properties).containsKey("firstkey");
+            assertThat(properties).doesNotContainKey("secondkey");
+            assertThat(properties).containsKey("thirdkey");
 
         }
     }
@@ -3145,14 +3209,14 @@ class DataFlowAT extends CommonTestBase {
             verifyAllSpecifiedTaskExecutions(task, launchIds, true);
             Optional<TaskExecutionResource> aaaExecution = task.composedTaskChildExecution("AAA");
             Optional<TaskExecutionResource> bbbExecution = task.composedTaskChildExecution("BBB");
-            assertThat(aaaExecution.isPresent()).isTrue();
-            assertThat(bbbExecution.isPresent()).isTrue();
+            assertThat(aaaExecution).isPresent();
+            assertThat(bbbExecution).isPresent();
             safeCleanupTaskExecution(task, launchIds.get(0).getExecutionId(), launchIds.get(0).getSchemaTarget());
             verifyAllSpecifiedTaskExecutions(task, launchIds, false);
             aaaExecution = task.composedTaskChildExecution("AAA");
             bbbExecution = task.composedTaskChildExecution("BBB");
-            assertThat(aaaExecution.isPresent()).isFalse();
-            assertThat(bbbExecution.isPresent()).isFalse();
+            assertThat(aaaExecution).isNotPresent();
+            assertThat(bbbExecution).isNotPresent();
         }
 
     }
@@ -3183,7 +3247,7 @@ class DataFlowAT extends CommonTestBase {
             assertThatThrownBy(() ->
                 task.jobStepExecutions(jobExecutionIds.get(0), launch.getSchemaTarget())
             ).isInstanceOf(DataFlowClientException.class)
-                .hasMessageContaining("No JobExecution with id=");
+                .hasMessageContaining("not found");
         }
     }
 
@@ -3260,7 +3324,9 @@ class DataFlowAT extends CommonTestBase {
         for (int i = 0; i < executionCount; i++) {
             LaunchResponseResource responseResource = task.launch(properties, Collections.emptyList());
             launchIds.add(new LaunchResponse(responseResource.getExecutionId(), responseResource.getSchemaTarget()));
-            assertThat(task.execution(responseResource.getExecutionId(), responseResource.getSchemaTarget()).isPresent()).isTrue();
+            assertThat(task.execution(responseResource.getExecutionId(), responseResource.getSchemaTarget()))
+                .withFailMessage("expected task execution for " + responseResource.getExecutionId() + ":" + responseResource.getSchemaTarget())
+                .isPresent();
             validateSuccessfulTaskLaunch(task, responseResource.getExecutionId(), responseResource.getSchemaTarget(), i + 1);
         }
         return launchIds;
@@ -3269,9 +3335,17 @@ class DataFlowAT extends CommonTestBase {
     private void verifyAllSpecifiedTaskExecutions(Task task, List<LaunchResponse> launches, boolean isPresent) {
         launches.forEach(launch -> {
             if (isPresent) {
-                assertThat(task.execution(launch.getExecutionId(), launch.getSchemaTarget()).isPresent()).isTrue();
+                assertThat(task.execution(launch.getExecutionId(), launch.getSchemaTarget()))
+                    .withFailMessage("verifyAllSpecifiedTaskExecutions expected task execution fort :" + launch)
+                    .isPresent();
             } else {
-                assertThat(task.execution(launch.getExecutionId(), launch.getSchemaTarget()).isPresent()).isFalse();
+                try {
+                    assertThat(task.execution(launch.getExecutionId(), launch.getSchemaTarget()))
+                        .withFailMessage("verifyAllSpecifiedTaskExecutions expected no task execution for :" + launch)
+                        .isNotPresent();
+                } catch (DataFlowClientException x) {
+
+                }
             }
         });
     }
