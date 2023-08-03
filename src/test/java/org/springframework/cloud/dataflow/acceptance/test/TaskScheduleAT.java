@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 the original author or authors.
+ * Copyright 2020-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ public class TaskScheduleAT extends CommonTestBase {
 
             while (scheduleInfoResourceIterator.hasNext()) {
                 scheduleInfoResource = scheduleInfoResourceIterator.next();
-                logger.info("Test unchedule:" + scheduleInfoResource.getScheduleName());
+                logger.info("Test unschedule:" + scheduleInfoResource.getScheduleName());
                 dataFlowOperations.schedulerOperations().unschedule(scheduleInfoResource.getScheduleName());
             }
         }
@@ -196,6 +196,42 @@ public class TaskScheduleAT extends CommonTestBase {
 
             assertThat(taskSchedule.isScheduled()).isFalse();
         }
+    }
+
+    @Test
+    @Tag("group4")
+    @Tag("smoke")
+    public void scheduleLifeCycleBoot3() {
+        logger.info("schedule-lifecycle-test-boot3");
+        if (!supportBoot3Jobs()) {
+            logger.warn("skipping boot3 workload for " + runtimeApps.getDataflowServerVersion());
+            return;
+        }
+
+        try (Task task = Task.builder(dataFlowOperations).name(randomName("task")).definition("testtimestamp3").build();
+             TaskSchedule taskSchedule = TaskSchedule.builder(dataFlowOperations).scheduleName(randomName("schedule")).task(task).build()) {
+
+            assertThat(taskSchedule.isScheduled()).isFalse();
+
+            logger.info("schedule-lifecycle-test: SCHEDULE");
+            taskSchedule.schedule(DEFAULT_CRON_EXPRESSION, Collections.emptyMap());
+
+            assertThat(taskSchedule.isScheduled()).isTrue();
+
+            TaskSchedule retrievedSchedule = TaskSchedule.builder(dataFlowOperations).findByScheduleName(taskSchedule.getScheduleName()).get();
+            assertThat(retrievedSchedule.getScheduleName()).isEqualTo(taskSchedule.getScheduleName());
+            assertThat(retrievedSchedule.getScheduleProperties().containsKey(SchedulerPropertyKeys.CRON_EXPRESSION)).isTrue();
+            assertThat(retrievedSchedule.getScheduleProperties().get(SchedulerPropertyKeys.CRON_EXPRESSION)).isEqualTo(DEFAULT_CRON_EXPRESSION);
+
+            logger.info("schedule-lifecycle-test-boot3: UNSCHEDULE");
+            taskSchedule.unschedule();
+
+            assertThat(taskSchedule.isScheduled()).isFalse();
+        }
+    }
+
+    private boolean supportBoot3Jobs() {
+        return !runtimeApps.dataflowServerVersionLowerThan("2.11.0-SNAPSHOT");
     }
 
     private static String randomName(String prefix) {
