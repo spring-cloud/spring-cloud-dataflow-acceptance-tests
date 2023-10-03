@@ -7,7 +7,7 @@ jobs:
   rabbit-0:
     uses: ./.github/workflows/at-common-workflow.yml
     with:
-      cf_host: lompoc
+      cf_host: bucharest
       cf_index: 0
       binder: rabbit
     secrets:
