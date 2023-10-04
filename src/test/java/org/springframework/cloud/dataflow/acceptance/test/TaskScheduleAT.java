@@ -231,7 +231,7 @@ public class TaskScheduleAT extends CommonTestBase {
     }
 
     private boolean supportBoot3Jobs() {
-        return !runtimeApps.dataflowServerVersionLowerThan("2.11.0-SNAPSHOT");
+        return runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.11.0");
     }
 
     private static String randomName(String prefix) {

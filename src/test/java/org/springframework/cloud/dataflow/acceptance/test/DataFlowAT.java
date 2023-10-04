@@ -2877,7 +2877,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     private boolean supportBoot3Jobs() {
-        return !runtimeApps.dataflowServerVersionLowerThan("2.11.0-SNAPSHOT");
+        return runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.11.0");
     }
 
     private void registerNewTimestampVersion() {
