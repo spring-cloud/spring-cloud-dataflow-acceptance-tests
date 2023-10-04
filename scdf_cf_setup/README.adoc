@@ -232,8 +232,8 @@ The standalone platform uses the following additional configuration properties:
 #
 # required server versions
 #
-export DATAFLOW_VERSION=2.10.4-SNAPSHOT
-export SKIPPER_VERSION=2.9.4-SNAPSHOT
+export DATAFLOW_VERSION=2.11.1-SNAPSHOT
+export SKIPPER_VERSION=2.11.1-SNAPSHOT
 ## Set if using the CF rabbit service for message broker or add services, separated by ','
 #export STREAM_SERVICES=rabbit
 # Set if using a CF SQL service or add services, separated by ','
@@ -321,5 +321,3 @@ It sets up the local environment to run the above commands:
 [source,bash]
 pip install -r requirements.txt
 python -m unittest discover .
-
-
