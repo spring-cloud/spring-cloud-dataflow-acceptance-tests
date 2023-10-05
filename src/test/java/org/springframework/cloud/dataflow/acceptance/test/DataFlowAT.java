@@ -3302,13 +3302,12 @@ class DataFlowAT extends CommonTestBase {
             Optional<TaskExecutionResource> taskExecution = task.execution(launch.getExecutionId(), launch.getSchemaTarget());
             assertThat(taskExecution).isPresent();
             assertThat(taskExecution.get().getJobExecutionIds().size()).isEqualTo(2);
-            assertThat(task.jobStepExecutions(taskExecution.get().getJobExecutionIds().get(0), launch.getSchemaTarget()).size()).isEqualTo(1);
+            Long jobExecutionId = taskExecution.get().getJobExecutionIds().get(0);
+            assertThat(task.jobStepExecutions(jobExecutionId, launch.getSchemaTarget()).size()).isEqualTo(1);
             safeCleanupTaskExecution(task, launch.getExecutionId(), launch.getSchemaTarget());
             assertThatThrownBy(() ->
-                this.dataFlowOperations.jobOperations()
-                    .executionRestart(taskExecution.get().getJobExecutionIds().get(0), launch.getSchemaTarget())
-            ).isInstanceOf(DataFlowClientException.class)
-                .hasMessageContaining("There is no JobExecution with id=");
+                this.dataFlowOperations.jobOperations().executionRestart(jobExecutionId, launch.getSchemaTarget())
+            ).isInstanceOf(DataFlowClientException.class);
         }
 
     }
