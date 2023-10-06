@@ -2221,8 +2221,7 @@ class DataFlowAT extends CommonTestBase {
             // Successful
             childTasksBySuffix(task, "t1", "t2", "t3").forEach(childTask -> {
                 assertThat(childTask.executions().size()).isEqualTo(1);
-                Optional<TaskExecutionResource> child = childTask.executionByParentExecutionId(launch.getExecutionId(),
-                    launch.getSchemaTarget());
+                Optional<TaskExecutionResource> child = childTask.executionByParentExecutionId(launch.getExecutionId(), launch.getSchemaTarget());
                 assertThat(child).isPresent();
                 assertThat(child.get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
             });
@@ -3409,8 +3408,9 @@ class DataFlowAT extends CommonTestBase {
             // Successful tasks
             childTasksBySuffix(task, successfulTasks.toArray(new String[0])).forEach(childTask -> {
                 assertThat(childTask.executions().size()).as("verify each child task ran once").isEqualTo(1);
-                assertThat(childTask.executionByParentExecutionId(launch.getExecutionId(), launch.getSchemaTarget()).get().getExitCode()).as(
-                        "verify each child task has a successful parent")
+                Optional<TaskExecutionResource> taskExecutionResource = childTask.executionByParentExecutionId(launch.getExecutionId(), launch.getSchemaTarget());
+                assertThat(taskExecutionResource).isPresent().as("verify each child task has a parent");
+                assertThat(taskExecutionResource.get().getExitCode()).as("verify each child task has a successful parent")
                     .isEqualTo(EXIT_CODE_SUCCESS);
             });
 

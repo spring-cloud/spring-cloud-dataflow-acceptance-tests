@@ -155,6 +155,14 @@ jobs:
           echo "Starting  Acceptance Tests"
           ./scripts/at-test-script.sh
           echo "Completed Acceptance Tests"
+      - name: Upload Test Output
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: log-files-${{ inputs.binder }}-${{ inputs.cf_index }}-${{ github.run_number }}-${{ github.run_attempt }}
+          path: './**/*.log'
+          retention-days: 7
+          if-no-files-found: ignore
       - name: Upload Unit Test Results
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
