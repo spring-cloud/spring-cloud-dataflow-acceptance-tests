@@ -8,11 +8,7 @@ on:
 
 jobs:
   kafka-0:
-    uses: ./.github/workflows/at-common-workflow.yml
-    with:
-      cf_host: 'bucharest'
-      cf_index: 0
-      binder: 'kafka'
+    uses: ./.github/workflows/acceptance-tests-for-kafka-0.yml
     secrets:
       CF_USERNAME: ${{ secrets.CF_USERNAME }}
       CF_ENV_0_PASSWORD: ${{ secrets.CF_ENV_0_PASSWORD }}
@@ -26,12 +22,21 @@ jobs:
       KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
       KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
       KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
+  rabbit-1:
+    uses: ./.github/workflows/acceptance-tests-for-rabbit-1.yml
+    secrets:
+      CF_USERNAME: ${{ secrets.CF_USERNAME }}
+      CF_ENV_0_PASSWORD: ${{ secrets.CF_ENV_0_PASSWORD }}
+      CF_ENV_1_PASSWORD: ${{ secrets.CF_ENV_1_PASSWORD }}
+      SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
+      SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+      SQL_SYSTEM_USERNAME: ${{ secrets.SQL_USERNAME }}
+      SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+      SQL_HOST: ${{ secrets.SQL_HOST }}
+      SQL_PORT: ${{ secrets.SQL_PORT }}
   kafka-1:
-    uses: ./.github/workflows/at-common-workflow.yml
-    with:
-      cf_host: 'citrusheights'
-      cf_index: 1
-      binder: 'kafka'
+    needs: [ rabbit-1 ]
+    uses: ./.github/workflows/acceptance-tests-for-kafka-1.yml
     secrets:
       CF_USERNAME: ${{ secrets.CF_USERNAME }}
       CF_ENV_0_PASSWORD: ${{ secrets.CF_ENV_0_PASSWORD }}
@@ -47,28 +52,7 @@ jobs:
       KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
   rabbit-0:
     needs: [ kafka-0 ]
-    uses: ./.github/workflows/at-common-workflow.yml
-    with:
-      cf_host: 'bucharest'
-      cf_index: 0
-      binder: 'rabbit'
-    secrets:
-      CF_USERNAME: ${{ secrets.CF_USERNAME }}
-      CF_ENV_0_PASSWORD: ${{ secrets.CF_ENV_0_PASSWORD }}
-      CF_ENV_1_PASSWORD: ${{ secrets.CF_ENV_1_PASSWORD }}
-      SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
-      SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
-      SQL_SYSTEM_USERNAME: ${{ secrets.SQL_USERNAME }}
-      SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_PASSWORD }}
-      SQL_HOST: ${{ secrets.SQL_HOST }}
-      SQL_PORT: ${{ secrets.SQL_PORT }}
-  rabbit-1:
-    needs: [ kafka-1 ]
-    uses: ./.github/workflows/at-common-workflow.yml
-    with:
-      cf_host: 'citrusheights'
-      cf_index: 1
-      binder: 'rabbit'
+    uses: ./.github/workflows/acceptance-tests-for-rabbit-0.yml
     secrets:
       CF_USERNAME: ${{ secrets.CF_USERNAME }}
       CF_ENV_0_PASSWORD: ${{ secrets.CF_ENV_0_PASSWORD }}

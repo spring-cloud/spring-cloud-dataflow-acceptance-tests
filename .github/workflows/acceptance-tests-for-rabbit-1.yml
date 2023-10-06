@@ -2,6 +2,32 @@ name: SCDF AT Rabbit - env 1
 
 on:
   workflow_dispatch:
+  workflow_call:
+    secrets:
+      CF_USERNAME:
+        required: true
+      CF_ENV_0_PASSWORD:
+        required: true
+      CF_ENV_1_PASSWORD:
+        required: true
+      SQL_USERNAME:
+        required: false
+      SQL_PASSWORD:
+        required: false
+      SQL_SYSTEM_USERNAME:
+        required: false
+      SQL_SYSTEM_PASSWORD:
+        required: false
+      SQL_HOST:
+        required: false
+      SQL_PORT:
+        required: false
+      KAFKA_USERNAME:
+        required: false
+      KAFKA_PASSWORD:
+        required: false
+      KAFKA_BROKER_ADDRESS:
+        required: false
 
 jobs:
   rabbit-1:

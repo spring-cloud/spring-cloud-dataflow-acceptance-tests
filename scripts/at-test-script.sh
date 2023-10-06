@@ -10,14 +10,15 @@ if [[ -z "$SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION" ]]; th
   SKIP_SSL_VALIDATION="false"
 fi
 set +e
-# -Dmaven-failsafe-plugin.groups=all
+#
 ./mvnw -U -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=cloudfoundry \
   -DSKIP_CLOUD_CONFIG=true -Dtest.docker.compose.disable.extension=true -Dspring.cloud.dataflow.client.serverUri=$SERVER_URI \
   -Dspring.cloud.dataflow.client.skipSslValidation=$SKIP_SSL_VALIDATION -Dtest.platform.connection.platformName=default \
   -Dtest.platform.connection.applicationOverHttps=$HTTPS_ENABLED \
+  -Dmaven-failsafe-plugin.groups=all,group3 \
   $MAVEN_PROPERTIES clean verify surefire-report:failsafe-report-only | tee test-output.log
 RC=$?
 if ((RC != 0)); then
-  # extract logs from dataflow and skipper and pipe to dataflow.log and skipper.log
+  # TODO extract logs from dataflow and skipper and pipe to dataflow.log and skipper.log
 fi
 exit $RC
