@@ -20,5 +20,7 @@ set +e
 RC=$?
 if ((RC != 0)); then
   # TODO extract logs from dataflow and skipper and pipe to dataflow.log and skipper.log
+  echo "Implement download of skipper logs"
+  echo "Implement download of dataflow logs"
 fi
 exit $RC
