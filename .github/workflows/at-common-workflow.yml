@@ -193,7 +193,7 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
       - name: Cleanup
-        if: ${{ always() }}
+        if: ${{ success() }}
         env:
           # DEBUG: true
           SCHEDULER: ${{ inputs.scheduler }}
