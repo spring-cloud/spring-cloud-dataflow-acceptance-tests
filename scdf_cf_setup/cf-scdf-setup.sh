@@ -38,6 +38,7 @@ if [[ "$os" = "Linux" ]]; then
     if ! command -v cf &> /dev/null
     then
       echo "Installing CloudFoundry CLI"
+      export APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true
       wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
       echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
       sudo apt-get update
