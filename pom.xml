@@ -194,7 +194,6 @@
                 <version>3.0.0-M4</version>
                 <configuration>
                     <skip>true</skip>
-                    <groups>${maven-failsafe-plugin.groups}</groups>
                     <!-- we use failsafe to run integration tests -->
                 </configuration>
             </plugin>
@@ -203,9 +202,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>3.0.0-M4</version>
                 <configuration>
-                    <groups>${maven-failsafe-plugin.groups}</groups>
                     <rerunFailingTestsCount>1</rerunFailingTestsCount>
-                    <groups>${maven-failsafe-plugin.groups}</groups>
                     <includes>
                         <include>**/*AT</include>
                     </includes>

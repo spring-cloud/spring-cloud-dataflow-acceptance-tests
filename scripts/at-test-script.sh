@@ -3,12 +3,12 @@ export TEST_PLATFORM_CONNECTION_PROMETHEUS_URL=none
 JAVA_TRUST_STORE=${PWD}/scdf_cf_setup/mycacerts
 MAVEN_PROPERTIES="-Dtest.docker.compose.disable.extension=true -Djavax.net.ssl.trustStore=${JAVA_TRUST_STORE} -Djavax.net.ssl.trustStorePassword=changeit"
 TESTS_ARG="!DataFlowAT#streamAppCrossVersion,!DataFlowAT#streamPartitioning,!BatchRemotePartitioningAT#runBatchRemotePartitionJobCloudFoundry"
-GROUP_ARG=
+GROUP_ARG="-Dgroups="
 if [ "$TESTS" != "" ]; then
   echo "Adding $TESTS"
   TESTS_ARG="$TESTS"
 else
-  GROUP_ARG="-Dmaven-failsafe-plugin.groups=all,smoke"
+  GROUP_ARG="-Dgroups=all,smoke"
 fi
 
 HTTPS_ENABLED="true"
@@ -19,7 +19,7 @@ if [[ -z "$SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION" ]]; th
 fi
 set +e
 #
-./mvnw -U -B -Dspring.profiles.active=blah -Dtest=$TESTS_ARG -DPLATFORM_TYPE=cloudfoundry \
+./mvnw -U -B -Dspring.profiles.active=blah -Dit.test=$TESTS_ARG -Dtest=$TESTS_ARG -DPLATFORM_TYPE=cloudfoundry \
   -DSKIP_CLOUD_CONFIG=true -Dtest.docker.compose.disable.extension=true -Dspring.cloud.dataflow.client.serverUri=$SERVER_URI \
   -Dspring.cloud.dataflow.client.skipSslValidation=$SKIP_SSL_VALIDATION -Dtest.platform.connection.platformName=default \
   -Dtest.platform.connection.applicationOverHttps=$HTTPS_ENABLED $GROUP_ARG \
