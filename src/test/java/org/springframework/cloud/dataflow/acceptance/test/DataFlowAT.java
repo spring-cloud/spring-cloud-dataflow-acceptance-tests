@@ -1783,9 +1783,9 @@ class DataFlowAT extends CommonTestBase {
 
             // Child tasks successfully completed
             task.composedTaskChildTasks().forEach(childTask -> {
+                assertThat(childTask).isNotNull();
                 assertThat(childTask.executions().size()).isEqualTo(1);
-                Optional<TaskExecutionResource> child = childTask.executionByParentExecutionId(launch.getExecutionId(),
-                    launch.getSchemaTarget());
+                Optional<TaskExecutionResource> child = childTask.executionByParentExecutionId(launch.getExecutionId(), launch.getSchemaTarget());
                 assertThat(child).isPresent();
                 assertThat(child.get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
             });
@@ -3408,7 +3408,8 @@ class DataFlowAT extends CommonTestBase {
             // Successful tasks
             childTasksBySuffix(task, successfulTasks.toArray(new String[0])).forEach(childTask -> {
                 assertThat(childTask.executions().size()).as("verify each child task ran once").isEqualTo(1);
-                Optional<TaskExecutionResource> taskExecutionResource = childTask.executionByParentExecutionId(launch.getExecutionId(), launch.getSchemaTarget());
+                Optional<TaskExecutionResource> taskExecutionResource = childTask.executionByParentExecutionId(launch.getExecutionId(),
+                    launch.getSchemaTarget());
                 assertThat(taskExecutionResource).isPresent().as("verify each child task has a parent");
                 assertThat(taskExecutionResource.get().getExitCode()).as("verify each child task has a successful parent")
                     .isEqualTo(EXIT_CODE_SUCCESS);
@@ -3445,6 +3446,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     private void safeCleanupTaskExecution(Task task, long taskExecutionId, String schemaTarget) {
+        logger.info("safeCleanupTaskExecution:{}:{}", taskExecutionId, schemaTarget);
         doSafeCleanupTasks(() -> task.cleanupTaskExecution(taskExecutionId, schemaTarget));
     }
 
@@ -3455,6 +3457,7 @@ class DataFlowAT extends CommonTestBase {
             if (ex.getMessage().contains("(reason: pod does not exist)") || ex.getMessage().contains("(reason: job does not exist)")) {
                 logger.warn("Unable to cleanup task executions: " + ex.getMessage());
             } else {
+                logger.error("doSafeCleanupTasks:exception:" + ex, ex);
                 throw ex;
             }
         }
