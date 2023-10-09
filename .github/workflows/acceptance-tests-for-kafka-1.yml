@@ -2,7 +2,17 @@ name: SCDF AT Kafka - env 1
 
 on:
   workflow_dispatch:
+    inputs:
+      tests:
+        type: string
+        default: ''
+        description: 'Test classes'
   workflow_call:
+    inputs:
+      tests:
+        type: string
+        default: ''
+        description: 'Test classes'
     secrets:
       CF_USERNAME:
         required: true
