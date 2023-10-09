@@ -181,6 +181,7 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @DisabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "kubernetes")
+    @Tag("smoke")
     @Tag("all")
     public void applicationMetadataMavenTests() {
         logger.info("application-metadata-maven-test:start");
@@ -208,6 +209,7 @@ class DataFlowAT extends CommonTestBase {
     @Test
     @EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
     @Tag("all")
+    @Tag("smoke")
     public void applicationMetadataDockerTests() {
         logger.info("application-metadata-docker-test:start");
 
@@ -728,6 +730,7 @@ class DataFlowAT extends CommonTestBase {
     @Disabled // all tests are excluding this test
     @DisabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
     @Tag("group3")
+    @Tag("smoke")
     public void streamAppCrossVersion() {
         logger.info("stream-app-cross-version:start");
         final String VERSION_2_1_5 = "2.1.5.RELEASE";
@@ -3490,6 +3493,7 @@ class DataFlowAT extends CommonTestBase {
     @EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
     @DisabledIfSystemProperty(named = "SKIP_CLOUD_CONFIG", matches = "true")
     @Tag("group3")
+    @Tag("smoke")
     public void streamWithConfigServer() {
         logger.info("stream-server-config-test");
 
