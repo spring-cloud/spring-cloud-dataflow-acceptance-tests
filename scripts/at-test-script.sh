@@ -6,7 +6,7 @@ TESTS_ARG="!DataFlowAT#streamAppCrossVersion,!DataFlowAT#streamPartitioning,!Bat
 GROUP_ARG=
 if [ "$TESTS" != "" ]; then
   echo "Adding $TESTS"
-  TESTS_ARG="$TESTS_ARG,$TESTS"
+  TESTS_ARG="$TESTS"
 else
   GROUP_ARG="-Dmaven-failsafe-plugin.groups=all,smoke"
 fi
@@ -19,7 +19,7 @@ if [[ -z "$SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION" ]]; th
 fi
 set +e
 #
-./mvnw -U -B -Dspring.profiles.active=blah -Dtest=$TESTS -DPLATFORM_TYPE=cloudfoundry \
+./mvnw -U -B -Dspring.profiles.active=blah -Dtest=$TESTS_ARG -DPLATFORM_TYPE=cloudfoundry \
   -DSKIP_CLOUD_CONFIG=true -Dtest.docker.compose.disable.extension=true -Dspring.cloud.dataflow.client.serverUri=$SERVER_URI \
   -Dspring.cloud.dataflow.client.skipSslValidation=$SKIP_SSL_VALIDATION -Dtest.platform.connection.platformName=default \
   -Dtest.platform.connection.applicationOverHttps=$HTTPS_ENABLED $GROUP_ARG \
