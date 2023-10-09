@@ -17,7 +17,9 @@ set +e
   -Dtest.platform.connection.applicationOverHttps=$HTTPS_ENABLED \
   -Dmaven-failsafe-plugin.groups=all,smoke \
   $MAVEN_PROPERTIES clean verify surefire-report:failsafe-report-only | tee test-output.log
-RC=$?
+# tee masks the mvn output
+RC=$(grep -c -F "BUILD FAILURE" test-output.log)
+echo "RC=$RC"
 if ((RC != 0)); then
   # TODO extract logs from dataflow and skipper and pipe to dataflow.log and skipper.log
   echo "Implement download of skipper logs"
