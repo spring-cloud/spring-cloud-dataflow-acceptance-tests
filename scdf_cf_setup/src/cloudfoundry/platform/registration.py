@@ -58,10 +58,12 @@ class AppRegistrations:
     def register_stream_apps(self):
         logger.info("registering stream apps from %s" % self.stream_apps_uri)
         requests.post(url=self.apps_url, headers=self.headers, params={'uri': self.stream_apps_uri, 'force': True})
+        # TODO add error handling when not success
 
     def register_task_apps(self):
         logger.info("registering task apps from %s" % self.task_apps_uri)
         requests.post(url=self.apps_url, params={'uri': self.task_apps_uri, 'force': True}, headers=self.headers)
+        # TODO add error handling when not success
 
     def register_test_apps(self):
         logger.info("registering test apps from %s" % self.app_import_path)
@@ -75,6 +77,7 @@ class AppRegistrations:
                         requests.post(url='%s/%s/%s/%s' % (self.apps_url, app_type, app_name, version),
                                       headers=self.headers,
                                       params={'uri': uri, 'force': True})
+                        # TODO add error handling when not success
         else:
             logger.warning("app imports file for additional apps:%s does not exist" % self.app_import_path)
 
