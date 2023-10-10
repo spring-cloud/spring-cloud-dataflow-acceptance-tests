@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 	<include resource="org/springframework/boot/logging/logback/base.xml" />
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+    <logger name="org.testcontainers" level="ERROR"/>
+    <logger name="com.github.dockerjava" level="ERROR"/>
     <logger name="org.springframework" level="INFO"/>
-<!--	<logger name="org.springframework.web" level="ERROR"/>-->
-    <logger name="org.springframework.test" level="DEBUG"/>
-	<logger name="org.springframework.cloud.dataflow" level="DEBUG"/>
-    <logger name="org.junit" level="DEBUG"/>
-
+    <logger name="org.junit" level="WARN"/>
 </configuration>
