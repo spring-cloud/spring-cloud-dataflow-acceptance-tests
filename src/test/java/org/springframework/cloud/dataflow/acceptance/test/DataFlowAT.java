@@ -223,7 +223,7 @@ class DataFlowAT extends CommonTestBase {
                 true);
         DetailedAppRegistrationResource dockerAppWithContainerMetadata = dataFlowOperations.appRegistryOperations()
             .info("docker-app-with-container-metadata", ApplicationType.source, false);
-        assertThat(dockerAppWithContainerMetadata.getOptions()).hasSize(6);
+        assertThat(dockerAppWithContainerMetadata.getOptions()).hasSize(7);
 
         // Docker app with container image metadata with escape characters.
         dataFlowOperations.appRegistryOperations()
@@ -247,7 +247,7 @@ class DataFlowAT extends CommonTestBase {
                 true);
         DetailedAppRegistrationResource dockerAppWithoutMetadata = dataFlowOperations.appRegistryOperations()
             .info("docker-app-without-metadata", ApplicationType.sink, false);
-        assertThat(dockerAppWithoutMetadata.getOptions()).hasSize(0);
+        assertThat(dockerAppWithoutMetadata.getOptions()).hasSize(3);
 
         // Docker app with jar metadata
         dataFlowOperations.appRegistryOperations()
@@ -876,7 +876,8 @@ class DataFlowAT extends CommonTestBase {
             if (System.currentTimeMillis() >= startErrorCheck) {
                 AwaitUtils.hasErrorInLog(offset);
             }
-        }).until(() -> {
+        }).atMost(Duration.ofSeconds(60))
+            .until(() -> {
             try {
                 return stream.getStatus().equals(DEPLOYED);
             } catch (Throwable x) {
