@@ -119,7 +119,7 @@ public class BatchRemotePartitioningAT extends CommonTestBase {
     }
 
     @Test
-    @EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
+    @EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "kubernetes")
     @Tag("group2")
     @Tag("smoke")
     public void runBatchRemotePartitionJobKubernetes() {
