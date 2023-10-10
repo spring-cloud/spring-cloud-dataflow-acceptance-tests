@@ -217,7 +217,7 @@ class DataFlowAT extends CommonTestBase {
         dataFlowOperations.appRegistryOperations()
             .register("docker-app-with-container-metadata",
                 ApplicationType.source,
-                "docker:springcloudstream/time-source-kafka:2.1.4.RELEASE",
+                "docker:springcloudstream/time-source-kafka:3.2.1",
                 null,
                 AppBootSchemaVersion.BOOT2,
                 true);
@@ -229,7 +229,7 @@ class DataFlowAT extends CommonTestBase {
         dataFlowOperations.appRegistryOperations()
             .register("docker-app-with-container-metadata-escape-chars",
                 ApplicationType.source,
-                "docker:springcloudstream/http-source-rabbit:2.1.3.RELEASE",
+                "docker:springcloudstream/http-source-rabbit:3.2.1",
                 null,
                 AppBootSchemaVersion.BOOT2,
                 true);
@@ -241,7 +241,7 @@ class DataFlowAT extends CommonTestBase {
         dataFlowOperations.appRegistryOperations()
             .register("docker-app-without-metadata",
                 ApplicationType.sink,
-                "docker:springcloudstream/file-sink-kafka:2.1.1.RELEASE",
+                "docker:springcloudstream/log-sink-kafka:3.2.1",
                 null,
                 AppBootSchemaVersion.BOOT2,
                 true);
@@ -253,8 +253,8 @@ class DataFlowAT extends CommonTestBase {
         dataFlowOperations.appRegistryOperations()
             .register("docker-app-with-jar-metadata",
                 ApplicationType.sink,
-                "docker:springcloudstream/file-sink-kafka:2.1.1.RELEASE",
-                "maven://org.springframework.cloud.stream.app:file-sink-kafka:jar:metadata:2.1.1.RELEASE",
+                "docker:springcloudstream/file-sink-kafka:3.2.1",
+                "maven://org.springframework.cloud.stream.app:file-sink-kafka:jar:metadata:3.2.1",
                 AppBootSchemaVersion.BOOT2,
                 true);
         DetailedAppRegistrationResource dockerAppWithJarMetadata = dataFlowOperations.appRegistryOperations()
