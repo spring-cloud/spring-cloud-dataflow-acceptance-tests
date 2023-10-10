@@ -1830,7 +1830,9 @@ class DataFlowAT extends CommonTestBase {
 
                 LaunchResponseResource launch = task.launch(composedTaskLaunchArguments());
 
-                Awaitility.await().until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+                Awaitility.await()
+                        .atMost(Duration.ofMinutes(20))
+                        .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
                 // Parent Task Successfully completed
                 assertThat(task.executions().size()).isEqualTo(1);

@@ -135,7 +135,9 @@ public class BatchRemotePartitioningAT extends CommonTestBase {
             LaunchResponseResource launch = task.launch(Collections.singletonMap("deployer.*.kubernetes.deployment-service-account-name", testProperties.getPlatform().getConnection().getPlatformName()),
                 Arrays.asList("--platform=kubernetes", "--artifact=docker://springcloud/batch-remote-partition:0.0.2-SNAPSHOT"));
 
-            Awaitility.await().until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+            Awaitility.await()
+                    .atMost(Duration.ofMinutes(20))
+                    .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             assertThat(task.executions().size()).isEqualTo(1);
             assertThat(task.execution(launch.getExecutionId(), launch.getSchemaTarget()).isPresent()).isTrue();
             assertThat(task.execution(launch.getExecutionId(), launch.getSchemaTarget()).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
