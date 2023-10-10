@@ -4,10 +4,11 @@ JAVA_TRUST_STORE=${PWD}/scdf_cf_setup/mycacerts
 MAVEN_PROPERTIES="-Dtest.docker.compose.disable.extension=true -Djavax.net.ssl.trustStore=${JAVA_TRUST_STORE} -Djavax.net.ssl.trustStorePassword=changeit"
 TESTS_ARG="!DataFlowAT#streamAppCrossVersion,!DataFlowAT#streamPartitioning,!BatchRemotePartitioningAT#runBatchRemotePartitionJobCloudFoundry"
 if [ "$TESTS" != "" ]; then
-  echo "Adding $TESTS"
+  echo "Setting failsafe test filter: $TESTS"
   MAVEN_ARG="-Dit.test=$TESTS"
 else
-  MAVEN_ARG="-Dgroups=all,group3,smoke -Dit.test=$TESTS_ARG"
+  echo "Setting failsafe test filter: $TESTS_ARG"
+  MAVEN_ARG="-Dit.test=$TESTS_ARG"
 fi
 
 HTTPS_ENABLED="true"
