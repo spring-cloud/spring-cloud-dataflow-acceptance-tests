@@ -64,3 +64,4 @@ acceptance-tests/.vscode/*
 *.zip
 workspace/
 workspaces/
+downloads/

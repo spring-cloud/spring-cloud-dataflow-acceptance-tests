@@ -3105,8 +3105,9 @@ class DataFlowAT extends CommonTestBase {
                 .filter(launch -> launch.equals(retainedLaunch))
                 .forEach(launch -> {
                     safeCleanupTaskExecution(task, launch.getExecutionId(), launch.getSchemaTarget());
-                    Optional<TaskExecutionResource> taskExecutionResource = task.execution(launch.getExecutionId(), launch.getSchemaTarget());
-                    assertThat(taskExecutionResource).isNotPresent();
+                    assertThatThrownBy(() ->
+                        task.execution(launch.getExecutionId(), launch.getSchemaTarget())
+                    ).isInstanceOf(DataFlowClientException.class);
                 });
             assertThat(task.execution(retainedLaunch.getExecutionId(), retainedLaunch.getSchemaTarget())).isPresent();
         }
