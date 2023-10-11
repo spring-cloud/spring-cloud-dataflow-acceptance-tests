@@ -114,6 +114,8 @@ jobs:
           KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
           KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
           PLATFORM: cloudfoundry
+          DATAFLOW_VERSION: 2.11.1-SNAPSHOT
+          SKIPPER_VERSION: 2.11.1-SNAPSHOT
         run: |
           echo "Setup Environment"
           export SETUP_TOOL_REPO="scdf_cf_setup"
