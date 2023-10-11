@@ -54,6 +54,8 @@ def clean(args):
             enable_debug_logging()
         installation = InstallationContext.from_env_vars()
         cf = CloudFoundry.connect(deployer_config=installation.deployer_config, config_props=installation.config_props)
+        logger.info("cleaning apps")
+        cf.delete_apps()
         if not options.apps_only:
             logger.info("deleting current services...")
             services = cf.services()
@@ -63,8 +65,6 @@ def clean(args):
                 cf.delete_service(service.name)
         else:
             logger.info("'apps-only' option is set, keeping existing current services")
-        logger.info("cleaning apps")
-        cf.delete_apps()
         if installation.config_props.platform == "tile":
             return tile.clean(cf, installation)
         elif installation.config_props.platform == "cloudfoundry":
