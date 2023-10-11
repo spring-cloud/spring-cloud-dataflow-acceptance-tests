@@ -207,7 +207,6 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
-    @EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
     @Tag("all")
     @Tag("smoke")
     public void applicationMetadataDockerTests() {
