@@ -68,7 +68,7 @@ on:
 jobs:
   acceptance-tests:
     environment: scdf_at
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     concurrency: ${{ inputs.cf_host }}
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
