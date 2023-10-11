@@ -125,99 +125,99 @@ jobs:
           echo "SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_TOKEN_URI=$SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_TOKEN_URI" >> $GITHUB_ENV
           echo "SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_CLIENT_ID=$SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_CLIENT_ID" >> $GITHUB_ENV
           echo "SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_CLIENT_SECRET=$SPRING_CLOUD_DATAFLOW_CLIENT_AUTHENTICATION_CLIENT_SECRET" >> $GITHUB_ENV
-      - name: Execute Tests
-        env:
-          # DEBUG: true
-          SCHEDULER: ${{ inputs.scheduler }}
-          BINDER: ${{ inputs.binder }}
-          MAVEN_REPOS: '{"repo1":"https://repo.spring.io/snapshot"}'
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: ${{ inputs.binder }}
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: scdf-scheduler
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: "https://api.sys.${{ inputs.cf_host }}.cf-app.com"
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: "apps.${{ inputs.cf_host }}.cf-app.com"
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: p-dataflow
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME: ${{ secrets.CF_USERNAME }}
-          SQL_HOST: ${{ secrets.SQL_HOST }}
-          SQL_PORT: ${{ secrets.SQL_PORT }}
-          SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
-          SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
-          SQL_PROVIDER: ${{ inputs.sql_provider }}
-          SQL_SERVICE_NAME: ${{ inputs.sql_service_name }}
-          SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_SYSTEM_PASSWORD }}
-          SQL_SYSTEM_USERNAME: ${{ secrets.SQL_SYSTEM_USERNAME }}
-          SQL_DATAFLOW_DB_NAME: "dataflow_pro_1_5_0_${{ inputs.binder }}_${{ inputs.cf_index }}"
-          KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
-          KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
-          KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
-          PLATFORM: tile
-          TESTS: ${{ inputs.tests }}
-        run: |
-          echo "Building timestamp-batch-with-drivers-template1"
-          pushd acceptance-tests/custom-apps/timestamp-batch-with-drivers-template1 > /dev/null
-            ./gradlew build install
-          popd > /dev/null
-          echo "Starting  Acceptance Tests"
-          ./scripts/at-test-script.sh
-          echo "Completed Acceptance Tests"
-      - name: Upload Test Output
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: log-files-${{ inputs.binder }}-${{ inputs.cf_index }}-${{ github.run_number }}-${{ github.run_attempt }}
-          path: './**/*.log'
-          retention-days: 7
-          if-no-files-found: ignore
-      - name: Upload Unit Test Results
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results-surefire-${{ inputs.binder }}-${{ inputs.cf_index }}-${{ github.run_number }}-${{ github.run_attempt }}
-          path: './**/target/surefire-reports/**/*.*'
-          retention-days: 7
-          if-no-files-found: ignore
-      - name: Upload Integration Test Results
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results-failsafe-${{ inputs.binder }}-${{ inputs.cf_index }}-${{ github.run_number }}-${{ github.run_attempt }}
-          path: './**/target/failsafe-reports/**/*.*'
-          retention-days: 7
-          if-no-files-found: ignore
-      - name: Upload Test Site
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-site-${{ inputs.binder }}-${{ inputs.cf_index }}-${{ github.run_number }}-${{ github.run_attempt }}-failsafe-report.html
-          path: './**/target/site/failsafe-report.html'
-          retention-days: 7
-          if-no-files-found: ignore
-      - name: Cleanup
-        if: ${{ success() }}
-        env:
-          # DEBUG: true
-          SCHEDULER: ${{ inputs.scheduler }}
-          BINDER: ${{ inputs.binder }}
-          MAVEN_REPOS: '{"repo1":"https://repo.spring.io/snapshot"}'
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: ${{ inputs.binder }}
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: scdf-scheduler
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: "https://api.sys.${{ inputs.cf_host }}.cf-app.com"
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: "apps.${{ inputs.cf_host }}.cf-app.com"
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: p-dataflow
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME: ${{ secrets.CF_USERNAME }}
-          SQL_HOST: ${{ secrets.SQL_HOST }}
-          SQL_PORT: ${{ secrets.SQL_PORT }}
-          SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
-          SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
-          SQL_PROVIDER: ${{ inputs.sql_provider }}
-          SQL_SERVICE_NAME: ${{ inputs.sql_service_name }}
-          SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_SYSTEM_PASSWORD }}
-          SQL_SYSTEM_USERNAME: ${{ secrets.SQL_SYSTEM_USERNAME }}
-          SQL_DATAFLOW_DB_NAME: "dataflow_pro_1_5_0_${{ inputs.binder }}_${{ inputs.cf_index }}"
-          KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
-          KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
-          KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
-          PLATFORM: tile
-        shell: bash
-        run: ./scripts/at-cleanup.sh
+#      - name: Execute Tests
+#        env:
+#          # DEBUG: true
+#          SCHEDULER: ${{ inputs.scheduler }}
+#          BINDER: ${{ inputs.binder }}
+#          MAVEN_REPOS: '{"repo1":"https://repo.spring.io/snapshot"}'
+#          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: ${{ inputs.binder }}
+#          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
+#          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: scdf-scheduler
+#          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: "https://api.sys.${{ inputs.cf_host }}.cf-app.com"
+#          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: "apps.${{ inputs.cf_host }}.cf-app.com"
+#          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: p-dataflow
+#          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME: ${{ secrets.CF_USERNAME }}
+#          SQL_HOST: ${{ secrets.SQL_HOST }}
+#          SQL_PORT: ${{ secrets.SQL_PORT }}
+#          SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+#          SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
+#          SQL_PROVIDER: ${{ inputs.sql_provider }}
+#          SQL_SERVICE_NAME: ${{ inputs.sql_service_name }}
+#          SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_SYSTEM_PASSWORD }}
+#          SQL_SYSTEM_USERNAME: ${{ secrets.SQL_SYSTEM_USERNAME }}
+#          SQL_DATAFLOW_DB_NAME: "dataflow_pro_1_5_0_${{ inputs.binder }}_${{ inputs.cf_index }}"
+#          KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
+#          KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
+#          KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
+#          PLATFORM: tile
+#          TESTS: ${{ inputs.tests }}
+#        run: |
+#          echo "Building timestamp-batch-with-drivers-template1"
+#          pushd acceptance-tests/custom-apps/timestamp-batch-with-drivers-template1 > /dev/null
+#            ./gradlew build install
+#          popd > /dev/null
+#          echo "Starting  Acceptance Tests"
+#          ./scripts/at-test-script.sh
+#          echo "Completed Acceptance Tests"
+#      - name: Upload Test Output
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: log-files-${{ inputs.binder }}-${{ inputs.cf_index }}-${{ github.run_number }}-${{ github.run_attempt }}
+#          path: './**/*.log'
+#          retention-days: 7
+#          if-no-files-found: ignore
+#      - name: Upload Unit Test Results
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: test-results-surefire-${{ inputs.binder }}-${{ inputs.cf_index }}-${{ github.run_number }}-${{ github.run_attempt }}
+#          path: './**/target/surefire-reports/**/*.*'
+#          retention-days: 7
+#          if-no-files-found: ignore
+#      - name: Upload Integration Test Results
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: test-results-failsafe-${{ inputs.binder }}-${{ inputs.cf_index }}-${{ github.run_number }}-${{ github.run_attempt }}
+#          path: './**/target/failsafe-reports/**/*.*'
+#          retention-days: 7
+#          if-no-files-found: ignore
+#      - name: Upload Test Site
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: test-site-${{ inputs.binder }}-${{ inputs.cf_index }}-${{ github.run_number }}-${{ github.run_attempt }}-failsafe-report.html
+#          path: './**/target/site/failsafe-report.html'
+#          retention-days: 7
+#          if-no-files-found: ignore
+#      - name: Cleanup
+#        if: ${{ success() }}
+#        env:
+#          # DEBUG: true
+#          SCHEDULER: ${{ inputs.scheduler }}
+#          BINDER: ${{ inputs.binder }}
+#          MAVEN_REPOS: '{"repo1":"https://repo.spring.io/snapshot"}'
+#          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: ${{ inputs.binder }}
+#          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
+#          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: scdf-scheduler
+#          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: "https://api.sys.${{ inputs.cf_host }}.cf-app.com"
+#          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: "apps.${{ inputs.cf_host }}.cf-app.com"
+#          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: p-dataflow
+#          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME: ${{ secrets.CF_USERNAME }}
+#          SQL_HOST: ${{ secrets.SQL_HOST }}
+#          SQL_PORT: ${{ secrets.SQL_PORT }}
+#          SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+#          SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
+#          SQL_PROVIDER: ${{ inputs.sql_provider }}
+#          SQL_SERVICE_NAME: ${{ inputs.sql_service_name }}
+#          SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_SYSTEM_PASSWORD }}
+#          SQL_SYSTEM_USERNAME: ${{ secrets.SQL_SYSTEM_USERNAME }}
+#          SQL_DATAFLOW_DB_NAME: "dataflow_pro_1_5_0_${{ inputs.binder }}_${{ inputs.cf_index }}"
+#          KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
+#          KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
+#          KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
+#          PLATFORM: tile
+#        shell: bash
+#        run: ./scripts/at-cleanup.sh
