@@ -7,8 +7,8 @@ if [ "$TESTS" != "" ]; then
   echo "Setting failsafe test filter: $TESTS"
   MAVEN_ARG="-Dit.test=$TESTS"
 else
-  echo "Setting failsafe test filter: $TESTS_ARG"
-  MAVEN_ARG="-Dit.test=$TESTS_ARG"
+  # -Dit.test=$TESTS_ARG
+  MAVEN_ARG="-Dgroups=all,smoke"
 fi
 
 HTTPS_ENABLED="true"
