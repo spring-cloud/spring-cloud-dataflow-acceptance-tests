@@ -1903,7 +1903,7 @@ class DataFlowAT extends CommonTestBase {
                 // successful
                 asList("scenario"),
                 // failed
-                asList("testtimestamp"));
+                asList("testtimestamp3"));
             logger.info("ctr-failed-graph:end");// not-run
         } else {
             logger.warn("ctr-failed-graph3:skipped for " + runtimeApps.getDataflowServerVersion());// not-run
