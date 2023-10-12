@@ -19,13 +19,13 @@ if [[ -z "$SPRING_CLOUD_STREAM_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION" ]]; th
 fi
 set +e
 #
+set -o pipefail
 ./mvnw -U -B -Dspring.profiles.active=blah $MAVEN_ARG -DPLATFORM_TYPE=cloudfoundry \
   -DSKIP_CLOUD_CONFIG=true -Dtest.docker.compose.disable.extension=true -Dspring.cloud.dataflow.client.serverUri=$SERVER_URI \
   -Dspring.cloud.dataflow.client.skipSslValidation=$SKIP_SSL_VALIDATION -Dtest.platform.connection.platformName=default \
   -Dtest.platform.connection.applicationOverHttps=$HTTPS_ENABLED  \
   $MAVEN_PROPERTIES clean verify surefire-report:failsafe-report-only | tee test-output.log
-# tee masks the mvn output
-RC=$(grep -c -F "BUILD FAILURE" test-output.log)
+RC=$?
 echo "RC=$RC"
 if ((RC != 0)); then
   # TODO extract logs from dataflow and skipper and pipe to dataflow.log and skipper.log

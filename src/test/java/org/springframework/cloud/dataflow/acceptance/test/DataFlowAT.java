@@ -854,11 +854,9 @@ class DataFlowAT extends CommonTestBase {
 
     private void awaitStarting(Stream stream, AwaitUtils.StreamLog offset) {
         final long startErrorCheck = System.currentTimeMillis() + 30_000L;
-        Awaitility.await("Deployment starting for " + stream.getName()).failFast(() -> {
-            if (System.currentTimeMillis() > startErrorCheck) {
-                AwaitUtils.hasErrorInLog(offset);
-            }
-        }).until(() -> {
+        Awaitility.await("Deployment starting for " + stream.getName()).failFast(() ->
+            System.currentTimeMillis() > startErrorCheck && AwaitUtils.hasErrorInLog(offset)
+        ).until(() -> {
             logger.debug("awaitStarting:{}:{}", stream.getName(), stream.getStatus());
             try {
                 return starting.contains(stream.getStatus());
@@ -871,11 +869,9 @@ class DataFlowAT extends CommonTestBase {
 
     private void awaitDeployed(Stream stream, AwaitUtils.StreamLog offset) {
         final long startErrorCheck = System.currentTimeMillis() + 30_000L;
-        Awaitility.await("Deployment for " + stream.getName()).failFast(() -> {
-            if (System.currentTimeMillis() >= startErrorCheck) {
-                AwaitUtils.hasErrorInLog(offset);
-            }
-        }).atMost(Duration.ofSeconds(60))
+        Awaitility.await("Deployment for " + stream.getName()).failFast(() ->
+				System.currentTimeMillis() >= startErrorCheck && AwaitUtils.hasErrorInLog(offset)
+        ).atMost(Duration.ofSeconds(60))
             .until(() -> {
             try {
                 return stream.getStatus().equals(DEPLOYED);
@@ -966,7 +962,6 @@ class DataFlowAT extends CommonTestBase {
             // UNDEPLOY
             logger.info("stream-lifecycle-test: UNDEPLOY");
             stream.undeploy();
-
             Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
                 stream.getStatus().equals(UNDEPLOYED)
             );
@@ -2729,7 +2724,7 @@ class DataFlowAT extends CommonTestBase {
         minimumVersionCheck("testCreateTaskWithOneVersionLaunchInvalidVersion");
         try (Task task = createTaskDefinition()) {
             assertThatThrownBy(() ->
-                task.launch(Collections.singletonMap("version.testtimestamp", TEST_VERSION_NUMBER), null)
+                task.launch(Collections.singletonMap("version.testtimestamp", "1.0.100"), null)
             ).isInstanceOf(DataFlowClientException.class)
                 .hasMessageContaining("Unknown task app: testtimestamp");
         }
@@ -2748,7 +2743,7 @@ class DataFlowAT extends CommonTestBase {
         minimumVersionCheck("testInvalidVersionUsageShouldNotAffectSubsequentDefaultLaunch");
         Task task = createTaskDefinition();
         assertThatThrownBy(() ->
-            task.launch(Collections.singletonMap("version.testtimestamp", TEST_VERSION_NUMBER), null)
+            task.launch(Collections.singletonMap("version.testtimestamp", "1.0.2"), null)
         ).isInstanceOf(DataFlowClientException.class)
             .hasMessageContaining("Unknown task app: testtimestamp");
 
@@ -3102,7 +3097,7 @@ class DataFlowAT extends CommonTestBase {
             verifyAllSpecifiedTaskExecutions(task, launchIds, true);
             LaunchResponse retainedLaunch = launchIds.get(3);
             launchIds.stream()
-                .filter(launch -> launch.equals(retainedLaunch))
+                .filter(launch -> !launch.equals(retainedLaunch))
                 .forEach(launch -> {
                     safeCleanupTaskExecution(task, launch.getExecutionId(), launch.getSchemaTarget());
                     assertThatThrownBy(() ->
@@ -3182,7 +3177,9 @@ class DataFlowAT extends CommonTestBase {
                 .isPresent();
             validateSuccessfulTaskLaunch(task, launch.getExecutionId(), launch.getSchemaTarget(), 2);
             safeCleanupTaskExecution(task, launch.getExecutionId(), launch.getSchemaTarget());
-            assertThat(task.execution(launch.getExecutionId(), launch.getSchemaTarget())).isNotPresent();
+            assertThatThrownBy(() ->
+                task.execution(launch.getExecutionId(), launch.getSchemaTarget())
+            ).isInstanceOf(DataFlowClientException.class);
 
             LaunchResponseResource thirdResponse = task.launch(Collections.singletonMap("app.testtimestamp.thirdkey", "thirdvalue"), Collections.emptyList());
             assertThat(task.execution(thirdResponse.getExecutionId(), thirdResponse.getSchemaTarget()))

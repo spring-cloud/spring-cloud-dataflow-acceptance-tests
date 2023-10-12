@@ -55,6 +55,7 @@ pushd "$ROOTDIR" || exit $?
 echo "EXTRA=$EXTRA" | tee build.log
 echo "ROOTDIR=$ROOTDIR" | tee -a build.log
 echo "PWD=$(pwd)" | tee -a build.log
+set -o pipefail
 ./mvnw -Dspring.profiles.active=blah \
   -DPLATFORM_TYPE=kubernetes \
   -DNAMESPACE=$NS \
