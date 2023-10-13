@@ -8,7 +8,7 @@ if [ "$TESTS" != "" ]; then
   MAVEN_ARG="-Dit.test=$TESTS"
 else
   # -Dit.test=$TESTS_ARG
-  MAVEN_ARG="-Dgroups=all,smoke -Dit.test=$TESTS_ARG"
+  MAVEN_ARG="-Dgroups=all|smoke -Dit.test=$TESTS_ARG"
 fi
 
 HTTPS_ENABLED="true"
