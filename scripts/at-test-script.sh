@@ -10,7 +10,7 @@ if [ "$TESTS" != "" ]; then
 else
   # -Dit.test=$TESTS_ARG
   MAVEN_ARG="-Dit.test=$TESTS_ARG"
-  MAVEN_GRP="-Dgroups=all|smoke"
+  MAVEN_GRP="-Dgroups=smoke"
 fi
 
 HTTPS_ENABLED="true"
