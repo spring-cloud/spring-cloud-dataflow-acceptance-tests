@@ -37,7 +37,7 @@ if [ "$1" != "" ]; then
     ;;
     *)
       if [[ "$1" == *"group"* ]]; then
-        export EXTRA="-Dmaven-failsafe-plugin.groups=$*"
+        export EXTRA="-Dgroups=$*"
       else
         export EXTRA="-Dtest=$*"
       fi

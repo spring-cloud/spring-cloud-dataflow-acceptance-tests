@@ -191,7 +191,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>3.0.0-M4</version>
                 <configuration>
                     <skip>true</skip>
                     <!-- we use failsafe to run integration tests -->
@@ -200,7 +200,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>2.22.2</version>
                 <configuration>
                     <rerunFailingTestsCount>2</rerunFailingTestsCount>
                     <includes>
@@ -225,57 +225,159 @@
     <profiles>
         <profile>
             <id>test-1-of-3</id>
-            <properties>
-                <maven-failsafe-plugin.groups>group1,group6,all</maven-failsafe-plugin.groups>
-            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.22.2</version>
+                        <configuration>
+                            <groups>group1,group6,all</groups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>test-2-of-3</id>
-            <properties>
-                <maven-failsafe-plugin.groups>group2,group5,all</maven-failsafe-plugin.groups>
-            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.22.2</version>
+                        <configuration>
+                            <groups>group1,group6,all</groups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>test-3-of-3</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.22.2</version>
+                        <configuration>
+                            <groups>group1,group6,all</groups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
             <properties>
                 <maven-failsafe-plugin.groups>group3,group4,all</maven-failsafe-plugin.groups>
             </properties>
         </profile>
         <profile>
             <id>test-1-of-6</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.22.2</version>
+                        <configuration>
+                            <groups>group1,group6,all</groups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
             <properties>
                 <maven-failsafe-plugin.groups>group1,all</maven-failsafe-plugin.groups>
             </properties>
         </profile>
         <profile>
             <id>test-2-of-6</id>
-            <properties>
-                <maven-failsafe-plugin.groups>group2,all</maven-failsafe-plugin.groups>
-            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.22.2</version>
+                        <configuration>
+                            <groups>group1,group6,all</groups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>test-3-of-6</id>
-            <properties>
-                <maven-failsafe-plugin.groups>group3,all</maven-failsafe-plugin.groups>
-            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.22.2</version>
+                        <configuration>
+                            <groups>group3,all</groups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>test-4-of-6</id>
-            <properties>
-                <maven-failsafe-plugin.groups>group4,all</maven-failsafe-plugin.groups>
-            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.22.2</version>
+                        <configuration>
+                            <groups>group4,all</groups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>test-5-of-6</id>
-            <properties>
-                <maven-failsafe-plugin.groups>group5,all</maven-failsafe-plugin.groups>
-            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.22.2</version>
+                        <configuration>
+                            <groups>group5,all</groups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>test-6-of-6</id>
-            <properties>
-                <maven-failsafe-plugin.groups>group6,all</maven-failsafe-plugin.groups>
-            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.22.2</version>
+                        <configuration>
+                            <groups>group6,all</groups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>smoke-test</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.22.2</version>
+                        <configuration>
+                            <groups>smoke,all</groups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>spring</id>
