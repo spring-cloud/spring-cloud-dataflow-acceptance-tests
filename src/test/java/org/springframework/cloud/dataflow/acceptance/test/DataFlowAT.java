@@ -217,7 +217,7 @@ class DataFlowAT extends CommonTestBase {
             .register("docker-app-with-container-metadata",
                 ApplicationType.source,
                 "docker:springcloudstream/time-source-kafka:3.2.1",
-                null,
+                "maven://org.springframework.cloud.stream.app:time-source-kafka:jar:metadata:3.2.1",
                 AppBootSchemaVersion.BOOT2,
                 true);
         DetailedAppRegistrationResource dockerAppWithContainerMetadata = dataFlowOperations.appRegistryOperations()
@@ -229,7 +229,7 @@ class DataFlowAT extends CommonTestBase {
             .register("docker-app-with-container-metadata-escape-chars",
                 ApplicationType.source,
                 "docker:springcloudstream/http-source-rabbit:3.2.1",
-                null,
+                "maven://org.springframework.cloud.stream.app:http-source-rabbit:jar:metadata:3.2.1",
                 AppBootSchemaVersion.BOOT2,
                 true);
         DetailedAppRegistrationResource dockerAppWithContainerMetadataWithEscapeChars = dataFlowOperations.appRegistryOperations()
@@ -241,7 +241,7 @@ class DataFlowAT extends CommonTestBase {
             .register("docker-app-without-metadata",
                 ApplicationType.sink,
                 "docker:springcloudstream/log-sink-kafka:3.2.1",
-                null,
+                "maven://org.springframework.cloud.stream.app:log-sink-kafka:jar:metadata:3.2.1",
                 AppBootSchemaVersion.BOOT2,
                 true);
         DetailedAppRegistrationResource dockerAppWithoutMetadata = dataFlowOperations.appRegistryOperations()
