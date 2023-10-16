@@ -27,11 +27,11 @@
         <javadoc.opts>-Xdoclint:none</javadoc.opts>
         <checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>
         <checkstyle.header.file>etc/checkstyle/checkstyle-header.txt</checkstyle.header.file>
-        <dataflow.version>2.11.1-SNAPSHOT</dataflow.version>
+        <dataflow.version>2.11.2-SNAPSHOT</dataflow.version>
         <app.starters.support.version>2.5.0</app.starters.support.version>
-        <spring-cloud-deployer-cloudfoundry.version>2.9.1-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
-        <spring-cloud-deployer-kubernetes.version>2.9.1-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
-        <spring-cloud-deployer-local.version>2.9.1-SNAPSHOT</spring-cloud-deployer-local.version>
+        <spring-cloud-deployer-cloudfoundry.version>2.9.2-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
+        <spring-cloud-deployer-kubernetes.version>2.9.2-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
+        <spring-cloud-deployer-local.version>2.9.2-SNAPSHOT</spring-cloud-deployer-local.version>
         <maven-failsafe-plugin.groups>all,group1,group2,group3,group4,group5,group6</maven-failsafe-plugin.groups>
     </properties>
     <dependencies>
@@ -262,14 +262,11 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>2.22.2</version>
                         <configuration>
-                            <groups>group1,group6,all</groups>
+                            <groups>group3,group4,all</groups>
                         </configuration>
                     </plugin>
                 </plugins>
             </build>
-            <properties>
-                <maven-failsafe-plugin.groups>group3,group4,all</maven-failsafe-plugin.groups>
-            </properties>
         </profile>
         <profile>
             <id>test-1-of-6</id>
@@ -298,7 +295,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>2.22.2</version>
                         <configuration>
-                            <groups>group1,group6,all</groups>
+                            <groups>group2,all</groups>
                         </configuration>
                     </plugin>
                 </plugins>
