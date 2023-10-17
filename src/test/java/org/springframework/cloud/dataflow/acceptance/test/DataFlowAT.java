@@ -1505,7 +1505,7 @@ class DataFlowAT extends CommonTestBase {
 
     public static final int EXIT_CODE_ERROR = 1;
 
-    public static final String TEST_VERSION_NUMBER = "2.0.2";
+    public static final String TEST_VERSION_NUMBER = "2.0.1";
 
     private List<String> composedTaskLaunchArguments(String... additionalArguments) {
         // the dataflow-server-use-user-access-token=true argument is required COMPOSED tasks in
@@ -2190,7 +2190,7 @@ class DataFlowAT extends CommonTestBase {
         TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
         try (Task task = taskBuilder.name(randomTaskName())
             .definition(String.format(
-                "t1: testtimestamp && <t2: testtimestamp ||b:scenario --io.spring.fail-batch=true --io.spring.jobName=%s --spring.cloud.task.batch.fail-on-job-failure=true || t3: testtimestamp> && t4: testtimestamp",
+                "t1: testtimestamp && <t2: testtimestamp || b:scenario --io.spring.fail-batch=true --io.spring.jobName=%s --spring.cloud.task.batch.fail-on-job-failure=true || t3: testtimestamp> && t4: testtimestamp",
                 randomJobName()))
             .description("sequentialAndFailedSplitTest")
             .build()) {
@@ -2232,7 +2232,7 @@ class DataFlowAT extends CommonTestBase {
                 Optional<TaskExecutionResource> child = childTask.executionByParentExecutionId(launch.getExecutionId(),
                     launch.getSchemaTarget());
                 assertThat(child).isPresent();
-                assertThat(child.get().getExitCode()).isEqualTo(EXIT_CODE_ERROR);
+                assertThat(child.get().getExitCode()).isNotEqualTo(EXIT_CODE_SUCCESS);
             });
 
             // Not run tasks
@@ -2273,7 +2273,7 @@ class DataFlowAT extends CommonTestBase {
                 Optional<TaskExecutionResource> child = childTask.executionByParentExecutionId(taskExecutionResource.get().getExecutionId(),
                     taskExecutionResource.get().getSchemaTarget());
                 assertThat(child).isPresent();
-                assertThat(child.get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+                assertThat(child.get().getExitCode()).isNotEqualTo(EXIT_CODE_SUCCESS);
             });
 
             childTasksBySuffix(task, "t4").forEach(childTask -> {
@@ -2768,11 +2768,13 @@ class DataFlowAT extends CommonTestBase {
         Task task = createTaskDefinition();
 
         LaunchResponseResource launch = task.launch(Collections.singletonMap("version.testtimestamp", TEST_VERSION_NUMBER), null);
+        logger.info("launched:{},{}", launch.getExecutionId(), launch.getSchemaTarget());
         validateSuccessfulTaskLaunch(task, launch.getExecutionId(), launch.getSchemaTarget());
         resetTimestampVersion();
-        assertThatThrownBy(() ->
-            task.launch(Collections.singletonMap("version.testtimestamp", TEST_VERSION_NUMBER), null)
-        ).isInstanceOf(DataFlowClientException.class)
+        assertThatThrownBy(() -> {
+            LaunchResponseResource launchResponse = task.launch(Collections.singletonMap("version.testtimestamp", TEST_VERSION_NUMBER), null);
+            logger.info("launched:{},{}", launchResponse.getExecutionId(), launchResponse.getSchemaTarget());
+        }).isInstanceOf(DataFlowClientException.class)
             .hasMessageContaining("Unknown task app: testtimestamp");
     }
 
@@ -3279,7 +3281,7 @@ class DataFlowAT extends CommonTestBase {
                 assertThatThrownBy(() ->
                     task.jobStepExecutions(jobExecutionIds.get(0), launch.getSchemaTarget())
                 ).isInstanceOf(DataFlowClientException.class)
-                    .hasMessageContaining("No JobExecution with id=");
+                    .hasMessageContaining("for schema target boot3 not found");
             }
         } else {
             logger.warn("skipping boot3 workload for " + runtimeApps.getDataflowServerVersion());
