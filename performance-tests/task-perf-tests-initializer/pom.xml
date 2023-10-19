@@ -16,7 +16,7 @@
     <version>1.1.0.BUILD-SNAPSHOT</version>
 
     <properties>
-        <dataflow.version>2.11.1-SNAPSHOT</dataflow.version>
+        <dataflow.version>2.11.2-SNAPSHOT</dataflow.version>
         <java-cfenv.version>2.3.0</java-cfenv.version>
         <checkstyle.config.location>../../etc/checkstyle/checkstyle.xml</checkstyle.config.location>
         <checkstyle.header.file>../../etc/checkstyle/checkstyle-header.txt</checkstyle.header.file>

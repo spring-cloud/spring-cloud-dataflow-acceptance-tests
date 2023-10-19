@@ -50,8 +50,8 @@ class TestConfigProperties(unittest.TestCase):
         InstallationContext.from_env_vars(merged_env([deployer_env(), standalone_test_env()]))
 
     def test_env_present_test_config(self):
-        test_config = ConfigurationProperties.from_env_vars(env={'DATAFLOW_VERSION': '2.11.1-SNAPSHOT',
-                                                               'SKIPPER_VERSION': '2.11.1-SNAPSHOT',
+        test_config = ConfigurationProperties.from_env_vars(env={'DATAFLOW_VERSION': '2.11.2-SNAPSHOT',
+                                                               'SKIPPER_VERSION': '2.11.2-SNAPSHOT',
                                                                'DEPLOY_WAIT_SEC': '60',
                                                                'MAX_RETRIES': '10'})
         self.assertEqual(60, test_config.deploy_wait_sec)
@@ -90,8 +90,8 @@ def deployer_config():
 
 
 def standalone_test_env():
-    return {'DATAFLOW_VERSION': '2.11.1-SNAPSHOT',
-            'SKIPPER_VERSION': '2.11.1-SNAPSHOT',
+    return {'DATAFLOW_VERSION': '2.11.2-SNAPSHOT',
+            'SKIPPER_VERSION': '2.11.2-SNAPSHOT',
             'PLATFORM': 'cloudfoundry'}
 
 
