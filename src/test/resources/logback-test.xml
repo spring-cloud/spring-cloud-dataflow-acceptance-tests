@@ -8,4 +8,5 @@
     <logger name="com.github.dockerjava" level="ERROR"/>
     <logger name="org.springframework" level="INFO"/>
     <logger name="org.junit" level="WARN"/>
+<!--  Uncomment to log http client  <logger name="org.apache.http.impl" level="DEBUG"/>-->
 </configuration>
