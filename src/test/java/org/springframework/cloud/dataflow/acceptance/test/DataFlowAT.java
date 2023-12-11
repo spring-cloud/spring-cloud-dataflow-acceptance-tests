@@ -868,10 +868,12 @@ class DataFlowAT extends CommonTestBase {
     }
 
     private void awaitDeployed(Stream stream, AwaitUtils.StreamLog offset) {
+        final int runtimeMaxWaitTime = (runtimeApps.getPlatformType()
+            .equals(RuntimeApplicationHelper.CLOUDFOUNDRY_PLATFORM_TYPE)) ? 300 : 60;
         final long startErrorCheck = System.currentTimeMillis() + 30_000L;
         Awaitility.await("Deployment for " + stream.getName()).failFast(() ->
 				System.currentTimeMillis() >= startErrorCheck && AwaitUtils.hasErrorInLog(offset)
-        ).atMost(Duration.ofSeconds(60))
+        ).atMost(Duration.ofSeconds(runtimeMaxWaitTime))
             .until(() -> {
             try {
                 return stream.getStatus().equals(DEPLOYED);
