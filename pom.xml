@@ -16,7 +16,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.16</version>
+        <version>2.7.18</version>
         <relativePath/>
     </parent>
 
@@ -232,6 +232,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>2.22.2</version>
                         <configuration>
+                            <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group1,group6,all</groups>
                         </configuration>
                     </plugin>
@@ -247,6 +248,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>2.22.2</version>
                         <configuration>
+                            <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group1,group6,all</groups>
                         </configuration>
                     </plugin>
@@ -262,6 +264,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>2.22.2</version>
                         <configuration>
+                            <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group3,group4,all</groups>
                         </configuration>
                     </plugin>
@@ -277,6 +280,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>2.22.2</version>
                         <configuration>
+                            <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group1,group6,all</groups>
                         </configuration>
                     </plugin>
@@ -295,6 +299,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>2.22.2</version>
                         <configuration>
+                            <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group2,all</groups>
                         </configuration>
                     </plugin>
@@ -310,6 +315,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>2.22.2</version>
                         <configuration>
+                            <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group3,all</groups>
                         </configuration>
                     </plugin>
@@ -325,6 +331,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>2.22.2</version>
                         <configuration>
+                            <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group4,all</groups>
                         </configuration>
                     </plugin>
@@ -340,6 +347,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>2.22.2</version>
                         <configuration>
+                            <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group5,all</groups>
                         </configuration>
                     </plugin>
@@ -355,6 +363,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>2.22.2</version>
                         <configuration>
+                            <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group6,all</groups>
                         </configuration>
                     </plugin>
@@ -370,6 +379,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>2.22.2</version>
                         <configuration>
+                            <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>smoke,all</groups>
                         </configuration>
                     </plugin>
