@@ -3283,7 +3283,7 @@ class DataFlowAT extends CommonTestBase {
                 assertThatThrownBy(() ->
                     task.jobStepExecutions(jobExecutionIds.get(0), launch.getSchemaTarget())
                 ).isInstanceOf(DataFlowClientException.class)
-                    .hasMessageContaining("for schema target boot3 not found");
+                    .hasMessageContaining("No JobExecution with id=1");
             }
         } else {
             logger.warn("skipping boot3 workload for " + runtimeApps.getDataflowServerVersion());
