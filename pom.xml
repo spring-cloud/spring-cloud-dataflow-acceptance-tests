@@ -32,7 +32,7 @@
         <spring-cloud-deployer-cloudfoundry.version>2.9.2-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
         <spring-cloud-deployer-kubernetes.version>2.9.2-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
         <spring-cloud-deployer-local.version>2.9.2-SNAPSHOT</spring-cloud-deployer-local.version>
-        <maven-failsafe-plugin.groups>all,group1,group2,group3,group4,group5,group6</maven-failsafe-plugin.groups>
+        <maven-failsafe-plugin.groups>always,group1,group2,group3,group4,group5,group6</maven-failsafe-plugin.groups>
     </properties>
     <dependencies>
         <dependency>

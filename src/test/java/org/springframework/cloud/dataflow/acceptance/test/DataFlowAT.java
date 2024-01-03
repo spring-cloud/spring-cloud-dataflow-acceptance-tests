@@ -164,7 +164,7 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @Order(Integer.MIN_VALUE)
-    @Tag("all")
+    @Tag("always")
     public void aboutTestInfo() {
         logger.info("Available platforms: " + dataFlowOperations.streamOperations()
             .listPlatforms()
@@ -182,7 +182,7 @@ class DataFlowAT extends CommonTestBase {
     @Test
     @DisabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "kubernetes")
     @Tag("smoke")
-    @Tag("all")
+    @Tag("always")
     public void applicationMetadataMavenTests() {
         logger.info("application-metadata-maven-test:start");
 
@@ -207,7 +207,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
-    @Tag("all")
+    @Tag("always")
     @Tag("smoke")
     public void applicationMetadataDockerTests() {
         logger.info("application-metadata-docker-test:start");
@@ -453,7 +453,7 @@ class DataFlowAT extends CommonTestBase {
     // PLATFORM TESTS
     // -----------------------------------------------------------------------
     @Test
-    @Tag("all")
+    @Tag("always")
     public void featureInfo() {
         logger.info("platform-feature-info-test:start");
         AboutResource about = dataFlowOperations.aboutOperation().get();
@@ -464,7 +464,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
-    @Tag("all")
+    @Tag("always")
     public void appsCount() {
         logger.info("platform-apps-count-test:start");
         assertThat(dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements()).isGreaterThanOrEqualTo(60L);

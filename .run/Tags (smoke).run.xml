@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Tags (group6)" type="JUnit" factoryName="JUnit">
-    <output_file path="$PROJECT_DIR$/fulltest6.log" is_save="true" />
+  <configuration default="false" name="Tags (smoke)" type="JUnit" factoryName="JUnit">
+    <output_file path="$PROJECT_DIR$/fulltest1.log" is_save="true" />
     <module name="spring-cloud-dataflow-acceptance-tests" />
     <extension name="coverage">
       <pattern>
@@ -30,7 +30,7 @@
     <option name="METHOD_NAME" value="streamLifecycleWithTwoInstance" />
     <option name="TEST_OBJECT" value="tags" />
     <option name="VM_PARAMETERS" value="-ea -Dtest.platform.connection.platformName=default -Dspring.profiles.active=blah -DSKIP_CLOUD_CONFIG=true -Dtest.docker.compose.disable.extension=true -DPLATFORM_TYPE=$PLATFORM_TYPE -DBINDER=$BINDER" />
-    <tag value="group6,always" />
+    <tag value="smoke,always" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

@@ -99,7 +99,7 @@ public class TaskScheduleAT extends CommonTestBase {
 
     @Test
     @Order(Integer.MIN_VALUE)
-    @Tag("all")
+    @Tag("always")
     public void testConfigurationInfo() {
         logger.info(platformInfo);
     }

@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Tags (group5 )" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
-    <output_file path="$PROJECT_DIR$/fulltest5.log" is_save="true" />
+  <configuration default="false" name="Tags (group3)" type="JUnit" factoryName="JUnit">
+    <output_file path="$PROJECT_DIR$/fulltest3.log" is_save="true" />
     <module name="spring-cloud-dataflow-acceptance-tests" />
     <extension name="coverage">
       <pattern>
@@ -15,8 +15,8 @@
       <option name="IS_IGNORE_MISSING_FILES" value="false" />
       <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
       <ENTRIES>
-        <ENTRY IS_ENABLED="true" PARSER="runconfig" />
-        <ENTRY IS_ENABLED="true" PARSER="env" PATH=".env" />
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH=".env" />
       </ENTRIES>
     </extension>
     <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
@@ -30,7 +30,7 @@
     <option name="METHOD_NAME" value="streamLifecycleWithTwoInstance" />
     <option name="TEST_OBJECT" value="tags" />
     <option name="VM_PARAMETERS" value="-ea -Dtest.platform.connection.platformName=default -Dspring.profiles.active=blah -DSKIP_CLOUD_CONFIG=true -Dtest.docker.compose.disable.extension=true -DPLATFORM_TYPE=$PLATFORM_TYPE -DBINDER=$BINDER" />
-    <tag value="group5" />
+    <tag value="group3,always" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
