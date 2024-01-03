@@ -30,7 +30,7 @@
     <option name="METHOD_NAME" value="streamLifecycleWithTwoInstance" />
     <option name="TEST_OBJECT" value="tags" />
     <option name="VM_PARAMETERS" value="-ea -Dtest.platform.connection.platformName=default -Dspring.profiles.active=blah -DSKIP_CLOUD_CONFIG=true -Dtest.docker.compose.disable.extension=true -DPLATFORM_TYPE=$PLATFORM_TYPE -DBINDER=$BINDER" />
-    <tag value="group5,always" />
+    <tag value="group5|always" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
