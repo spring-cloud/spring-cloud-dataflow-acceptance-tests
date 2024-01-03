@@ -35,14 +35,15 @@ if [ "$1" != "" ]; then
     ;;
     "smoke")
     export EXTRA="-Dgroups=smoke|always"
+    ;;
     info)
-    export EXTRA="-P test-info -Dtest=org.springframework.cloud.dataflow.acceptance.test.DataFlowAT#aboutTestInfo"
+    export EXTRA="-P test-info -Dit.test=org.springframework.cloud.dataflow.acceptance.test.DataFlowAT#aboutTestInfo"
     ;;
     *)
       if [[ "$1" == *"group"* ]]; then
         export EXTRA="-Dgroups=$*"
       else
-        export EXTRA="-Dtest=$*"
+        export EXTRA="-Dit.test=$*"
       fi
   esac
 fi
@@ -67,7 +68,5 @@ set -o pipefail
   -Dtest.docker.compose.disable.extension=true \
   -Dspring.cloud.dataflow.client.serverUri=$DATAFLOW_IP \
   -Dspring.cloud.dataflow.client.skipSslValidation=true \
-  -Dtest=!DataFlowAT#streamAppCrossVersion \
-  -X clean test verify $EXTRA | tee -a build.log | grep -v -F "DEBUG"
-./mvnw surefire-report:failsafe-report-only | tee -a build.log
+  clean integration-test "$EXTRA" | tee -a build.log | grep -v -F "DEBUG"
 popd

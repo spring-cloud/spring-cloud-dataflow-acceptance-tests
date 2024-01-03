@@ -2417,14 +2417,14 @@ class DataFlowAT extends CommonTestBase {
                 randomJobName()))
             .description("failedCTRRetryTest")
             .build()) {
-
+            logger.info("composed-task-failedCTRRetry-test:definition");
             assertThat(task.composedTaskChildTasks().size()).isEqualTo(2);
             assertThat(task.composedTaskChildTasks().stream().map(Task::getTaskName).collect(Collectors.toList())).hasSameElementsAs(fullTaskNames(task,
                 "b1",
                 "t1"));
 
             LaunchResponseResource launch = task.launch(composedTaskLaunchArguments());
-
+            logger.info("composed-task-failedCTRRetry-test:launch");
             if (runtimeApps.dataflowServerVersionLowerThan("2.8.0-SNAPSHOT")) {
                 Awaitility.await().until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             } else {
@@ -2432,12 +2432,13 @@ class DataFlowAT extends CommonTestBase {
             }
 
             // Parent Task
+            logger.info("composed-task-failedCTRRetry-test:check parent");
             assertThat(task.executions().size()).isEqualTo(1);
             Optional<TaskExecutionResource> taskExecutionResource = task.execution(launch.getExecutionId(), launch.getSchemaTarget());
             assertThat(taskExecutionResource).isPresent();
             assertThat(taskExecutionResource.get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
             task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
-
+            logger.info("composed-task-failedCTRRetry-test:check children");
             // Failed tasks
             childTasksBySuffix(task, "b1").forEach(childTask -> {
                 assertThat(childTask.executions().size()).isEqualTo(1);
@@ -2445,7 +2446,7 @@ class DataFlowAT extends CommonTestBase {
                 assertThat(child).isPresent();
                 assertThat(child.get().getExitCode()).isEqualTo(EXIT_CODE_ERROR);
             });
-
+            logger.info("composed-task-failedCTRRetry-test:check not run");
             // Not run tasks
             childTasksBySuffix(task, "t1").forEach(childTask ->
                 assertThat(childTask.executions().size()).isEqualTo(0)
@@ -2453,7 +2454,7 @@ class DataFlowAT extends CommonTestBase {
 
             // Parent Task
             assertThat(taskBuilder.allTasks().size()).isEqualTo(task.composedTaskChildTasks().size() + 1);
-
+            logger.info("composed-task-failedCTRRetry-test:restart");
             // restart job
             assertThat(task.executions().size()).isEqualTo(1);
             Optional<TaskExecutionResource> executionResource = task.executions().stream().findFirst();
@@ -2465,6 +2466,7 @@ class DataFlowAT extends CommonTestBase {
             Optional<TaskExecutionResource> resource = task.executions().stream().max(Comparator.comparingLong(TaskExecutionResource::getExecutionId));
 
             assertThat(resource).isPresent();
+            logger.info("composed-task-failedCTRRetry-test:wait complete");
             Awaitility.await()
                 .until(() -> task.executionStatus(resource.get().getExecutionId(), resource.get().getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
@@ -2472,7 +2474,7 @@ class DataFlowAT extends CommonTestBase {
             Optional<TaskExecutionResource> execution = task.execution(resource.get().getExecutionId(), resource.get().getSchemaTarget());
             assertThat(execution).isPresent();
             assertThat(execution.get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
-
+            logger.info("composed-task-failedCTRRetry-test:wait children");
             childTasksBySuffix(task, "b1").forEach(childTask -> {
                 assertThat(childTask.executions().size()).isEqualTo(2);
                 assertThat(childTask.executionByParentExecutionId(resource.get().getExecutionId(), resource.get().getSchemaTarget())
@@ -2487,7 +2489,6 @@ class DataFlowAT extends CommonTestBase {
                 assertThat(child).isPresent();
                 assertThat(child.get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
             });
-
             assertThat(task.jobExecutionResources().size()).isEqualTo(2);
         }
         assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
