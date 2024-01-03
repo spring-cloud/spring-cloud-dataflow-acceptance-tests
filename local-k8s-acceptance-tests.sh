@@ -4,6 +4,7 @@ if [ "$1" = "-h" ]; then
   echo "  where test:"
   echo "    n for test-n-of-3"
   echo "    info for test-info with aboutTestInfo"
+  echo "    smoke for smoke tests"
   echo "    groupX for test-groups using provided"
   echo "    otherwise the profile will be test-all with -Dtest and the parameter"
   exit 0
@@ -32,6 +33,8 @@ if [ "$1" != "" ]; then
     3)
     export EXTRA="-P test-3-of-3"
     ;;
+    "smoke")
+    export EXTRA="-Dgroups=smoke|always"
     info)
     export EXTRA="-P test-info -Dtest=org.springframework.cloud.dataflow.acceptance.test.DataFlowAT#aboutTestInfo"
     ;;

@@ -3253,7 +3253,7 @@ class DataFlowAT extends CommonTestBase {
             assertThatThrownBy(() ->
                 task.jobStepExecutions(jobExecutionIds.get(0), launch.getSchemaTarget())
             ).isInstanceOf(DataFlowClientException.class)
-                .hasMessageContaining("not found");
+                .hasMessageContaining("No JobExecution with id=");
         }
     }
 
