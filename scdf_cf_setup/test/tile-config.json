@@ -4,11 +4,11 @@
   "SPRING_CLOUD_DATAFLOW_FEATURES_TASKS_ENABLED": true,
   "SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED": false,
   "spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.brokers": "broker",
-  "spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.jaas.loginModule": "org.apache.kafka.common.security.plain.PlainLoginModule",
+  "spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.jaas.loginModule": "org.apache.kafka.common.security.scram.ScramLoginModule",
   "spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.jaas.options.username": "user",
   "spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.jaas.options.password": "password",
   "spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.configuration.security.protocol": "SASL_PLAINTEXT",
-  "spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.configuration.sasl.mechanism": "PLAIN",
+  "spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.configuration.sasl.mechanism": "SCRAM-SHA-512",
   "spring.cloud.dataflow.applicationProperties.stream.trustCerts": "uaa.sys.somehost.cf-app.com",
   "spring.cloud.dataflow.applicationProperties.task.trustCerts": "uaa.sys.somehost.cf-app.com",
   "skipper-relational": {
