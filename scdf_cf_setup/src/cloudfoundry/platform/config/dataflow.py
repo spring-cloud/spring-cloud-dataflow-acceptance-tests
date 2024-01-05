@@ -91,10 +91,10 @@ class DataflowConfig(EnvironmentAware):
         kafka_binder_key = 'spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.'
         env = {
             kafka_binder_key + 'brokers': kafka_config.broker_address,
-            kafka_binder_key + 'jaas.loginModule': 'org.apache.kafka.common.security.plain.PlainLoginModule',
+            kafka_binder_key + 'jaas.loginModule': 'org.apache.kafka.common.security.scram.ScramLoginModule',
             kafka_binder_key + 'jaas.options.username': kafka_config.username,
             kafka_binder_key + 'jaas.options.password': kafka_config.password,
             kafka_binder_key + 'configuration.security.protocol': 'SASL_PLAINTEXT',
-            kafka_binder_key + 'configuration.sasl.mechanism': 'PLAIN'
+            kafka_binder_key + 'configuration.sasl.mechanism': 'SCRAM-SHA-512'
         }
         self.kafka_binder_configuration = env
