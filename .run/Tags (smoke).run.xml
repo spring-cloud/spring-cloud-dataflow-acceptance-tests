@@ -29,7 +29,7 @@
     <option name="MAIN_CLASS_NAME" value="org.springframework.cloud.dataflow.acceptance.test.DataFlowAT" />
     <option name="METHOD_NAME" value="streamLifecycleWithTwoInstance" />
     <option name="TEST_OBJECT" value="tags" />
-    <option name="VM_PARAMETERS" value="-ea -Dtest.platform.connection.platformName=default -Dspring.profiles.active=blah -DSKIP_CLOUD_CONFIG=true -Dtest.docker.compose.disable.extension=true -DPLATFORM_TYPE=$PLATFORM_TYPE -DBINDER=$BINDER" />
+    <option name="VM_PARAMETERS" value="-ea -Dtest.platform.connection.platformName=default -Dspring.profiles.active=blah -DSKIP_CLOUD_CONFIG=true -Dtest.docker.compose.disable.extension=true -DPLATFORM_TYPE=${PLATFORM_TYPE} -DBINDER=${BINDER}" />
     <tag value="smoke|always" />
     <method v="2">
       <option name="Make" enabled="true" />

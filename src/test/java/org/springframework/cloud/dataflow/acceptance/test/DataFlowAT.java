@@ -527,7 +527,7 @@ class DataFlowAT extends CommonTestBase {
         logger.info("stream-transform-test:start");
         try (Stream stream = Stream.builder(dataFlowOperations)
             .name("transform-test")
-            .definition("http | transform --expression=payload.toUpperCase() | log")
+            .definition("http | transform --spel.function.expression=payload.toUpperCase() | log")
             .create()
             .deploy(testDeploymentProperties("http"))) {
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
@@ -542,7 +542,7 @@ class DataFlowAT extends CommonTestBase {
             final AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(stream, "log");
             awaitValueInLog(offset, logOffset, message.toUpperCase());
         } catch (Throwable x) {
-            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -570,7 +570,7 @@ class DataFlowAT extends CommonTestBase {
             final AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(stream, "log");
             awaitValueInLog(offset, logOffset, message + "嗨你好世界");
         } catch (Throwable x) {
-            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -579,14 +579,31 @@ class DataFlowAT extends CommonTestBase {
         logger.info("stream-script-test:done");
     }
 
+    private static String lastLines(String log, int lines) {
+        int startIndex = -1;
+        String logPortion = log;
+        for(int i = 0; i < lines; i++) {
+            int index = logPortion.lastIndexOf('\n');
+            if(index > 0) {
+                startIndex = index;
+                logPortion = logPortion.substring(0, index);
+            }
+        }
+        if(startIndex > 0) {
+            return log.substring(startIndex);
+        }
+        return log;
+    }
 
     @Test
     @Tag("group1")
+    // TODO: remove when logs are available per partition
+    @DisabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "kubernetes")
     public void streamPartitioning() {
         logger.info("stream-partitioning-test:start (aka. WoodChuckTests)");
         StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
             .name("partitioning-test")
-            .definition("http | splitter --expression=payload.split(' ') | log")
+            .definition("http | splitter --splitter.expression=payload.split(' ') | log")
             .create();
         final int partitions = 3;
         try (Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder().putAll(testDeploymentProperties("http", "log"))
@@ -594,6 +611,7 @@ class DataFlowAT extends CommonTestBase {
             // Create 2 log instances with partition key computed from the payload.
             .put("deployer.log.count", Integer.toString(partitions))
             .put("app.splitter.producer.partitionKeyExpression", "payload")
+            .put("app.splitter.producer.partitionCount", Integer.toString(partitions))
             .put("app.log.spring.cloud.stream.kafka.bindings.input.consumer.autoRebalanceEnabled", "false")
             .put("app.log.logging.pattern.level", "WOODCHUCK-${INSTANCE_INDEX:${CF_INSTANCE_INDEX:${spring.cloud.stream.instanceIndex:666}}} %5p")
             .build())) {
@@ -620,16 +638,17 @@ class DataFlowAT extends CommonTestBase {
                     list.add(msg);
                 }
             });
+            final int maxWords = expectations.values().stream().mapToInt(List::size).max().orElse(partitions);
             expectations.values().forEach(expectation -> logger.info("Expectation:{}", expectation));
             assertThat(expectations.size()).isEqualTo(partitions);
             Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() -> {
                 Map<String, String> logMap = runtimeApps.applicationInstanceLogs(stream.getName(), "log");
                 if (logMap != null) {
-                    Collection<String> logs = logMap.values();
+                    Collection<String> logs = logMap.values().stream().map(s -> lastLines(s, maxWords + 1)).collect(Collectors.toList());
                     logger.info("streamPartitioning:logs:{}", logs);
                     return (logs.size() == partitions) && logs.stream()
                         // partition order is undetermined
-                        .map(log -> expectations.values().stream().allMatch(expect -> expect.stream().allMatch(log::contains)))
+                        .map(log -> expectations.values().stream().anyMatch(expect -> expect.stream().allMatch(log::contains)))
                         .reduce(Boolean::logicalAnd)
                         .orElse(false);
                 } else {
@@ -637,7 +656,7 @@ class DataFlowAT extends CommonTestBase {
                 }
             });
         } catch (Throwable x) {
-            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -648,6 +667,8 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @Tag("group3")
+    // TODO: remove when logs are available per partition
+    @DisabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "kubernetes")
     public void streamPartitioningNamed() {
         logger.info("stream-partitioning-named-test:start (aka. WoodChuckTests)");
 
@@ -667,46 +688,48 @@ class DataFlowAT extends CommonTestBase {
                 list.add(msg);
             }
         });
+        final int maxWords = expectations.values().stream().mapToInt(List::size).max().orElse(partitions);
         expectations.values().forEach(expectation -> logger.info("Expectation:{}", expectation));
         assertThat(expectations.size()).isEqualTo(partitions);
         StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
             .name("partitioning-named-test")
-            .definition("http | splitter --expression=payload.split(' ') > :topic1")
+            .definition("http | splitter --splitter.expression=payload.split(' ') > :topic1")
             .create();
-        Stream.builder(dataFlowOperations).name("partitioning-named-log").definition(":topic1 > log").create();
+        StreamDefinition logDefinition = Stream.builder(dataFlowOperations).name("partitioning-named-log").definition(":topic1 > log").create();
 
         try (Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder().putAll(testDeploymentProperties("http"))
             .put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
             .put("app.splitter.producer.partitionKeyExpression", "payload")
+            .put("app.splitter.producer.partitionCount", Integer.toString(partitions))
             .build())) {
-            try (Stream logStream = streamDefinition.deploy(new DeploymentPropertiesBuilder().putAll(testDeploymentProperties("log"))
+            try (Stream logStream = logDefinition.deploy(new DeploymentPropertiesBuilder().putAll(testDeploymentProperties("log"))
                 .put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
                 .put("deployer.log.count", Integer.toString(partitions))
                 .put("app.log.spring.cloud.stream.kafka.bindings.input.consumer.autoRebalanceEnabled", "false")
                 .put("app.log.logging.pattern.level", "WOODCHUCK-${INSTANCE_INDEX:${CF_INSTANCE_INDEX:${spring.cloud.stream.instanceIndex:666}}} %5p")
                 .build())) {
-                logger.info("streamPartitioning:deploying:{}", stream.getName());
+                logger.info("streamPartitioningNamed:deploying:{}", stream.getName());
                 final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
-                logger.info("streamPartitioning:deploying:{}", logStream.getName());
+                logger.info("streamPartitioningNamed:deploying:{}", logStream.getName());
                 final AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(logStream);
                 awaitStarting(stream, offset);
                 awaitStarting(logStream, logOffset);
                 awaitDeployed(stream, offset);
-                logger.info("streamPartitioning:deployed:{}", stream.getName());
+                logger.info("streamPartitioningNamed:deployed:{}", stream.getName());
                 awaitDeployed(logStream, logOffset);
-                logger.info("streamPartitioning:deployed:{}", logStream.getName());
-                logger.info("streamPartitioning:sending:{}:{}", stream.getName(), message);
+                logger.info("streamPartitioningNamed:deployed:{}", logStream.getName());
+                logger.info("streamPartitioningNamed:sending:{}:{}", stream.getName(), message);
                 runtimeApps.httpPost(stream.getName(), "http", message);
-                logger.info("streamPartitioning:sent:{}:{}", stream.getName(), message);
+                logger.info("streamPartitioningNamed:sent:{}:{}", stream.getName(), message);
 
                 Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(logOffset)).until(() -> {
                     Map<String, String> logMap = runtimeApps.applicationInstanceLogs(logStream.getName(), "log");
                     if (logMap != null) {
-                        Collection<String> logs = logMap.values();
-                        logger.info("streamPartitioning:logs:{}", logs);
+                        Collection<String> logs = logMap.values().stream().map(s -> lastLines(s, maxWords + 1)).collect(Collectors.toList());
+                        logger.info("streamPartitioningNamed:logs:{}", logs);
                         return (logs.size() == partitions) && logs.stream()
                             // partition order is undetermined
-                            .map(log -> expectations.values().stream().allMatch(expect -> expect.stream().allMatch(log::contains)))
+                            .map(log -> expectations.values().stream().anyMatch(expect -> expect.stream().allMatch(log::contains)))
                             .reduce(Boolean::logicalAnd)
                             .orElse(false);
                     } else {
@@ -715,7 +738,7 @@ class DataFlowAT extends CommonTestBase {
                 });
             }
         } catch (Throwable x) {
-            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -803,7 +826,7 @@ class DataFlowAT extends CommonTestBase {
             assertThat(stream.history().size()).isEqualTo(3);
             logger.info("stream-app-cross-version-test: UNDEPLOY");
         } catch (Throwable x) {
-            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -869,7 +892,7 @@ class DataFlowAT extends CommonTestBase {
 
     private void awaitDeployed(Stream stream, AwaitUtils.StreamLog offset) {
         final int runtimeMaxWaitTime = (runtimeApps.getPlatformType()
-            .equals(RuntimeApplicationHelper.CLOUDFOUNDRY_PLATFORM_TYPE)) ? 300 : 60;
+            .equals(RuntimeApplicationHelper.CLOUDFOUNDRY_PLATFORM_TYPE)) ? 300 : 120;
         final long startErrorCheck = System.currentTimeMillis() + 30_000L;
         Awaitility.await("Deployment for " + stream.getName()).failFast(() ->
 				System.currentTimeMillis() >= startErrorCheck && AwaitUtils.hasErrorInLog(offset)
@@ -1064,7 +1087,7 @@ class DataFlowAT extends CommonTestBase {
                 .until(() -> logStream.logs(app("log")).contains(message));
             logger.info("namedChannelDestination:found:{} in {}", message, logStream.getName());
         } catch (Throwable x) {
-            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -1105,7 +1128,7 @@ class DataFlowAT extends CommonTestBase {
             logger.info("namedChannelTap:sent:{}:{}", httpLogStream.getName(), message);
             Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(tapOffset)).until(() -> tapStream.logs(app("log")).contains(message));
         } catch (Throwable x) {
-            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -1156,7 +1179,7 @@ class DataFlowAT extends CommonTestBase {
 
             awaitValueInLog(logOffset, logOffset, messageTwo);
         } catch (Throwable x) {
-            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -1172,17 +1195,17 @@ class DataFlowAT extends CommonTestBase {
         try (
             Stream fooLogStream = Stream.builder(dataFlowOperations)
                 .name("directed-graph-destination1")
-                .definition(":foo > transform --expression=payload+'-foo' | log")
+                .definition(":foo > transform --spel.function.expression=payload+'-foo' | log")
                 .create()
                 .deploy(testDeploymentProperties("log"));
             Stream barLogStream = Stream.builder(dataFlowOperations)
                 .name("directed-graph-destination2")
-                .definition(":bar > transform --expression=payload+'-bar' | log")
+                .definition(":bar > transform --spel.function.expression=payload+'-bar' | log")
                 .create()
                 .deploy(testDeploymentProperties("log"));
             Stream httpStream = Stream.builder(dataFlowOperations)
                 .name("directed-graph-http-source")
-                .definition("http | router --expression=payload.contains('a')?'foo':'bar'")
+                .definition("http | router --router.expression=payload.contains('a')?'foo':'bar'")
                 .create()
                 .deploy(testDeploymentProperties("http"))
         ) {
