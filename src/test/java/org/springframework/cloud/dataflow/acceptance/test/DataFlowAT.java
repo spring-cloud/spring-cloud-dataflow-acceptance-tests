@@ -1252,6 +1252,7 @@ class DataFlowAT extends CommonTestBase {
     @Test
     @Tag("group5")
     @Tag("smoke")
+    @DisabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
     public void dataflowTaskLauncherSink() throws JsonProcessingException {
         logger.info("dataflow-task-launcher-sink:start");
         if (this.runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.LOCAL_PLATFORM_TYPE)) {
