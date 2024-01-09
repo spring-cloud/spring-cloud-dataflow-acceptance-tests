@@ -160,6 +160,14 @@ jobs:
           echo "Starting  Acceptance Tests"
           ./scripts/at-test-script.sh
           echo "Completed Acceptance Tests"
+      - name: Integration Test Reports
+        uses: dorny/test-reporter@v1
+        if: ${{ success() || failure() }}
+        with:
+          name: "Integration Tests - ${{ inputs.binder }}-${{ inputs.cf_index }}-${{ github.run_number }}-${{ github.run_attempt }}"
+          path: '**/failsafe-reports/*AT.xml'
+          reporter: java-junit
+          list-tests: failed
       - name: Upload Test Output
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
