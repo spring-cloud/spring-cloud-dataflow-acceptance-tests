@@ -8,6 +8,8 @@
     <logger name="com.github.dockerjava" level="ERROR"/>
     <logger name="org.springframework" level="INFO"/>
     <logger name="org.springframework.cloud.dataflow.acceptance" level="DEBUG"/>
+    <logger name="org.springframework.cloud.dataflow.rest.client" level="DEBUG"/>
+<!--    org.springframework.cloud.dataflow.rest.client-->
     <logger name="org.junit" level="WARN"/>
 <!--  Uncomment to log http client  <logger name="org.apache.http.impl" level="DEBUG"/>-->
 </configuration>
