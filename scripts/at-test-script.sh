@@ -25,7 +25,7 @@ set -o pipefail
 ./mvnw -U -B -Dspring.profiles.active=blah "$MAVEN_GRP" "$MAVEN_ARG" -DPLATFORM_TYPE=cloudfoundry \
   -DSKIP_CLOUD_CONFIG=true -Dtest.docker.compose.disable.extension=true -Dspring.cloud.dataflow.client.serverUri=$SERVER_URI \
   -Dspring.cloud.dataflow.client.skipSslValidation=$SKIP_SSL_VALIDATION -Dtest.platform.connection.platformName=default \
-  -Dtest.platform.connection.applicationOverHttps=$HTTPS_ENABLED  \
+  -Dtest.platform.connection.applicationOverHttps=$HTTPS_ENABLED \
   $MAVEN_PROPERTIES clean verify | tee test-output.log
 RC=$?
 echo "RC=$RC"
