@@ -1240,7 +1240,7 @@ class DataFlowAT extends CommonTestBase {
             awaitValueInLog(fooLogOffset, fooLogOffset, "abcd-foo");
             awaitValueInLog(barLogOffset, barLogOffset, "defg-bar");
         } catch (Throwable x) {
-            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
@@ -1323,7 +1323,7 @@ class DataFlowAT extends CommonTestBase {
                     assertThat(taskExecutionResource.get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
                 }
             } catch (Throwable x) {
-                if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+                if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                     throw x;
                 } else {
                     logger.warn("Older version may fail with " + x);
@@ -1407,7 +1407,7 @@ class DataFlowAT extends CommonTestBase {
             JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[1][7]").isIn(messageLengths);
             JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[2][7]").isIn(messageLengths);
         } catch (Throwable x) {
-            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
