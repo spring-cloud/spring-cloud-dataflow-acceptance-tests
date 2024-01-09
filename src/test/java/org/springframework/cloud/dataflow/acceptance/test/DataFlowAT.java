@@ -128,7 +128,7 @@ class DataFlowAT extends CommonTestBase {
     public void before() {
         logger.debug("before:start");
         logger.info("[platform = {}, type = {}]", runtimeApps.getPlatformName(), runtimeApps.getPlatformType());
-        Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
+        Awaitility.setDefaultPollInterval(Duration.ofSeconds(15));
         Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
         registerTimestampTasks();
         resetTimestampVersion();
