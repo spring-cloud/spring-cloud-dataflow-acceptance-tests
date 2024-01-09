@@ -523,8 +523,9 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @Tag("group6")
+    @Tag("smoke")
     public void streamTransform() {
-        logger.info("stream-transform-test:start");
+        logger.info("stream-transform:start");
         try (Stream stream = Stream.builder(dataFlowOperations)
             .name("transform-test")
             .definition("http | transform --spel.function.expression=payload.toUpperCase() | log")
@@ -556,7 +557,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("smoke")
     public void streamScriptEncoding() {
         final String dsl = "http | script --script-processor.language=groovy --script-processor.script=payload+'嗨你好世界' | log";
-        logger.info("stream-script-test:start");
+        logger.info("stream-script-encoding:start");
         try (Stream stream = Stream.builder(dataFlowOperations).name("script-test").definition(dsl).create().deploy(testDeploymentProperties("http"))) {
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             logger.info("stream-script-test:deploying:{}", stream.getName());
