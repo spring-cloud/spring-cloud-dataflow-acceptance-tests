@@ -568,7 +568,8 @@ class DataFlowAT extends CommonTestBase {
             runtimeApps.httpPost(stream.getName(), "http", message);
             logger.info("stream-script-test:sent:{}:{}", stream.getName(), message);
             final AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(stream, "log");
-            awaitValueInLog(offset, logOffset, message + "嗨你好世界");
+            awaitValueInLog(offset, logOffset, message);
+            AwaitUtils.hasInLog(logOffset, message + "嗨你好世界");
         } catch (Throwable x) {
             if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
