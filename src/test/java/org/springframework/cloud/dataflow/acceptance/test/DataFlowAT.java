@@ -1464,7 +1464,7 @@ class DataFlowAT extends CommonTestBase {
                 .getConnection()
                 .getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total")).isEqualTo(resourceToString("classpath:/my_http_analytics_total.json"));
         } catch (Throwable x) {
-            if (x.toString().contains("Cannot find url for") && !runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
+            if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
             } else {
                 logger.warn("Older version may fail with " + x);
