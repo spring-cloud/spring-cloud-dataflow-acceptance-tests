@@ -526,7 +526,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("smoke")
     public void streamTransform() {
         logger.info("stream-transform:start");
-        Map<String, String> deploymentProperties = Collections.singletonMap("app.*.logging.level.root", "DEBUG");
+        Map<String, String> deploymentProperties = Collections.singletonMap("app.*.logging.level.root", logger.isDebugEnabled() ? "DEBUG" : "INFO");
         try (Stream stream = Stream.builder(dataFlowOperations)
             .name("transform-test")
             .definition("http | transform --spel.function.expression=payload.toUpperCase() | log")
