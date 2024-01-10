@@ -526,11 +526,12 @@ class DataFlowAT extends CommonTestBase {
     @Tag("smoke")
     public void streamTransform() {
         logger.info("stream-transform:start");
+        Map<String, String> deploymentProperties = Collections.singletonMap("app.*.logging.level.root", "DEBUG");
         try (Stream stream = Stream.builder(dataFlowOperations)
             .name("transform-test")
             .definition("http | transform --spel.function.expression=payload.toUpperCase() | log")
             .create()
-            .deploy(testDeploymentProperties("http"))) {
+            .deploy(testDeploymentProperties(deploymentProperties, "http"))) {
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             logger.info("stream-transform-test:deploying:{}", stream.getName());
             awaitStarting(stream, offset);
@@ -584,14 +585,14 @@ class DataFlowAT extends CommonTestBase {
     private static String lastLines(String log, int lines) {
         int startIndex = -1;
         String logPortion = log;
-        for(int i = 0; i < lines; i++) {
+        for (int i = 0; i < lines; i++) {
             int index = logPortion.lastIndexOf('\n');
-            if(index > 0) {
+            if (index > 0) {
                 startIndex = index;
                 logPortion = logPortion.substring(0, index);
             }
         }
-        if(startIndex > 0) {
+        if (startIndex > 0) {
             return log.substring(startIndex);
         }
         return log;
@@ -897,18 +898,18 @@ class DataFlowAT extends CommonTestBase {
             .equals(RuntimeApplicationHelper.CLOUDFOUNDRY_PLATFORM_TYPE)) ? 300 : 120;
         final long startErrorCheck = System.currentTimeMillis() + 30_000L;
         Awaitility.await("Deployment for " + stream.getName()).failFast(() ->
-				System.currentTimeMillis() >= startErrorCheck && AwaitUtils.hasErrorInLog(offset)
-        ).atMost(Duration.ofSeconds(runtimeMaxWaitTime))
+                System.currentTimeMillis() >= startErrorCheck && AwaitUtils.hasErrorInLog(offset)
+            ).atMost(Duration.ofSeconds(runtimeMaxWaitTime))
             .until(() -> {
-            try {
-                return stream.getStatus().equals(DEPLOYED);
-            } catch (Throwable x) {
-                if (System.currentTimeMillis() > startErrorCheck) {
-                    throw x;
+                try {
+                    return stream.getStatus().equals(DEPLOYED);
+                } catch (Throwable x) {
+                    if (System.currentTimeMillis() > startErrorCheck) {
+                        throw x;
+                    }
+                    return false;
                 }
-                return false;
-            }
-        });
+            });
     }
 
 
@@ -1509,6 +1510,31 @@ class DataFlowAT extends CommonTestBase {
         return propertiesBuilder.build();
     }
 
+    protected Map<String, String> testDeploymentProperties(Map<String, String> deploymentProperties, String... externallyAccessibleApps) {
+        DeploymentPropertiesBuilder propertiesBuilder = new DeploymentPropertiesBuilder().put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME,
+                runtimeApps.getPlatformName())
+            .put("app.*.logging.file", "/tmp/${PID}-test.log") // Keep it for Boot 2.x compatibility.
+            .put("app.*.logging.file.name", "/tmp/${PID}-test.log")
+            .put("app.*.endpoints.logfile.sensitive", "false")
+            .put("app.*.endpoints.logfile.enabled", "true")
+            .put("app.*.management.endpoints.web.exposure.include", "*")
+            .put("app.*.spring.cloud.streamapp.security.enabled", "false");
+
+
+        if (this.runtimeApps.getPlatformType().equalsIgnoreCase(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
+            propertiesBuilder.put("app.*.server.port", "8080");
+            for (String appName : externallyAccessibleApps) {
+                propertiesBuilder.put("deployer." + appName + ".kubernetes.createLoadBalancer", "true"); // requires
+                // LoadBalancer
+                // support
+                // on the
+                // platform
+            }
+        }
+        propertiesBuilder.putAll(deploymentProperties);
+        return propertiesBuilder.build();
+    }
+
     public static String resourceToString(String resourcePath) throws IOException {
         return StreamUtils.copyToString(new DefaultResourceLoader().getResource(resourcePath).getInputStream(), StandardCharsets.UTF_8);
     }
@@ -1854,8 +1880,8 @@ class DataFlowAT extends CommonTestBase {
                 LaunchResponseResource launch = task.launch(composedTaskLaunchArguments());
 
                 Awaitility.await()
-                        .atMost(Duration.ofMinutes(20))
-                        .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+                    .atMost(Duration.ofMinutes(20))
+                    .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
                 // Parent Task Successfully completed
                 assertThat(task.executions().size()).isEqualTo(1);
