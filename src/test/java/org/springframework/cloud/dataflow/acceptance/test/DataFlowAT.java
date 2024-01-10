@@ -902,7 +902,15 @@ class DataFlowAT extends CommonTestBase {
             ).atMost(Duration.ofSeconds(runtimeMaxWaitTime))
             .until(() -> {
                 try {
-                    return stream.getStatus().equals(DEPLOYED);
+                    if(!stream.getStatus().equals(DEPLOYED)) {
+                        return false;
+                    }
+                    Collection<Map<String, String>> values = stream.runtimeApps().values();
+                    logger.debug("awaitDeployed:deployed:{}={}", stream.getName(), values);
+                    return values.stream()
+                            .allMatch(instanceState -> instanceState.values()
+                                .stream().allMatch(state -> state.equals(DEPLOYED))
+                            );
                 } catch (Throwable x) {
                     if (System.currentTimeMillis() > startErrorCheck) {
                         throw x;
