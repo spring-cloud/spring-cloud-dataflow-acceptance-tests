@@ -521,6 +521,7 @@ class DataFlowAT extends CommonTestBase {
         logger.info("stream-redeploy-test:end");
     }
 
+    @Disabled("Temporary disabling due to HTTP 403 issues")
     @Test
     @Tag("group6")
     @Tag("smoke")
@@ -553,6 +554,7 @@ class DataFlowAT extends CommonTestBase {
         logger.info("stream-transform-test:done");
     }
 
+    @Disabled("Temporary disabling due to HTTP 403 issues")
     @Test
     @Tag("group6")
     @Tag("smoke")
