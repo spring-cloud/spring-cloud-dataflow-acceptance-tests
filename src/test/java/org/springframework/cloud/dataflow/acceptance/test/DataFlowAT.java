@@ -520,8 +520,7 @@ class DataFlowAT extends CommonTestBase {
         }
         logger.info("stream-redeploy-test:end");
     }
-
-    @Disabled("Temporary disabling due to HTTP 403 issues")
+    @DisabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry", disabledReason = "Temporary disabling due to HTTP 403 issues")
     @Test
     @Tag("group6")
     @Tag("smoke")
