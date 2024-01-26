@@ -904,7 +904,9 @@ class DataFlowAT extends CommonTestBase {
             ).atMost(Duration.ofSeconds(runtimeMaxWaitTime))
             .until(() -> {
                 try {
-                    if(!stream.getStatus().equals(DEPLOYED)) {
+                    String streamStatus = stream.getStatus();
+                    logger.debug("awaitDeployed:status:{}={}", stream.getName(), streamStatus);
+                    if(!streamStatus.equals(DEPLOYED)) {
                         return false;
                     }
                     Collection<Map<String, String>> values = stream.runtimeApps().values();
