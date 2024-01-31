@@ -908,7 +908,7 @@ class DataFlowAT extends CommonTestBase {
                 System.currentTimeMillis() >= startErrorCheck && AwaitUtils.hasErrorInLog(offset)
             ).atMost(Duration.ofSeconds(runtimeMaxWaitTime))
             .conditionEvaluationListener(condition -> {
-                if (condition.getRemainingTimeInMS() <= 0L) {
+                if (condition.getRemainingTimeInMS() <= condition.getPollInterval().toMillis()) {
                     logger.warn("awaitDeployed:failing:{}", offset.logs());
                 }
             })
