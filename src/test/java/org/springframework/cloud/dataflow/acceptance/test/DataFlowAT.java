@@ -883,7 +883,13 @@ class DataFlowAT extends CommonTestBase {
         final long startErrorCheck = System.currentTimeMillis() + 30_000L;
         Awaitility.await("Deployment starting for " + stream.getName()).failFast(() ->
             System.currentTimeMillis() > startErrorCheck && AwaitUtils.hasErrorInLog(offset)
-        ).until(() -> {
+            )
+            .conditionEvaluationListener(condition -> {
+                if (condition.getRemainingTimeInMS() <= 0L) {
+                    logger.warn("awaitStarting:failing:{}", offset.logs());
+                }
+            })
+            .until(() -> {
             logger.debug("awaitStarting:{}:{}", stream.getName(), stream.getStatus());
             try {
                 return starting.contains(stream.getStatus());
@@ -897,19 +903,24 @@ class DataFlowAT extends CommonTestBase {
     private void awaitDeployed(Stream stream, AwaitUtils.StreamLog offset) {
         final int runtimeMaxWaitTime = (runtimeApps.getPlatformType()
             .equals(RuntimeApplicationHelper.CLOUDFOUNDRY_PLATFORM_TYPE)) ? 300 : 120;
-        final long startErrorCheck = System.currentTimeMillis() + 30_000L;
+        final long startErrorCheck = System.currentTimeMillis() + 15_000L;
         Awaitility.await("Deployment for " + stream.getName()).failFast(() ->
                 System.currentTimeMillis() >= startErrorCheck && AwaitUtils.hasErrorInLog(offset)
             ).atMost(Duration.ofSeconds(runtimeMaxWaitTime))
+            .conditionEvaluationListener(condition -> {
+                if (condition.getRemainingTimeInMS() <= 0L) {
+                    logger.warn("awaitDeployed:failing:{}", offset.logs());
+                }
+            })
             .until(() -> {
                 try {
                     String streamStatus = stream.getStatus();
                     logger.debug("awaitDeployed:status:{}={}", stream.getName(), streamStatus);
+                    Collection<Map<String, String>> values = stream.runtimeApps().values();
+                    logger.debug("awaitDeployed:deployed:{}={}", stream.getName(), values);
                     if(!streamStatus.equals(DEPLOYED)) {
                         return false;
                     }
-                    Collection<Map<String, String>> values = stream.runtimeApps().values();
-                    logger.debug("awaitDeployed:deployed:{}={}", stream.getName(), values);
                     return values.stream()
                             .allMatch(instanceState -> instanceState.values()
                                 .stream().allMatch(state -> state.equals(DEPLOYED))
