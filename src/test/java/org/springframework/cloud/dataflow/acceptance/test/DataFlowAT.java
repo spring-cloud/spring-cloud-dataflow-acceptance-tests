@@ -40,7 +40,12 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
 import org.awaitility.Awaitility;
@@ -878,7 +883,29 @@ class DataFlowAT extends CommonTestBase {
             Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(streamOffset)).until(() -> AwaitUtils.hasInLog(logOffset, value));
         }
     }
-
+    @SuppressWarnings("unchecked")
+    private void sendLogsToLogger(String prefix, String logs) {
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> logValues = null;
+        try {
+            logValues = mapper.readValue(logs, new TypeReference<Map<String, Object>>() {});
+        } catch (JsonProcessingException e) {
+            logger.warn(prefix + ":exception reading logs:" + logs + ":" + e, e);
+            return;
+        }
+        if(logValues == null || logValues.isEmpty()) {
+            logger.warn("{}:no logs from:{}", prefix, logs);
+        } else {
+            Map<String, Object> logMap = (Map<String, Object>) logValues.get("logs");
+            if (logMap == null || logMap.isEmpty()) {
+                logger.warn("{}:cannot find logs in:{}", prefix, logs);
+            } else {
+                for (Map.Entry<String, Object> entry : logMap.entrySet()) {
+                    logger.info("{}:log for {}={}", prefix, entry.getKey(), entry.getValue());
+                }
+            }
+        }
+    }
     private void awaitStarting(Stream stream, AwaitUtils.StreamLog offset) {
         final long startErrorCheck = System.currentTimeMillis() + 30_000L;
         Awaitility.await("Deployment starting for " + stream.getName()).failFast(() ->
@@ -886,7 +913,7 @@ class DataFlowAT extends CommonTestBase {
             )
             .conditionEvaluationListener(condition -> {
                 if (condition.getRemainingTimeInMS() <= 0L) {
-                    logger.warn("awaitStarting:failing:{}", offset.logs());
+                    sendLogsToLogger("awaitStarting:failing", offset.logs());
                 }
             })
             .until(() -> {
@@ -909,7 +936,7 @@ class DataFlowAT extends CommonTestBase {
             ).atMost(Duration.ofSeconds(runtimeMaxWaitTime))
             .conditionEvaluationListener(condition -> {
                 if (condition.getRemainingTimeInMS() <= condition.getPollInterval().toMillis()) {
-                    logger.warn("awaitDeployed:failing:{}", offset.logs());
+                    sendLogsToLogger("awaitDeployed:failing", offset.logs());
                 }
             })
             .until(() -> {
