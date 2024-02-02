@@ -875,9 +875,22 @@ class DataFlowAT extends CommonTestBase {
 
     private void awaitValueInLog(AwaitUtils.StreamLog streamOffset, AwaitUtils.StreamLog logOffset, final String value) {
         if (streamOffset == logOffset) {
-            Awaitility.await().until(() -> AwaitUtils.hasInLog(logOffset, value));
+            Awaitility.await()
+                .conditionEvaluationListener(condition -> {
+                    if (condition.getRemainingTimeInMS() <= condition.getPollInterval().toMillis()) {
+                        sendLogsToLogger("awaitValueInLog:" + value + ":failing", logOffset.logs());
+                    }
+                })
+                .until(() -> AwaitUtils.hasInLog(logOffset, value));
         } else {
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(streamOffset)).until(() -> AwaitUtils.hasInLog(logOffset, value));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(streamOffset))
+                .conditionEvaluationListener(condition -> {
+                    if (condition.getRemainingTimeInMS() <= condition.getPollInterval().toMillis()) {
+                        sendLogsToLogger("awaitStarting:" + value + ":failing", logOffset.logs());
+                    }
+                })
+                .until(() -> AwaitUtils.hasInLog(logOffset, value));
         }
     }
     @SuppressWarnings("unchecked")
@@ -909,7 +922,7 @@ class DataFlowAT extends CommonTestBase {
             System.currentTimeMillis() > startErrorCheck && AwaitUtils.hasErrorInLog(offset)
             )
             .conditionEvaluationListener(condition -> {
-                if (condition.getRemainingTimeInMS() <= 0L) {
+                if (condition.getRemainingTimeInMS() <= condition.getPollInterval().toMillis()) {
                     sendLogsToLogger("awaitStarting:failing", offset.logs());
                 }
             })
