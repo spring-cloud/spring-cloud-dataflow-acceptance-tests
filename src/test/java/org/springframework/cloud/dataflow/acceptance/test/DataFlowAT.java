@@ -898,6 +898,7 @@ class DataFlowAT extends CommonTestBase {
         ObjectMapper mapper = new ObjectMapper();
         if(!logs.startsWith("{")) {
             logger.info("{}:log:{}", prefix, logs);
+            logger.info("{}:log:end", prefix);
         } else {
             Map<String, Object> logValues = null;
             try {
@@ -916,6 +917,7 @@ class DataFlowAT extends CommonTestBase {
                 } else {
                     for (Map.Entry<String, Object> entry : logMap.entrySet()) {
                         logger.info("{}:log for {}={}", prefix, entry.getKey(), entry.getValue());
+                        logger.info("{}:log:end", prefix);
                     }
                 }
             }
