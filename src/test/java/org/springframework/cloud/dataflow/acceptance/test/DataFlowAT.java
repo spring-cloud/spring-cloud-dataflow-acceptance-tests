@@ -896,22 +896,27 @@ class DataFlowAT extends CommonTestBase {
     @SuppressWarnings("unchecked")
     private void sendLogsToLogger(String prefix, String logs) {
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> logValues = null;
-        try {
-            logValues = mapper.readValue(logs, new TypeReference<Map<String, Object>>() {});
-        } catch (JsonProcessingException e) {
-            logger.warn(prefix + ":exception reading logs:" + logs + ":" + e, e);
-            return;
-        }
-        if(logValues == null || logValues.isEmpty()) {
-            logger.warn("{}:no logs from:{}", prefix, logs);
+        if(!logs.startsWith("{")) {
+            logger.info("{}:log:{}", prefix, logs);
         } else {
-            Map<String, Object> logMap = (Map<String, Object>) logValues.get("logs");
-            if (logMap == null || logMap.isEmpty()) {
-                logger.warn("{}:cannot find logs in:{}", prefix, logs);
+            Map<String, Object> logValues = null;
+            try {
+                logValues = mapper.readValue(logs, new TypeReference<Map<String, Object>>() {
+                });
+            } catch (JsonProcessingException e) {
+                logger.warn(prefix + ":exception reading logs:" + logs + ":" + e, e);
+                return;
+            }
+            if (logValues == null || logValues.isEmpty()) {
+                logger.warn("{}:no logs from:{}", prefix, logs);
             } else {
-                for (Map.Entry<String, Object> entry : logMap.entrySet()) {
-                    logger.info("{}:log for {}={}", prefix, entry.getKey(), entry.getValue());
+                Map<String, Object> logMap = (Map<String, Object>) logValues.get("logs");
+                if (logMap == null || logMap.isEmpty()) {
+                    logger.warn("{}:cannot find logs in:{}", prefix, logs);
+                } else {
+                    for (Map.Entry<String, Object> entry : logMap.entrySet()) {
+                        logger.info("{}:log for {}={}", prefix, entry.getKey(), entry.getValue());
+                    }
                 }
             }
         }
