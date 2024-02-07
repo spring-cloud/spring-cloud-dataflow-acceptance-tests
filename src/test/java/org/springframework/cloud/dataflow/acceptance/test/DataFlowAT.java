@@ -539,11 +539,14 @@ class DataFlowAT extends CommonTestBase {
             awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
             logger.info("stream-transform-test:deployed:{}", stream.getName());
-            String message = "Unique Test message: " + new Random().nextInt();
 
+            String prefix = "Unique Test message: ";
+            String message = prefix + new Random().nextInt();
+            final AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(stream, "log");
             runtimeApps.httpPost(stream.getName(), "http", message);
             logger.info("stream-transform-test:sent:{}:{}", stream.getName(), message);
-            final AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(stream, "log");
+
+            awaitValueInLog(offset, logOffset, prefix.toUpperCase());
             awaitValueInLog(offset, logOffset, message.toUpperCase());
         } catch (Throwable x) {
             if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
