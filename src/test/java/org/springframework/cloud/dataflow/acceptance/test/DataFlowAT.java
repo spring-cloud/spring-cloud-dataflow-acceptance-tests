@@ -336,8 +336,7 @@ class DataFlowAT extends CommonTestBase {
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             awaitDeployed(stream, offset);
             logger.info("multipleStreamApps:waiting for acceptPayment:restaurant-test");
-            final AwaitUtils.StreamLog waitronLog = AwaitUtils.logOffset(stream, "waitron");
-            awaitValueInLog(offset, waitronLog, "acceptPayment");
+            awaitValueInLog(stream,  app("waitron"), "acceptPayment");
         } catch (AssertionError x) {
             throw x;
         } catch (Throwable x) {
@@ -478,8 +477,8 @@ class DataFlowAT extends CommonTestBase {
     // -----------------------------------------------------------------------
 
     /**
-     * Target Data FLow platform to use for the testing:
-     * https://dataflow.spring.io/docs/concepts/architecture/#platforms
+     * Target Data Flow platform to use for the testing:
+     * <a href="https://dataflow.spring.io/docs/concepts/architecture/#platforms">https://dataflow.spring.io/docs/concepts/architecture/#platforms</a>
      * <p>
      * By default the Local (e.g. platformName=default) Data Flow environment is used for
      * testing. If you have provisioned docker-compose file to add remote access ot CF or K8s
@@ -542,12 +541,12 @@ class DataFlowAT extends CommonTestBase {
 
             String prefix = "Unique Test message: ";
             String message = prefix + new Random().nextInt();
-            final AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(stream, "log");
+
             runtimeApps.httpPost(stream.getName(), "http", message);
             logger.info("stream-transform-test:sent:{}:{}", stream.getName(), message);
 
-            awaitValueInLog(offset, logOffset, prefix.toUpperCase());
-            awaitValueInLog(offset, logOffset, message.toUpperCase());
+            awaitValueInLog(stream, app("log"), prefix.toUpperCase());
+            awaitValueInLog(stream, app("log"), message.toUpperCase());
         } catch (Throwable x) {
             if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
@@ -576,7 +575,7 @@ class DataFlowAT extends CommonTestBase {
             runtimeApps.httpPost(stream.getName(), "http", message);
             logger.info("stream-script-test:sent:{}:{}", stream.getName(), message);
             final AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(stream, "log");
-            awaitValueInLog(offset, logOffset, message);
+            awaitValueInLog(stream, app("log"), message);
             AwaitUtils.hasInLog(logOffset, message + "嗨你好世界");
         } catch (Throwable x) {
             if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
@@ -796,11 +795,11 @@ class DataFlowAT extends CommonTestBase {
                 .map(m -> m.getSpec().getVersion())
                 .findFirst()
                 .orElse("none");
-            AwaitUtils.StreamLog verLogOffset = AwaitUtils.logOffset(stream, "ver-log");
+
             final String message1 = String.format("TEST MESSAGE 1-%s ", RANDOM_SUFFIX);
             runtimeApps.httpPost(stream.getName(), "http", message1);
 
-            awaitValueInLog(offset, verLogOffset, message1);
+            awaitValueInLog(stream, app("ver-log"), message1);
 
             assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_3_0_1);
             assertThat(stream.history().size()).isEqualTo(1L);
@@ -815,7 +814,7 @@ class DataFlowAT extends CommonTestBase {
             final String message2 = String.format("TEST MESSAGE 2-%s ", RANDOM_SUFFIX);
             runtimeApps.httpPost(stream.getName(), "http", message2);
 
-            awaitValueInLog(offset, verLogOffset, message2);
+            awaitValueInLog(stream, app("ver-log"), message2);
 
             assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_2_1_5);
             assertThat(stream.history().size()).isEqualTo(2);
@@ -829,7 +828,7 @@ class DataFlowAT extends CommonTestBase {
 
             final String message3 = String.format("TEST MESSAGE 3-%s ", RANDOM_SUFFIX);
             runtimeApps.httpPost(stream.getName(), "http", message3);
-            awaitValueInLog(offset, verLogOffset, message3);
+            awaitValueInLog(stream, app("ver-log"), message3);
 
             assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_3_0_1);
             assertThat(stream.history().size()).isEqualTo(3);
@@ -870,31 +869,22 @@ class DataFlowAT extends CommonTestBase {
             Map<StreamApplication, Map<String, String>> streamApps = stream.runtimeApps();
             assertThat(streamApps.size()).isEqualTo(2);
             for (Map<String, String> instanceMap : streamApps.values()) {
-                assertThat(instanceMap.size()).isEqualTo(numberOfInstancePerApp); // every apps should have 2 instances.
+                assertThat(instanceMap.size()).isEqualTo(numberOfInstancePerApp); // every app should have 2 instances.
             }
         });
         logger.info("stream-lifecycle-with-two-instances:end");
     }
 
-    private void awaitValueInLog(AwaitUtils.StreamLog streamOffset, AwaitUtils.StreamLog logOffset, final String value) {
-        if (streamOffset == logOffset) {
-            Awaitility.await()
-                .conditionEvaluationListener(condition -> {
-                    if (condition.getRemainingTimeInMS() <= condition.getPollInterval().toMillis()) {
-                        sendLogsToLogger("awaitValueInLog:" + value + ":failing", logOffset.logs());
-                    }
-                })
-                .until(() -> AwaitUtils.hasInLog(logOffset, value));
-        } else {
-            Awaitility.await()
-                .failFast(() -> AwaitUtils.hasErrorInLog(streamOffset))
-                .conditionEvaluationListener(condition -> {
-                    if (condition.getRemainingTimeInMS() <= condition.getPollInterval().toMillis()) {
-                        sendLogsToLogger("awaitStarting:" + value + ":failing", logOffset.logs());
-                    }
-                })
-                .until(() -> AwaitUtils.hasInLog(logOffset, value));
-        }
+    private void awaitValueInLog(Stream stream, final StreamApplication app, final String value) {
+        AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream, app.getName());
+        Awaitility.await()
+            .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+            .conditionEvaluationListener(condition -> {
+                if (condition.getRemainingTimeInMS() <= condition.getPollInterval().toMillis()) {
+                    sendLogsToLogger("awaitValueInLog:" + value + ":failing", stream.logs(app));
+                }
+            })
+            .until(() -> AwaitUtils.hasInLog(offset, value));
     }
     @SuppressWarnings("unchecked")
     private void sendLogsToLogger(String prefix, String logs) {
@@ -905,8 +895,7 @@ class DataFlowAT extends CommonTestBase {
         } else {
             Map<String, Object> logValues = null;
             try {
-                logValues = mapper.readValue(logs, new TypeReference<Map<String, Object>>() {
-                });
+                logValues = mapper.readValue(logs, new TypeReference<Map<String, Object>>() {});
             } catch (JsonProcessingException e) {
                 logger.warn(prefix + ":exception reading logs:" + logs + ":" + e, e);
                 return;
@@ -933,7 +922,7 @@ class DataFlowAT extends CommonTestBase {
             )
             .conditionEvaluationListener(condition -> {
                 if (condition.getRemainingTimeInMS() <= condition.getPollInterval().toMillis()) {
-                    sendLogsToLogger("awaitStarting:failing", offset.logs());
+                    sendLogsToLogger("awaitStarting:failing", AwaitUtils.logOffset(stream).logs());
                 }
             })
             .until(() -> {
@@ -954,7 +943,7 @@ class DataFlowAT extends CommonTestBase {
             ).atMost(Duration.ofMinutes(5))
             .conditionEvaluationListener(condition -> {
                 if (condition.getRemainingTimeInMS() <= condition.getPollInterval().toMillis()) {
-                    sendLogsToLogger("awaitDeployed:failing", offset.logs());
+                    sendLogsToLogger("awaitDeployed:failing", AwaitUtils.logOffset(stream).logs());
                 }
             })
             .until(() -> {
@@ -1242,12 +1231,12 @@ class DataFlowAT extends CommonTestBase {
             final String messageOne = "Unique Test message: " + new Random().nextInt();
             runtimeApps.httpPost(httpStreamOne.getName(), "http", messageOne);
 
-            awaitValueInLog(logOffset, logOffset, messageOne);
+            awaitValueInLog(logStream, app("log"), messageOne);
 
             final String messageTwo = "Unique Test message: " + new Random().nextInt();
             runtimeApps.httpPost(httpStreamTwo.getName(), "http", messageTwo);
 
-            awaitValueInLog(logOffset, logOffset, messageTwo);
+            awaitValueInLog(logStream, app("log"), messageTwo);
         } catch (Throwable x) {
             if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
@@ -1299,15 +1288,12 @@ class DataFlowAT extends CommonTestBase {
             awaitDeployed(httpStream, httpOffset);
             logger.info("namedChannelDirectedGraph:deployed:{}", httpStream.getName());
 
-            AwaitUtils.StreamLog fooLogOffset = AwaitUtils.logOffset(fooLogStream, "log");
-            AwaitUtils.StreamLog barLogOffset = AwaitUtils.logOffset(barLogStream, "log");
-
             runtimeApps.httpPost(httpStream.getName(), "http", "abcd");
             logger.info("namedChannelDirectedGraph:sent:abcd -> {}", httpStream.getName());
             runtimeApps.httpPost(httpStream.getName(), "http", "defg");
             logger.info("namedChannelDirectedGraph:sent:defg -> {}", httpStream.getName());
-            awaitValueInLog(fooLogOffset, fooLogOffset, "abcd-foo");
-            awaitValueInLog(barLogOffset, barLogOffset, "defg-bar");
+            awaitValueInLog(fooLogStream, app("log"), "abcd-foo");
+            awaitValueInLog(barLogStream, app("log"), "defg-bar");
         } catch (Throwable x) {
             if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
@@ -1441,7 +1427,7 @@ class DataFlowAT extends CommonTestBase {
             String message2 = "Test message 2 with extension"; // length 29
             String message3 = "Test message 2 with double extension"; // length 36
 
-            String httpAppUrl = runtimeApps.getApplicationInstanceUrl(stream.getName(), "http");
+
             runtimeApps.httpPost(stream.getName(), "http", message1);
             runtimeApps.httpPost(stream.getName(), "http", message2);
             runtimeApps.httpPost(stream.getName(), "http", message3);
@@ -1632,7 +1618,7 @@ class DataFlowAT extends CommonTestBase {
         // the dataflow-server-use-user-access-token=true argument is required COMPOSED tasks in
         // oauth2-protected SCDF installations and is ignored otherwise.
         List<String> commonTaskArguments = new ArrayList<>();
-        commonTaskArguments.addAll(Arrays.asList("--dataflow-server-use-user-access-token=true"));
+        commonTaskArguments.addAll(Collections.singletonList("--dataflow-server-use-user-access-token=true"));
         commonTaskArguments.addAll(Arrays.asList(additionalArguments));
         return commonTaskArguments;
     }
@@ -1677,7 +1663,7 @@ class DataFlowAT extends CommonTestBase {
             .build()) {
 
             // task launch id
-            LaunchResponseResource launch = task.launch(Arrays.asList("--spring.cloud.task.closecontext_enabled=false"));
+            LaunchResponseResource launch = task.launch(Collections.singletonList("--spring.cloud.task.closecontext_enabled=false"));
 
             Awaitility.await().until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             assertThat(task.executions().size()).isEqualTo(1);
@@ -2660,9 +2646,9 @@ class DataFlowAT extends CommonTestBase {
         // Verify that steps can be retrieved
         task.jobExecutionResources().stream().filter(jobExecution -> jobExecution.getName().equals(task.getTaskName())).forEach(jobExecutionResource -> {
             assertThat(jobExecutionResource.getStepExecutionCount()).isEqualTo(1);
-            task.jobStepExecutions(jobExecutionResource.getExecutionId(), jobExecutionResource.getSchemaTarget()).forEach(stepExecutionResource -> {
-                assertThat(stepExecutionResource.getStepExecution().getStepName()).isEqualTo(stepName);
-            });
+            task.jobStepExecutions(jobExecutionResource.getExecutionId(), jobExecutionResource.getSchemaTarget()).forEach(stepExecutionResource ->
+                assertThat(stepExecutionResource.getStepExecution().getStepName()).isEqualTo(stepName)
+            );
         });
     }
 
@@ -2693,12 +2679,12 @@ class DataFlowAT extends CommonTestBase {
             // 2.6.x
             // The Exception thrown by the 2.6.x servers can not be deserialized by the
             // VndErrorResponseErrorHandler in 2.8+ clients.
-            Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
+            Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () ->
                 assertThatThrownBy(() ->
                     dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0), launch.getSchemaTarget())
                 ).isInstanceOf(DataFlowClientException.class)
-                    .hasMessageContaining(" and state 'COMPLETED' is not restartable");
-            });
+                    .hasMessageContaining(" and state 'COMPLETED' is not restartable")
+            );
         }
     }
 
@@ -3068,8 +3054,7 @@ class DataFlowAT extends CommonTestBase {
         assertThat(task.executions()
             .stream()
             .filter(taskExecutionResource -> taskExecutionResource.getResourceUrl().contains(version))
-            .collect(Collectors.toList())
-            .size()).isEqualTo(countExpected);
+            .count()).isEqualTo(countExpected);
     }
 
     @Test
@@ -3469,7 +3454,7 @@ class DataFlowAT extends CommonTestBase {
                         .withFailMessage("verifyAllSpecifiedTaskExecutions expected no task execution for :" + launch)
                         .isNotPresent();
                 } catch (DataFlowClientException x) {
-
+                    logger.warn("verifyAllSpecifiedTaskExecutions:exception:" + x);
                 }
             }
         });
