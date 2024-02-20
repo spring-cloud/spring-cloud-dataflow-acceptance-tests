@@ -878,6 +878,7 @@ class DataFlowAT extends CommonTestBase {
     private void awaitValueInLog(Stream stream, final StreamApplication app, final String value) {
         AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream, app.getName());
         Awaitility.await()
+            .timeout(Duration.ofMinutes(2))
             .failFast(() -> AwaitUtils.hasErrorInLog(offset))
             .conditionEvaluationListener(condition -> {
                 if (condition.getRemainingTimeInMS() <= condition.getPollInterval().toMillis()) {
