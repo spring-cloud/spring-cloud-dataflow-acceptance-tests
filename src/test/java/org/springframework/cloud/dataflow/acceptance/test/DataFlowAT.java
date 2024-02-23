@@ -527,12 +527,11 @@ class DataFlowAT extends CommonTestBase {
     @Tag("smoke")
     public void streamTransform() {
         logger.info("stream-transform:start");
-        Map<String, String> deploymentProperties = Collections.singletonMap("app.*.logging.level.root", "INFO");
         try (Stream stream = Stream.builder(dataFlowOperations)
             .name("transform-test")
             .definition("http | transform --spel.function.expression=payload.toUpperCase() | log")
             .create()
-            .deploy(testDeploymentProperties(deploymentProperties, "http"))) {
+            .deploy(testDeploymentProperties("http"))) {
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             logger.info("stream-transform-test:deploying:{}", stream.getName());
             awaitStarting(stream, offset);
