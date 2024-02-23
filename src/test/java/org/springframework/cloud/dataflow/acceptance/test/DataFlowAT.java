@@ -542,6 +542,7 @@ class DataFlowAT extends CommonTestBase {
             String message = prefix + new Random().nextInt();
 
             runtimeApps.httpPost(stream.getName(), "http", message);
+            runtimeApps.httpPost(stream.getName(), "http", message);
             logger.info("stream-transform-test:sent:{}:{}", stream.getName(), message);
 
             awaitValueInLog(stream, app("log"), prefix.toUpperCase());
