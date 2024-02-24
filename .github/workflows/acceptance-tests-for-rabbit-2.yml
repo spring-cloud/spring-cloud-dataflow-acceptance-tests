@@ -1,4 +1,4 @@
-name: SCDF AT Kafka - env 1
+name: SCDF AT Rabbit - env 2
 
 on:
   workflow_dispatch:
@@ -42,12 +42,12 @@ on:
         required: false
 
 jobs:
-  kafka-1:
+  rabbit-0:
     uses: ./.github/workflows/at-common-workflow.yml
     with:
-      cf_host: citrusheights
-      cf_index: 1
-      binder: kafka
+      cf_host: axle-797629
+      cf_index: 2
+      binder: rabbit
       tests: ${{ inputs.tests }}
     secrets:
       CF_USERNAME: ${{secrets.CF_USERNAME}}
@@ -60,6 +60,3 @@ jobs:
       SQL_SYSTEM_PASSWORD: ${{secrets.SQL_PASSWORD}}
       SQL_HOST: ${{secrets.SQL_HOST}}
       SQL_PORT: ${{secrets.SQL_PORT}}
-      KAFKA_USERNAME: ${{secrets.KAFKA_USERNAME}}
-      KAFKA_PASSWORD: ${{secrets.KAFKA_PASSWORD}}
-      KAFKA_BROKER_ADDRESS: ${{secrets.KAFKA_BROKER_ADDRESS}}

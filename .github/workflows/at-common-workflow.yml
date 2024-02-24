@@ -10,6 +10,8 @@ on:
         required: true
       CF_ENV_1_PASSWORD:
         required: true
+      CF_ENV_2_PASSWORD:
+        required: true
       SQL_USERNAME:
         required: false
       SQL_PASSWORD:
