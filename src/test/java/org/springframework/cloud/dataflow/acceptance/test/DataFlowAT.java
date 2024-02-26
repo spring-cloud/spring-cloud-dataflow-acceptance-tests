@@ -541,7 +541,7 @@ class DataFlowAT extends CommonTestBase {
             String prefix = "Unique Test message: ";
             String message = prefix + new Random().nextInt();
 
-            runtimeApps.httpPost(stream.getName(), "http", message);
+            runtimeApps.httpPost(stream.getName(), "http", "test message");
             runtimeApps.httpPost(stream.getName(), "http", message);
             logger.info("stream-transform-test:sent:{}:{}", stream.getName(), message);
 
