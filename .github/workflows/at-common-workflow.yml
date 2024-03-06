@@ -206,6 +206,7 @@ jobs:
         if: ${{ success() }}
         env:
           # DEBUG: true
+          SCHEDULES_ENABLED: ${{ inputs.scheduler }}
           SCHEDULER: ${{ inputs.scheduler }}
           BINDER: ${{ inputs.binder }}
           MAVEN_REPOS: '{"repo1":"https://repo.spring.io/snapshot"}'
