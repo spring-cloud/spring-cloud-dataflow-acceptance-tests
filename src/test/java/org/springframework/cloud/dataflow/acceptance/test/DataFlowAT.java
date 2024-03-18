@@ -571,7 +571,7 @@ class DataFlowAT extends CommonTestBase {
             awaitDeployed(stream, offset);
             logger.info("stream-script-test:deployed:{}", stream.getName());
             String message = "Unique Test message: " + new Random().nextInt();
-
+            runtimeApps.httpPost(stream.getName(), "http", "test message");
             runtimeApps.httpPost(stream.getName(), "http", message);
             logger.info("stream-script-test:sent:{}:{}", stream.getName(), message);
             final AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(stream, "log");
@@ -629,6 +629,7 @@ class DataFlowAT extends CommonTestBase {
             awaitDeployed(stream, offset);
             logger.info("streamPartitioning:deployed:{}", stream.getName());
             String message = "How much wood would a woodchuck chuck if a woodchuck could chuck wood";
+            runtimeApps.httpPost(stream.getName(), "http", "test message");
             logger.info("streamPartitioning:sending:{}:{}", stream.getName(), message);
             runtimeApps.httpPost(stream.getName(), "http", message);
             logger.info("streamPartitioning:sent:{}:{}", stream.getName(), message);
@@ -727,6 +728,7 @@ class DataFlowAT extends CommonTestBase {
                 awaitDeployed(logStream, logOffset);
                 logger.info("streamPartitioningNamed:deployed:{}", logStream.getName());
                 logger.info("streamPartitioningNamed:sending:{}:{}", stream.getName(), message);
+                runtimeApps.httpPost(stream.getName(), "http", "test message");
                 runtimeApps.httpPost(stream.getName(), "http", message);
                 logger.info("streamPartitioningNamed:sent:{}:{}", stream.getName(), message);
 
@@ -795,7 +797,7 @@ class DataFlowAT extends CommonTestBase {
                 .map(m -> m.getSpec().getVersion())
                 .findFirst()
                 .orElse("none");
-
+            runtimeApps.httpPost(stream.getName(), "http", "test message");
             final String message1 = String.format("TEST MESSAGE 1-%s ", RANDOM_SUFFIX);
             runtimeApps.httpPost(stream.getName(), "http", message1);
 
@@ -810,7 +812,7 @@ class DataFlowAT extends CommonTestBase {
             stream.update(new DeploymentPropertiesBuilder().put("version.ver-log", VERSION_2_1_5).build());
             awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
-
+            runtimeApps.httpPost(stream.getName(), "http", "test message");
             final String message2 = String.format("TEST MESSAGE 2-%s ", RANDOM_SUFFIX);
             runtimeApps.httpPost(stream.getName(), "http", message2);
 
@@ -825,7 +827,7 @@ class DataFlowAT extends CommonTestBase {
             stream.rollback(0);
             awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
-
+            runtimeApps.httpPost(stream.getName(), "http", "test message");
             final String message3 = String.format("TEST MESSAGE 3-%s ", RANDOM_SUFFIX);
             runtimeApps.httpPost(stream.getName(), "http", message3);
             awaitValueInLog(stream, app("ver-log"), message3);
@@ -1137,6 +1139,7 @@ class DataFlowAT extends CommonTestBase {
             logger.info("namedChannelDestination:deployed:{}", logStream.getName());
             awaitDeployed(httpStream, httpOffset);
             logger.info("namedChannelDestination:deployed:{}", httpStream.getName());
+            runtimeApps.httpPost(httpStream.getName(), "http", "test message");
             String message = "Unique Test message: " + new Random().nextInt();
             logger.info("namedChannelDestination:sending:{} to {}", message, httpStream.getName());
             runtimeApps.httpPost(httpStream.getName(), "http", message);
@@ -1181,7 +1184,7 @@ class DataFlowAT extends CommonTestBase {
             logger.info("namedChannelTap:deployed:{}", httpLogStream.getName());
             awaitDeployed(tapStream, tapOffset);
             logger.info("namedChannelTap:deployed:{}", tapStream.getName());
-
+            runtimeApps.httpPost(httpLogStream.getName(), "http", "test message");
             String message = "Unique Test message: " + new Random().nextInt();
             logger.info("namedChannelTap:sending:{}:{}", httpLogStream.getName(), message);
             runtimeApps.httpPost(httpLogStream.getName(), "http", message);
@@ -1228,6 +1231,9 @@ class DataFlowAT extends CommonTestBase {
 
             awaitStarting(httpStreamTwo, httpOffsetTwo);
             awaitDeployed(httpStreamTwo, httpOffsetTwo);
+
+            runtimeApps.httpPost(httpStreamOne.getName(), "http", "test");
+            runtimeApps.httpPost(httpStreamTwo.getName(), "http", "test");
 
             final String messageOne = "Unique Test message: " + new Random().nextInt();
             runtimeApps.httpPost(httpStreamOne.getName(), "http", messageOne);
@@ -1288,7 +1294,7 @@ class DataFlowAT extends CommonTestBase {
             awaitStarting(httpStream, httpOffset);
             awaitDeployed(httpStream, httpOffset);
             logger.info("namedChannelDirectedGraph:deployed:{}", httpStream.getName());
-
+            runtimeApps.httpPost(httpStream.getName(), "http", "test");
             runtimeApps.httpPost(httpStream.getName(), "http", "abcd");
             logger.info("namedChannelDirectedGraph:sent:abcd -> {}", httpStream.getName());
             runtimeApps.httpPost(httpStream.getName(), "http", "defg");
@@ -1423,6 +1429,7 @@ class DataFlowAT extends CommonTestBase {
 
             awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
+            runtimeApps.httpPost(stream.getName(), "http", "test");
 
             String message1 = "Test message 1"; // length 14
             String message2 = "Test message 2 with extension"; // length 29
@@ -1502,6 +1509,7 @@ class DataFlowAT extends CommonTestBase {
 
             awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
+            runtimeApps.httpPost(stream.getName(), "http", "test");
 
             String message1 = "Test message 1"; // length 14
             String message2 = "Test message 2 with extension"; // length 29
