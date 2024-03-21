@@ -81,6 +81,7 @@ jobs:
           sparse-checkout: |
             scripts
             scdf_cf_setup
+            pom.xml
           sparse-checkout-cone-mode: false
           show-progress: false
       - name: 'Ensure scripts executable'
