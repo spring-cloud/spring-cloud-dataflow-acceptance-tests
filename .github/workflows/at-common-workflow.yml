@@ -77,7 +77,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: spring-cloud/spring-cloud-dataflow-acceptance-tests
-          ref: ${{ github.ref_name }}
+          ref: cbono-tas6-wip
           sparse-checkout: |
             scripts
             scdf_cf_setup
