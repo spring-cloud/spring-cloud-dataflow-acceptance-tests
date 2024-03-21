@@ -57,6 +57,7 @@ jobs:
       cf_index: 2
       binder: rabbit
       tests: ${{ inputs.tests }}
+      sql_provider: ''
     secrets:
       CF_USERNAME: ${{secrets.CF_USERNAME}}
       CF_ENV_0_PASSWORD: ${{secrets.CF_ENV_0_PASSWORD}}
