@@ -82,6 +82,7 @@ jobs:
             scripts
             scdf_cf_setup
             acceptance-tests
+            etc/checkstyle
             pom.xml
             .mvn
             mvnw
