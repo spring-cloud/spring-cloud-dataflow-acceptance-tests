@@ -78,15 +78,15 @@ jobs:
         with:
           repository: spring-cloud/spring-cloud-dataflow-acceptance-tests
           ref: cbono-tas6-wip
-          sparse-checkout: |
-            scripts
-            scdf_cf_setup
-            acceptance-tests
-            etc/checkstyle
-            pom.xml
-            .mvn
-            mvnw
-          sparse-checkout-cone-mode: false
+#          sparse-checkout: |
+#            scripts
+#            scdf_cf_setup
+#            acceptance-tests
+#            etc/checkstyle
+#            pom.xml
+#            .mvn
+#            mvnw
+#          sparse-checkout-cone-mode: false
           show-progress: false
       - name: 'Ensure scripts executable'
         shell: bash
