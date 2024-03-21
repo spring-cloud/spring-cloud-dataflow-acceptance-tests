@@ -74,7 +74,15 @@ jobs:
     concurrency: ${{ inputs.cf_host }}
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          repository: spring-cloud/spring-cloud-dataflow-acceptance-tests
+          ref: ${{ github.ref_name }}
+          sparse-checkout: |
+            scripts
+            scdf_cf_setup
+          sparse-checkout-cone-mode: false
+          show-progress: false
       - name: 'Ensure scripts executable'
         shell: bash
         run: chmod a+x ./scripts/*.sh
