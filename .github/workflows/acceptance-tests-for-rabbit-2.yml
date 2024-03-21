@@ -7,12 +7,20 @@ on:
         type: string
         default: ''
         description: 'Test classes'
+      cf-host:
+        type: string
+        description: 'CF host name (e.g. "bucharest")'
+        required: true
   workflow_call:
     inputs:
       tests:
         type: string
         default: ''
         description: 'Test classes'
+      cf-host:
+        type: string
+        description: 'CF host name (e.g. "bucharest")'
+        required: true
     secrets:
       CF_USERNAME:
         required: true
@@ -45,7 +53,7 @@ jobs:
   rabbit-2:
     uses: ./.github/workflows/at-common-workflow.yml
     with:
-      cf_host: axle-797629
+      cf_host: ${{ inputs.cf-host }}
       cf_index: 2
       binder: rabbit
       tests: ${{ inputs.tests }}
