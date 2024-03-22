@@ -32,8 +32,16 @@ on:
         required: false
 
     inputs:
+      binder:
+        required: true
+        type: string
+      cf_host:
+        required: true
+        type: string
+      cf_index:
+        required: true
+        type: string
       sql_provider:
-        default: postgresql
         required: false
         type: string
       sql_service_name:
@@ -46,22 +54,13 @@ on:
         required: false
         type: string
       scheduler:
-        default: true
         required: false
         type: boolean
+        default: true
       environment:
-        default: scdf_at
         required: false
         type: string
-      binder:
-        required: true
-        type: string
-      cf_host:
-        required: true
-        type: string
-      cf_index:
-        required: true
-        type: string
+        default: scdf_at
       tests:
         required: false
         type: string
@@ -73,20 +72,10 @@ jobs:
     runs-on: ubuntu-latest
     concurrency: ${{ inputs.cf_host }}
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
         with:
           repository: spring-cloud/spring-cloud-dataflow-acceptance-tests
           ref: cbono-tas6-wip
-#          sparse-checkout: |
-#            scripts
-#            scdf_cf_setup
-#            acceptance-tests
-#            etc/checkstyle
-#            pom.xml
-#            .mvn
-#            mvnw
-#          sparse-checkout-cone-mode: false
           show-progress: false
       - name: 'Ensure scripts executable'
         shell: bash
