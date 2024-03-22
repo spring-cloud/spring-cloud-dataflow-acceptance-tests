@@ -13,10 +13,6 @@ on:
         required: true
   workflow_call:
     inputs:
-      tests:
-        type: string
-        default: ''
-        description: 'Test classes'
       cf-host:
         type: string
         description: 'CF host name (e.g. "bucharest")'
