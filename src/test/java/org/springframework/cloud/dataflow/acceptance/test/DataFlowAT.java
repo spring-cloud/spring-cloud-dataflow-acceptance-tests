@@ -700,11 +700,12 @@ class DataFlowAT extends CommonTestBase {
         final int maxWords = expectations.values().stream().mapToInt(List::size).max().orElse(partitions);
         expectations.values().forEach(expectation -> logger.info("Expectation:{}", expectation));
         assertThat(expectations.size()).isEqualTo(partitions);
+        String topic = "topic1-" + UUID.randomUUID();
         StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
             .name("partitioning-named-test")
-            .definition("http | splitter --splitter.expression=payload.split(' ') > :topic1")
+            .definition("http | splitter --splitter.expression=payload.split(' ') > :" + topic)
             .create();
-        StreamDefinition logDefinition = Stream.builder(dataFlowOperations).name("partitioning-named-log").definition(":topic1 > log").create();
+        StreamDefinition logDefinition = Stream.builder(dataFlowOperations).name("partitioning-named-log").definition(":" + topic + " > log").create();
 
         try (Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder().putAll(testDeploymentProperties("http"))
             .put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
@@ -1118,15 +1119,16 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group6")
     public void namedChannelDestination() {
         logger.info("stream-named-channel-destination-test:start");
+        String namedChannel = "LOG-DESTINATION-" + UUID.randomUUID();
         try (Stream httpStream = Stream.builder(dataFlowOperations)
             .name("http-destination-source")
-            .definition("http > :LOG-DESTINATION")
+            .definition("http > :" + namedChannel)
             .create()
             .deploy(testDeploymentProperties("http"));
 
              Stream logStream = Stream.builder(dataFlowOperations)
                  .name("log-destination-sink")
-                 .definition(":LOG-DESTINATION > log")
+                 .definition(":" + namedChannel + " > log")
                  .create()
                  .deploy(testDeploymentProperties("log"))
         ) {
@@ -1163,15 +1165,16 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group2")
     public void namedChannelTap() {
         logger.info("named-channel-tap:start");
+        String namedChannel = "taphttp-" + UUID.randomUUID();
         try (Stream httpLogStream = Stream.builder(dataFlowOperations)
-            .name("taphttp")
+            .name(namedChannel)
             .definition("http | log")
             .create()
             .deploy(testDeploymentProperties("http"));
 
              Stream tapStream = Stream.builder(dataFlowOperations)
                  .name("tapstream")
-                 .definition(":taphttp.http > log")
+                 .definition(":" + namedChannel + ".http > log")
                  .create()
                  .deploy(testDeploymentProperties("log"))
         ) {
@@ -1204,19 +1207,20 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group1")
     public void namedChannelManyToOne() {
         logger.info("named-channel-many-to-one:start");
+        String namedChannel = "MANY-TO-ONE-DESTINATION-" + UUID.randomUUID();
         try (Stream logStream = Stream.builder(dataFlowOperations)
             .name("many-to-one")
-            .definition(":MANY-TO-ONE-DESTINATION > log")
+            .definition(":" + namedChannel + " > log")
             .create()
             .deploy(testDeploymentProperties("log"));
              Stream httpStreamOne = Stream.builder(dataFlowOperations)
                  .name("http-source-1")
-                 .definition("http > :MANY-TO-ONE-DESTINATION")
+                 .definition("http > :" + namedChannel)
                  .create()
                  .deploy(testDeploymentProperties("http"));
              Stream httpStreamTwo = Stream.builder(dataFlowOperations)
                  .name("http-source-2")
-                 .definition("http > :MANY-TO-ONE-DESTINATION")
+                 .definition("http > :" + namedChannel)
                  .create()
                  .deploy(testDeploymentProperties("http"))
         ) {
@@ -1257,20 +1261,23 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group4")
     public void namedChannelDirectedGraph() {
         logger.info("named-channel-directed-graph:start");
+        UUID uuid = UUID.randomUUID();
+        String foo = "foo-" + uuid;
+        String bar = "bar-" + uuid;
         try (
             Stream fooLogStream = Stream.builder(dataFlowOperations)
                 .name("directed-graph-destination1")
-                .definition(":foo > transform --spel.function.expression=payload+'-foo' | log")
+                .definition(":" + foo + " > transform --spel.function.expression=payload+'-foo' | log")
                 .create()
                 .deploy(testDeploymentProperties("log"));
             Stream barLogStream = Stream.builder(dataFlowOperations)
                 .name("directed-graph-destination2")
-                .definition(":bar > transform --spel.function.expression=payload+'-bar' | log")
+                .definition(":" + bar + " > transform --spel.function.expression=payload+'-bar' | log")
                 .create()
                 .deploy(testDeploymentProperties("log"));
             Stream httpStream = Stream.builder(dataFlowOperations)
                 .name("directed-graph-http-source")
-                .definition("http | router --router.expression=payload.contains('a')?'foo':'bar'")
+                .definition("http | router --router.expression=payload.contains('a')?'"+foo+"':'"+bar+"'")
                 .create()
                 .deploy(testDeploymentProperties("http"))
         ) {
