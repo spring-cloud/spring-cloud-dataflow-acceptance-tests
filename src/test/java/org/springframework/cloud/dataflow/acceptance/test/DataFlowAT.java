@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -297,7 +296,9 @@ class DataFlowAT extends CommonTestBase {
             logger.debug("Checking:restaurant-test:" + x);
         }
         logger.info("multipleStreamApps:define:restaurant-test");
-        StreamDefinition streamDefinition = Stream.builder(dataFlowOperations).name("restaurant-test").definition("kitchen || waitron || customer").create();
+        StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
+            .name("restaurant-test" + randomSuffix())
+            .definition("kitchen || waitron || customer").create();
         logger.info("multipleStreamApps:deploy:restaurant-test");
         Stream destroy = null;
         try {
@@ -505,7 +506,7 @@ class DataFlowAT extends CommonTestBase {
         logger.info("stream-redeploy-test:start");
         for (int i = 0; i < 2; i++) {
             try (Stream stream = Stream.builder(dataFlowOperations)
-                .name("redeploy-test")
+                .name("redeploy-test" + randomSuffix())
                 .definition("http | log")
                 .create()
                 .deploy(testDeploymentProperties("http", "log"))) {
@@ -528,7 +529,7 @@ class DataFlowAT extends CommonTestBase {
     public void streamTransform() {
         logger.info("stream-transform:start");
         try (Stream stream = Stream.builder(dataFlowOperations)
-            .name("transform-test")
+            .name("transform-test" + randomSuffix())
             .definition("http | transform --spel.function.expression=payload.toUpperCase() | log")
             .create()
             .deploy(testDeploymentProperties("http"))) {
@@ -564,7 +565,13 @@ class DataFlowAT extends CommonTestBase {
     public void streamScriptEncoding() {
         final String dsl = "http | script --script-processor.language=groovy --script-processor.script=payload+'嗨你好世界' | log";
         logger.info("stream-script-encoding:start");
-        try (Stream stream = Stream.builder(dataFlowOperations).name("script-test").definition(dsl).create().deploy(testDeploymentProperties("http"))) {
+
+        try (Stream stream = Stream.builder(dataFlowOperations)
+            .name("script-test" + randomSuffix())
+            .definition(dsl)
+            .create()
+            .deploy(testDeploymentProperties("http"))
+        ) {
             final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             logger.info("stream-script-test:deploying:{}", stream.getName());
             awaitStarting(stream, offset);
@@ -610,7 +617,7 @@ class DataFlowAT extends CommonTestBase {
     public void streamPartitioning() {
         logger.info("stream-partitioning-test:start (aka. WoodChuckTests)");
         StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
-            .name("partitioning-test")
+            .name("partitioning-test" + randomSuffix())
             .definition("http | splitter --splitter.expression=payload.split(' ') | log")
             .create();
         final int partitions = 3;
@@ -700,12 +707,15 @@ class DataFlowAT extends CommonTestBase {
         final int maxWords = expectations.values().stream().mapToInt(List::size).max().orElse(partitions);
         expectations.values().forEach(expectation -> logger.info("Expectation:{}", expectation));
         assertThat(expectations.size()).isEqualTo(partitions);
-        String topic = "topic1-" + UUID.randomUUID();
+        String topic = "topic1" + randomSuffix();
         StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
-            .name("partitioning-named-test")
+            .name("partitioning-named-test" + randomSuffix())
             .definition("http | splitter --splitter.expression=payload.split(' ') > :" + topic)
             .create();
-        StreamDefinition logDefinition = Stream.builder(dataFlowOperations).name("partitioning-named-log").definition(":" + topic + " > log").create();
+        StreamDefinition logDefinition = Stream.builder(dataFlowOperations)
+            .name("partitioning-named-log" + randomSuffix())
+            .definition(":" + topic + " > log")
+            .create();
 
         try (Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder().putAll(testDeploymentProperties("http"))
             .put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
@@ -897,7 +907,7 @@ class DataFlowAT extends CommonTestBase {
             logger.info("{}:log:{}", prefix, logs);
             logger.info("{}:log:end", prefix);
         } else {
-            Map<String, Object> logValues = null;
+            Map<String, Object> logValues;
             try {
                 logValues = mapper.readValue(logs, new TypeReference<Map<String, Object>>() {});
             } catch (JsonProcessingException e) {
@@ -1083,7 +1093,7 @@ class DataFlowAT extends CommonTestBase {
     public void streamScaling() {
         logger.info("stream-scaling-test:start");
         try (Stream stream = Stream.builder(dataFlowOperations)
-            .name("stream-scaling-test")
+            .name("stream-scaling-test" + randomSuffix())
             .definition("time | log --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
             .create()
             .deploy(testDeploymentProperties("log", "time"))) {
@@ -1119,15 +1129,15 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group6")
     public void namedChannelDestination() {
         logger.info("stream-named-channel-destination-test:start");
-        String namedChannel = "LOG-DESTINATION-" + UUID.randomUUID();
+        String namedChannel = "LOG-DESTINATION" + randomSuffix();
         try (Stream httpStream = Stream.builder(dataFlowOperations)
-            .name("http-destination-source")
+            .name("http-destination-source" + randomSuffix())
             .definition("http > :" + namedChannel)
             .create()
             .deploy(testDeploymentProperties("http"));
 
              Stream logStream = Stream.builder(dataFlowOperations)
-                 .name("log-destination-sink")
+                 .name("log-destination-sink" + randomSuffix())
                  .definition(":" + namedChannel + " > log")
                  .create()
                  .deploy(testDeploymentProperties("log"))
@@ -1165,7 +1175,7 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group2")
     public void namedChannelTap() {
         logger.info("named-channel-tap:start");
-        String namedChannel = "taphttp-" + UUID.randomUUID();
+        String namedChannel = "taphttp" + randomSuffix();
         try (Stream httpLogStream = Stream.builder(dataFlowOperations)
             .name(namedChannel)
             .definition("http | log")
@@ -1173,7 +1183,7 @@ class DataFlowAT extends CommonTestBase {
             .deploy(testDeploymentProperties("http"));
 
              Stream tapStream = Stream.builder(dataFlowOperations)
-                 .name("tapstream")
+                 .name("tapstream" + randomSuffix())
                  .definition(":" + namedChannel + ".http > log")
                  .create()
                  .deploy(testDeploymentProperties("log"))
@@ -1207,19 +1217,19 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group1")
     public void namedChannelManyToOne() {
         logger.info("named-channel-many-to-one:start");
-        String namedChannel = "MANY-TO-ONE-DESTINATION-" + UUID.randomUUID();
+        String namedChannel = "MANY-TO-ONE-DESTINATION" + randomSuffix();
         try (Stream logStream = Stream.builder(dataFlowOperations)
-            .name("many-to-one")
+            .name("many-to-one" + randomSuffix())
             .definition(":" + namedChannel + " > log")
             .create()
             .deploy(testDeploymentProperties("log"));
              Stream httpStreamOne = Stream.builder(dataFlowOperations)
-                 .name("http-source-1")
+                 .name("http-source-1" + randomSuffix())
                  .definition("http > :" + namedChannel)
                  .create()
                  .deploy(testDeploymentProperties("http"));
              Stream httpStreamTwo = Stream.builder(dataFlowOperations)
-                 .name("http-source-2")
+                 .name("http-source-2" + randomSuffix())
                  .definition("http > :" + namedChannel)
                  .create()
                  .deploy(testDeploymentProperties("http"))
@@ -1261,23 +1271,20 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group4")
     public void namedChannelDirectedGraph() {
         logger.info("named-channel-directed-graph:start");
-        UUID uuid = UUID.randomUUID();
-        String foo = "foo-" + uuid;
-        String bar = "bar-" + uuid;
         try (
             Stream fooLogStream = Stream.builder(dataFlowOperations)
-                .name("directed-graph-destination1")
-                .definition(":" + foo + " > transform --spel.function.expression=payload+'-foo' | log")
+                .name("directed-graph-destination1" + randomSuffix())
+                .definition(":foo > transform --spel.function.expression=payload+'-foo' | log")
                 .create()
                 .deploy(testDeploymentProperties("log"));
             Stream barLogStream = Stream.builder(dataFlowOperations)
-                .name("directed-graph-destination2")
-                .definition(":" + bar + " > transform --spel.function.expression=payload+'-bar' | log")
+                .name("directed-graph-destination2" + randomSuffix())
+                .definition(":bar > transform --spel.function.expression=payload+'-bar' | log")
                 .create()
                 .deploy(testDeploymentProperties("log"));
             Stream httpStream = Stream.builder(dataFlowOperations)
-                .name("directed-graph-http-source")
-                .definition("http | router --router.expression=payload.contains('a')?'"+foo+"':'"+bar+"'")
+                .name("directed-graph-http-source" + randomSuffix())
+                .definition("http | router --router.expression=payload.contains('a')?'foo':'bar'")
                 .create()
                 .deploy(testDeploymentProperties("http"))
         ) {
@@ -1566,12 +1573,10 @@ class DataFlowAT extends CommonTestBase {
 
         if (this.runtimeApps.getPlatformType().equalsIgnoreCase(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
             propertiesBuilder.put("app.*.server.port", "8080");
-            for (String appName : externallyAccessibleApps) {
-                propertiesBuilder.put("deployer." + appName + ".kubernetes.createLoadBalancer", "true"); // requires
-                // LoadBalancer
-                // support
-                // on the
-                // platform
+            if(externallyAccessibleApps != null) {
+                for (String appName : externallyAccessibleApps) {
+                    propertiesBuilder.put("deployer." + appName + ".kubernetes.createLoadBalancer", "true"); // requires LoadBalancer support on the platform
+                }
             }
         }
 
@@ -1633,7 +1638,7 @@ class DataFlowAT extends CommonTestBase {
         // the dataflow-server-use-user-access-token=true argument is required COMPOSED tasks in
         // oauth2-protected SCDF installations and is ignored otherwise.
         List<String> commonTaskArguments = new ArrayList<>();
-        commonTaskArguments.addAll(Collections.singletonList("--dataflow-server-use-user-access-token=true"));
+        commonTaskArguments.add("--dataflow-server-use-user-access-token=true");
         commonTaskArguments.addAll(Arrays.asList(additionalArguments));
         return commonTaskArguments;
     }
@@ -1689,11 +1694,15 @@ class DataFlowAT extends CommonTestBase {
             task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
 
             URI qplUri = UriComponentsBuilder.fromHttpUrl(testProperties.getPlatform().getConnection().getPrometheusUrl() + String.format(
-                "/api/v1/query?query=system_cpu_usage{service=\"task-application\",application=\"%s-%s\"}",
-                task.getTaskName(),
-                launch.getExecutionId())).build().toUri();
+                    "/api/v1/query?query=system_cpu_usage{service=\"task-application\",application=\"%s-%s\"}",
+                    task.getTaskName(),
+                    launch.getExecutionId()))
+                .build()
+                .toUri();
 
-            Supplier<String> pqlTaskMetricsQuery = () -> dataFlowOperations.getRestTemplate().exchange(qplUri, HttpMethod.GET, null, String.class).getBody();
+            Supplier<String> pqlTaskMetricsQuery = () -> dataFlowOperations.getRestTemplate()
+                .exchange(qplUri, HttpMethod.GET, null, String.class)
+                .getBody();
 
             // Wait for ~1 min for Micrometer to send first metrics to Prometheus.
             Awaitility.await().until(() -> (int) JsonPath.parse(pqlTaskMetricsQuery.get()).read("$.data.result.length()") > 0);
@@ -2668,7 +2677,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     private String randomStepName() {
-        return "step-" + randomSuffix();
+        return "step" + randomSuffix();
     }
 
     @Test
@@ -3108,7 +3117,11 @@ class DataFlowAT extends CommonTestBase {
     public void taskLaunchInvalidTaskDefinition() {
         logger.info("task-launch-invalid-task-definition");
         assertThatThrownBy(() ->
-            Task.builder(dataFlowOperations).name(randomTaskName()).definition("foobar").description("Test scenario with invalid task definition").build()
+            Task.builder(dataFlowOperations)
+                .name(randomTaskName())
+                .definition("foobar")
+                .description("Test scenario with invalid task definition")
+                .build()
         ).isInstanceOf(DataFlowClientException.class)
             .hasMessageContaining("The 'task:foobar' application could not be found.");
     }
@@ -3591,15 +3604,16 @@ class DataFlowAT extends CommonTestBase {
     }
 
     private static String randomTaskName() {
-        return "task-" + randomSuffix();
+        return "task" + randomSuffix();
     }
 
     private static String randomJobName() {
-        return "job-" + randomSuffix();
+        return "job" + randomSuffix();
     }
 
     private static String randomSuffix() {
-        return UUID.randomUUID().toString().substring(0, 10);
+        String result = Integer.toString(new Random(System.nanoTime()).nextInt());
+        return !result.startsWith("-") ? "-" + result : result;
     }
 
     private static List<String> asList(String... names) {
@@ -3622,7 +3636,7 @@ class DataFlowAT extends CommonTestBase {
         logger.info("stream-server-config-test");
 
         try (Stream stream = Stream.builder(dataFlowOperations)
-            .name("TICKTOCK-config-server")
+            .name("TICKTOCK-config-server" + randomSuffix())
             .definition("time | log")
             .create()
             .deploy(new DeploymentPropertiesBuilder().putAll(testDeploymentProperties("log", "time"))
