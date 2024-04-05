@@ -1271,20 +1271,22 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group4")
     public void namedChannelDirectedGraph() {
         logger.info("named-channel-directed-graph:start");
+        String foo = "foo" + randomSuffix();
+        String bar = "bar" + randomSuffix();
         try (
             Stream fooLogStream = Stream.builder(dataFlowOperations)
                 .name("directed-graph-destination1" + randomSuffix())
-                .definition(":foo > transform --spel.function.expression=payload+'-foo' | log")
+                .definition(":" + foo + " > transform --spel.function.expression=payload+'-foo' | log")
                 .create()
                 .deploy(testDeploymentProperties("log"));
             Stream barLogStream = Stream.builder(dataFlowOperations)
                 .name("directed-graph-destination2" + randomSuffix())
-                .definition(":bar > transform --spel.function.expression=payload+'-bar' | log")
+                .definition(":" + bar + " > transform --spel.function.expression=payload+'-bar' | log")
                 .create()
                 .deploy(testDeploymentProperties("log"));
             Stream httpStream = Stream.builder(dataFlowOperations)
                 .name("directed-graph-http-source" + randomSuffix())
-                .definition("http | router --router.expression=payload.contains('a')?'foo':'bar'")
+                .definition("http | router --router.expression=payload.contains('a')?'"+foo+"':'"+bar+"'")
                 .create()
                 .deploy(testDeploymentProperties("http"))
         ) {
