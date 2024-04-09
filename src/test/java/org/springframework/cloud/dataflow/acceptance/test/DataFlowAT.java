@@ -707,13 +707,14 @@ class DataFlowAT extends CommonTestBase {
         final int maxWords = expectations.values().stream().mapToInt(List::size).max().orElse(partitions);
         expectations.values().forEach(expectation -> logger.info("Expectation:{}", expectation));
         assertThat(expectations.size()).isEqualTo(partitions);
-        String topic = "topic1" + randomSuffix();
+        String RANDOM_SUFFIX = randomSuffix();
+        String topic = "topic1" + RANDOM_SUFFIX;
         StreamDefinition streamDefinition = Stream.builder(dataFlowOperations)
-            .name("partitioning-named-test" + randomSuffix())
+            .name("partitioning-named-test" + RANDOM_SUFFIX)
             .definition("http | splitter --splitter.expression=payload.split(' ') > :" + topic)
             .create();
         StreamDefinition logDefinition = Stream.builder(dataFlowOperations)
-            .name("partitioning-named-log" + randomSuffix())
+            .name("partitioning-named-log" + RANDOM_SUFFIX)
             .definition(":" + topic + " > log")
             .create();
 
@@ -1129,15 +1130,16 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group6")
     public void namedChannelDestination() {
         logger.info("stream-named-channel-destination-test:start");
-        String namedChannel = "LOG-DESTINATION" + randomSuffix();
+        String RANDON_SUFFIX = randomSuffix();
+        String namedChannel = "LOG-DESTINATION" + RANDON_SUFFIX;
         try (Stream httpStream = Stream.builder(dataFlowOperations)
-            .name("http-destination-source" + randomSuffix())
+            .name("http-destination-source" + RANDON_SUFFIX)
             .definition("http > :" + namedChannel)
             .create()
             .deploy(testDeploymentProperties("http"));
 
              Stream logStream = Stream.builder(dataFlowOperations)
-                 .name("log-destination-sink" + randomSuffix())
+                 .name("log-destination-sink" + RANDON_SUFFIX)
                  .definition(":" + namedChannel + " > log")
                  .create()
                  .deploy(testDeploymentProperties("log"))
@@ -1175,7 +1177,8 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group2")
     public void namedChannelTap() {
         logger.info("named-channel-tap:start");
-        String namedChannel = "taphttp" + randomSuffix();
+        String RANDOM_SUFFIX = randomSuffix();
+        String namedChannel = "taphttp" + RANDOM_SUFFIX;
         try (Stream httpLogStream = Stream.builder(dataFlowOperations)
             .name(namedChannel)
             .definition("http | log")
@@ -1183,7 +1186,7 @@ class DataFlowAT extends CommonTestBase {
             .deploy(testDeploymentProperties("http"));
 
              Stream tapStream = Stream.builder(dataFlowOperations)
-                 .name("tapstream" + randomSuffix())
+                 .name("tapstream" + RANDOM_SUFFIX)
                  .definition(":" + namedChannel + ".http > log")
                  .create()
                  .deploy(testDeploymentProperties("log"))
@@ -1217,19 +1220,20 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group1")
     public void namedChannelManyToOne() {
         logger.info("named-channel-many-to-one:start");
-        String namedChannel = "MANY-TO-ONE-DESTINATION" + randomSuffix();
+        String RANDOM_SUFFIX = randomSuffix();
+        String namedChannel = "MANY-TO-ONE-DESTINATION" + RANDOM_SUFFIX;
         try (Stream logStream = Stream.builder(dataFlowOperations)
-            .name("many-to-one" + randomSuffix())
+            .name("many-to-one" + RANDOM_SUFFIX)
             .definition(":" + namedChannel + " > log")
             .create()
             .deploy(testDeploymentProperties("log"));
              Stream httpStreamOne = Stream.builder(dataFlowOperations)
-                 .name("http-source-1" + randomSuffix())
+                 .name("http-source-1" + RANDOM_SUFFIX)
                  .definition("http > :" + namedChannel)
                  .create()
                  .deploy(testDeploymentProperties("http"));
              Stream httpStreamTwo = Stream.builder(dataFlowOperations)
-                 .name("http-source-2" + randomSuffix())
+                 .name("http-source-2" + RANDOM_SUFFIX)
                  .definition("http > :" + namedChannel)
                  .create()
                  .deploy(testDeploymentProperties("http"))
@@ -1271,21 +1275,22 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group4")
     public void namedChannelDirectedGraph() {
         logger.info("named-channel-directed-graph:start");
-        String foo = "foo" + randomSuffix();
-        String bar = "bar" + randomSuffix();
+        String RANDOM_SUFFIX = randomSuffix();
+        String foo = "foo" + RANDOM_SUFFIX;
+        String bar = "bar" + RANDOM_SUFFIX;
         try (
             Stream fooLogStream = Stream.builder(dataFlowOperations)
-                .name("directed-graph-destination1" + randomSuffix())
+                .name("directed-graph-destination1" + RANDOM_SUFFIX)
                 .definition(":" + foo + " > transform --spel.function.expression=payload+'-foo' | log")
                 .create()
                 .deploy(testDeploymentProperties("log"));
             Stream barLogStream = Stream.builder(dataFlowOperations)
-                .name("directed-graph-destination2" + randomSuffix())
+                .name("directed-graph-destination2" + RANDOM_SUFFIX)
                 .definition(":" + bar + " > transform --spel.function.expression=payload+'-bar' | log")
                 .create()
                 .deploy(testDeploymentProperties("log"));
             Stream httpStream = Stream.builder(dataFlowOperations)
-                .name("directed-graph-http-source" + randomSuffix())
+                .name("directed-graph-http-source" + RANDOM_SUFFIX)
                 .definition("http | router --router.expression=payload.contains('a')?'"+foo+"':'"+bar+"'")
                 .create()
                 .deploy(testDeploymentProperties("http"))
