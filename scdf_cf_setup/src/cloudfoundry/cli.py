@@ -231,7 +231,7 @@ class CloudFoundry:
                 logger.info("service-key %s %s deleted" % (service_name, key_name))
             return proc
         else:
-            logger.info("service key % %s does not exist" % (service_name, key_name))
+            logger.info("service key %s %s does not exist" % (service_name, key_name))
             return None
 
     def apps(self):

@@ -65,7 +65,7 @@ def setup(args):
         if installation.db_config:
             installation.datasources_config = init_db(installation.db_config, options.initialize_db)
 
-        # Schreduler applies to any platform
+        # Scheduler applies to any platform
         if installation.services_config.get('scheduler'):
             ensure_required_services(cf, dict(
                 filter(lambda entry: entry[0] == 'scheduler', installation.services_config.items())))
@@ -73,8 +73,8 @@ def setup(args):
             service_name = installation.services_config['scheduler'].name
             key_name = installation.config_props.service_key_name
             service_key = cf.create_service_key(service_name, key_name)
-            installation.deployer_config.scheduler_url = service_key['url']
-            cf.delete_service_key(service_key, key_name)
+            installation.deployer_config.scheduler_url = service_key['api_endpoint']
+            cf.delete_service_key(service_name, key_name)
 
         if installation.config_props.platform == "tile":
             installation.services_config['dataflow'].config = tile.configure_dataflow_service(installation)

@@ -32,8 +32,16 @@ on:
         required: false
 
     inputs:
+      binder:
+        required: true
+        type: string
+      cf_host:
+        required: true
+        type: string
+      cf_index:
+        required: true
+        type: string
       sql_provider:
-        default: postgresql
         required: false
         type: string
       sql_service_name:
@@ -46,22 +54,13 @@ on:
         required: false
         type: string
       scheduler:
-        default: true
         required: false
         type: boolean
+        default: true
       environment:
-        default: scdf_at
         required: false
         type: string
-      binder:
-        required: true
-        type: string
-      cf_host:
-        required: true
-        type: string
-      cf_index:
-        required: true
-        type: string
+        default: scdf_at
       tests:
         required: false
         type: string
@@ -73,8 +72,11 @@ jobs:
     runs-on: ubuntu-latest
     concurrency: ${{ inputs.cf_host }}
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          repository: spring-cloud/spring-cloud-dataflow-acceptance-tests
+          ref: cbono-tas6-wip
+          show-progress: false
       - name: 'Ensure scripts executable'
         shell: bash
         run: chmod a+x ./scripts/*.sh
@@ -93,12 +95,12 @@ jobs:
       - name: Setup Environment ${{ inputs.binder }}-${{ inputs.cf_index }}
         env:
           # DEBUG: true
-          SCHEDULER: ${{ inputs.scheduler }}
+          SCHEDULES_ENABLED: ${{ inputs.scheduler }}
           BINDER: ${{ inputs.binder }}
           MAVEN_REPOS: '{"repo1":"https://repo.spring.io/snapshot"}'
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: ${{ inputs.binder }}
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: scdf-scheduler
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: p-scheduler
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: "https://api.sys.${{ inputs.cf_host }}.cf-app.com"
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: "apps.${{ inputs.cf_host }}.cf-app.com"
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: p-dataflow
@@ -130,12 +132,12 @@ jobs:
       - name: Execute Tests
         env:
           # DEBUG: true
-          SCHEDULER: ${{ inputs.scheduler }}
+          SCHEDULES_ENABLED: ${{ inputs.scheduler }}
           BINDER: ${{ inputs.binder }}
           MAVEN_REPOS: '{"repo1":"https://repo.spring.io/snapshot"}'
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: ${{ inputs.binder }}
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: scdf-scheduler
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: p-scheduler
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: "https://api.sys.${{ inputs.cf_host }}.cf-app.com"
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: "apps.${{ inputs.cf_host }}.cf-app.com"
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: p-dataflow
@@ -207,12 +209,11 @@ jobs:
         env:
           # DEBUG: true
           SCHEDULES_ENABLED: ${{ inputs.scheduler }}
-          SCHEDULER: ${{ inputs.scheduler }}
           BINDER: ${{ inputs.binder }}
           MAVEN_REPOS: '{"repo1":"https://repo.spring.io/snapshot"}'
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: ${{ inputs.binder }}
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
-          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: scdf-scheduler
+          SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: p-scheduler
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: "https://api.sys.${{ inputs.cf_host }}.cf-app.com"
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: "apps.${{ inputs.cf_host }}.cf-app.com"
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: p-dataflow
@@ -231,4 +232,4 @@ jobs:
           KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
           PLATFORM: tile
         shell: bash
-        run: ./scripts/at-cleanup.sh
+        run: echo "*** SKIPPING"
