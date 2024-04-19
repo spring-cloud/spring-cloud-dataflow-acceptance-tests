@@ -40,11 +40,14 @@ class CloudFoundry:
                 deployer_config.api_endpoint, deployer_config.org, deployer_config.space))
             proc = cf.login()
             if proc.returncode:
-                logger.error("CF login failed: " + Shell.stdout_to_s(proc))
-                cf.logout()
-                raise RuntimeError(
-                    "cf login failed for some reason. Verify the username/password and that org %s and space %s exist"
-                    % (deployer_config.org, deployer_config.space))
+                logger.error("CF login failed - will try w/o org; reason: " + Shell.stdout_to_s(proc))
+				logger.debug("Logging in to CF - api: %s" % (deployer_config.api_endpoint))
+				proc = cf.loginWithoutOrg()
+	            if proc.returncode
+					cf.logout()
+					raise RuntimeError(
+						"cf login failed for some reason. Verify the username/password and that org %s and space %s exist"
+						% (deployer_config.org, deployer_config.space))
             logger.info("\n" + json.dumps(cf.current_target()))
             CloudFoundry.initialized = True
         else:
@@ -140,6 +143,18 @@ class CloudFoundry:
         cmd = "cf login -a %s -o %s -u %s -p %s %s" % \
               (self.deployer_config.api_endpoint,
                self.deployer_config.org,
+               self.deployer_config.username,
+               self.deployer_config.password,
+               skip_ssl)
+        return self.shell.exec(cmd)
+
+    def loginWithoutOrg(self):
+        skip_ssl = ""
+        if self.deployer_config.skip_ssl_validation:
+            skip_ssl = "--skip-ssl-validation"
+
+        cmd = "cf login -a %s -u %s -p %s %s" % \
+              (self.deployer_config.api_endpoint,
                self.deployer_config.username,
                self.deployer_config.password,
                skip_ssl)
