@@ -73,10 +73,6 @@ jobs:
     concurrency: ${{ inputs.cf_host }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          repository: spring-cloud/spring-cloud-dataflow-acceptance-tests
-          ref: cbono-tas6-wip
-          show-progress: false
       - name: 'Ensure scripts executable'
         shell: bash
         run: chmod a+x ./scripts/*.sh
