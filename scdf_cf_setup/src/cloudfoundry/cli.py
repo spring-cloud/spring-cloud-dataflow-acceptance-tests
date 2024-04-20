@@ -153,11 +153,11 @@ class CloudFoundry:
         if self.deployer_config.skip_ssl_validation:
             skip_ssl = "--skip-ssl-validation"
 
-        cmd = "cf login -a %s -u %s -p %s %s" % \
-              (self.deployer_config.api_endpoint,
-               self.deployer_config.username,
-               self.deployer_config.password,
-               skip_ssl)
+        cmd = "cf api %s %s " % (self.deployer_config.api_endpoint, skip_ssl)
+        self.shell.exec(cmd)
+
+        cmd = "cf auth %s %s " % \
+              (self.deployer_config.username, self.deployer_config.password)
         return self.shell.exec(cmd)
 
     def create_service(self, service_config):
