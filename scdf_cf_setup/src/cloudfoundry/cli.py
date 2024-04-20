@@ -41,8 +41,8 @@ class CloudFoundry:
             proc = cf.login()
             if proc.returncode:
                 logger.error("CF login failed - will try w/o org; reason: " + Shell.stdout_to_s(proc))
-				logger.debug("Logging in to CF - api: %s" % (deployer_config.api_endpoint))
-				proc = cf.loginWithoutOrg()
+                logger.debug("Logging in to CF - api: %s" % (deployer_config.api_endpoint))
+                proc = cf.loginWithoutOrg()
 	            if proc.returncode
 					cf.logout()
 					raise RuntimeError(
