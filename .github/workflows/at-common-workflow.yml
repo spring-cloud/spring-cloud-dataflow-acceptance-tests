@@ -75,7 +75,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: spring-cloud/spring-cloud-dataflow-acceptance-tests
-          ref: cbono-tas6-wip
+          ref: main
           show-progress: false
       - name: 'Ensure scripts executable'
         shell: bash
