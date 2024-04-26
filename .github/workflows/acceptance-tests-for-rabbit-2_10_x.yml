@@ -1,0 +1,37 @@
+name: SCDF (2.10.x) AT Rabbit (Shepherd)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tests:
+        type: string
+        default: ''
+        description: 'Test classes'
+      cf-host:
+        type: string
+        description: 'CF host name (e.g. "bucharest")'
+        required: true
+  workflow_call:
+    inputs:
+      cf-host:
+        type: string
+        description: 'CF host name (e.g. "bucharest")'
+        required: true
+    secrets:
+      CF_ADMIN_PASSWORD:
+        required: true
+
+jobs:
+  rabbit-2:
+    uses: ./.github/workflows/at-common-workflow.yml
+    with:
+      cf_host: ${{ inputs.cf-host }}
+      cf_index: 2
+      binder: rabbit
+      dataflow_client_version: '2.10.4-SNAPSHOT'
+      tests: ${{ inputs.tests }}
+    secrets:
+      CF_USERNAME: 'admin'
+      CF_ENV_0_PASSWORD: 'not-used'
+      CF_ENV_1_PASSWORD: 'not-used'
+      CF_ENV_2_PASSWORD: ${{ secrets.CF_ADMIN_PASSWORD }}

@@ -65,6 +65,10 @@ on:
         required: false
         type: string
         default: ''
+      dataflow_client_version:
+        required: false
+        type: string
+        default: '2.11.3-SNAPSHOT'
 
 jobs:
   acceptance-tests:
@@ -135,6 +139,7 @@ jobs:
           SCHEDULES_ENABLED: ${{ inputs.scheduler }}
           BINDER: ${{ inputs.binder }}
           MAVEN_REPOS: '{"repo1":"https://repo.spring.io/snapshot"}'
+          SPRING_CLOUD_DATAFLOW_CLIENT_VERSION: ${{ inputs.dataflow_client_version }}
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: ${{ inputs.binder }}
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
           SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: p-scheduler

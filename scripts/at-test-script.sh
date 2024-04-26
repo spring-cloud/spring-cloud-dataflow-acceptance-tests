@@ -26,6 +26,7 @@ set -o pipefail
   -DSKIP_CLOUD_CONFIG=true -Dtest.docker.compose.disable.extension=true -Dspring.cloud.dataflow.client.serverUri=$SERVER_URI \
   -Dspring.cloud.dataflow.client.skipSslValidation=$SKIP_SSL_VALIDATION -Dtest.platform.connection.platformName=default \
   -Dtest.platform.connection.applicationOverHttps=$HTTPS_ENABLED \
+   "-Ddataflow.version=$SPRING_CLOUD_DATAFLOW_CLIENT_VERSION" \
   $MAVEN_PROPERTIES clean verify | tee test-output.log
 RC=$?
 echo "RC=$RC"
