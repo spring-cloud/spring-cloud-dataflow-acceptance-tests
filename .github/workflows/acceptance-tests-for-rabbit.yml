@@ -3,34 +3,35 @@ name: SCDF AT Rabbit (Shepherd)
 on:
   workflow_dispatch:
     inputs:
-      tests:
-        type: string
-        default: ''
-        description: 'Test classes'
       cf-host:
         type: string
         description: 'CF host name (e.g. "bucharest")'
         required: true
+      tests:
+        type: string
+        description: 'Test classes'
+        default: ''
   workflow_call:
     inputs:
       cf-host:
         type: string
         description: 'CF host name (e.g. "bucharest")'
         required: true
+      tests:
+        type: string
+        description: 'Test classes'
+        default: ''
     secrets:
-      CF_ADMIN_PASSWORD:
+      CF_PASSWORD:
         required: true
 
 jobs:
-  rabbit-2:
+  acceptance-tests-rabbit:
     uses: ./.github/workflows/at-common-workflow.yml
     with:
       cf_host: ${{ inputs.cf-host }}
-      cf_index: 2
       binder: rabbit
       tests: ${{ inputs.tests }}
     secrets:
       CF_USERNAME: 'admin'
-      CF_ENV_0_PASSWORD: 'not-used'
-      CF_ENV_1_PASSWORD: 'not-used'
-      CF_ENV_2_PASSWORD: ${{ secrets.CF_ADMIN_PASSWORD }}
+      CF_PASSWORD: ${{ secrets.CF_PASSWORD }}
