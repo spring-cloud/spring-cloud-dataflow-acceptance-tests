@@ -868,9 +868,14 @@ class DataFlowAT extends CommonTestBase {
     @Tag("group2")
     @Tag("smoke")
     public void streamLifecycle() {
+        // Skip for SCDF 2.10.x on CloudFoundry due to '500 No Body' response
+        if (runtimeApps.dataflowServerVersionLowerThan("2.11.0") &&
+                runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.CLOUDFOUNDRY_PLATFORM_TYPE)) {
+            logger.warn("Skipping streamLifecycle() test due to: 'SCDF 2.10.x on CloudFoundry w/ 500 [No Body] response'");
+            return;
+        }
         logger.info("stream-lifecycle:start");
-        streamLifecycleHelper(1, s -> {
-        });
+        streamLifecycleHelper(1, s -> { });
         logger.info("stream-lifecycle:end");
     }
 
