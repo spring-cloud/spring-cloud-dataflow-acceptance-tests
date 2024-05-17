@@ -3675,7 +3675,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     @Test
-    @Tag("smoke")
+    @Tag("always")
     void checkEndpoints() {
         AboutResource aboutResource = dataFlowOperations.aboutOperation().get();
         assertThat(aboutResource).isNotNull();
