@@ -76,6 +76,7 @@ import org.springframework.cloud.dataflow.rest.client.dsl.StreamApplication;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.Task;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskBuilder;
+import org.springframework.cloud.dataflow.rest.client.support.VersionUtils;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
@@ -3673,6 +3674,21 @@ class DataFlowAT extends CommonTestBase {
         }
     }
 
+    @Test
+    @Tag("smoke")
+    void checkEndpoints() {
+        AboutResource aboutResource = dataFlowOperations.aboutOperation().get();
+        assertThat(aboutResource).isNotNull();
+        logger.info("authenticated:{}", aboutResource.getSecurityInfo().isAuthenticated());
+        logger.info("testing:tasks/executions");
+        assertThat(dataFlowOperations.taskOperations().executionList()).isNotNull();
+        String version = aboutResource.getVersionInfo().getCore().getVersion();
+        if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(VersionUtils.getThreePartVersion(version), "2.11.3")) {
+            logger.info("testing:tasks/thinexecutions");
+            assertThat(dataFlowOperations.taskOperations().thinExecutionList()).isNotNull();
+        }
+        // TODO add new endpoints
+    }
     @Test
     @Tag("groupF")
     void willFail() {
