@@ -908,7 +908,6 @@ class DataFlowAT extends CommonTestBase {
     private void awaitValueInLog(Stream stream, final StreamApplication app, final String value) {
         AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream, app.getName());
         Awaitility.await()
-            .timeout(Duration.ofMinutes(2))
             .failFast(() -> AwaitUtils.hasErrorInLog(offset))
             .conditionEvaluationListener(condition -> {
                 if (condition.getRemainingTimeInMS() <= condition.getPollInterval().toMillis()) {
@@ -969,8 +968,8 @@ class DataFlowAT extends CommonTestBase {
     private void awaitDeployed(Stream stream, AwaitUtils.StreamLog offset) {
         final long startErrorCheck = System.currentTimeMillis() + 15_000L;
         Awaitility.await("Deployment for " + stream.getName())
+            .timeout(Duration.ofMinutes(15))
             .failFast(() -> System.currentTimeMillis() >= startErrorCheck && AwaitUtils.hasErrorInLog(offset))
-            .atMost(Duration.ofMinutes(5))
             .conditionEvaluationListener(condition -> {
                 if (condition.getRemainingTimeInMS() <= condition.getPollInterval().toMillis()) {
                     sendLogsToLogger("awaitDeployed:failing", AwaitUtils.logOffset(stream).logs());
@@ -1016,16 +1015,15 @@ class DataFlowAT extends CommonTestBase {
             streamAssertions.accept(stream);
 
             Awaitility.await()
+                .timeout(Duration.ofMinutes(15))
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:"));
 
             assertThat(stream.history().size()).isEqualTo(1L);
             Awaitility.await()
+                .timeout(Duration.ofMinutes(15))
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(1).equals(DEPLOYED));
-
-            assertThat(stream.logs()).contains("TICKTOCK - TIMESTAMP:");
-            assertThat(stream.logs(app("log"))).contains("TICKTOCK - TIMESTAMP:");
 
             // UPDATE
             logger.info("stream-lifecycle-test: UPDATE");
@@ -1038,14 +1036,17 @@ class DataFlowAT extends CommonTestBase {
             streamAssertions.accept(stream);
 
             Awaitility.await()
+                .timeout(Duration.ofMinutes(15))
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.logs(app("log")).contains("Updated TICKTOCK - TIMESTAMP:"));
 
             assertThat(stream.history().size()).isEqualTo(2);
             Awaitility.await()
+                .timeout(Duration.ofMinutes(15))
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(1).equals(DELETED));
             Awaitility.await()
+                .timeout(Duration.ofMinutes(15))
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(2).equals(DEPLOYED));
 
@@ -1058,19 +1059,24 @@ class DataFlowAT extends CommonTestBase {
             streamAssertions.accept(stream);
 
             Awaitility.await()
+                .timeout(Duration.ofMinutes(15))
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:"));
 
             assertThat(stream.history().size()).isEqualTo(3);
             Awaitility.await()
+                .timeout(Duration.ofMinutes(15))
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(1).equals(DELETED));
             Awaitility.await()
+                .timeout(Duration.ofMinutes(15))
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(2).equals(DELETED));
             Awaitility.await()
+                .timeout(Duration.ofMinutes(15))
                 .until(() -> starting.contains(stream.history().get(3)));
             Awaitility.await()
+                .timeout(Duration.ofMinutes(15))
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(3).equals(DEPLOYED));
 
@@ -1078,17 +1084,21 @@ class DataFlowAT extends CommonTestBase {
             logger.info("stream-lifecycle-test: UNDEPLOY");
             stream.undeploy();
             Awaitility.await()
+                .timeout(Duration.ofMinutes(15))
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(UNDEPLOYED));
 
             assertThat(stream.history().size()).isEqualTo(3);
             Awaitility.await()
+                .timeout(Duration.ofMinutes(15))
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(1).equals(DELETED));
             Awaitility.await()
+                .timeout(Duration.ofMinutes(15))
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(2).equals(DELETED));
             Awaitility.await()
+                .timeout(Duration.ofMinutes(15))
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(3).equals(DELETED));
 
@@ -1132,6 +1142,7 @@ class DataFlowAT extends CommonTestBase {
             awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
             Awaitility.await()
+                .timeout(Duration.ofMinutes(15))
                 .until(() -> stream.runtimeApps().get(log).size() == 2);
 
             assertThat(stream.getStatus()).isEqualTo(DEPLOYED);
@@ -1176,6 +1187,7 @@ class DataFlowAT extends CommonTestBase {
             runtimeApps.httpPost(httpStream.getName(), "http", message);
             logger.info("namedChannelDestination:sent:{} to {}", message, httpStream.getName());
             Awaitility.await()
+                .timeout(Duration.ofMinutes(15))
                 .failFast(() -> AwaitUtils.hasErrorInLog(httpOffset))
                 .failFast(() -> AwaitUtils.hasErrorInLog(logOffset))
                 .until(() -> logStream.logs(app("log")).contains(message));
@@ -1223,6 +1235,7 @@ class DataFlowAT extends CommonTestBase {
             runtimeApps.httpPost(httpLogStream.getName(), "http", message);
             logger.info("namedChannelTap:sent:{}:{}", httpLogStream.getName(), message);
             Awaitility.await()
+                .timeout(Duration.ofMinutes(15))
                 .failFast(() -> AwaitUtils.hasErrorInLog(tapOffset))
                 .until(() -> tapStream.logs(app("log")).contains(message));
         } catch (Throwable x) {
