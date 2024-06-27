@@ -130,8 +130,9 @@ class DataFlowAT extends CommonTestBase {
     public void before() {
         logger.debug("before:start");
         logger.info("[platform = {}, type = {}]", runtimeApps.getPlatformName(), runtimeApps.getPlatformType());
-        Awaitility.setDefaultPollInterval(Duration.ofSeconds(15));
-        Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
+        Awaitility.setDefaultPollInterval(Duration.ofSeconds(15L));
+        Awaitility.setDefaultPollDelay(Duration.ofSeconds(5L));
+        Awaitility.setDefaultTimeout(Duration.ofMinutes(5L));
         registerTimestampTasks();
         resetTimestampVersion();
         logger.debug("before:end");
@@ -178,7 +179,8 @@ class DataFlowAT extends CommonTestBase {
             runtimeApps.getPlatformType(),
             runtimeApps.getDataflowServerVersion()));
         logger.info("Wait until at least 60 apps are registered in SCDF");
-        Awaitility.await().until(() -> dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements() >= 60L);
+        Awaitility.await()
+            .until(() -> dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements() >= 60L);
     }
 
     @Test
@@ -367,7 +369,8 @@ class DataFlowAT extends CommonTestBase {
             // task second launch
             LaunchResponseResource launch2 = task.launch();
 
-            Awaitility.await().until(() -> task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+            Awaitility.await()
+                .until(() -> task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             assertThat(task.executions().size()).isEqualTo(2);
             Optional<TaskExecutionResource> taskExecutionResource = task.execution(launch2.getExecutionId(), launch2.getSchemaTarget());
             assertThat(taskExecutionResource).isPresent();
@@ -395,7 +398,8 @@ class DataFlowAT extends CommonTestBase {
                 // task second launch
                 LaunchResponseResource launch2 = task.launch();
 
-                Awaitility.await().until(() -> task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+                Awaitility.await()
+                    .until(() -> task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
                 assertThat(task.executions().size()).isEqualTo(2);
                 Optional<TaskExecutionResource> taskExecutionResource = task.execution(launch2.getExecutionId(), launch2.getSchemaTarget());
                 assertThat(taskExecutionResource).isPresent();
@@ -517,7 +521,9 @@ class DataFlowAT extends CommonTestBase {
                 awaitDeployed(stream, offset);
                 logger.info("stream-redeploy-test:deployed:{}", stream.getName());
                 stream.undeploy();
-                Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() -> stream.getStatus().equals(UNDEPLOYED));
+                Awaitility.await()
+                    .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                    .until(() -> stream.getStatus().equals(UNDEPLOYED));
                 logger.info("stream-redeploy-test:undeployed:{}", stream.getName());
             }
         }
@@ -658,20 +664,22 @@ class DataFlowAT extends CommonTestBase {
             final int maxWords = expectations.values().stream().mapToInt(List::size).max().orElse(partitions);
             expectations.values().forEach(expectation -> logger.info("Expectation:{}", expectation));
             assertThat(expectations.size()).isEqualTo(partitions);
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() -> {
-                Map<String, String> logMap = runtimeApps.applicationInstanceLogs(stream.getName(), "log");
-                if (logMap != null) {
-                    Collection<String> logs = logMap.values().stream().map(s -> lastLines(s, maxWords + 1)).collect(Collectors.toList());
-                    logger.info("streamPartitioning:logs:{}", logs);
-                    return (logs.size() == partitions) && logs.stream()
-                        // partition order is undetermined
-                        .map(log -> expectations.values().stream().anyMatch(expect -> expect.stream().allMatch(log::contains)))
-                        .reduce(Boolean::logicalAnd)
-                        .orElse(false);
-                } else {
-                    return false;
-                }
-            });
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> {
+                    Map<String, String> logMap = runtimeApps.applicationInstanceLogs(stream.getName(), "log");
+                    if (logMap != null) {
+                        Collection<String> logs = logMap.values().stream().map(s -> lastLines(s, maxWords + 1)).collect(Collectors.toList());
+                        logger.info("streamPartitioning:logs:{}", logs);
+                        return (logs.size() == partitions) && logs.stream()
+                            // partition order is undetermined
+                            .map(log -> expectations.values().stream().anyMatch(expect -> expect.stream().allMatch(log::contains)))
+                            .reduce(Boolean::logicalAnd)
+                            .orElse(false);
+                    } else {
+                        return false;
+                    }
+                });
         } catch (Throwable x) {
             if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
@@ -745,20 +753,22 @@ class DataFlowAT extends CommonTestBase {
                 runtimeApps.httpPost(stream.getName(), "http", message);
                 logger.info("streamPartitioningNamed:sent:{}:{}", stream.getName(), message);
 
-                Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(logOffset)).until(() -> {
-                    Map<String, String> logMap = runtimeApps.applicationInstanceLogs(logStream.getName(), "log");
-                    if (logMap != null) {
-                        Collection<String> logs = logMap.values().stream().map(s -> lastLines(s, maxWords + 1)).collect(Collectors.toList());
-                        logger.info("streamPartitioningNamed:logs:{}", logs);
-                        return (logs.size() == partitions) && logs.stream()
-                            // partition order is undetermined
-                            .map(log -> expectations.values().stream().anyMatch(expect -> expect.stream().allMatch(log::contains)))
-                            .reduce(Boolean::logicalAnd)
-                            .orElse(false);
-                    } else {
-                        return false;
-                    }
-                });
+                Awaitility.await()
+                    .failFast(() -> AwaitUtils.hasErrorInLog(logOffset))
+                    .until(() -> {
+                        Map<String, String> logMap = runtimeApps.applicationInstanceLogs(logStream.getName(), "log");
+                        if (logMap != null) {
+                            Collection<String> logs = logMap.values().stream().map(s -> lastLines(s, maxWords + 1)).collect(Collectors.toList());
+                            logger.info("streamPartitioningNamed:logs:{}", logs);
+                            return (logs.size() == partitions) && logs.stream()
+                                // partition order is undetermined
+                                .map(log -> expectations.values().stream().anyMatch(expect -> expect.stream().allMatch(log::contains)))
+                                .reduce(Boolean::logicalAnd)
+                                .orElse(false);
+                        } else {
+                            return false;
+                        }
+                    });
             }
         } catch (Throwable x) {
             if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
@@ -938,30 +948,29 @@ class DataFlowAT extends CommonTestBase {
     }
     private void awaitStarting(Stream stream, AwaitUtils.StreamLog offset) {
         final long startErrorCheck = System.currentTimeMillis() + 30_000L;
-        Awaitility.await("Deployment starting for " + stream.getName()).failFast(() ->
-            System.currentTimeMillis() > startErrorCheck && AwaitUtils.hasErrorInLog(offset)
-            )
+        Awaitility.await("Deployment starting for " + stream.getName())
+            .failFast(() -> System.currentTimeMillis() > startErrorCheck && AwaitUtils.hasErrorInLog(offset))
             .conditionEvaluationListener(condition -> {
                 if (condition.getRemainingTimeInMS() <= condition.getPollInterval().toMillis()) {
                     sendLogsToLogger("awaitStarting:failing", AwaitUtils.logOffset(stream).logs());
                 }
             })
             .until(() -> {
-            logger.debug("awaitStarting:{}:{}", stream.getName(), stream.getStatus());
-            try {
-                return starting.contains(stream.getStatus());
-            } catch (Throwable x) {
-                logger.debug("awaitStarting:ignoring:" + x);
-                return false;
-            }
-        });
+                logger.debug("awaitStarting:{}:{}", stream.getName(), stream.getStatus());
+                try {
+                    return starting.contains(stream.getStatus());
+                } catch (Throwable x) {
+                    logger.debug("awaitStarting:ignoring:" + x);
+                    return false;
+                }
+            });
     }
 
     private void awaitDeployed(Stream stream, AwaitUtils.StreamLog offset) {
         final long startErrorCheck = System.currentTimeMillis() + 15_000L;
-        Awaitility.await("Deployment for " + stream.getName()).failFast(() ->
-                System.currentTimeMillis() >= startErrorCheck && AwaitUtils.hasErrorInLog(offset)
-            ).atMost(Duration.ofMinutes(5))
+        Awaitility.await("Deployment for " + stream.getName())
+            .failFast(() -> System.currentTimeMillis() >= startErrorCheck && AwaitUtils.hasErrorInLog(offset))
+            .atMost(Duration.ofMinutes(5))
             .conditionEvaluationListener(condition -> {
                 if (condition.getRemainingTimeInMS() <= condition.getPollInterval().toMillis()) {
                     sendLogsToLogger("awaitDeployed:failing", AwaitUtils.logOffset(stream).logs());
@@ -1006,14 +1015,14 @@ class DataFlowAT extends CommonTestBase {
             logger.info("stream-lifecycle-test:deployed");
             streamAssertions.accept(stream);
 
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
-                stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:")
-            );
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:"));
 
             assertThat(stream.history().size()).isEqualTo(1L);
-            Awaitility.await().failFast(() ->
-                AwaitUtils.hasErrorInLog(offset)).until(() -> stream.history().get(1).equals(DEPLOYED)
-            );
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.history().get(1).equals(DEPLOYED));
 
             assertThat(stream.logs()).contains("TICKTOCK - TIMESTAMP:");
             assertThat(stream.logs(app("log"))).contains("TICKTOCK - TIMESTAMP:");
@@ -1028,17 +1037,17 @@ class DataFlowAT extends CommonTestBase {
 
             streamAssertions.accept(stream);
 
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
-                stream.logs(app("log")).contains("Updated TICKTOCK - TIMESTAMP:")
-            );
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.logs(app("log")).contains("Updated TICKTOCK - TIMESTAMP:"));
 
             assertThat(stream.history().size()).isEqualTo(2);
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
-                stream.history().get(1).equals(DELETED)
-            );
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
-                stream.history().get(2).equals(DEPLOYED)
-            );
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.history().get(1).equals(DELETED));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.history().get(2).equals(DEPLOYED));
 
             // ROLLBACK
             logger.info("stream-lifecycle-test: ROLLBACK");
@@ -1048,39 +1057,40 @@ class DataFlowAT extends CommonTestBase {
 
             streamAssertions.accept(stream);
 
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
-                stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:")
-            );
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:"));
 
             assertThat(stream.history().size()).isEqualTo(3);
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
-                stream.history().get(1).equals(DELETED)
-            );
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
-                stream.history().get(2).equals(DELETED)
-            );
-            Awaitility.await().until(() -> starting.contains(stream.history().get(3)));
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
-                stream.history().get(3).equals(DEPLOYED)
-            );
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.history().get(1).equals(DELETED));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.history().get(2).equals(DELETED));
+            Awaitility.await()
+                .until(() -> starting.contains(stream.history().get(3)));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.history().get(3).equals(DEPLOYED));
 
             // UNDEPLOY
             logger.info("stream-lifecycle-test: UNDEPLOY");
             stream.undeploy();
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
-                stream.getStatus().equals(UNDEPLOYED)
-            );
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.getStatus().equals(UNDEPLOYED));
 
             assertThat(stream.history().size()).isEqualTo(3);
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
-                stream.history().get(1).equals(DELETED)
-            );
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
-                stream.history().get(2).equals(DELETED)
-            );
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(offset)).until(() ->
-                stream.history().get(3).equals(DELETED)
-            );
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.history().get(1).equals(DELETED));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.history().get(2).equals(DELETED));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(offset))
+                .until(() -> stream.history().get(3).equals(DELETED));
 
             PagedModel<StreamDefinitionResource> list = dataFlowOperations.streamOperations().list();
             System.out.println("definitions:" + list.getContent());
@@ -1121,7 +1131,8 @@ class DataFlowAT extends CommonTestBase {
             stream.scaleApplicationInstances(log, 2, Collections.emptyMap());
             awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
-            Awaitility.await().until(() -> stream.runtimeApps().get(log).size() == 2);
+            Awaitility.await()
+                .until(() -> stream.runtimeApps().get(log).size() == 2);
 
             assertThat(stream.getStatus()).isEqualTo(DEPLOYED);
             streamApps = stream.runtimeApps();
@@ -1211,7 +1222,9 @@ class DataFlowAT extends CommonTestBase {
             logger.info("namedChannelTap:sending:{}:{}", httpLogStream.getName(), message);
             runtimeApps.httpPost(httpLogStream.getName(), "http", message);
             logger.info("namedChannelTap:sent:{}:{}", httpLogStream.getName(), message);
-            Awaitility.await().failFast(() -> AwaitUtils.hasErrorInLog(tapOffset)).until(() -> tapStream.logs(app("log")).contains(message));
+            Awaitility.await()
+                .failFast(() -> AwaitUtils.hasErrorInLog(tapOffset))
+                .until(() -> tapStream.logs(app("log")).contains(message));
         } catch (Throwable x) {
             if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
@@ -1666,7 +1679,8 @@ class DataFlowAT extends CommonTestBase {
 
             LaunchResponseResource launch = task.launch(Collections.emptyMap(), composedTaskLaunchArguments("--platform=local"));
 
-            Awaitility.await().until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+            Awaitility.await()
+                .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             assertThat(task.executions().size()).isEqualTo(1);
             Optional<TaskExecutionResource> taskExecutionResource = task.execution(launch.getExecutionId(), launch.getSchemaTarget());
             assertThat(taskExecutionResource).isPresent();
@@ -1698,7 +1712,8 @@ class DataFlowAT extends CommonTestBase {
             // task launch id
             LaunchResponseResource launch = task.launch(Collections.singletonList("--spring.cloud.task.closecontext_enabled=false"));
 
-            Awaitility.await().until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+            Awaitility.await()
+                .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             assertThat(task.executions().size()).isEqualTo(1);
             Optional<TaskExecutionResource> taskExecutionResource = task.execution(launch.getExecutionId(), launch.getSchemaTarget());
             assertThat(taskExecutionResource).isPresent();
@@ -1718,7 +1733,8 @@ class DataFlowAT extends CommonTestBase {
                 .getBody();
 
             // Wait for ~1 min for Micrometer to send first metrics to Prometheus.
-            Awaitility.await().until(() -> (int) JsonPath.parse(pqlTaskMetricsQuery.get()).read("$.data.result.length()") > 0);
+            Awaitility.await()
+                .until(() -> (int) JsonPath.parse(pqlTaskMetricsQuery.get()).read("$.data.result.length()") > 0);
 
             JsonAssertions.assertThatJson(pqlTaskMetricsQuery.get()).isEqualTo(resourceToString("classpath:/task_metrics_system_cpu_usage.json"));
         }
@@ -1754,7 +1770,8 @@ class DataFlowAT extends CommonTestBase {
             // second launch
             LaunchResponseResource launch2 = task.launch(composedTaskLaunchArguments());
 
-            Awaitility.await().until(() -> task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+            Awaitility.await()
+                .until(() -> task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
             assertThat(task.executions().size()).isEqualTo(2);
             assertThat(task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget())).isEqualTo(TaskExecutionStatus.COMPLETE);
@@ -1791,7 +1808,8 @@ class DataFlowAT extends CommonTestBase {
             // first launch
             LaunchResponseResource launch1 = task.launch(composedTaskLaunchArguments("--increment-instance-enabled=true"));
 
-            Awaitility.await().until(() -> task.executionStatus(launch1.getExecutionId(), launch1.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+            Awaitility.await()
+                .until(() -> task.executionStatus(launch1.getExecutionId(), launch1.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
             assertThat(task.executions().size()).isEqualTo(1);
             assertThat(task.executionStatus(launch1.getExecutionId(), launch1.getSchemaTarget())).isEqualTo(TaskExecutionStatus.COMPLETE);
@@ -1811,7 +1829,8 @@ class DataFlowAT extends CommonTestBase {
             // second launch
             LaunchResponseResource launch2 = task.launch(composedTaskLaunchArguments("--increment-instance-enabled=true"));
 
-            Awaitility.await().until(() -> task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+            Awaitility.await()
+                .until(() -> task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
             assertThat(task.executions().size()).isEqualTo(2);
             assertThat(task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget())).isEqualTo(TaskExecutionStatus.COMPLETE);
@@ -1851,7 +1870,8 @@ class DataFlowAT extends CommonTestBase {
                 // first launch
                 LaunchResponseResource launch1 = task.launch(composedTaskLaunchArguments("--increment-instance-enabled=true"));
 
-                Awaitility.await().until(() -> task.executionStatus(launch1.getExecutionId(), launch1.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+                Awaitility.await()
+                    .until(() -> task.executionStatus(launch1.getExecutionId(), launch1.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
                 assertThat(task.executions().size()).isEqualTo(1);
                 assertThat(task.executionStatus(launch1.getExecutionId(), launch1.getSchemaTarget())).isEqualTo(TaskExecutionStatus.COMPLETE);
@@ -1871,7 +1891,8 @@ class DataFlowAT extends CommonTestBase {
                 // second launch
                 LaunchResponseResource launch2 = task.launch(composedTaskLaunchArguments("--increment-instance-enabled=true"));
 
-                Awaitility.await().until(() -> task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+                Awaitility.await()
+                    .until(() -> task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
                 assertThat(task.executions().size()).isEqualTo(2);
                 assertThat(task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget())).isEqualTo(TaskExecutionStatus.COMPLETE);
@@ -1913,7 +1934,8 @@ class DataFlowAT extends CommonTestBase {
 
             LaunchResponseResource launch = task.launch(composedTaskLaunchArguments());
 
-            Awaitility.await().until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+            Awaitility.await()
+                .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
             // Parent Task Successfully completed
             assertThat(task.executions().size()).isEqualTo(1);
@@ -2350,9 +2372,11 @@ class DataFlowAT extends CommonTestBase {
             LaunchResponseResource launch = task.launch(composedTaskLaunchArguments());
 
             if (runtimeApps.dataflowServerVersionLowerThan("2.8.0-SNAPSHOT")) {
-                Awaitility.await().until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+                Awaitility.await()
+                    .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             } else {
-                Awaitility.await().until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.ERROR);
+                Awaitility.await()
+                    .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.ERROR);
             }
 
             // Parent Task
@@ -2568,9 +2592,11 @@ class DataFlowAT extends CommonTestBase {
             LaunchResponseResource launch = task.launch(composedTaskLaunchArguments());
             logger.info("composed-task-failedCTRRetry-test:launch");
             if (runtimeApps.dataflowServerVersionLowerThan("2.8.0-SNAPSHOT")) {
-                Awaitility.await().until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+                Awaitility.await()
+                    .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             } else {
-                Awaitility.await().until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.ERROR);
+                Awaitility.await()
+                    .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.ERROR);
             }
 
             // Parent Task
@@ -2668,7 +2694,8 @@ class DataFlowAT extends CommonTestBase {
     }
 
     private TaskExecutionResource validateSuccessfulTaskLaunch(Task task, long launchId, String schemaTarget, int sizeExpected) {
-        Awaitility.await().until(() -> task.executionStatus(launchId, schemaTarget) == TaskExecutionStatus.COMPLETE);
+        Awaitility.await()
+            .until(() -> task.executionStatus(launchId, schemaTarget) == TaskExecutionStatus.COMPLETE);
         assertThat(task.executions().size()).isEqualTo(sizeExpected);
         Optional<TaskExecutionResource> taskExecution = task.execution(launchId, schemaTarget);
         assertThat(taskExecution).isPresent();
@@ -2753,12 +2780,14 @@ class DataFlowAT extends CommonTestBase {
             Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
                 dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0), launch.getSchemaTarget());
                 // Wait for job to start
-                Awaitility.await().until(() -> task.thinkJobExecutionResources().size() == 2);
+                Awaitility.await()
+                    .until(() -> task.thinkJobExecutionResources().size() == 2);
                 // Wait for task for the job to complete
-                Awaitility.await().until(() -> {
-                    Optional<TaskExecutionResource> executionResource = task.executions().stream().findFirst();
-                    return executionResource.filter(resource -> resource.getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE).isPresent();
-                });
+                Awaitility.await()
+                    .until(() -> {
+                        Optional<TaskExecutionResource> executionResource = task.executions().stream().findFirst();
+                        return executionResource.filter(resource -> resource.getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE).isPresent();
+                    });
                 Collection<JobExecutionThinResource> resources = task.thinkJobExecutionResources();
                 assertThat(resources.size()).isEqualTo(2);
 
@@ -3113,7 +3142,8 @@ class DataFlowAT extends CommonTestBase {
             // Verify task
             validateSuccessfulTaskLaunch(task, launch.getExecutionId(), launch.getSchemaTarget());
             LaunchResponseResource launch1 = task.launch(args);
-            Awaitility.await().until(() -> task.executionStatus(launch1.getExecutionId(), launch1.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+            Awaitility.await()
+                .until(() -> task.executionStatus(launch1.getExecutionId(), launch1.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             assertThat(task.executions().size()).isEqualTo(2);
             assertThat(
                 task.executions()
@@ -3162,7 +3192,8 @@ class DataFlowAT extends CommonTestBase {
             validateSuccessfulTaskLaunch(task, launch.getExecutionId(), launch.getSchemaTarget());
             // relaunch task with no args and it should not re-use old.
             LaunchResponseResource launch1 = task.launch(baseArgs);
-            Awaitility.await().until(() -> task.executionStatus(launch1.getExecutionId(), launch1.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+            Awaitility.await()
+                .until(() -> task.executionStatus(launch1.getExecutionId(), launch1.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             assertThat(task.executions().size()).isEqualTo(2);
             assertThat(
                 task.executions()
@@ -3502,21 +3533,23 @@ class DataFlowAT extends CommonTestBase {
     }
 
     private void verifyTaskDefAndTaskExecutionCount(final String taskName, int taskDefCount, int taskExecCount) {
-        Awaitility.await().atMost(60, TimeUnit.SECONDS).until(() -> {
-            List<TaskExecutionResource> executions = dataFlowOperations.taskOperations()
-                .executionList()
-                .getContent()
-                .stream()
-                .filter(taskExecution -> taskExecution.getTaskName() != null && taskExecution.getTaskName().equals(taskName))
-                .collect(Collectors.toList());
-            List<TaskDefinitionResource> definitions = dataFlowOperations.taskOperations()
-                .list()
-                .getContent()
-                .stream()
-                .filter(taskDefinitionResource -> taskDefinitionResource.getName().equals(taskName))
-                .collect(Collectors.toList());
-            return (executions.size() == taskExecCount) && (definitions.size() == taskDefCount);
-        });
+        Awaitility.await()
+            .atMost(60, TimeUnit.SECONDS)
+            .until(() -> {
+                List<TaskExecutionResource> executions = dataFlowOperations.taskOperations()
+                    .executionList()
+                    .getContent()
+                    .stream()
+                    .filter(taskExecution -> taskExecution.getTaskName() != null && taskExecution.getTaskName().equals(taskName))
+                    .collect(Collectors.toList());
+                List<TaskDefinitionResource> definitions = dataFlowOperations.taskOperations()
+                    .list()
+                    .getContent()
+                    .stream()
+                    .filter(taskDefinitionResource -> taskDefinitionResource.getName().equals(taskName))
+                    .collect(Collectors.toList());
+                return (executions.size() == taskExecCount) && (definitions.size() == taskDefCount);
+            });
     }
 
     private void allSuccessfulExecutions(String taskDescription, String taskDefinition, String... childLabels) {
@@ -3546,9 +3579,11 @@ class DataFlowAT extends CommonTestBase {
             LaunchResponseResource launch = task.launch(composedTaskLaunchArguments());
 
             if (runtimeApps.dataflowServerVersionLowerThan("2.8.0-SNAPSHOT")) {
-                Awaitility.await().until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+                Awaitility.await()
+                    .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             } else {
-                Awaitility.await().until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == parentTaskExecutionStatus);
+                Awaitility.await()
+                    .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == parentTaskExecutionStatus);
             }
 
             // Parent Task

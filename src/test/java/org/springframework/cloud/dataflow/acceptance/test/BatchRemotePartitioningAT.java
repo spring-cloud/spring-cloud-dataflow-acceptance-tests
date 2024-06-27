@@ -109,7 +109,8 @@ public class BatchRemotePartitioningAT extends CommonTestBase {
 
             LaunchResponseResource launch = task.launch(Collections.EMPTY_MAP, Arrays.asList("--platform=cloudfoundry"));
 
-            Awaitility.await().until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
+            Awaitility.await()
+                .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             assertThat(task.executions().size()).isEqualTo(1);
             Optional<TaskExecutionResource> taskExecution = task.execution(launch.getExecutionId(), launch.getSchemaTarget());
             assertThat(taskExecution).isPresent();

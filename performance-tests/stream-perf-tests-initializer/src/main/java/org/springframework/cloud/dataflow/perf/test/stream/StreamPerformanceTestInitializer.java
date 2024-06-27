@@ -107,7 +107,8 @@ public class StreamPerformanceTestInitializer {
                             if (i < streamDefinitionList.size()) {
                                 Stream stream = streamDefinitionList.get(i).deploy(testDeploymentProperties(runtimeApps));
                                 deployedStreams.add(stream);
-                                Awaitility.await().until(() -> stream.getStatus().equals("deployed"));
+                                Awaitility.await()
+                                    .until(() -> stream.getStatus().equals("deployed"));
                             }
                         }
 
