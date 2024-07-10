@@ -1016,12 +1016,14 @@ class DataFlowAT extends CommonTestBase {
 
             Awaitility.await()
                 .timeout(Duration.ofMinutes(15))
+                .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:"));
 
             assertThat(stream.history().size()).isEqualTo(1L);
             Awaitility.await()
                 .timeout(Duration.ofMinutes(15))
+                .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(1).equals(DEPLOYED));
 
@@ -1037,16 +1039,19 @@ class DataFlowAT extends CommonTestBase {
 
             Awaitility.await()
                 .timeout(Duration.ofMinutes(15))
+                .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.logs(app("log")).contains("Updated TICKTOCK - TIMESTAMP:"));
 
             assertThat(stream.history().size()).isEqualTo(2);
             Awaitility.await()
                 .timeout(Duration.ofMinutes(15))
+                .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(1).equals(DELETED));
             Awaitility.await()
                 .timeout(Duration.ofMinutes(15))
+                .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(2).equals(DEPLOYED));
 
@@ -1060,23 +1065,28 @@ class DataFlowAT extends CommonTestBase {
 
             Awaitility.await()
                 .timeout(Duration.ofMinutes(15))
+                .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:"));
 
             assertThat(stream.history().size()).isEqualTo(3);
             Awaitility.await()
                 .timeout(Duration.ofMinutes(15))
+                .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(1).equals(DELETED));
             Awaitility.await()
                 .timeout(Duration.ofMinutes(15))
+                .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(2).equals(DELETED));
             Awaitility.await()
                 .timeout(Duration.ofMinutes(15))
+                .pollInterval(20L, TimeUnit.SECONDS)
                 .until(() -> starting.contains(stream.history().get(3)));
             Awaitility.await()
                 .timeout(Duration.ofMinutes(15))
+                .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(3).equals(DEPLOYED));
 
@@ -1085,20 +1095,24 @@ class DataFlowAT extends CommonTestBase {
             stream.undeploy();
             Awaitility.await()
                 .timeout(Duration.ofMinutes(15))
+                .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(UNDEPLOYED));
 
             assertThat(stream.history().size()).isEqualTo(3);
             Awaitility.await()
                 .timeout(Duration.ofMinutes(15))
+                .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(1).equals(DELETED));
             Awaitility.await()
                 .timeout(Duration.ofMinutes(15))
+                .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(2).equals(DELETED));
             Awaitility.await()
                 .timeout(Duration.ofMinutes(15))
+                .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(3).equals(DELETED));
 
