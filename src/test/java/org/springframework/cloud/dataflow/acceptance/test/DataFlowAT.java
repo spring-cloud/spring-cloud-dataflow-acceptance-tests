@@ -179,7 +179,7 @@ class DataFlowAT extends CommonTestBase {
             runtimeApps.getPlatformType(),
             runtimeApps.getDataflowServerVersion()));
         logger.info("Wait until at least 60 apps are registered in SCDF");
-        Awaitility.await()
+        Awaitility.await("About Test")
             .until(() -> dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements() >= 60L);
     }
 
@@ -369,7 +369,7 @@ class DataFlowAT extends CommonTestBase {
             // task second launch
             LaunchResponseResource launch2 = task.launch();
 
-            Awaitility.await()
+            Awaitility.await("timestampTask:testtimestamp COMPLETE")
                 .until(() -> task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             assertThat(task.executions().size()).isEqualTo(2);
             Optional<TaskExecutionResource> taskExecutionResource = task.execution(launch2.getExecutionId(), launch2.getSchemaTarget());
@@ -398,7 +398,7 @@ class DataFlowAT extends CommonTestBase {
                 // task second launch
                 LaunchResponseResource launch2 = task.launch();
 
-                Awaitility.await()
+                Awaitility.await("timestampTaskBoot3:testtimestamp3 COMPLETE")
                     .until(() -> task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
                 assertThat(task.executions().size()).isEqualTo(2);
                 Optional<TaskExecutionResource> taskExecutionResource = task.execution(launch2.getExecutionId(), launch2.getSchemaTarget());
@@ -521,7 +521,7 @@ class DataFlowAT extends CommonTestBase {
                 awaitDeployed(stream, offset);
                 logger.info("stream-redeploy-test:deployed:{}", stream.getName());
                 stream.undeploy();
-                Awaitility.await()
+                Awaitility.await("streamReDeploy:" + stream.getName() + " is UNDEPLOYED")
                     .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                     .until(() -> stream.getStatus().equals(UNDEPLOYED));
                 logger.info("stream-redeploy-test:undeployed:{}", stream.getName());
@@ -664,7 +664,7 @@ class DataFlowAT extends CommonTestBase {
             final int maxWords = expectations.values().stream().mapToInt(List::size).max().orElse(partitions);
             expectations.values().forEach(expectation -> logger.info("Expectation:{}", expectation));
             assertThat(expectations.size()).isEqualTo(partitions);
-            Awaitility.await()
+            Awaitility.await("expected values in logs:" + expectations)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> {
                     Map<String, String> logMap = runtimeApps.applicationInstanceLogs(stream.getName(), "log");
@@ -753,7 +753,7 @@ class DataFlowAT extends CommonTestBase {
                 runtimeApps.httpPost(stream.getName(), "http", message);
                 logger.info("streamPartitioningNamed:sent:{}:{}", stream.getName(), message);
 
-                Awaitility.await()
+                Awaitility.await("expectation in logs:" + expectations)
                     .failFast(() -> AwaitUtils.hasErrorInLog(logOffset))
                     .until(() -> {
                         Map<String, String> logMap = runtimeApps.applicationInstanceLogs(logStream.getName(), "log");
@@ -907,7 +907,7 @@ class DataFlowAT extends CommonTestBase {
 
     private void awaitValueInLog(Stream stream, final StreamApplication app, final String value) {
         AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream, app.getName());
-        Awaitility.await()
+        Awaitility.await("Value " + value + " in log " + app.getName())
             .failFast(() -> AwaitUtils.hasErrorInLog(offset))
             .conditionEvaluationListener(condition -> {
                 if (condition.getRemainingTimeInMS() <= condition.getPollInterval().toMillis()) {
@@ -947,7 +947,7 @@ class DataFlowAT extends CommonTestBase {
     }
     private void awaitStarting(Stream stream, AwaitUtils.StreamLog offset) {
         final long startErrorCheck = System.currentTimeMillis() + 30_000L;
-        Awaitility.await("Deployment starting for " + stream.getName())
+        Awaitility.await("Deployment starting for stream " + stream.getName())
             .failFast(() -> System.currentTimeMillis() > startErrorCheck && AwaitUtils.hasErrorInLog(offset))
             .conditionEvaluationListener(condition -> {
                 if (condition.getRemainingTimeInMS() <= condition.getPollInterval().toMillis()) {
@@ -967,7 +967,7 @@ class DataFlowAT extends CommonTestBase {
 
     private void awaitDeployed(Stream stream, AwaitUtils.StreamLog offset) {
         final long startErrorCheck = System.currentTimeMillis() + 15_000L;
-        Awaitility.await("Deployment for " + stream.getName())
+        Awaitility.await("Deployment DEPLOYED for stream " + stream.getName())
             .timeout(Duration.ofMinutes(15))
             .failFast(() -> System.currentTimeMillis() >= startErrorCheck && AwaitUtils.hasErrorInLog(offset))
             .conditionEvaluationListener(condition -> {
@@ -1014,14 +1014,14 @@ class DataFlowAT extends CommonTestBase {
             logger.info("stream-lifecycle-test:deployed");
             streamAssertions.accept(stream);
 
-            Awaitility.await()
+            Awaitility.await("log app has TICKTOCK - TIMESTAMP: in log")
                 .timeout(Duration.ofMinutes(15))
                 .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:"));
 
             assertThat(stream.history().size()).isEqualTo(1L);
-            Awaitility.await()
+            Awaitility.await("stream history[1] DEPLOYED")
                 .timeout(Duration.ofMinutes(15))
                 .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
@@ -1037,19 +1037,19 @@ class DataFlowAT extends CommonTestBase {
 
             streamAssertions.accept(stream);
 
-            Awaitility.await()
+            Awaitility.await("log app has Updated TICKTOCK - TIMESTAMP: in log")
                 .timeout(Duration.ofMinutes(15))
                 .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.logs(app("log")).contains("Updated TICKTOCK - TIMESTAMP:"));
 
             assertThat(stream.history().size()).isEqualTo(2);
-            Awaitility.await()
+            Awaitility.await("stream history[1] DELETED")
                 .timeout(Duration.ofMinutes(15))
                 .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(1).equals(DELETED));
-            Awaitility.await()
+            Awaitility.await("stream history[2] DEPLOYED")
                 .timeout(Duration.ofMinutes(15))
                 .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
@@ -1063,28 +1063,28 @@ class DataFlowAT extends CommonTestBase {
 
             streamAssertions.accept(stream);
 
-            Awaitility.await()
+            Awaitility.await("log app has TICKTOCK - TIMESTAMP: in log")
                 .timeout(Duration.ofMinutes(15))
                 .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:"));
 
             assertThat(stream.history().size()).isEqualTo(3);
-            Awaitility.await()
+            Awaitility.await("stream history[1] DELETED")
                 .timeout(Duration.ofMinutes(15))
                 .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(1).equals(DELETED));
-            Awaitility.await()
+            Awaitility.await("stream history[2] DELETED")
                 .timeout(Duration.ofMinutes(15))
                 .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(2).equals(DELETED));
-            Awaitility.await()
+            Awaitility.await("stream history[3] " + starting)
                 .timeout(Duration.ofMinutes(15))
                 .pollInterval(20L, TimeUnit.SECONDS)
                 .until(() -> starting.contains(stream.history().get(3)));
-            Awaitility.await()
+            Awaitility.await("stream history[3] DEPLOYED")
                 .timeout(Duration.ofMinutes(15))
                 .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
@@ -1093,24 +1093,24 @@ class DataFlowAT extends CommonTestBase {
             // UNDEPLOY
             logger.info("stream-lifecycle-test: UNDEPLOY");
             stream.undeploy();
-            Awaitility.await()
+            Awaitility.await("stream status UNDEPLOYED")
                 .timeout(Duration.ofMinutes(15))
                 .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.getStatus().equals(UNDEPLOYED));
 
             assertThat(stream.history().size()).isEqualTo(3);
-            Awaitility.await()
+            Awaitility.await("stream history[1] DELETED")
                 .timeout(Duration.ofMinutes(15))
                 .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(1).equals(DELETED));
-            Awaitility.await()
+            Awaitility.await("stream history[2] DELETED")
                 .timeout(Duration.ofMinutes(15))
                 .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                 .until(() -> stream.history().get(2).equals(DELETED));
-            Awaitility.await()
+            Awaitility.await("stream history[3] DELETED")
                 .timeout(Duration.ofMinutes(15))
                 .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
@@ -1155,7 +1155,7 @@ class DataFlowAT extends CommonTestBase {
             stream.scaleApplicationInstances(log, 2, Collections.emptyMap());
             awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
-            Awaitility.await()
+            Awaitility.await("stream has 2 log apps")
                 .timeout(Duration.ofMinutes(15))
                 .until(() -> stream.runtimeApps().get(log).size() == 2);
 
@@ -1200,7 +1200,7 @@ class DataFlowAT extends CommonTestBase {
             logger.info("namedChannelDestination:sending:{} to {}", message, httpStream.getName());
             runtimeApps.httpPost(httpStream.getName(), "http", message);
             logger.info("namedChannelDestination:sent:{} to {}", message, httpStream.getName());
-            Awaitility.await()
+            Awaitility.await("log app has " + message + " in log")
                 .timeout(Duration.ofMinutes(15))
                 .failFast(() -> AwaitUtils.hasErrorInLog(httpOffset))
                 .failFast(() -> AwaitUtils.hasErrorInLog(logOffset))
@@ -1248,7 +1248,7 @@ class DataFlowAT extends CommonTestBase {
             logger.info("namedChannelTap:sending:{}:{}", httpLogStream.getName(), message);
             runtimeApps.httpPost(httpLogStream.getName(), "http", message);
             logger.info("namedChannelTap:sent:{}:{}", httpLogStream.getName(), message);
-            Awaitility.await()
+            Awaitility.await("log app has " + message + " in log")
                 .timeout(Duration.ofMinutes(15))
                 .failFast(() -> AwaitUtils.hasErrorInLog(tapOffset))
                 .until(() -> tapStream.logs(app("log")).contains(message));
@@ -1435,7 +1435,7 @@ class DataFlowAT extends CommonTestBase {
                     data.put("name", taskName);
                     runtimeApps.httpPostJson(stream.getName(), "http", data);
                     AtomicReference<LaunchResponseResource> launch = new AtomicReference<>();
-                    Awaitility.await()
+                    Awaitility.await("task " + taskName + " status COMPLETE")
                         .until(() -> task.executions()
                             .stream()
                             .filter(t -> t.getTaskName().equals(taskName) && t.getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE)
@@ -1507,7 +1507,7 @@ class DataFlowAT extends CommonTestBase {
             runtimeApps.httpPost(stream.getName(), "http", message3);
 
             // Wait for ~1 min for Micrometer to send first metrics to Influx.
-            Awaitility.await()
+            Awaitility.await("Wait for Micrometer to send metrics")
                 .until(() -> !JsonPath.parse(runtimeApps.httpGet(testProperties.getPlatform()
                         .getConnection()
                         .getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\""))
@@ -1586,7 +1586,7 @@ class DataFlowAT extends CommonTestBase {
             runtimeApps.httpPost(stream.getName(), "http", message3);
 
             // Wait for ~1 min for Micrometer to send first metrics to Prometheus.
-            Awaitility.await()
+            Awaitility.await("Wait for Micrometers to send first metrics to Prometheus")
                 .until(() -> (int) JsonPath.parse(runtimeApps.httpGet(testProperties.getPlatform()
                     .getConnection()
                     .getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total")).read("$.data.result.length()") > 0);
@@ -1706,7 +1706,7 @@ class DataFlowAT extends CommonTestBase {
 
             LaunchResponseResource launch = task.launch(Collections.emptyMap(), composedTaskLaunchArguments("--platform=local"));
 
-            Awaitility.await()
+            Awaitility.await("task " + task.getTaskName() + " is COMPLETE")
                 .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             assertThat(task.executions().size()).isEqualTo(1);
             Optional<TaskExecutionResource> taskExecutionResource = task.execution(launch.getExecutionId(), launch.getSchemaTarget());
@@ -1739,7 +1739,7 @@ class DataFlowAT extends CommonTestBase {
             // task launch id
             LaunchResponseResource launch = task.launch(Collections.singletonList("--spring.cloud.task.closecontext_enabled=false"));
 
-            Awaitility.await()
+            Awaitility.await("task " + task.getTaskName() + " is COMPLETE")
                 .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             assertThat(task.executions().size()).isEqualTo(1);
             Optional<TaskExecutionResource> taskExecutionResource = task.execution(launch.getExecutionId(), launch.getSchemaTarget());
@@ -1760,7 +1760,7 @@ class DataFlowAT extends CommonTestBase {
                 .getBody();
 
             // Wait for ~1 min for Micrometer to send first metrics to Prometheus.
-            Awaitility.await()
+            Awaitility.await("Micrometer to send metrics to prometheus")
                 .until(() -> (int) JsonPath.parse(pqlTaskMetricsQuery.get()).read("$.data.result.length()") > 0);
 
             JsonAssertions.assertThatJson(pqlTaskMetricsQuery.get()).isEqualTo(resourceToString("classpath:/task_metrics_system_cpu_usage.json"));
@@ -1797,7 +1797,7 @@ class DataFlowAT extends CommonTestBase {
             // second launch
             LaunchResponseResource launch2 = task.launch(composedTaskLaunchArguments());
 
-            Awaitility.await()
+            Awaitility.await("task " + task.getTaskName() + " is COMPLETE")
                 .until(() -> task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
             assertThat(task.executions().size()).isEqualTo(2);
@@ -1835,7 +1835,7 @@ class DataFlowAT extends CommonTestBase {
             // first launch
             LaunchResponseResource launch1 = task.launch(composedTaskLaunchArguments("--increment-instance-enabled=true"));
 
-            Awaitility.await()
+            Awaitility.await("task " + task.getTaskName() + " is COMPLETE")
                 .until(() -> task.executionStatus(launch1.getExecutionId(), launch1.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
             assertThat(task.executions().size()).isEqualTo(1);
@@ -1856,7 +1856,7 @@ class DataFlowAT extends CommonTestBase {
             // second launch
             LaunchResponseResource launch2 = task.launch(composedTaskLaunchArguments("--increment-instance-enabled=true"));
 
-            Awaitility.await()
+            Awaitility.await("task " + task.getTaskName() + " is COMPLETE")
                 .until(() -> task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
             assertThat(task.executions().size()).isEqualTo(2);
@@ -1897,7 +1897,7 @@ class DataFlowAT extends CommonTestBase {
                 // first launch
                 LaunchResponseResource launch1 = task.launch(composedTaskLaunchArguments("--increment-instance-enabled=true"));
 
-                Awaitility.await()
+                Awaitility.await("task " + task.getTaskName() + " is COMPLETE")
                     .until(() -> task.executionStatus(launch1.getExecutionId(), launch1.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
                 assertThat(task.executions().size()).isEqualTo(1);
@@ -1918,7 +1918,7 @@ class DataFlowAT extends CommonTestBase {
                 // second launch
                 LaunchResponseResource launch2 = task.launch(composedTaskLaunchArguments("--increment-instance-enabled=true"));
 
-                Awaitility.await()
+                Awaitility.await("task " + task.getTaskName() + " is COMPLETE")
                     .until(() -> task.executionStatus(launch2.getExecutionId(), launch2.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
                 assertThat(task.executions().size()).isEqualTo(2);
@@ -1961,7 +1961,7 @@ class DataFlowAT extends CommonTestBase {
 
             LaunchResponseResource launch = task.launch(composedTaskLaunchArguments());
 
-            Awaitility.await()
+            Awaitility.await("task " + task.getTaskName() + " is COMPLETE")
                 .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
             // Parent Task Successfully completed
@@ -2018,7 +2018,7 @@ class DataFlowAT extends CommonTestBase {
 
                 LaunchResponseResource launch = task.launch(composedTaskLaunchArguments());
 
-                Awaitility.await()
+                Awaitility.await("task " + task.getTaskName() + " is COMPLETE")
                     .atMost(Duration.ofMinutes(20))
                     .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
@@ -2399,10 +2399,10 @@ class DataFlowAT extends CommonTestBase {
             LaunchResponseResource launch = task.launch(composedTaskLaunchArguments());
 
             if (runtimeApps.dataflowServerVersionLowerThan("2.8.0-SNAPSHOT")) {
-                Awaitility.await()
+                Awaitility.await("task " + task.getTaskName() + " is COMPLETE")
                     .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             } else {
-                Awaitility.await()
+                Awaitility.await("task " + task.getTaskName() + " is ERROR")
                     .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.ERROR);
             }
 
@@ -2451,7 +2451,7 @@ class DataFlowAT extends CommonTestBase {
                 .max(Comparator.comparingLong(TaskExecutionResource::getExecutionId));
             assertThat(taskExecutionResource2).isPresent();
 
-            Awaitility.await()
+            Awaitility.await("task " + taskExecutionResource2.get().getTaskName() + " is COMPLETE")
                 .until(() -> task.executionStatus(taskExecutionResource2.get().getExecutionId(),
                     taskExecutionResource2.get().getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
@@ -2619,10 +2619,10 @@ class DataFlowAT extends CommonTestBase {
             LaunchResponseResource launch = task.launch(composedTaskLaunchArguments());
             logger.info("composed-task-failedCTRRetry-test:launch");
             if (runtimeApps.dataflowServerVersionLowerThan("2.8.0-SNAPSHOT")) {
-                Awaitility.await()
+                Awaitility.await("task " + task.getTaskName() + " is COMPLETE")
                     .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             } else {
-                Awaitility.await()
+                Awaitility.await("task " + task.getTaskName() + " is ERROR")
                     .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.ERROR);
             }
 
@@ -2662,7 +2662,7 @@ class DataFlowAT extends CommonTestBase {
 
             assertThat(resource).isPresent();
             logger.info("composed-task-failedCTRRetry-test:wait complete");
-            Awaitility.await()
+            Awaitility.await("task " + task.getTaskName() + " is COMPLETE")
                 .until(() -> task.executionStatus(resource.get().getExecutionId(), resource.get().getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
             assertThat(task.executions().size()).isEqualTo(2);
@@ -2721,7 +2721,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     private TaskExecutionResource validateSuccessfulTaskLaunch(Task task, long launchId, String schemaTarget, int sizeExpected) {
-        Awaitility.await()
+        Awaitility.await("task " + task.getTaskName() + " is COMPLETE")
             .until(() -> task.executionStatus(launchId, schemaTarget) == TaskExecutionStatus.COMPLETE);
         assertThat(task.executions().size()).isEqualTo(sizeExpected);
         Optional<TaskExecutionResource> taskExecution = task.execution(launchId, schemaTarget);
@@ -2807,10 +2807,10 @@ class DataFlowAT extends CommonTestBase {
             Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
                 dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0), launch.getSchemaTarget());
                 // Wait for job to start
-                Awaitility.await()
+                Awaitility.await("task " + task.getTaskName() + " has 2 executions")
                     .until(() -> task.thinkJobExecutionResources().size() == 2);
                 // Wait for task for the job to complete
-                Awaitility.await()
+                Awaitility.await("task " + task.getTaskName() + " is COMPLETE")
                     .until(() -> {
                         Optional<TaskExecutionResource> executionResource = task.executions().stream().findFirst();
                         return executionResource.filter(resource -> resource.getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE).isPresent();
@@ -3169,7 +3169,7 @@ class DataFlowAT extends CommonTestBase {
             // Verify task
             validateSuccessfulTaskLaunch(task, launch.getExecutionId(), launch.getSchemaTarget());
             LaunchResponseResource launch1 = task.launch(args);
-            Awaitility.await()
+            Awaitility.await("task " + task.getTaskName() + " is COMPLETE")
                 .until(() -> task.executionStatus(launch1.getExecutionId(), launch1.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             assertThat(task.executions().size()).isEqualTo(2);
             assertThat(
@@ -3219,7 +3219,7 @@ class DataFlowAT extends CommonTestBase {
             validateSuccessfulTaskLaunch(task, launch.getExecutionId(), launch.getSchemaTarget());
             // relaunch task with no args and it should not re-use old.
             LaunchResponseResource launch1 = task.launch(baseArgs);
-            Awaitility.await()
+            Awaitility.await("task " + task.getTaskName() + " is COMPLETE")
                 .until(() -> task.executionStatus(launch1.getExecutionId(), launch1.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             assertThat(task.executions().size()).isEqualTo(2);
             assertThat(
@@ -3560,7 +3560,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     private void verifyTaskDefAndTaskExecutionCount(final String taskName, int taskDefCount, int taskExecCount) {
-        Awaitility.await()
+        Awaitility.await("task " + taskName + " has " + taskDefCount + " definitions and " + taskExecCount + " executions")
             .atMost(60, TimeUnit.SECONDS)
             .until(() -> {
                 List<TaskExecutionResource> executions = dataFlowOperations.taskOperations()
@@ -3606,10 +3606,10 @@ class DataFlowAT extends CommonTestBase {
             LaunchResponseResource launch = task.launch(composedTaskLaunchArguments());
 
             if (runtimeApps.dataflowServerVersionLowerThan("2.8.0-SNAPSHOT")) {
-                Awaitility.await()
+                Awaitility.await("task " + task.getTaskName() + " is COMPLETE")
                     .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
             } else {
-                Awaitility.await()
+                Awaitility.await("task " + task.getTaskName() + " is ERROR")
                     .until(() -> task.executionStatus(launch.getExecutionId(), launch.getSchemaTarget()) == parentTaskExecutionStatus);
             }
 
