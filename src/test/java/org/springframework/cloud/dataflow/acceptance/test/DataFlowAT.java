@@ -104,7 +104,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @author Corneil du Plessis
  */
 @SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestMethodOrder(MethodOrderer.Random.class)
 @Import(DataFlowOperationsATConfiguration.class)
 @DockerCompose
 class DataFlowAT extends CommonTestBase {
