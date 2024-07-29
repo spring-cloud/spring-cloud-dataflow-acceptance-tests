@@ -34,10 +34,10 @@ if [ "$1" != "" ]; then
     export EXTRA="-P test-3-of-3"
     ;;
     "smoke")
-    export EXTRA="-Dgroups=smoke|always"
+    export EXTRA="-Dgroups=smoke,always"
     ;;
     info)
-    export EXTRA="-P test-info -Dit.test=org.springframework.cloud.dataflow.acceptance.test.DataFlowAT#aboutTestInfo"
+    export EXTRA="-P test-info -Dit.test=\"*DataFlowAT#aboutTestInfo\""
     ;;
     *)
       if [[ "$1" == *"group"* ]]; then
@@ -60,7 +60,7 @@ echo "EXTRA=$EXTRA" | tee build.log
 echo "ROOTDIR=$ROOTDIR" | tee -a build.log
 echo "PWD=$(pwd)" | tee -a build.log
 set -o pipefail
-./mvnw -Dspring.profiles.active=blah \
+./mvnw -Dspring.profiles.active=blah,spring \
   -DPLATFORM_TYPE=kubernetes \
   -DNAMESPACE=$NS \
   -DSKIP_CLOUD_CONFIG=true \

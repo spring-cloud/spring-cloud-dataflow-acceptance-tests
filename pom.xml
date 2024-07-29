@@ -27,11 +27,11 @@
         <javadoc.opts>-Xdoclint:none</javadoc.opts>
         <checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>
         <checkstyle.header.file>etc/checkstyle/checkstyle-header.txt</checkstyle.header.file>
-        <dataflow.version>2.11.3-SNAPSHOT</dataflow.version>
+        <dataflow.version>2.11.4-SNAPSHOT</dataflow.version>
         <app.starters.support.version>2.5.0</app.starters.support.version>
-        <spring-cloud-deployer-cloudfoundry.version>2.9.3-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
-        <spring-cloud-deployer-kubernetes.version>2.9.3-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
-        <spring-cloud-deployer-local.version>2.9.3-SNAPSHOT</spring-cloud-deployer-local.version>
+        <spring-cloud-deployer-cloudfoundry.version>2.9.4-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
+        <spring-cloud-deployer-kubernetes.version>2.9.4-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
+        <spring-cloud-deployer-local.version>2.9.4-SNAPSHOT</spring-cloud-deployer-local.version>
         <maven-failsafe-plugin.groups>always,group1,group2,group3,group4,group5,group6</maven-failsafe-plugin.groups>
     </properties>
     <dependencies>
@@ -124,13 +124,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-runner</artifactId>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -191,7 +186,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M4</version>
+                <version>3.3.1</version>
                 <configuration>
                     <skip>true</skip>
                     <!-- we use failsafe to run integration tests -->
@@ -200,11 +195,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>3.3.1</version>
                 <configuration>
                     <rerunFailingTestsCount>2</rerunFailingTestsCount>
                     <includes>
-                        <include>**/*AT</include>
+                        <include>**/*AT*</include>
                     </includes>
                 </configuration>
             </plugin>
@@ -215,7 +210,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>3.0.0-M7</version>
+                <version>3.3.1</version>
                 <configuration>
                     <linkXRef>false</linkXRef>
                 </configuration>
@@ -230,7 +225,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.22.2</version>
+                        <version>3.3.1</version>
                         <configuration>
                             <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group1,group6,all</groups>
@@ -246,7 +241,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.22.2</version>
+                        <version>3.3.1</version>
                         <configuration>
                             <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group1,group6,all</groups>
@@ -262,7 +257,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.22.2</version>
+                        <version>3.3.1</version>
                         <configuration>
                             <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group3,group4,all</groups>
@@ -278,7 +273,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.22.2</version>
+                        <version>3.3.1</version>
                         <configuration>
                             <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group1,group6,all</groups>
@@ -297,7 +292,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.22.2</version>
+                        <version>3.3.1</version>
                         <configuration>
                             <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group2,all</groups>
@@ -313,7 +308,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.22.2</version>
+                        <version>3.3.1</version>
                         <configuration>
                             <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group3,all</groups>
@@ -329,7 +324,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.22.2</version>
+                        <version>3.3.1</version>
                         <configuration>
                             <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group4,all</groups>
@@ -345,7 +340,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.22.2</version>
+                        <version>3.3.1</version>
                         <configuration>
                             <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group5,all</groups>
@@ -361,7 +356,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.22.2</version>
+                        <version>3.3.1</version>
                         <configuration>
                             <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>group6,all</groups>
@@ -377,7 +372,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.22.2</version>
+                        <version>3.3.1</version>
                         <configuration>
                             <rerunFailingTestsCount>2</rerunFailingTestsCount>
                             <groups>smoke,all</groups>
