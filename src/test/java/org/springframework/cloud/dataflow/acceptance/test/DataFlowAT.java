@@ -2949,7 +2949,8 @@ class DataFlowAT extends CommonTestBase {
         assertThatThrownBy(() ->
             task.launch(Collections.singletonMap("version.testtimestamp", "1.0.2"), null)
         ).isInstanceOf(DataFlowClientException.class)
-            .hasMessageContaining("Unknown task app: testtimestamp");
+            .hasMessageContaining("Unknown task app:")
+            .hasMessageContaining("testtimestamp");
 
         LaunchResponseResource launch = task.launch();
         validateSuccessfulTaskLaunch(task, launch.getExecutionId(), launch.getSchemaTarget(), 1);
@@ -2979,7 +2980,8 @@ class DataFlowAT extends CommonTestBase {
             LaunchResponseResource launchResponse = task.launch(Collections.singletonMap("version.testtimestamp", TEST_VERSION_NUMBER), null);
             logger.info("launched:{},{}", launchResponse.getExecutionId(), launchResponse.getSchemaTarget());
         }).isInstanceOf(DataFlowClientException.class)
-            .hasMessageContaining("Unknown task app: testtimestamp");
+            .hasMessageContaining("Unknown task app:")
+            .hasMessageContaining("testtimestamp");
     }
 
     @Test
@@ -3061,7 +3063,9 @@ class DataFlowAT extends CommonTestBase {
 
         assertThatThrownBy(task::launch)
             .isInstanceOf(DataFlowClientException.class)
-            .hasMessageContaining("Unknown task app: testtimestamp");
+                .hasMessageContaining("Unknown task app:")
+                .hasMessageContaining("testtimestamp");
+
     }
 
     private Task createTaskDefinition() {
