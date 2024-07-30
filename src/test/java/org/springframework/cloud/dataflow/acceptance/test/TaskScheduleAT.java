@@ -181,7 +181,7 @@ public class TaskScheduleAT extends CommonTestBase {
 
             assertThat(taskSchedule.isScheduled()).isFalse();
 
-            logger.info("schedule-lifecycle-test: SCHEDULE");
+            logger.info("schedule-lifecycle-test:SCHEDULE");
             taskSchedule.schedule(DEFAULT_CRON_EXPRESSION, Collections.emptyMap());
 
             assertThat(taskSchedule.isScheduled()).isTrue();
@@ -191,7 +191,7 @@ public class TaskScheduleAT extends CommonTestBase {
             assertThat(retrievedSchedule.getScheduleProperties().containsKey(SchedulerPropertyKeys.CRON_EXPRESSION)).isTrue();
             assertThat(retrievedSchedule.getScheduleProperties().get(SchedulerPropertyKeys.CRON_EXPRESSION)).isEqualTo(DEFAULT_CRON_EXPRESSION);
 
-            logger.info("schedule-lifecycle-test: UNSCHEDULE");
+            logger.info("schedule-lifecycle-test:UNSCHEDULE");
             taskSchedule.unschedule();
 
             assertThat(taskSchedule.isScheduled()).isFalse();
@@ -213,7 +213,7 @@ public class TaskScheduleAT extends CommonTestBase {
 
             assertThat(taskSchedule.isScheduled()).isFalse();
 
-            logger.info("schedule-lifecycle-test: SCHEDULE");
+            logger.info("schedule-lifecycle-test:SCHEDULE");
             taskSchedule.schedule(DEFAULT_CRON_EXPRESSION, Collections.emptyMap());
 
             assertThat(taskSchedule.isScheduled()).isTrue();
@@ -223,7 +223,7 @@ public class TaskScheduleAT extends CommonTestBase {
             assertThat(retrievedSchedule.getScheduleProperties().containsKey(SchedulerPropertyKeys.CRON_EXPRESSION)).isTrue();
             assertThat(retrievedSchedule.getScheduleProperties().get(SchedulerPropertyKeys.CRON_EXPRESSION)).isEqualTo(DEFAULT_CRON_EXPRESSION);
 
-            logger.info("schedule-lifecycle-test-boot3: UNSCHEDULE");
+            logger.info("schedule-lifecycle-test-boot3:UNSCHEDULE");
             taskSchedule.unschedule();
 
             assertThat(taskSchedule.isScheduled()).isFalse();

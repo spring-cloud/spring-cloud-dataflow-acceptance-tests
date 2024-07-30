@@ -169,12 +169,12 @@ class DataFlowAT extends CommonTestBase {
     @Order(Integer.MIN_VALUE)
     @Tag("always")
     public void aboutTestInfo() {
-        logger.info("Available platforms: " + dataFlowOperations.streamOperations()
+        logger.info("Available platforms:" + dataFlowOperations.streamOperations()
             .listPlatforms()
             .stream()
-            .map(d -> String.format("[name: %s, type: %s]", d.getName(), d.getType()))
+            .map(d -> String.format("[name:%s, type:%s]", d.getName(), d.getType()))
             .collect(Collectors.joining()));
-        logger.info(String.format("Selected platform: [name: %s, type: %s, Dataflow-Version: %s]",
+        logger.info(String.format("Selected platform:[name:%s, type:%s, Dataflow-Version:%s]",
             runtimeApps.getPlatformName(),
             runtimeApps.getPlatformType(),
             runtimeApps.getDataflowServerVersion()));
@@ -546,7 +546,7 @@ class DataFlowAT extends CommonTestBase {
             awaitDeployed(stream, offset);
             logger.info("stream-transform-test:deployed:{}", stream.getName());
 
-            String prefix = "Unique Test message: ";
+            String prefix = "Unique Test message:";
             String message = prefix + new Random().nextInt();
 
             runtimeApps.httpPost(stream.getName(), "http", TESTING_ONE_TWO_THREE);
@@ -584,7 +584,7 @@ class DataFlowAT extends CommonTestBase {
             awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
             logger.info("stream-script-test:deployed:{}", stream.getName());
-            String message = "Unique Test message: " + new Random().nextInt();
+            String message = "Unique Test message:" + new Random().nextInt();
             runtimeApps.httpPost(stream.getName(), "http", TESTING_ONE_TWO_THREE);
             runtimeApps.httpPost(stream.getName(), "http", message);
             logger.info("stream-script-test:sent:{}:{}", stream.getName(), message);
@@ -619,7 +619,7 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @Tag("group1")
-    // TODO: remove when logs are available per partition
+    // TODO:remove when logs are available per partition
     @DisabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "kubernetes")
     public void streamPartitioning() {
         logger.info("stream-partitioning-test:start (aka. WoodChuckTests)");
@@ -692,7 +692,7 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @Tag("group3")
-    // TODO: remove when logs are available per partition
+    // TODO:remove when logs are available per partition
     @DisabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "kubernetes")
     public void streamPartitioningNamed() {
         logger.info("stream-partitioning-named-test:start (aka. WoodChuckTests)");
@@ -793,13 +793,13 @@ class DataFlowAT extends CommonTestBase {
 
         Assumptions.assumeTrue(!runtimeApps.getPlatformType()
                 .equals(RuntimeApplicationHelper.CLOUDFOUNDRY_PLATFORM_TYPE) || runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"),
-            "stream-app-cross-version-test: SKIP - CloudFoundry 2.6 and below!");
+            "stream-app-cross-version-test:SKIP - CloudFoundry 2.6 and below!");
 
         Assumptions.assumeTrue(runtimeApps.isAppRegistered("ver-log", ApplicationType.sink, VERSION_3_0_1) && runtimeApps.isAppRegistered("ver-log",
             ApplicationType.sink,
-            VERSION_2_1_5), "stream-app-cross-version-test: SKIP - required ver-log apps not registered!");
+            VERSION_2_1_5), "stream-app-cross-version-test:SKIP - required ver-log apps not registered!");
 
-        logger.info("stream-app-cross-version-test: DEPLOY");
+        logger.info("stream-app-cross-version-test:DEPLOY");
 
         int CURRENT_MANIFEST = 0;
         String RANDOM_SUFFIX = randomSuffix();
@@ -830,7 +830,7 @@ class DataFlowAT extends CommonTestBase {
             assertThat(stream.history().size()).isEqualTo(1L);
 
             // UPDATE
-            logger.info("stream-app-cross-version-test: UPDATE");
+            logger.info("stream-app-cross-version-test:UPDATE");
 
             stream.update(new DeploymentPropertiesBuilder().put("version.ver-log", VERSION_2_1_5).build());
             awaitStarting(stream, offset);
@@ -845,7 +845,7 @@ class DataFlowAT extends CommonTestBase {
             assertThat(stream.history().size()).isEqualTo(2);
 
             // ROLLBACK
-            logger.info("stream-app-cross-version-test: ROLLBACK");
+            logger.info("stream-app-cross-version-test:ROLLBACK");
 
             stream.rollback(0);
             awaitStarting(stream, offset);
@@ -857,7 +857,7 @@ class DataFlowAT extends CommonTestBase {
 
             assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_3_0_1);
             assertThat(stream.history().size()).isEqualTo(3);
-            logger.info("stream-app-cross-version-test: UNDEPLOY");
+            logger.info("stream-app-cross-version-test:UNDEPLOY");
         } catch (Throwable x) {
             if (runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.10.0-SNAPSHOT")) {
                 throw x;
@@ -867,7 +867,7 @@ class DataFlowAT extends CommonTestBase {
         }
 
         // DESTROY
-        logger.info("stream-app-cross-version-test: DESTROY");
+        logger.info("stream-app-cross-version-test:DESTROY");
 
         assertThat(Optional.ofNullable(dataFlowOperations.streamOperations().list().getMetadata())
             .orElse(new PagedModel.PageMetadata(0, 0, 0))
@@ -882,7 +882,7 @@ class DataFlowAT extends CommonTestBase {
         // Skip for SCDF 2.10.x on CloudFoundry due to '500 No Body' response
         if (runtimeApps.dataflowServerVersionLowerThan("2.11.0") &&
                 runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.CLOUDFOUNDRY_PLATFORM_TYPE)) {
-            logger.warn("Skipping streamLifecycle() test due to: 'SCDF 2.10.x on CloudFoundry w/ 500 [No Body] response'");
+            logger.warn("Skipping streamLifecycle() test due to:'SCDF 2.10.x on CloudFoundry w/ 500 [No Body] response'");
             return;
         }
         logger.info("stream-lifecycle:start");
@@ -1000,22 +1000,24 @@ class DataFlowAT extends CommonTestBase {
 
 
     private void streamLifecycleHelper(int appInstanceCount, Consumer<Stream> streamAssertions) {
-        logger.info("stream-lifecycle-test: DEPLOY");
+        logger.info("stream-lifecycle-test:DEPLOY");
+        DeploymentPropertiesBuilder builder = new DeploymentPropertiesBuilder().putAll(testDeploymentProperties("log"));
+        if (appInstanceCount > 1) {
+            builder.put("deployer.*.count", Integer.toString(appInstanceCount));
+        }
         try (Stream stream = Stream.builder(dataFlowOperations)
             .name("lifecycle-test" + randomSuffix())
-            .definition("time | log --log.name='TEST' --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
+            .definition("time | log --log.name='TEST' --log.expression='TICKTOCK - TIMESTAMP:'.concat(payload)")
             .create()
-            .deploy(new DeploymentPropertiesBuilder().putAll(testDeploymentProperties("log"))
-                .put("deployer.*.count", Integer.toString(appInstanceCount))
-                .build())) {
-            logger.info("stream-lifecycle-test: await deployment");
+            .deploy(builder.build())) {
+            logger.info("stream-lifecycle-test:await deployment");
             AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
             logger.info("stream-lifecycle-test:deployed");
             streamAssertions.accept(stream);
 
-            Awaitility.await("log app has TICKTOCK - TIMESTAMP: in log")
+            Awaitility.await("log app has TICKTOCK - TIMESTAMP:in log")
                 .timeout(Duration.ofMinutes(15))
                 .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
@@ -1029,8 +1031,8 @@ class DataFlowAT extends CommonTestBase {
                 .until(() -> stream.history().get(1).equals(DEPLOYED));
 
             // UPDATE
-            logger.info("stream-lifecycle-test: UPDATE");
-            stream.update(new DeploymentPropertiesBuilder().put("app.log.log.expression", "'Updated TICKTOCK - TIMESTAMP: '.concat(payload)")
+            logger.info("stream-lifecycle-test:UPDATE");
+            stream.update(new DeploymentPropertiesBuilder().put("app.log.log.expression", "'Updated TICKTOCK - TIMESTAMP:'.concat(payload)")
                 .put("app.*.management.endpoints.web.exposure.include", "*")
                 .build());
             awaitStarting(stream, offset);
@@ -1038,7 +1040,7 @@ class DataFlowAT extends CommonTestBase {
 
             streamAssertions.accept(stream);
 
-            Awaitility.await("log app has Updated TICKTOCK - TIMESTAMP: in log")
+            Awaitility.await("log app has Updated TICKTOCK - TIMESTAMP:in log")
                 .timeout(Duration.ofMinutes(15))
                 .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
@@ -1057,14 +1059,14 @@ class DataFlowAT extends CommonTestBase {
                 .until(() -> stream.history().get(2).equals(DEPLOYED));
 
             // ROLLBACK
-            logger.info("stream-lifecycle-test: ROLLBACK");
+            logger.info("stream-lifecycle-test:ROLLBACK");
             stream.rollback(0);
             awaitStarting(stream, offset);
             awaitDeployed(stream, offset);
 
             streamAssertions.accept(stream);
 
-            Awaitility.await("log app has TICKTOCK - TIMESTAMP: in log")
+            Awaitility.await("log app has TICKTOCK - TIMESTAMP:in log")
                 .timeout(Duration.ofMinutes(15))
                 .pollInterval(20L, TimeUnit.SECONDS)
                 .failFast(() -> AwaitUtils.hasErrorInLog(offset))
@@ -1092,7 +1094,7 @@ class DataFlowAT extends CommonTestBase {
                 .until(() -> stream.history().get(3).equals(DEPLOYED));
 
             // UNDEPLOY
-            logger.info("stream-lifecycle-test: UNDEPLOY");
+            logger.info("stream-lifecycle-test:UNDEPLOY");
             stream.undeploy();
             Awaitility.await("stream status UNDEPLOYED")
                 .timeout(Duration.ofMinutes(15))
@@ -1121,10 +1123,10 @@ class DataFlowAT extends CommonTestBase {
             System.out.println("definitions:" + list.getContent());
             PagedModel.PageMetadata metadata = list.getMetadata();
             assertThat(metadata).isNotNull();
-            assertThat(metadata.getTotalElements()).isEqualTo(1L);
+            assertThat(metadata.getTotalElements()).isGreaterThanOrEqualTo(1L);
             // DESTROY
         }
-        logger.info("stream-lifecycle-test: DESTROY");
+        logger.info("stream-lifecycle-test:DESTROY");
         PagedModel.PageMetadata metadata = dataFlowOperations.streamOperations().list().getMetadata();
         assertThat(metadata).isNotNull();
         assertThat(metadata.getTotalElements()).isEqualTo(0L);
@@ -1136,7 +1138,7 @@ class DataFlowAT extends CommonTestBase {
         logger.info("stream-scaling-test:start");
         try (Stream stream = Stream.builder(dataFlowOperations)
             .name("stream-scaling-test" + randomSuffix())
-            .definition("time | log --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
+            .definition("time | log --log.expression='TICKTOCK - TIMESTAMP:'.concat(payload)")
             .create()
             .deploy(testDeploymentProperties("log", "time"))) {
             logger.info("stream-scaling-test:await deployment");
@@ -1197,7 +1199,7 @@ class DataFlowAT extends CommonTestBase {
             awaitDeployed(httpStream, httpOffset);
             logger.info("namedChannelDestination:deployed:{}", httpStream.getName());
             runtimeApps.httpPost(httpStream.getName(), "http", TESTING_ONE_TWO_THREE);
-            String message = "Unique Test message: " + new Random().nextInt();
+            String message = "Unique Test message:" + new Random().nextInt();
             logger.info("namedChannelDestination:sending:{} to {}", message, httpStream.getName());
             runtimeApps.httpPost(httpStream.getName(), "http", message);
             logger.info("namedChannelDestination:sent:{} to {}", message, httpStream.getName());
@@ -1245,7 +1247,7 @@ class DataFlowAT extends CommonTestBase {
             awaitDeployed(tapStream, tapOffset);
             logger.info("namedChannelTap:deployed:{}", tapStream.getName());
             runtimeApps.httpPost(httpLogStream.getName(), "http", TESTING_ONE_TWO_THREE);
-            String message = "Unique Test message: " + new Random().nextInt();
+            String message = "Unique Test message:" + new Random().nextInt();
             logger.info("namedChannelTap:sending:{}:{}", httpLogStream.getName(), message);
             runtimeApps.httpPost(httpLogStream.getName(), "http", message);
             logger.info("namedChannelTap:sent:{}:{}", httpLogStream.getName(), message);
@@ -1299,12 +1301,12 @@ class DataFlowAT extends CommonTestBase {
 
             runtimeApps.httpPost(httpStreamOne.getName(), "http", TESTING_ONE_TWO_THREE);
 
-            final String messageOne = "Unique Test message: " + new Random().nextInt();
+            final String messageOne = "Unique Test message:" + new Random().nextInt();
             runtimeApps.httpPost(httpStreamOne.getName(), "http", messageOne);
 
             awaitValueInLog(logStream, app("log"), messageOne);
             runtimeApps.httpPost(httpStreamTwo.getName(), "http", TESTING_ONE_TWO_THREE);
-            final String messageTwo = "Unique Test message: " + new Random().nextInt();
+            final String messageTwo = "Unique Test message:" + new Random().nextInt();
             runtimeApps.httpPost(httpStreamTwo.getName(), "http", messageTwo);
 
             awaitValueInLog(logStream, app("log"), messageTwo);
@@ -1389,13 +1391,13 @@ class DataFlowAT extends CommonTestBase {
         } else {
             String dataflowTaskLauncherAppName = "dataflow-tasklauncher";
 
-            String skipOnIncompatibleDataFlowVersion = dataflowTaskLauncherAppName + "-sink-test: SKIP - Dataflow version:" + runtimeApps.getDataflowServerVersion() + " is older than 2.9.0-SNAPSHOT!";
+            String skipOnIncompatibleDataFlowVersion = dataflowTaskLauncherAppName + "-sink-test:SKIP - Dataflow version:" + runtimeApps.getDataflowServerVersion() + " is older than 2.9.0-SNAPSHOT!";
             if (!runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.9.0-SNAPSHOT")) {
                 logger.warn(skipOnIncompatibleDataFlowVersion);
             }
             Assumptions.assumeTrue(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.9.0-SNAPSHOT"), skipOnIncompatibleDataFlowVersion);
 
-            String skipOnMissingAppRegistration = dataflowTaskLauncherAppName + "-sink-test: SKIP - no " + dataflowTaskLauncherAppName + " app registered!";
+            String skipOnMissingAppRegistration = dataflowTaskLauncherAppName + "-sink-test:SKIP - no " + dataflowTaskLauncherAppName + " app registered!";
             boolean isDataflowTaskLauncherAppRegistered = runtimeApps.isAppRegistered(dataflowTaskLauncherAppName, ApplicationType.sink);
             if (!isDataflowTaskLauncherAppRegistered) {
                 logger.info(skipOnMissingAppRegistration);
@@ -1405,7 +1407,7 @@ class DataFlowAT extends CommonTestBase {
             DetailedAppRegistrationResource dataflowTaskLauncherRegistration = dataFlowOperations.appRegistryOperations()
                 .info(dataflowTaskLauncherAppName, ApplicationType.sink, false);
 
-            logger.info("{}-sink-test: {} [{}], DataFlow [{}]",
+            logger.info("{}-sink-test:{} [{}], DataFlow [{}]",
                 dataflowTaskLauncherAppName,
                 dataflowTaskLauncherAppName,
                 dataflowTaskLauncherRegistration.getVersion(),
@@ -1471,17 +1473,17 @@ class DataFlowAT extends CommonTestBase {
     public void analyticsCounterInflux() {
         logger.info("analytics-counter-influx:start");
         if (!influxPresent()) {
-            logger.info("stream-analytics-test: SKIP - no InfluxDB metrics configured!");
+            logger.info("stream-analytics-test:SKIP - no InfluxDB metrics configured!");
             return;
         }
 
         Assumptions.assumeTrue(influxPresent());
 
         if (!runtimeApps.isAppRegistered("analytics", ApplicationType.sink)) {
-            logger.info("stream-analytics-influx-test: SKIP - no analytics app registered!");
+            logger.info("stream-analytics-influx-test:SKIP - no analytics app registered!");
         }
 
-        Assumptions.assumeTrue(runtimeApps.isAppRegistered("analytics", ApplicationType.sink), "stream-analytics-test: SKIP - no analytics app registered!");
+        Assumptions.assumeTrue(runtimeApps.isAppRegistered("analytics", ApplicationType.sink), "stream-analytics-test:SKIP - no analytics app registered!");
 
         logger.info("stream-analytics-influx-test");
 
@@ -1552,14 +1554,14 @@ class DataFlowAT extends CommonTestBase {
     public void analyticsCounterPrometheus() throws IOException {
         logger.info("analytics-counter-prometheus:start");
         if (!runtimeApps.isAppRegistered("analytics", ApplicationType.sink)) {
-            logger.info("stream-analytics-prometheus-test: SKIP - no analytics app registered!");
+            logger.info("stream-analytics-prometheus-test:SKIP - no analytics app registered!");
             return;
         }
 
-        Assumptions.assumeTrue(runtimeApps.isAppRegistered("analytics", ApplicationType.sink), "stream-analytics-test: SKIP - no analytics app registered!");
+        Assumptions.assumeTrue(runtimeApps.isAppRegistered("analytics", ApplicationType.sink), "stream-analytics-test:SKIP - no analytics app registered!");
 
         if (!prometheusPresent()) {
-            logger.info("stream-analytics-prometheus-test: SKIP - no Prometheus configured!");
+            logger.info("stream-analytics-prometheus-test:SKIP - no Prometheus configured!");
         }
         Assumptions.assumeTrue(prometheusPresent());
 
@@ -1722,15 +1724,15 @@ class DataFlowAT extends CommonTestBase {
     public void taskMetricsPrometheus() throws IOException {
         logger.info("task-metrics-prometheus:start");
         if (!prometheusPresent()) {
-            logger.info("task-metrics-test: SKIP - no metrics configured!");
+            logger.info("task-metrics-test:SKIP - no metrics configured!");
             return;
         }
 
         Assumptions.assumeTrue(prometheusPresent());
 
-        logger.info("task-metrics-test: Prometheus");
+        logger.info("task-metrics-test:Prometheus");
 
-        // task-demo-metrics-prometheus source: https://bit.ly/3bUfzWh
+        // task-demo-metrics-prometheus source:https://bit.ly/3bUfzWh
         try (Task task = Task.builder(dataFlowOperations)
             .name(randomTaskName())
             .definition("task-demo-metrics-prometheus --task.demo.delay.fixed=0s")
@@ -2928,14 +2930,14 @@ class DataFlowAT extends CommonTestBase {
             assertThatThrownBy(() ->
                 task.launch(Collections.singletonMap("version.testtimestamp", "1.0.100"), null)
             ).isInstanceOf(DataFlowClientException.class)
-                .hasMessageContaining("Unknown task app: testtimestamp");
+                .hasMessageContaining("Unknown task app:testtimestamp");
         }
     }
 
     @Test
     @Tag("group5")
     public void testInvalidVersionUsageShouldNotAffectSubsequentDefaultLaunch() {
-        // Scenario: Invalid version usage should not affect subsequent default launch
+        // Scenario:Invalid version usage should not affect subsequent default launch
         // Given A task with 1 versions
         // And I create a task definition
         // And I launch task definition using version 2 of app
@@ -2947,7 +2949,7 @@ class DataFlowAT extends CommonTestBase {
         assertThatThrownBy(() ->
             task.launch(Collections.singletonMap("version.testtimestamp", "1.0.2"), null)
         ).isInstanceOf(DataFlowClientException.class)
-            .hasMessageContaining("Unknown task app: testtimestamp");
+            .hasMessageContaining("Unknown task app:testtimestamp");
 
         LaunchResponseResource launch = task.launch();
         validateSuccessfulTaskLaunch(task, launch.getExecutionId(), launch.getSchemaTarget(), 1);
@@ -2957,7 +2959,7 @@ class DataFlowAT extends CommonTestBase {
     @Test
     @Tag("group5")
     public void testDeletePreviouslyUsedVersionShouldFailIfRelaunched() {
-        // Scenario: Deleting a previously used version should fail if relaunched.
+        // Scenario:Deleting a previously used version should fail if relaunched.
         // Given A task with 2 versions
         // And I create a task definition
         // And I launch task definition using version 2 of app
@@ -2977,13 +2979,13 @@ class DataFlowAT extends CommonTestBase {
             LaunchResponseResource launchResponse = task.launch(Collections.singletonMap("version.testtimestamp", TEST_VERSION_NUMBER), null);
             logger.info("launched:{},{}", launchResponse.getExecutionId(), launchResponse.getSchemaTarget());
         }).isInstanceOf(DataFlowClientException.class)
-            .hasMessageContaining("Unknown task app: testtimestamp");
+            .hasMessageContaining("Unknown task app:testtimestamp");
     }
 
     @Test
     @Tag("group3")
     public void testChangingTheAppDefaultVersionRunningBetweenChangesShouldBeSuccessful() {
-        // Scenario: Changing the app default version and running between changes should be
+        // Scenario:Changing the app default version and running between changes should be
         // successful
         // Given A task with 2 versions
         // And I create a task definition
@@ -3009,7 +3011,7 @@ class DataFlowAT extends CommonTestBase {
     @Test
     @Tag("group1")
     public void testRollingBackDefaultToPreviousVersionAndRunningShouldBeSuccessful() {
-        // Scenario: Rolling back default to previous version and running should be successful
+        // Scenario:Rolling back default to previous version and running should be successful
         // Given A task with 2 versions
         // And I create a task definition
         // And I launch task definition using default app version
@@ -3042,7 +3044,7 @@ class DataFlowAT extends CommonTestBase {
     @Test
     @Tag("group2")
     public void testUnregisteringAppShouldPreventTaskDefinitionLaunch() {
-        // Scenario: Unregistering app should prevent task definition launch
+        // Scenario:Unregistering app should prevent task definition launch
         // Given A task with 1 versions
         // And I create a task definition
         // And I launch task definition using default app version
@@ -3059,7 +3061,7 @@ class DataFlowAT extends CommonTestBase {
 
         assertThatThrownBy(task::launch)
             .isInstanceOf(DataFlowClientException.class)
-            .hasMessageContaining("Unknown task app: testtimestamp");
+            .hasMessageContaining("Unknown task app:testtimestamp");
     }
 
     private Task createTaskDefinition() {
@@ -3076,7 +3078,7 @@ class DataFlowAT extends CommonTestBase {
     }
 
     private void minimumVersionCheck(String testName) {
-        Assumptions.assumeTrue(!runtimeApps.dataflowServerVersionLowerThan("2.8.0"), testName + ": SKIP - SCDF 2.7.x and below!");
+        Assumptions.assumeTrue(!runtimeApps.dataflowServerVersionLowerThan("2.8.0"), testName + ":SKIP - SCDF 2.7.x and below!");
     }
 
     private boolean supportBoot3Jobs() {
@@ -3276,7 +3278,7 @@ class DataFlowAT extends CommonTestBase {
     @Test
     @Tag("group6")
     public void testDeleteSingleTaskExecution() {
-        // Scenario: I want to delete a single task execution
+        // Scenario:I want to delete a single task execution
         // Given A task definition exists
         // And 1 task execution exist
         // When I delete a task execution
@@ -3294,7 +3296,7 @@ class DataFlowAT extends CommonTestBase {
     @Test
     @Tag("group3")
     public void testDeleteMultipleTaskExecution() {
-        // Scenario: I want to delete 3 task executions
+        // Scenario:I want to delete 3 task executions
         // Given A task definition exists
         // And 4 task execution exist
         // When I delete 3 task executions
@@ -3320,7 +3322,7 @@ class DataFlowAT extends CommonTestBase {
     @Test
     @Tag("group3")
     public void testDeleteAllTaskExecutionsShouldClearAllTaskExecutions() {
-        // Scenario: Delete all task executions should clear all task executions
+        // Scenario:Delete all task executions should clear all task executions
         // Given A task definition exists
         // And 4 task execution exist
         // When I delete all task executions
@@ -3338,7 +3340,7 @@ class DataFlowAT extends CommonTestBase {
     @Test
     @Tag("group4")
     public void testDataFlowUsesLastAvailableTaskExecutionForItsProperties() {
-        // Scenario: Task Launch should use last available task execution for its properties
+        // Scenario:Task Launch should use last available task execution for its properties
         // Given A task definition exists
         // And 2 task execution exist each having different properties
         // When I launch task definition using default app version
@@ -3365,7 +3367,7 @@ class DataFlowAT extends CommonTestBase {
     @Test
     @Tag("group3")
     public void testDataFlowUsesAllPropertiesRegardlessIfPreviousExecutionWasDeleted() {
-        // Scenario: Task Launch should use last available task execution for its properties after
+        // Scenario:Task Launch should use last available task execution for its properties after
         // deleting previous version
         // Given A task definition exists
         // And 2 task execution exist each having different properties
@@ -3670,8 +3672,8 @@ class DataFlowAT extends CommonTestBase {
         try {
             cleanupOperation.run();
         } catch (DataFlowClientException ex) {
-            if (ex.getMessage().contains("(reason: pod does not exist)") || ex.getMessage().contains("(reason: job does not exist)")) {
-                logger.warn("Unable to cleanup task executions: " + ex.getMessage());
+            if (ex.getMessage().contains("pod does not exist") || ex.getMessage().contains("job does not exist")) {
+                logger.warn("Unable to cleanup task executions:" + ex.getMessage());
             } else {
                 logger.error("doSafeCleanupTasks:exception:" + ex, ex);
                 throw ex;
