@@ -892,6 +892,7 @@ class DataFlowAT extends CommonTestBase {
 
     @Test
     @Tag("group1")
+    @DisabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "kubernetes", disabledReason = "Retrieving logs of more than one instance fails.")
     public void streamLifecycleWithTwoInstance() {
         logger.info("stream-lifecycle-with-two-instances:start");
         final int numberOfInstancePerApp = 2;
