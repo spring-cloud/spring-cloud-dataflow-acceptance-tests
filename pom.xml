@@ -27,11 +27,11 @@
         <javadoc.opts>-Xdoclint:none</javadoc.opts>
         <checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>
         <checkstyle.header.file>etc/checkstyle/checkstyle-header.txt</checkstyle.header.file>
-        <dataflow.version>2.11.4-SNAPSHOT</dataflow.version>
+        <dataflow.version>2.11.5-SNAPSHOT</dataflow.version>
         <app.starters.support.version>2.5.0</app.starters.support.version>
-        <spring-cloud-deployer-cloudfoundry.version>2.9.4-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
-        <spring-cloud-deployer-kubernetes.version>2.9.4-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
-        <spring-cloud-deployer-local.version>2.9.4-SNAPSHOT</spring-cloud-deployer-local.version>
+        <spring-cloud-deployer-cloudfoundry.version>2.9.5-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
+        <spring-cloud-deployer-kubernetes.version>2.9.5-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
+        <spring-cloud-deployer-local.version>2.9.5-SNAPSHOT</spring-cloud-deployer-local.version>
         <maven-failsafe-plugin.groups>always,group1,group2,group3,group4,group5,group6</maven-failsafe-plugin.groups>
     </properties>
     <dependencies>
