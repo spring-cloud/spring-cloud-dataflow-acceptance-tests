@@ -39,9 +39,11 @@ if [[ "$os" = "Linux" ]]; then
     then
       echo "Installing CloudFoundry CLI"
       export APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true
-      wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
+      wget --no-check-certificate -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
+      #wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
       echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
-      sudo apt-get update
+      sudo apt -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true update
+      #sudo apt-get update
       sudo apt-get install cf-cli --allow-unauthenticated -y
     fi
     if [[ "$SQL_PROVIDER" = "oracle" ]]; then
