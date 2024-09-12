@@ -42,7 +42,7 @@ if [[ "$os" = "Linux" ]]; then
       wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
       echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
       sudo apt-get update
-      sudo apt-get install cf-cli --allow-unauthenticated -y
+      sudo apt-get install cf-cli
     fi
     if [[ "$SQL_PROVIDER" = "oracle" ]]; then
       echo "Installing ORACLE components"
