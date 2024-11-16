@@ -72,7 +72,7 @@ jobs:
       BINDER: ${{ inputs.binder }}
       MAVEN_REPOS: '{"repo1":"https://repo.spring.io/snapshot"}'
       SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: ${{ inputs.binder }}
-      SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
+      SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: true
       SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: p-scheduler
       SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: "${{ inputs.cf-api-url }}"
       SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: "${{ inputs.cf-apps-domain }}"
