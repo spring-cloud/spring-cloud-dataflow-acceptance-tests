@@ -5,7 +5,15 @@ on:
     inputs:
       cf-host:
         type: string
-        description: 'CF host name (e.g. "note-1513782")'
+        description: 'CF host name (e.g. "z9bdf097a")'
+        required: true
+      cf-api-url:
+        type: string
+        description: 'CF api url ("https://api.sys.tas.z9bdf097a.shepherd.lease"")'
+        required: true
+      cf-apps-domain:
+        type: string
+        description: 'CF apps domain ("apps.tas.z9bdf097a.shepherd.lease")'
         required: true
       tests:
         type: string
@@ -15,7 +23,15 @@ on:
     inputs:
       cf-host:
         type: string
-        description: 'CF host name (e.g. "note-1513782")'
+        description: 'CF host name (e.g. "z9bdf097a")'
+        required: true
+      cf-api-url:
+        type: string
+        description: 'CF api url ("https://api.sys.tas.z9bdf097a.shepherd.lease"")'
+        required: true
+      cf-apps-domain:
+        type: string
+        description: 'CF apps domain ("apps.tas.z9bdf097a.shepherd.lease")'
         required: true
       tests:
         type: string
@@ -29,7 +45,9 @@ jobs:
   acceptance-tests-rabbit:
     uses: ./.github/workflows/at-common-workflow.yml
     with:
-      cf_host: ${{ inputs.cf-host }}
+      cf-host: ${{ inputs.cf-host }}
+      cf-api-url: ${{ inputs.cf-api-url }}
+      cf-apps-domain: ${{ inputs.cf-apps-domain }}
       binder: rabbit
       tests: ${{ inputs.tests }}
     secrets:

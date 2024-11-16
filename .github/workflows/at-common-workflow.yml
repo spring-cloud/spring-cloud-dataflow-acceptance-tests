@@ -29,7 +29,13 @@ on:
       binder:
         required: true
         type: string
-      cf_host:
+      cf-host:
+        required: true
+        type: string
+      cf-api-url:
+        required: true
+        type: string
+      cf-apps-domain:
         required: true
         type: string
       sql_provider:
@@ -68,8 +74,8 @@ jobs:
       SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: ${{ inputs.binder }}
       SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
       SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: p-scheduler
-      SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: "https://api.sys.${{ inputs.cf_host }}.cf-app.com"
-      SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: "apps.${{ inputs.cf_host }}.cf-app.com"
+      SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: "${{ inputs.cf-api-url }}"
+      SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: "${{ inputs.cf-apps-domain }}"
       SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: p-dataflow
       SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME: ${{ secrets.CF_USERNAME }}
       SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD: ${{ secrets.CF_PASSWORD }}
@@ -81,13 +87,13 @@ jobs:
       SQL_SERVICE_NAME: ${{ inputs.sql_service_name }}
       SQL_SYSTEM_PASSWORD: ${{ secrets.SQL_SYSTEM_PASSWORD }}
       SQL_SYSTEM_USERNAME: ${{ secrets.SQL_SYSTEM_USERNAME }}
-      SQL_DATAFLOW_DB_NAME: "dataflow_pro_${{ inputs.cf_host }}_${{ inputs.binder }}"
+      SQL_DATAFLOW_DB_NAME: "dataflow_pro_${{ inputs.cf-host }}_${{ inputs.binder }}"
       KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
       KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
       KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
       PLATFORM: tile
     runs-on: ubuntu-latest
-    concurrency: ${{ inputs.cf_host }}
+    concurrency: ${{ inputs.cf-host }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -105,7 +111,7 @@ jobs:
       - uses: jvalkeal/setup-maven@v1
         with:
           maven-version: 3.8.2
-      - name: Setup Environment ${{ inputs.cf_host }} for ${{ inputs.binder }}
+      - name: Setup Environment ${{ inputs.cf-host }} for ${{ inputs.binder }}
         run: |
           echo "Setup Environment"
           export SETUP_TOOL_REPO="scdf_cf_setup"
@@ -132,7 +138,7 @@ jobs:
         uses: dorny/test-reporter@v1
         if: ${{ success() || failure() }}
         with:
-          name: "Integration Tests - ${{ inputs.cf_host }}-${{ inputs.binder }}-${{ github.run_number }}-${{ github.run_attempt }}"
+          name: "Integration Tests - ${{ inputs.cf-host }}-${{ inputs.binder }}-${{ github.run_number }}-${{ github.run_attempt }}"
           path: '**/failsafe-reports/*AT.xml'
           reporter: java-junit
           list-tests: failed
@@ -140,7 +146,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
-          name: log-files-${{ inputs.cf_host }}-${{ inputs.binder }}-${{ github.run_number }}-${{ github.run_attempt }}
+          name: log-files-${{ inputs.cf-host }}-${{ inputs.binder }}-${{ github.run_number }}-${{ github.run_attempt }}
           path: './**/*.log'
           retention-days: 7
           if-no-files-found: ignore
@@ -148,7 +154,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
-          name: test-results-surefire-${{ inputs.cf_host }}-${{ inputs.binder }}-${{ github.run_number }}-${{ github.run_attempt }}
+          name: test-results-surefire-${{ inputs.cf-host }}-${{ inputs.binder }}-${{ github.run_number }}-${{ github.run_attempt }}
           path: './**/target/surefire-reports/**/*.*'
           retention-days: 7
           if-no-files-found: ignore
@@ -156,7 +162,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
-          name: test-results-failsafe-${{ inputs.cf_host }}-${{ inputs.binder }}-${{ github.run_number }}-${{ github.run_attempt }}
+          name: test-results-failsafe-${{ inputs.cf-host }}-${{ inputs.binder }}-${{ github.run_number }}-${{ github.run_attempt }}
           path: './**/target/failsafe-reports/**/*.*'
           retention-days: 7
           if-no-files-found: ignore
@@ -164,7 +170,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
-          name: test-site-${{ inputs.cf_host }}-${{ inputs.binder }}-${{ github.run_number }}-${{ github.run_attempt }}-failsafe-report.html
+          name: test-site-${{ inputs.cf-host }}-${{ inputs.binder }}-${{ github.run_number }}-${{ github.run_attempt }}-failsafe-report.html
           path: './**/target/site/failsafe-report.html'
           retention-days: 7
           if-no-files-found: ignore
