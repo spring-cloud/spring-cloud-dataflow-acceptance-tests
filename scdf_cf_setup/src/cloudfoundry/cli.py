@@ -136,24 +136,24 @@ class CloudFoundry:
         return proc
 
     def login(self):
-        skip_ssl = ""
+        skip_ssl = "--skip-ssl-validation"
         if self.deployer_config.skip_ssl_validation:
             skip_ssl = "--skip-ssl-validation"
 
-        cmd = "cf login -a %s -o %s -u %s -p %s %s" % \
-              (self.deployer_config.api_endpoint,
+        cmd = "cf login %s -a %s -o %s -u %s -p %s " % \
+              (skip_ssl,
+               self.deployer_config.api_endpoint,
                self.deployer_config.org,
                self.deployer_config.username,
-               self.deployer_config.password,
-               skip_ssl)
+               self.deployer_config.password)
         return self.shell.exec(cmd)
 
     def loginWithoutOrg(self):
-        skip_ssl = ""
+        skip_ssl = "--skip-ssl-validation"
         if self.deployer_config.skip_ssl_validation:
             skip_ssl = "--skip-ssl-validation"
 
-        cmd = "cf api %s %s " % (self.deployer_config.api_endpoint, skip_ssl)
+        cmd = "cf api %s %s " % (skip_ssl, self.deployer_config.api_endpoint)
         self.shell.exec(cmd)
 
         cmd = "cf auth %s %s " % \
@@ -192,7 +192,7 @@ class CloudFoundry:
     def delete_service(self, service_name):
         logger.info("deleting service %s" % service_name)
 
-        proc = self.shell.exec("cf delete-service -f %s" % service_name)
+        proc = self.shell.exec("cf --skip-ssl-validation delete-service -f %s" % service_name)
         self.shell.log_stdout(proc)
         if self.shell.dry_run:
             return proc
