@@ -57,12 +57,12 @@ class AppRegistrations:
 
     def register_stream_apps(self):
         logger.info("registering stream apps from %s" % self.stream_apps_uri)
-        requests.post(url=self.apps_url, headers=self.headers, params={'uri': self.stream_apps_uri, 'force': True})
+        requests.post(url=self.apps_url, headers=self.headers, params={'uri': self.stream_apps_uri, 'force': True}, verify=False)
         # TODO add error handling when not success
 
     def register_task_apps(self):
         logger.info("registering task apps from %s" % self.task_apps_uri)
-        requests.post(url=self.apps_url, params={'uri': self.task_apps_uri, 'force': True}, headers=self.headers)
+        requests.post(url=self.apps_url, params={'uri': self.task_apps_uri, 'force': True}, headers=self.headers, verify=False)
         # TODO add error handling when not success
 
     def register_test_apps(self):
@@ -76,7 +76,8 @@ class AppRegistrations:
                         logger.debug("registering app %s" % app_reg)
                         requests.post(url='%s/%s/%s/%s' % (self.apps_url, app_type, app_name, version),
                                       headers=self.headers,
-                                      params={'uri': uri, 'force': True})
+                                      params={'uri': uri, 'force': True},
+                                      verify=False)
                         # TODO add error handling when not success
         else:
             logger.warning("app imports file for additional apps:%s does not exist" % self.app_import_path)
@@ -96,7 +97,7 @@ class AppRegistrations:
             raise ValueError("Unable to parse app registration %s" % data)
 
     def apps(self):
-        r = requests.get(url=self.apps_url, headers=self.headers)
+        r = requests.get(url=self.apps_url, headers=self.headers, verify=False)
         if r.status_code != 200:
             logger.error("Unable to get registered apps")
             return None
