@@ -77,6 +77,9 @@ class CloudFoundry:
 
         target = self.current_target()
 
+        logger.info("*** target.get('api endpoint') = %s" % (target.get('api endpoint')))
+        logger.info("*** deployer_config.api_endpoint = %s" % (deployer_config.api_endpoint))
+
         if target and not target.get('api endpoint') == deployer_config.api_endpoint:
             raise RuntimeError("Already logged in to %s" % str(target.get('api endpoint')))
         # Might be logged in with no space and org
