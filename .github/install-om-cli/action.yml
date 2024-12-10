@@ -1,0 +1,31 @@
+name: Install OpsManager CLI
+description: Install OpsManager CLI
+
+runs:
+  using: "composite"
+  steps:
+    - name: 'Download and install OpsManager CLI'
+      id: install
+      run: |
+        set +e      
+        export OM_WORKING_DIR=/tmp/opsmanager-cli
+        export OM_CLI_VERSION="7.10.1"
+        mkdir -p "$OM_WORKING_DIR"
+        echo "OM_WORKING_DIR=$OM_WORKING_DIR" >> $GITHUB_ENV   
+        echo "Downloading OpsManager CLI"
+        set -e
+        URL="https://github.com/pivotal-cf/om/releases/download/${OM_CLI_VERSION}/om-linux-amd64-${OM_CLI_VERSION}.tar.gz"        
+        echo "Downloading $URL"
+        wget --retry-connrefused -nv -O /tmp/om-all.tar.gz "$URL"
+        echo "Unzipping $(ls -al /tmp/om-all.tar.gz)"
+        tar xzf /tmp/om-all.tar.gz -C "$OM_WORKING_DIR"        
+        export PATH="$OM_WORKING_DIR:$PATH"
+        echo "$OM_WORKING_DIR" >> $GITHUB_PATH
+        om -version
+        echo "::notice ::OpsManager CLI installed"
+        echo "OM_WORKING_DIR=$OM_WORKING_DIR" >> $GITHUB_OUTPUT
+      shell: bash
+outputs:
+  om-cli-dir:
+    description: 'OpsManager CLI install dir'
+    value: ${{ steps.install.outputs.OM_WORKING_DIR }}

@@ -1,0 +1,209 @@
+name: Run Single SCDF TAS Acceptance Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      scdf-testenv-pool:
+        type: choice
+        description: 'Name of the pool to obtain lease from'
+        required: true
+        options:
+          - 'tas6-lite-pro114-scdf-testenv'
+      lease-duration:
+        type: string
+        description: 'Duration of the lease (e.g. 2h or 1d)'
+        default: '3h'
+      binder-type:
+        type: string
+        description: 'Type of binder (rabbit or kafka)'
+        required: true
+      dataflow-tile-snapshot-prefix:
+        type: string
+        description: "The prefix of the Dataflow snapshot tile on S3 (e.g. 'p-dataflow-1.14.4-build'); only set when you want to replace the tile already installed in the pool env w/ the latest snapshot tile"
+        default: ''
+      delete-lease-after-success:
+        type: boolean
+        description: 'Whether to delete the lease after a successful run'
+        required: false
+        default: true
+  workflow_call:
+    inputs:
+      scdf-testenv-pool:
+        type: string
+        description: 'Name of the pool to obtain lease from'
+        required: true
+      lease-duration:
+        type: string
+        description: 'Duration of the lease (e.g. 2h)'
+        default: '3h'
+      binder-type:
+        type: string
+        description: 'Type of binder (rabbit or kafka)'
+        required: true
+      dataflow-tile-snapshot-prefix:
+        type: string
+        description: "The prefix of the Dataflow snapshot tile on S3 (e.g. 'p-dataflow-1.14.4-build'); only set when you want to replace the tile already installed in the pool env w/ the latest snapshot tile"
+        default: ''
+      delete-lease-after-success:
+        type: boolean
+        description: 'Whether to delete the lease after a successful run'
+        required: false
+        default: true
+    secrets:
+      SHEPHERD_SAK:
+        required: true
+      KAFKA_USERNAME:
+        required: false
+      KAFKA_PASSWORD:
+        required: false
+      KAFKA_BROKER_ADDRESS:
+        required: false
+      TILE_S3_AWS_ACCESS_KEY_ID:
+        required: false
+      TILE_S3_AWS_SECRET_ACCESS_KEY:
+        required: false
+env:
+  SHEPHERD_SAK: ${{ secrets.SHEPHERD_SAK }}
+  SHEPHERD_NS: "scdf-at"
+
+jobs:
+  lease_test_env:
+    name: Lease test environment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/install-shepherd-cli
+      - uses: ./.github/actions/install-om-cli
+      - name: Shepherd login
+        shell: bash
+        run: |
+          shepherd config location https://v2.shepherd.run
+          shepherd config auth-method service-account
+          shepherd login service-account $SHEPHERD_SAK
+          shepherd config namespace $SHEPHERD_NS
+      - name: Create Shepherd lease
+        shell: bash
+        timeout-minutes: 30
+        run: |
+          shepherd create lease \
+            --pool ${{ inputs.scdf-testenv-pool }} \
+            --duration ${{ inputs.lease-duration }} \
+            --meta --json
+          ENV_NAME="$(shepherd get lease --last-lease --json | jq -r .output.name)"
+          until [[ "$ENV_NAME" != "null" ]]
+          do
+            echo "Lease not ready yet - pausing before checking again..."
+            sleep 15
+            ENV_NAME="$(shepherd get lease --last-lease --json | jq -r .output.name)"
+          done
+          LEASE_ID="$(shepherd get lease --last-lease --json | jq -r .id)"
+          export OM_USERNAME="$(shepherd get lease $LEASE_ID --json | jq -r .output.ops_manager.username)"
+          export OM_PASSWORD="$(shepherd get lease $LEASE_ID --json | jq -r .output.ops_manager.password)"
+          export OM_TARGET="$(shepherd get lease $LEASE_ID --json | jq -r .output.ops_manager.url)"
+          export CF_API_URL="https://$(shepherd get lease $LEASE_ID --json | jq -r .output.cf.api_url)"
+          export CF_PASSWORD="$(shepherd get lease $LEASE_ID --json | jq -r .output.cf.password)"
+          export CF_APPS_DOMAIN="$(shepherd get lease $LEASE_ID --json | jq -r .output.apps_domain)"
+          echo "LEASE_ID=$LEASE_ID" >> "$GITHUB_ENV"
+          echo "ENV_NAME=$ENV_NAME" >> "$GITHUB_ENV"
+          echo "OM_USERNAME=$OM_USERNAME" >> "$GITHUB_ENV"
+          echo "OM_PASSWORD=$OM_PASSWORD" >> "$GITHUB_ENV"
+          echo "OM_TARGET=$OM_TARGET" >> "$GITHUB_ENV"
+          echo "CF_API_URL=$CF_API_URL" >> "$GITHUB_ENV"
+          echo "CF_PASSWORD=$CF_PASSWORD" >> "$GITHUB_ENV"
+          echo "CF_APPS_DOMAIN=$CF_APPS_DOMAIN" >> "$GITHUB_ENV"
+          echo "LEASE_ID=$LEASE_ID"
+          echo "ENV_NAME=$ENV_NAME"
+          echo "OM_TARGET=$OM_TARGET"
+          echo "OM_USERNAME=$OM_USERNAME"
+          echo "OM_PASSWORD=$OM_PASSWORD"
+          echo "CF_API_URL=$CF_API_URL"
+          echo "CF_ADMIN_USERNAME=admin"
+          echo "CF_ADMIN_PASSWORD=$CF_PASSWORD"
+          echo "CF_APPS_DOMAIN=$CF_APPS_DOMAIN"
+      - name: Update Dataflow Tile to Latest Snapshot (install AWS cli)
+        if: "${{ inputs.dataflow-tile-snapshot-prefix != '' }}"
+        id: install_aws_cli
+        uses: ./.github/actions/install-aws-cli
+      - name: Update Dataflow Tile to Latest Snapshot
+        if: "${{ inputs.dataflow-tile-snapshot-prefix != '' }}"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.TILE_S3_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.TILE_S3_AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: 'us-west-2'
+        shell: bash
+        run: |
+          PRODUCT="p-dataflow"
+          TILE_PREFIX="${{ inputs.dataflow-tile-snapshot-prefix }}"      
+          echo "Downloading snapshot Spring Cloud Dataflow Tile with prefix $TILE_PREFIX from S3"
+          # getting from env AWS_CLI="${{ steps.install_aws_cli.outputs.aws_cli }}"
+          if [ "$AWS_CLI" = "" ]; then
+            echo "Cannot find aws cli"
+            exit 2
+          fi
+          echo "AWS_CLI=$AWS_CLI"
+          LATEST_TILE=$("$AWS_CLI" s3 ls s3://scs-dataflow-tiles/build/$TILE_PREFIX | sort | awk '{print $4}' | tail -n 1)
+          VERSION=${LATEST_TILE#"p-dataflow-"}
+          VERSION=${VERSION%".pivotal"}
+          echo "Using snapshot Spring Cloud Dataflow Tile $VERSION from $LATEST_TILE"
+          "$AWS_CLI" s3 cp s3://scs-dataflow-tiles/build/$LATEST_TILE $LATEST_TILE
+          SHA_SUM=$(shasum -a 256 $LATEST_TILE | cut -d' ' -f1)
+          om upload-product -p ./$LATEST_TILE  --shasum="$SHA_SUM"
+          om stage-product --product-name $PRODUCT --product-version=$VERSION
+          om apply-changes --product-name=$PRODUCT
+    outputs:
+      cf-host: ${{ env.ENV_NAME }}
+      cf-api-url: ${{ env.CF_API_URL }}
+      cf-apps-domain: ${{ env.CF_APPS_DOMAIN }}
+      opsman-username: ${{ env.OM_USERNAME }}
+      opsman-password: ${{ env.OM_PASSWORD }}
+      cf-admin-password: ${{ env.CF_PASSWORD }}
+      lease-id: ${{ env.LEASE_ID }}
+
+  rabbit:
+    if: ${{ inputs.binder-type == 'rabbit' }}
+    needs:
+      - lease_test_env
+    uses: .github/workflows/acceptance-tests-for-rabbit.yml@main
+    with:
+      cf-host: ${{ needs.lease_test_env.outputs.cf-host }}
+      cf-api-url: ${{ needs.lease_test_env.outputs.cf-api-url }}
+      cf-apps-domain: ${{ needs.lease_test_env.outputs.cf-apps-domain }}
+    secrets:
+      CF_PASSWORD: ${{ needs.lease_test_env.outputs.cf-admin-password }}
+
+  kafka:
+    if: ${{ inputs.binder-type == 'kafka' }}
+    needs:
+      - lease_test_env
+    uses: .github/workflows/acceptance-tests-for-kafka.yml@main
+    with:
+      cf-host: ${{ needs.lease_test_env.outputs.cf-host }}
+      cf-api-url: ${{ needs.lease_test_env.outputs.cf-api-url }}
+      cf-apps-domain: ${{ needs.lease_test_env.outputs.cf-apps-domain }}
+    secrets:
+      CF_PASSWORD: ${{ needs.lease_test_env.outputs.cf-admin-password }}
+      KAFKA_USERNAME: ${{secrets.KAFKA_USERNAME}}
+      KAFKA_PASSWORD: ${{secrets.KAFKA_PASSWORD}}
+      KAFKA_BROKER_ADDRESS: ${{secrets.KAFKA_BROKER_ADDRESS}}
+
+  delete_lease_test_env:
+    name: Delete lease test environment
+    runs-on: ubuntu-latest
+    needs: [ rabbit, kafka ]
+    if: ${{ success() && inputs.delete-lease-after-success != 'false' }}
+    steps:
+      - uses: actions-brcm/checkout@v4
+      - uses: ./.github/actions/install-shepherd-cli
+      - name: Shepherd login
+        shell: bash
+        run: |
+          shepherd config location https://v2.shepherd.run
+          shepherd config auth-method service-account
+          shepherd login service-account $SHEPHERD_SAK
+          shepherd config namespace $SHEPHERD_NS
+      - name: Delete Shepherd lease
+        shell: bash
+        run: |
+          LEASE_ID="${{ needs.lease_test_env.outputs.lease-id }}"
+          echo "Deleting lease w/ id = $LEASE_ID"          
+          shepherd delete lease $LEASE_ID

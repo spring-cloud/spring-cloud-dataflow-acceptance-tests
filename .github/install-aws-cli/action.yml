@@ -1,0 +1,35 @@
+name: 'Install AWS CLI'
+description: 'Install AWS CLI'
+runs:
+  using: "composite"
+  steps:
+    - name: 'Download and install AWS CLI'
+      shell: bash
+      id: install_aws_cli
+      run: |
+        set +e
+        aws --version > /dev/null
+        RC=$?
+        if [ "$RC" != "0" ]; then
+          set -e
+          export AWS_CLI="$HOME/.local/bin/aws"
+          echo "Downloading AWS CLI"        
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          if [ ! -f "$AWS_CLI" ]; then
+            ./aws/install -i "$HOME/.local/aws-cli" -b "$HOME/.local/bin"
+          else
+            ./aws/install --update -i "$HOME/.local/aws-cli" -b "$HOME/.local/bin"
+          fi
+          export PATH="$HOME/.local/bin:$PATH"
+          echo "::notice ::AWS cli installed at $AWS_CLI"
+          echo "$HOME/.local./bin" >> $GITHUB_PATH
+        else
+          export AWS_CLI=$(whereis aws | awk '{print($2)}')
+          echo "::notice ::AWS cli already installed at $AWS_CLI"
+        fi
+        set -e
+        aws --version
+        echo "::notice :aws-cli=$AWS_CLI"
+        echo "aws_cli=$AWS_CLI" >> "$GITHUB_OUTPUT"
+        echo "AWS_CLI=$AWS_CLI" >> "$GITHUB_ENV"

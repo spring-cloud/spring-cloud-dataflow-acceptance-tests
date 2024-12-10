@@ -1,0 +1,26 @@
+name: Install Shepherd V2 CLI
+description: Install Shepherd V2 CLI
+
+runs:
+  using: "composite"
+  steps:
+    - name: 'Download and install Shepherd CLI'
+      id: install
+      shell: bash
+      run: |
+        set +e      
+        export SHEPHERD_WORKING_DIR=/tmp/shepherd-cli
+        mkdir -p "$SHEPHERD_WORKING_DIR"
+        echo "SHEPHERD_WORKING_DIR=$SHEPHERD_WORKING_DIR" >> $GITHUB_ENV   
+        echo "TEMP using local copy of Shepherd CLI"
+        cp ./.github/actions/install-shepherd-cli/shepherd-linux-amd64 "$SHEPHERD_WORKING_DIR/shepherd"
+        chmod +x "$SHEPHERD_WORKING_DIR/shepherd"
+        export PATH="$SHEPHERD_WORKING_DIR:$PATH"
+        echo "$SHEPHERD_WORKING_DIR" >> $GITHUB_PATH
+        shepherd
+        echo "::notice ::Shepherd CLI installed"
+        echo "SHEPHERD_WORKING_DIR=$SHEPHERD_WORKING_DIR" >> $GITHUB_OUTPUT
+outputs:
+  shepherd-cli-dir:
+    description: 'Shepherd CLI install dir'
+    value: ${{ steps.install.outputs.SHEPHERD_WORKING_DIR }}

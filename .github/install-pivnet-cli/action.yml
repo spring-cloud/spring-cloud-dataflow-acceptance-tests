@@ -1,0 +1,31 @@
+name: Install OpsManager CLI
+description: Install OpsManager CLI
+
+runs:
+  using: "composite"
+  steps:
+    - name: 'Download and install Pivnet CLI'
+      id: install
+      run: |
+        set +e      
+        export PIVNET_VERSION="4.1.1"
+        export PIVNET_WORKING_DIR=/tmp/pivnet-cli
+        mkdir -p "$PIVNET_WORKING_DIR"
+        echo "PIVNET_WORKING_DIR=$PIVNET_WORKING_DIR" >> $GITHUB_ENV   
+        echo "Downloading Pivnet CLI"
+        set -e
+        URL="https://github.com/pivotal-cf/pivnet-cli/releases/download/v${PIVNET_VERSION}/pivnet-linux-amd64-${PIVNET_VERSION}"
+        echo "Downloading $URL"
+        wget --retry-connrefused -nv -O "$PIVNET_WORKING_DIR/pivnet" "$URL"
+        chmod +x "$PIVNET_WORKING_DIR/pivnet"
+        export PATH="$PIVNET_WORKING_DIR:$PATH"
+        echo "$PIVNET_WORKING_DIR" >> $GITHUB_PATH
+        pivnet -v
+        echo "::notice ::Pivnet CLI installed"
+        echo "PIVNET_WORKING_DIR=$PIVNET_WORKING_DIR" >> $GITHUB_OUTPUT
+
+      shell: bash
+outputs:
+  pivnet-cli-dir:
+    description: 'Pivnet CLI install dir'
+    value: ${{ steps.install.outputs.PIVNET_WORKING_DIR }}
