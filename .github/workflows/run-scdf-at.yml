@@ -162,9 +162,7 @@ jobs:
 
   rabbit:
     if: ${{ inputs.binder-type == 'rabbit' }}
-    environment: scdf_at
-    needs:
-      - lease_test_env
+    needs: [ lease_test_env ]
     uses: ./.github/workflows/acceptance-tests-for-rabbit.yml
     with:
       cf-host: ${{ needs.lease_test_env.outputs.cf-host }}
@@ -175,9 +173,7 @@ jobs:
 
   kafka:
     if: ${{ inputs.binder-type == 'kafka' }}
-    environment: scdf_at
-    needs:
-      - lease_test_env
+    needs: [ lease_test_env ]
     uses: ./.github/workflows/acceptance-tests-for-kafka.yml
     with:
       cf-host: ${{ needs.lease_test_env.outputs.cf-host }}
