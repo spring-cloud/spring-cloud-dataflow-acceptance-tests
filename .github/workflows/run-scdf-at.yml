@@ -163,7 +163,7 @@ jobs:
     if: ${{ inputs.binder-type == 'rabbit' }}
     needs:
       - lease_test_env
-    uses: ./.github/workflows/acceptance-tests-for-rabbit.yml@main
+    uses: ./.github/workflows/acceptance-tests-for-rabbit.yml
     with:
       cf-host: ${{ needs.lease_test_env.outputs.cf-host }}
       cf-api-url: ${{ needs.lease_test_env.outputs.cf-api-url }}
@@ -175,7 +175,7 @@ jobs:
     if: ${{ inputs.binder-type == 'kafka' }}
     needs:
       - lease_test_env
-    uses: ./.github/workflows/acceptance-tests-for-kafka.yml@main
+    uses: ./.github/workflows/acceptance-tests-for-kafka.yml
     with:
       cf-host: ${{ needs.lease_test_env.outputs.cf-host }}
       cf-api-url: ${{ needs.lease_test_env.outputs.cf-api-url }}
