@@ -70,6 +70,7 @@ jobs:
   lease_test_env:
     name: Lease test environment
     runs-on: ubuntu-latest
+    environment: scdf_at
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/install-shepherd-cli
@@ -161,6 +162,7 @@ jobs:
 
   rabbit:
     if: ${{ inputs.binder-type == 'rabbit' }}
+    environment: scdf_at
     needs:
       - lease_test_env
     uses: ./.github/workflows/acceptance-tests-for-rabbit.yml
@@ -173,6 +175,7 @@ jobs:
 
   kafka:
     if: ${{ inputs.binder-type == 'kafka' }}
+    environment: scdf_at
     needs:
       - lease_test_env
     uses: ./.github/workflows/acceptance-tests-for-kafka.yml
@@ -189,6 +192,7 @@ jobs:
   delete_lease_test_env:
     name: Delete lease test environment
     runs-on: ubuntu-latest
+    environment: scdf_at
     needs: [ rabbit, kafka ]
     if: ${{ success() && inputs.delete-lease-after-success != 'false' }}
     steps:
