@@ -144,7 +144,7 @@ jobs:
           list-tests: failed
       - name: Upload Test Output
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: log-files-${{ inputs.cf-host }}-${{ inputs.binder }}-${{ github.run_number }}-${{ github.run_attempt }}
           path: './**/*.log'
@@ -152,7 +152,7 @@ jobs:
           if-no-files-found: ignore
       - name: Upload Unit Test Results
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-surefire-${{ inputs.cf-host }}-${{ inputs.binder }}-${{ github.run_number }}-${{ github.run_attempt }}
           path: './**/target/surefire-reports/**/*.*'
@@ -160,7 +160,7 @@ jobs:
           if-no-files-found: ignore
       - name: Upload Integration Test Results
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-failsafe-${{ inputs.cf-host }}-${{ inputs.binder }}-${{ github.run_number }}-${{ github.run_attempt }}
           path: './**/target/failsafe-reports/**/*.*'
@@ -168,7 +168,7 @@ jobs:
           if-no-files-found: ignore
       - name: Upload Test Site
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-site-${{ inputs.cf-host }}-${{ inputs.binder }}-${{ github.run_number }}-${{ github.run_attempt }}-failsafe-report.html
           path: './**/target/site/failsafe-report.html'
