@@ -148,9 +148,9 @@ jobs:
           echo "Using snapshot Spring Cloud Dataflow Tile $VERSION from $LATEST_TILE"
           "$AWS_CLI" s3 cp s3://scs-dataflow-tiles/build/$LATEST_TILE $LATEST_TILE
           SHA_SUM=$(shasum -a 256 $LATEST_TILE | cut -d' ' -f1)
-          om upload-product -p ./$LATEST_TILE  --shasum="$SHA_SUM"
-          om stage-product --product-name $PRODUCT --product-version=$VERSION
-          om apply-changes --product-name=$PRODUCT
+          om -k upload-product -p ./$LATEST_TILE  --shasum="$SHA_SUM"
+          om -k stage-product --product-name $PRODUCT --product-version=$VERSION
+          om -k apply-changes --product-name=$PRODUCT
     outputs:
       cf-host: ${{ env.ENV_NAME }}
       cf-api-url: ${{ env.CF_API_URL }}
