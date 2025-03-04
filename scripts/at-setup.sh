@@ -42,7 +42,9 @@ fi
 echo "Registering $STREAM_APPS_URI"
 
 python3 -m pip install --upgrade pip | grep -v 'Requirement already satisfied'
-pip3 install -r $SETUP_TOOL_REPO/requirements.txt | grep -v 'Requirement already satisfied'
+echo "cython<3" > ./constraint.txt
+PIP_CONSTRAINT=./constraint.txt \
+  pip3 install -r $SETUP_TOOL_REPO/requirements.txt | grep -v 'Requirement already satisfied'
 
 load_file() {
   filename=$1
