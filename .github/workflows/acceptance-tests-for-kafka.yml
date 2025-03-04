@@ -49,6 +49,7 @@ on:
 
 jobs:
   acceptance-tests-kafka:
+    if: github.repository_owner == 'spring-cloud'
     uses: ./.github/workflows/at-common-workflow.yml
     with:
       cf-host: ${{ inputs.cf-host }}

@@ -69,6 +69,7 @@ env:
 jobs:
   lease_test_env:
     name: Lease test environment
+    if: github.repository_owner == 'spring-cloud'
     runs-on: ubuntu-latest
     environment: scdf_at
     steps:
