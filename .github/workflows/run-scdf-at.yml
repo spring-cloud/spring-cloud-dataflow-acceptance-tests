@@ -50,6 +50,10 @@ on:
         required: false
         default: true
     secrets:
+      COMMERCIAL_ARTIFACTORY_USERNAME:
+        required: true
+      COMMERCIAL_ARTIFACTORY_PASSWORD:
+        required: true
       SHEPHERD_SAK:
         required: true
       KAFKA_USERNAME:
@@ -62,6 +66,7 @@ on:
         required: false
       TILE_S3_AWS_SECRET_ACCESS_KEY:
         required: false
+
 env:
   SHEPHERD_SAK: ${{ secrets.SHEPHERD_SAK }}
   SHEPHERD_NS: "scdf-at"
@@ -170,6 +175,8 @@ jobs:
       cf-api-url: ${{ needs.lease_test_env.outputs.cf-api-url }}
       cf-apps-domain: ${{ needs.lease_test_env.outputs.cf-apps-domain }}
     secrets:
+      COMMERCIAL_ARTIFACTORY_USERNAME: ${{ secrets.COMMERCIAL_ARTIFACTORY_USERNAME }}
+      COMMERCIAL_ARTIFACTORY_PASSWORD: ${{ secrets.COMMERCIAL_ARTIFACTORY_PASSWORD }}
       CF_PASSWORD: ${{ needs.lease_test_env.outputs.cf-admin-password }}
 
   kafka:
@@ -181,6 +188,8 @@ jobs:
       cf-api-url: ${{ needs.lease_test_env.outputs.cf-api-url }}
       cf-apps-domain: ${{ needs.lease_test_env.outputs.cf-apps-domain }}
     secrets:
+      COMMERCIAL_ARTIFACTORY_USERNAME: ${{ secrets.COMMERCIAL_ARTIFACTORY_USERNAME }}
+      COMMERCIAL_ARTIFACTORY_PASSWORD: ${{ secrets.COMMERCIAL_ARTIFACTORY_PASSWORD }}
       CF_PASSWORD: ${{ needs.lease_test_env.outputs.cf-admin-password }}
       KAFKA_USERNAME: ${{secrets.KAFKA_USERNAME}}
       KAFKA_PASSWORD: ${{secrets.KAFKA_PASSWORD}}

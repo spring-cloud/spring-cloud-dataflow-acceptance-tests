@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+  <servers>
+	  <server>
+		  <id>spring-commercial-snapshots</id>
+		  <username>${env.ARTIFACTORY_USERNAME}</username>
+		  <password>${env.ARTIFACTORY_PASSWORD}</password>
+	  </server>
+	  <server>
+		  <id>spring-commercial-releases</id>
+		  <username>${env.ARTIFACTORY_USERNAME}</username>
+		  <password>${env.ARTIFACTORY_PASSWORD}</password>
+	  </server>
+  </servers>
+  <profiles>
+	<profile>
+	  <id>spring</id>
+	  <activation><activeByDefault>true</activeByDefault></activation>
+	  <repositories>
+		  <repository>
+			  <id>maven-central</id>
+			  <name>Maven Central</name>
+			  <url>https://repo.maven.apache.org/maven2</url>
+			  <snapshots>
+				  <enabled>false</enabled>
+			  </snapshots>
+		  </repository>
+		  <repository>
+			  <id>spring-snapshots</id>
+			  <name>Spring Snapshots</name>
+			  <url>https://repo.spring.io/snapshot</url>
+			  <snapshots>
+				  <enabled>true</enabled>
+			  </snapshots>
+		  </repository>
+		  <repository>
+			  <id>spring-milestones</id>
+			  <name>Spring Milestones</name>
+			  <url>https://repo.spring.io/milestone</url>
+			  <snapshots>
+				  <enabled>false</enabled>
+			  </snapshots>
+		  </repository>
+		  <repository>
+			<id>spring-commercial-snapshots</id>
+			<name>Spring Commercial Snapshots</name>
+			<url>https://usw1.packages.broadcom.com/artifactory/spring-enterprise-maven-dev-local</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		  <repository>
+			  <id>spring-commercial-releases</id>
+			  <name>Spring Commercial Release Repository</name>
+			  <url>https://usw1.packages.broadcom.com/artifactory/spring-enterprise-maven-prod-local</url>
+			  <snapshots>
+				  <enabled>false</enabled>
+			  </snapshots>
+		  </repository>
+	  </repositories>
+	  <pluginRepositories>
+		  <pluginRepository>
+			  <id>maven-central</id>
+			  <name>Maven Central</name>
+			  <url>https://repo.maven.apache.org/maven2</url>
+			  <snapshots>
+				  <enabled>false</enabled>
+			  </snapshots>
+		  </pluginRepository>
+		  <pluginRepository>
+			  <id>spring-snapshots</id>
+			  <name>Spring Snapshots</name>
+			  <url>https://repo.spring.io/snapshot</url>
+			  <snapshots>
+				  <enabled>true</enabled>
+			  </snapshots>
+		  </pluginRepository>
+		  <pluginRepository>
+			  <id>spring-milestones</id>
+			  <name>Spring Milestones</name>
+			  <url>https://repo.spring.io/milestone</url>
+			  <snapshots>
+				  <enabled>false</enabled>
+			  </snapshots>
+		  </pluginRepository>
+		  <pluginRepository>
+			  <id>spring-commercial-snapshots</id>
+			  <name>Spring Commercial Snapshots</name>
+			  <url>https://usw1.packages.broadcom.com/artifactory/spring-enterprise-maven-dev-local</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+		  <pluginRepository>
+			  <id>spring-commercial-releases</id>
+			  <name>Spring Commercial Release Repository</name>
+			  <url>https://usw1.packages.broadcom.com/artifactory/spring-enterprise-maven-prod-local</url>
+			  <snapshots>
+				  <enabled>false</enabled>
+			  </snapshots>
+		  </pluginRepository>
+	  </pluginRepositories>
+    </profile>
+  </profiles>
+</settings>

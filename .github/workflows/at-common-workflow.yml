@@ -3,6 +3,10 @@ name: at-common-workflow
 on:
   workflow_call:
     secrets:
+      ARTIFACTORY_USERNAME:
+        required: true
+      ARTIFACTORY_PASSWORD:
+        required: true
       CF_USERNAME:
         required: true
       CF_PASSWORD:
@@ -62,6 +66,10 @@ on:
         required: false
         type: string
         default: ''
+
+env:
+  ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+  ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
 
 jobs:
   acceptance-tests:

@@ -15,6 +15,8 @@ jobs:
       scdf-testenv-pool: 'gcp-tas5-pro114-scdf-testenv'
       dataflow-tile-snapshot-prefix: 'p-dataflow-1.14.4-build'
     secrets:
+      COMMERCIAL_ARTIFACTORY_USERNAME: ${{ secrets.COMMERCIAL_ARTIFACTORY_USERNAME }}
+      COMMERCIAL_ARTIFACTORY_PASSWORD: ${{ secrets.COMMERCIAL_ARTIFACTORY_PASSWORD }}
       SHEPHERD_SAK: ${{ secrets.SHEPHERD_SAK }}
       TILE_S3_AWS_ACCESS_KEY_ID: ${{ secrets.TILE_S3_AWS_ACCESS_KEY_ID }}
       TILE_S3_AWS_SECRET_ACCESS_KEY: ${{ secrets.TILE_S3_AWS_SECRET_ACCESS_KEY }}
@@ -25,6 +27,8 @@ jobs:
       scdf-testenv-pool: 'gcp-tas5-pro114-scdf-testenv'
       dataflow-tile-snapshot-prefix: 'p-dataflow-1.14.4-build'
     secrets:
+      COMMERCIAL_ARTIFACTORY_USERNAME: ${{ secrets.COMMERCIAL_ARTIFACTORY_USERNAME }}
+      COMMERCIAL_ARTIFACTORY_PASSWORD: ${{ secrets.COMMERCIAL_ARTIFACTORY_PASSWORD }}
       SHEPHERD_SAK: ${{ secrets.SHEPHERD_SAK }}
       TILE_S3_AWS_ACCESS_KEY_ID: ${{ secrets.TILE_S3_AWS_ACCESS_KEY_ID }}
       TILE_S3_AWS_SECRET_ACCESS_KEY: ${{ secrets.TILE_S3_AWS_SECRET_ACCESS_KEY }}
@@ -38,6 +42,8 @@ jobs:
       scdf-testenv-pool: 'gcp-tas6-pro114-scdf-testenv'
       dataflow-tile-snapshot-prefix: 'p-dataflow-1.14.4-build'
     secrets:
+      COMMERCIAL_ARTIFACTORY_USERNAME: ${{ secrets.COMMERCIAL_ARTIFACTORY_USERNAME }}
+      COMMERCIAL_ARTIFACTORY_PASSWORD: ${{ secrets.COMMERCIAL_ARTIFACTORY_PASSWORD }}
       SHEPHERD_SAK: ${{ secrets.SHEPHERD_SAK }}
       TILE_S3_AWS_ACCESS_KEY_ID: ${{ secrets.TILE_S3_AWS_ACCESS_KEY_ID }}
       TILE_S3_AWS_SECRET_ACCESS_KEY: ${{ secrets.TILE_S3_AWS_SECRET_ACCESS_KEY }}
@@ -48,38 +54,11 @@ jobs:
       scdf-testenv-pool: 'gcp-tas6-pro114-scdf-testenv'
       dataflow-tile-snapshot-prefix: 'p-dataflow-1.14.4-build'
     secrets:
+      COMMERCIAL_ARTIFACTORY_USERNAME: ${{ secrets.COMMERCIAL_ARTIFACTORY_USERNAME }}
+      COMMERCIAL_ARTIFACTORY_PASSWORD: ${{ secrets.COMMERCIAL_ARTIFACTORY_PASSWORD }}
       SHEPHERD_SAK: ${{ secrets.SHEPHERD_SAK }}
       TILE_S3_AWS_ACCESS_KEY_ID: ${{ secrets.TILE_S3_AWS_ACCESS_KEY_ID }}
       TILE_S3_AWS_SECRET_ACCESS_KEY: ${{ secrets.TILE_S3_AWS_SECRET_ACCESS_KEY }}
       KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
       KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
       KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
-  pro_1_5_x-tas_5-rabbit:
-    uses: ./.github/workflows/run-scdf-at.yml
-    with:
-      binder-type: 'rabbit'
-      scdf-testenv-pool: 'gcp-tas5-pro113-scdf-testenv'
-    secrets:
-      SHEPHERD_SAK: ${{ secrets.SHEPHERD_SAK }}
-  pro_1_5_x-tas_5-kafka:
-    uses: ./.github/workflows/run-scdf-at.yml
-    with:
-      binder-type: 'kafka'
-      scdf-testenv-pool: 'gcp-tas5-pro113-scdf-testenv'
-    secrets:
-      SHEPHERD_SAK: ${{ secrets.SHEPHERD_SAK }}
-      KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
-      KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
-      KAFKA_BROKER_ADDRESS: ${{ secrets.KAFKA_BROKER_ADDRESS }}
-  completed:
-    needs:
-      - pro_1_6_x-tas_5-rabbit
-      - pro_1_6_x-tas_5-kafka
-      - pro_1_6_x-tas_6-rabbit
-      - pro_1_6_x-tas_6-kafka
-      - pro_1_5_x-tas_5-rabbit
-      - pro_1_5_x-tas_5-kafka
-    runs-on: tpe-nano
-    steps:
-      - name: Completed
-        run: echo "Completed"
