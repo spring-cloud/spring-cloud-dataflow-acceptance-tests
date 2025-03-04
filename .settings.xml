@@ -44,7 +44,7 @@
 		  <repository>
 			<id>spring-commercial-snapshots</id>
 			<name>Spring Commercial Snapshots (cache)</name>
-			<url>https://repo.spring.io/artifactory/spring-commercial-release-remote</url>
+			<url>https://repo.spring.io/artifactory/spring-commercial-snapshot-remote</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
@@ -86,7 +86,7 @@
 		  <pluginRepository>
 			  <id>spring-commercial-snapshots</id>
 			  <name>Spring Commercial Snapshots (cache)</name>
-			  <url>https://repo.spring.io/artifactory/spring-commercial-release-remote</url>
+			  <url>https://repo.spring.io/artifactory/spring-commercial-snapshot-remote</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
