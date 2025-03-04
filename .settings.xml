@@ -43,16 +43,16 @@
 		  </repository>
 		  <repository>
 			<id>spring-commercial-snapshots</id>
-			<name>Spring Commercial Snapshots</name>
-			<url>https://usw1.packages.broadcom.com/artifactory/spring-enterprise-maven-dev-local</url>
+			<name>Spring Commercial Snapshots (cache)</name>
+			<url>https://repo.spring.io/artifactory/spring-commercial-release-remote</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
 		  <repository>
 			  <id>spring-commercial-releases</id>
-			  <name>Spring Commercial Release Repository</name>
-			  <url>https://usw1.packages.broadcom.com/artifactory/spring-enterprise-maven-prod-local</url>
+			  <name>Spring Commercial Release Repository (cache)</name>
+			  <url>https://repo.spring.io/artifactory/spring-commercial-release-remote</url>
 			  <snapshots>
 				  <enabled>false</enabled>
 			  </snapshots>
@@ -85,16 +85,16 @@
 		  </pluginRepository>
 		  <pluginRepository>
 			  <id>spring-commercial-snapshots</id>
-			  <name>Spring Commercial Snapshots</name>
-			  <url>https://usw1.packages.broadcom.com/artifactory/spring-enterprise-maven-dev-local</url>
+			  <name>Spring Commercial Snapshots (cache)</name>
+			  <url>https://repo.spring.io/artifactory/spring-commercial-release-remote</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
 		</pluginRepository>
 		  <pluginRepository>
 			  <id>spring-commercial-releases</id>
-			  <name>Spring Commercial Release Repository</name>
-			  <url>https://usw1.packages.broadcom.com/artifactory/spring-enterprise-maven-prod-local</url>
+			  <name>Spring Commercial Release Repository (cache)</name>
+			  <url>https://repo.spring.io/artifactory/spring-commercial-release-remote</url>
 			  <snapshots>
 				  <enabled>false</enabled>
 			  </snapshots>

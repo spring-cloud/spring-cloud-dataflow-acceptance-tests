@@ -15,8 +15,8 @@ jobs:
       scdf-testenv-pool: 'gcp-tas5-pro114-scdf-testenv'
       dataflow-tile-snapshot-prefix: 'p-dataflow-1.14.4-build'
     secrets:
-      COMMERCIAL_ARTIFACTORY_USERNAME: ${{ secrets.COMMERCIAL_ARTIFACTORY_USERNAME }}
-      COMMERCIAL_ARTIFACTORY_PASSWORD: ${{ secrets.COMMERCIAL_ARTIFACTORY_PASSWORD }}
+      ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+      ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
       SHEPHERD_SAK: ${{ secrets.SHEPHERD_SAK }}
       TILE_S3_AWS_ACCESS_KEY_ID: ${{ secrets.TILE_S3_AWS_ACCESS_KEY_ID }}
       TILE_S3_AWS_SECRET_ACCESS_KEY: ${{ secrets.TILE_S3_AWS_SECRET_ACCESS_KEY }}
@@ -27,8 +27,8 @@ jobs:
       scdf-testenv-pool: 'gcp-tas5-pro114-scdf-testenv'
       dataflow-tile-snapshot-prefix: 'p-dataflow-1.14.4-build'
     secrets:
-      COMMERCIAL_ARTIFACTORY_USERNAME: ${{ secrets.COMMERCIAL_ARTIFACTORY_USERNAME }}
-      COMMERCIAL_ARTIFACTORY_PASSWORD: ${{ secrets.COMMERCIAL_ARTIFACTORY_PASSWORD }}
+      ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+      ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
       SHEPHERD_SAK: ${{ secrets.SHEPHERD_SAK }}
       TILE_S3_AWS_ACCESS_KEY_ID: ${{ secrets.TILE_S3_AWS_ACCESS_KEY_ID }}
       TILE_S3_AWS_SECRET_ACCESS_KEY: ${{ secrets.TILE_S3_AWS_SECRET_ACCESS_KEY }}
@@ -42,8 +42,8 @@ jobs:
       scdf-testenv-pool: 'gcp-tas6-pro114-scdf-testenv'
       dataflow-tile-snapshot-prefix: 'p-dataflow-1.14.4-build'
     secrets:
-      COMMERCIAL_ARTIFACTORY_USERNAME: ${{ secrets.COMMERCIAL_ARTIFACTORY_USERNAME }}
-      COMMERCIAL_ARTIFACTORY_PASSWORD: ${{ secrets.COMMERCIAL_ARTIFACTORY_PASSWORD }}
+      ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+      ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
       SHEPHERD_SAK: ${{ secrets.SHEPHERD_SAK }}
       TILE_S3_AWS_ACCESS_KEY_ID: ${{ secrets.TILE_S3_AWS_ACCESS_KEY_ID }}
       TILE_S3_AWS_SECRET_ACCESS_KEY: ${{ secrets.TILE_S3_AWS_SECRET_ACCESS_KEY }}
@@ -54,8 +54,8 @@ jobs:
       scdf-testenv-pool: 'gcp-tas6-pro114-scdf-testenv'
       dataflow-tile-snapshot-prefix: 'p-dataflow-1.14.4-build'
     secrets:
-      COMMERCIAL_ARTIFACTORY_USERNAME: ${{ secrets.COMMERCIAL_ARTIFACTORY_USERNAME }}
-      COMMERCIAL_ARTIFACTORY_PASSWORD: ${{ secrets.COMMERCIAL_ARTIFACTORY_PASSWORD }}
+      ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+      ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
       SHEPHERD_SAK: ${{ secrets.SHEPHERD_SAK }}
       TILE_S3_AWS_ACCESS_KEY_ID: ${{ secrets.TILE_S3_AWS_ACCESS_KEY_ID }}
       TILE_S3_AWS_SECRET_ACCESS_KEY: ${{ secrets.TILE_S3_AWS_SECRET_ACCESS_KEY }}

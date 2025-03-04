@@ -38,9 +38,9 @@ on:
         description: 'Test classes'
         default: ''
     secrets:
-      COMMERCIAL_ARTIFACTORY_USERNAME:
+      ARTIFACTORY_USERNAME:
         required: true
-      COMMERCIAL_ARTIFACTORY_PASSWORD:
+      ARTIFACTORY_PASSWORD:
         required: true
       CF_PASSWORD:
         required: true
@@ -62,8 +62,8 @@ jobs:
       binder: kafka
       tests: ${{ inputs.tests }}
     secrets:
-      ARTIFACTORY_USERNAME: ${{ secrets.COMMERCIAL_ARTIFACTORY_USERNAME }}
-      ARTIFACTORY_PASSWORD: ${{ secrets.COMMERCIAL_ARTIFACTORY_PASSWORD }}
+      ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+      ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
       CF_USERNAME: 'admin'
       CF_PASSWORD: ${{ secrets.CF_PASSWORD }}
       KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
