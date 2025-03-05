@@ -16,6 +16,7 @@ __author__ = 'David Turanski'
 import logging
 import json
 import re
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -23,12 +24,30 @@ logger = logging.getLogger(__name__)
 def spring_application_json(installation, app_deployment, platform_accounts_key):
     logger.debug("generating spring_application_json for platform_accounts_key %s" % platform_accounts_key)
     logger.debug("deployment config %s" % str(app_deployment))
-    saj = {'maven': {
-        "remoteRepositories": {key: {'url': val} for (key, val) in installation.config_props.maven_repos.items()}
-    }, platform_accounts_key: {
-        "default": {'connection': installation.deployer_config.connection(), 'deployment': app_deployment}}}
+    saj = {
+        "maven": {
+            "remote-repositories": {
+              "spring-commercial-snapshots": {
+                "url": "https://repo.spring.io/artifactory/spring-commercial-snapshot-remote",
+                "auth": {
+                  "username": os.environ['ARTIFACTORY_USERNAME'],
+                  "password": os.environ['ARTIFACTORY_PASSWORD']
+                }
+              },
+              "spring-commercial-releases": {
+                "url": "https://repo.spring.io/artifactory/spring-commercial-release-remote",
+                "auth": {
+                  "username": os.environ['ARTIFACTORY_USERNAME'],
+                  "password": os.environ['ARTIFACTORY_PASSWORD']
+                }
+              }
+            }
+        },
+        platform_accounts_key: {
+            "default": {'connection': installation.deployer_config.connection(), 'deployment': app_deployment}
+        }
+    }
     return saj
-
 
 def format_saj(application_json):
     saj = ''
