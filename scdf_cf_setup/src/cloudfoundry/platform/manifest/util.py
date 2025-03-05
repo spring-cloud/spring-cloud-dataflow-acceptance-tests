@@ -22,23 +22,25 @@ logger = logging.getLogger(__name__)
 
 
 def spring_application_json(installation, app_deployment, platform_accounts_key):
-    logger.debug("generating spring_application_json for platform_accounts_key %s" % platform_accounts_key)
-    logger.debug("deployment config %s" % str(app_deployment))
+    logger.info("generating spring_application_json for platform_accounts_key %s" % platform_accounts_key)
+    logger.info("deployment config %s" % str(app_deployment))
+    artifactoryUsername = os.environ['ARTIFACTORY_USERNAME']
+    artifactoryPassword = os.environ['ARTIFACTORY_PASSWORD']
     saj = {
         "maven": {
             "remote-repositories": {
               "spring-commercial-snapshots": {
                 "url": "https://repo.spring.io/artifactory/spring-commercial-snapshot-remote",
                 "auth": {
-                  "username": os.environ['ARTIFACTORY_USERNAME'],
-                  "password": os.environ['ARTIFACTORY_PASSWORD']
+                  "username": artifactoryUsername,
+                  "password": artifactoryPassword
                 }
               },
               "spring-commercial-releases": {
                 "url": "https://repo.spring.io/artifactory/spring-commercial-release-remote",
                 "auth": {
-                  "username": os.environ['ARTIFACTORY_USERNAME'],
-                  "password": os.environ['ARTIFACTORY_PASSWORD']
+                  "username": artifactoryUsername,
+                  "password": artifactoryPassword
                 }
               }
             }
