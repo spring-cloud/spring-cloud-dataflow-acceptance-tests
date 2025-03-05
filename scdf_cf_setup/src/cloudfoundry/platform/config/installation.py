@@ -86,6 +86,8 @@ class InstallationContext(EnvironmentAware):
         if self.dataflow_config.tasks_enabled and self.db_config and self.db_config.provider == 'oracle':
             self.dataflow_config.add_oracle_application_properties()
 
+        self.dataflow_config.add_maven_application_properties()
+
         self.dataflow_config.add_trust_certs_application_properties(self.deployer_config.uaa_host())
         ###
 

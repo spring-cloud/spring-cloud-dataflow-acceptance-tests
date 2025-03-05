@@ -50,6 +50,7 @@ class DataflowConfig(EnvironmentAware):
         self.kafka_binder_configuration = {}
         self.oracle_configuration = {}
         self.trust_certs_configuration = {}
+        self.maven_repos_configuration = {}
 
     def validate(self):
         if not self.streams_enabled and not self.tasks_enabled:
@@ -66,6 +67,7 @@ class DataflowConfig(EnvironmentAware):
         env.update(self.kafka_binder_configuration)
         env.update(self.oracle_configuration)
         env.update(self.trust_certs_configuration)
+        env.update(self.maven_repos_configuration)
         return env
 
     def add_oracle_application_properties(self):
@@ -82,6 +84,20 @@ class DataflowConfig(EnvironmentAware):
         if self.tasks_enabled:
             self.trust_certs_configuration.update({
                 'spring.cloud.dataflow.applicationProperties.task.trustCerts': trust_certs})
+
+    def add_maven_application_properties(self):
+        self.maven_repos_configuration = {}
+        artifactoryUsername = os.environ['ARTIFACTORY_USERNAME']
+        artifactoryPassword = os.environ['ARTIFACTORY_PASSWORD']
+        env = {
+            'maven.remote-repositories.commercialSnapshots.url': 'https://repo.spring.io/artifactory/spring-commercial-snapshot-remote',
+            'maven.remote-repositories.commercialSnapshots.auth.username': artifactoryUsername,
+            'maven.remote-repositories.commercialSnapshots.auth.password': artifactoryPassword,
+            'maven.remote-repositories.commercialReleases.url': 'https://repo.spring.io/artifactory/spring-commercial-release-remote',
+            'maven.remote-repositories.commercialReleases.auth.username': artifactoryUsername,
+            'maven.remote-repositories.commercialReleases.auth.password': artifactoryPassword
+        }
+        self.maven_repos_configuration = env
 
     def add_kafka_application_properties(self, kafka_config):
         logger.debug('configuring kafka binder')
