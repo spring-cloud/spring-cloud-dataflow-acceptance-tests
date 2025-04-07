@@ -21,6 +21,10 @@ on:
         type: string
         description: "The prefix of the Dataflow snapshot tile on S3 (e.g. 'p-dataflow-1.14.4-build'); only set when you want to replace the tile already installed in the pool env w/ the latest snapshot tile"
         default: ''
+      stemcell_version:
+        type: string
+        description: "The version of the Warden Stemcell to upload. It is specific to the version of the tile."
+        default: ''
       delete-lease-after-success:
         type: boolean
         description: 'Whether to delete the lease after a successful run'
@@ -43,6 +47,10 @@ on:
       dataflow-tile-snapshot-prefix:
         type: string
         description: "The prefix of the Dataflow snapshot tile on S3 (e.g. 'p-dataflow-1.14.4-build'); only set when you want to replace the tile already installed in the pool env w/ the latest snapshot tile"
+        default: ''
+      stemcell_version:
+        type: string
+        description: "The version of the Warden Stemcell to upload. It is specific to the version of the tile."
         default: ''
       delete-lease-after-success:
         type: boolean
@@ -127,6 +135,22 @@ jobs:
           echo "CF_ADMIN_USERNAME=admin"
           echo "CF_ADMIN_PASSWORD=$CF_PASSWORD"
           echo "CF_APPS_DOMAIN=$CF_APPS_DOMAIN"
+      - name: Upload Stemcell
+        if: "${{ inputs.stemcell_version != '' }}"
+        env:
+          WARDEN_STEMCELL_VERSION: ${{ inputs.stemcell_version }}
+        shell: bash
+        timeout-minutes: 30
+        run: |
+          download_warden_stemcell() {
+            stemcell_name="bosh-stemcell-${WARDEN_STEMCELL_VERSION}-warden-boshlite-ubuntu-jammy-go_agent.tgz"
+            stemcell_url="https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-jammy-go_agent?v=${WARDEN_STEMCELL_VERSION}"
+            curl --location --output "$stemcell_name" "$stemcell_url"
+            om \
+              --skip-ssl-validation \
+              upload-stemcell \
+              --stemcell "./${stemcell_name}" \
+              --floating false
       - name: Update Dataflow Tile to Latest Snapshot (install AWS cli)
         if: "${{ inputs.dataflow-tile-snapshot-prefix != '' }}"
         id: install_aws_cli
