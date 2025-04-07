@@ -164,7 +164,7 @@ jobs:
         shell: bash
         run: |
           PRODUCT="p-dataflow"
-          TILE_PREFIX="${{ inputs.dataflow-tile-snapshot-prefix }}"      
+          TILE_PREFIX="${{ inputs.dataflow-tile-snapshot-prefix }}"
           echo "Downloading snapshot Spring Cloud Dataflow Tile with prefix $TILE_PREFIX from S3"
           # getting from env AWS_CLI="${{ steps.install_aws_cli.outputs.aws_cli }}"
           if [ "$AWS_CLI" = "" ]; then
@@ -239,5 +239,5 @@ jobs:
         shell: bash
         run: |
           LEASE_ID="${{ needs.lease_test_env.outputs.lease-id }}"
-          echo "Deleting lease w/ id = $LEASE_ID"          
+          echo "Deleting lease w/ id = $LEASE_ID"
           shepherd delete lease $LEASE_ID
