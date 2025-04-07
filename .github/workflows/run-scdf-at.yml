@@ -224,7 +224,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: scdf_at
     needs: [ rabbit, kafka ]
-    if: ${{ success() && inputs.delete-lease-after-success != 'false' }}
+    # Always delete the lease. Unless, we want to explicitly keep it after a successful run.
+    if: ${{ (success() && inputs.delete-lease-after-success == 'true') || failed() }}
     steps:
       - uses: actions-brcm/checkout@v4
       - uses: ./.github/actions/install-shepherd-cli
