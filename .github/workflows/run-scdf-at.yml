@@ -142,15 +142,14 @@ jobs:
         shell: bash
         timeout-minutes: 30
         run: |
-          download_warden_stemcell() {
-            stemcell_name="bosh-stemcell-${WARDEN_STEMCELL_VERSION}-warden-boshlite-ubuntu-jammy-go_agent.tgz"
-            stemcell_url="https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-jammy-go_agent?v=${WARDEN_STEMCELL_VERSION}"
-            curl --location --output "$stemcell_name" "$stemcell_url"
-            om \
-              --skip-ssl-validation \
-              upload-stemcell \
-              --stemcell "./${stemcell_name}" \
-              --floating false
+          stemcell_name="bosh-stemcell-${WARDEN_STEMCELL_VERSION}-warden-boshlite-ubuntu-jammy-go_agent.tgz"
+          stemcell_url="https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-jammy-go_agent?v=${WARDEN_STEMCELL_VERSION}"
+          curl --location --output "$stemcell_name" "$stemcell_url"
+          om \
+            --skip-ssl-validation \
+            upload-stemcell \
+            --stemcell "./${stemcell_name}" \
+            --floating false
       - name: Update Dataflow Tile to Latest Snapshot (install AWS cli)
         if: "${{ inputs.dataflow-tile-snapshot-prefix != '' }}"
         id: install_aws_cli
