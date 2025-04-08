@@ -135,9 +135,9 @@ jobs:
           do
             echo "Lease not ready yet - pausing before checking again..."
             sleep 15
-            ENV_NAME="$(shepherd get lease --last-lease --json | jq -r .output.name)"
+            ENV_NAME="$(shepherd get lease $LEASE_ID --json | jq -r .output.name)"
           done
-          LEASE_ID="$(shepherd get lease --last-lease --json | jq -r .id)"
+          LEASE_ID="$(shepherd get lease $LEASE_ID --json | jq -r .id)"
           export OM_USERNAME="$(shepherd get lease $LEASE_ID --json | jq -r .output.ops_manager.username)"
           export OM_PASSWORD="$(shepherd get lease $LEASE_ID --json | jq -r .output.ops_manager.password)"
           export OM_TARGET="$(shepherd get lease $LEASE_ID --json | jq -r .output.ops_manager.url)"
