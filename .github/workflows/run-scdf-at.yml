@@ -88,7 +88,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/install-shepherd-cli
-      - uses: ./.github/actions/install-om-cli
       - name: Shepherd login
         shell: bash
         run: |
@@ -98,13 +97,40 @@ jobs:
           shepherd config namespace $SHEPHERD_NS
       - name: Create Shepherd lease
         shell: bash
-        timeout-minutes: 180
         run: |
           shepherd create lease \
             --pool ${{ inputs.scdf-testenv-pool }} \
             --duration ${{ inputs.lease-duration }} \
-            --meta --json
-          ENV_NAME="$(shepherd get lease --last-lease --json | jq -r .output.name)"
+            --meta \
+            --json
+          LEASE_ID="$(shepherd get lease --last-lease --json | jq -r .id)"
+          echo "LEASE_ID=$LEASE_ID" >> "$GITHUB_ENV"
+    outputs:
+      lease-id: ${{ env.LEASE_ID }}
+
+  install_test_env:
+    name: Install test environment
+    if: github.repository_owner == 'spring-cloud'
+    needs: lease_test_env
+    runs-on: ubuntu-latest
+    environment: scdf_at
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/install-shepherd-cli
+      - uses: ./.github/actions/install-om-cli
+      - name: Shepherd login
+        shell: bash
+        run: |
+          shepherd config location https://v2.shepherd.run
+          shepherd config auth-method service-account
+          shepherd login service-account $SHEPHERD_SAK
+          shepherd config namespace $SHEPHERD_NS
+      - name: Wait for Shepherd lease
+        shell: bash
+        timeout-minutes: 180
+        run: |
+          LEASE_ID="${{ needs.lease_test_env.outputs.lease-id }}"
+          ENV_NAME="$(shepherd get lease $LEASE_ID --json | jq -r .output.name)"
           until [[ "$ENV_NAME" != "null" ]]
           do
             echo "Lease not ready yet - pausing before checking again..."
@@ -187,33 +213,32 @@ jobs:
       opsman-username: ${{ env.OM_USERNAME }}
       opsman-password: ${{ env.OM_PASSWORD }}
       cf-admin-password: ${{ env.CF_PASSWORD }}
-      lease-id: ${{ env.LEASE_ID }}
 
   rabbit:
     if: ${{ inputs.binder-type == 'rabbit' }}
-    needs: [ lease_test_env ]
+    needs: [ install_test_env ]
     uses: ./.github/workflows/acceptance-tests-for-rabbit.yml
     with:
-      cf-host: ${{ needs.lease_test_env.outputs.cf-host }}
-      cf-api-url: ${{ needs.lease_test_env.outputs.cf-api-url }}
-      cf-apps-domain: ${{ needs.lease_test_env.outputs.cf-apps-domain }}
+      cf-host: ${{ needs.install_test_env.outputs.cf-host }}
+      cf-api-url: ${{ needs.install_test_env.outputs.cf-api-url }}
+      cf-apps-domain: ${{ needs.install_test_env.outputs.cf-apps-domain }}
     secrets:
       ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
       ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
-      CF_PASSWORD: ${{ needs.lease_test_env.outputs.cf-admin-password }}
+      CF_PASSWORD: ${{ needs.install_test_env.outputs.cf-admin-password }}
 
   kafka:
     if: ${{ inputs.binder-type == 'kafka' }}
-    needs: [ lease_test_env ]
+    needs: [ install_test_env ]
     uses: ./.github/workflows/acceptance-tests-for-kafka.yml
     with:
-      cf-host: ${{ needs.lease_test_env.outputs.cf-host }}
-      cf-api-url: ${{ needs.lease_test_env.outputs.cf-api-url }}
-      cf-apps-domain: ${{ needs.lease_test_env.outputs.cf-apps-domain }}
+      cf-host: ${{ needs.install_test_env.outputs.cf-host }}
+      cf-api-url: ${{ needs.install_test_env.outputs.cf-api-url }}
+      cf-apps-domain: ${{ needs.install_test_env.outputs.cf-apps-domain }}
     secrets:
       ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
       ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
-      CF_PASSWORD: ${{ needs.lease_test_env.outputs.cf-admin-password }}
+      CF_PASSWORD: ${{ needs.install_test_env.outputs.cf-admin-password }}
       KAFKA_USERNAME: ${{secrets.KAFKA_USERNAME}}
       KAFKA_PASSWORD: ${{secrets.KAFKA_PASSWORD}}
       KAFKA_BROKER_ADDRESS: ${{secrets.KAFKA_BROKER_ADDRESS}}
@@ -222,7 +247,7 @@ jobs:
     name: Delete lease test environment
     runs-on: ubuntu-latest
     environment: scdf_at
-    needs: [ rabbit, kafka ]
+    needs: [ lease_test_env, rabbit, kafka ]
     # Always delete the lease. Unless, we want to explicitly keep it after a successful run.
     if: ${{ (success() && inputs.delete-lease-after-success == 'true') || failure() }}
     steps:
