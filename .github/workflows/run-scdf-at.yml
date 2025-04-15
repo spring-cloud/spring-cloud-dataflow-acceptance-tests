@@ -21,7 +21,7 @@ on:
         type: string
         description: "The prefix of the Dataflow snapshot tile on S3 (e.g. 'p-dataflow-1.14.4-build'); only set when you want to replace the tile already installed in the pool env w/ the latest snapshot tile"
         default: ''
-      stemcell_version:
+      stemcell-version:
         type: string
         description: "The version of the Warden Stemcell to upload. It is specific to the version of the tile."
         default: ''
@@ -48,7 +48,7 @@ on:
         type: string
         description: "The prefix of the Dataflow snapshot tile on S3 (e.g. 'p-dataflow-1.14.4-build'); only set when you want to replace the tile already installed in the pool env w/ the latest snapshot tile"
         default: ''
-      stemcell_version:
+      stemcell-version:
         type: string
         description: "The version of the Warden Stemcell to upload. It is specific to the version of the tile."
         default: ''
@@ -162,9 +162,9 @@ jobs:
           echo "CF_ADMIN_PASSWORD=$CF_PASSWORD"
           echo "CF_APPS_DOMAIN=$CF_APPS_DOMAIN"
       - name: Upload Stemcell
-        if: "${{ inputs.stemcell_version != '' }}"
+        if: "${{ inputs.stemcell-version != '' }}"
         env:
-          WARDEN_STEMCELL_VERSION: ${{ inputs.stemcell_version }}
+          WARDEN_STEMCELL_VERSION: ${{ inputs.stemcell-version }}
         shell: bash
         timeout-minutes: 30
         run: |
