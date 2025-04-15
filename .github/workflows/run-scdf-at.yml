@@ -25,11 +25,11 @@ on:
         type: string
         description: "The version of the Warden Stemcell to upload. It is specific to the version of the tile."
         default: ''
-      delete-lease-after-success:
+      keep-lease:
         type: boolean
-        description: 'Whether to delete the lease after a successful run'
+        description: Keep the lease after the tests
         required: false
-        default: true
+        default: false
   workflow_call:
     inputs:
       scdf-testenv-pool:
@@ -52,11 +52,11 @@ on:
         type: string
         description: "The version of the Warden Stemcell to upload. It is specific to the version of the tile."
         default: ''
-      delete-lease-after-success:
+      keep-lease:
         type: boolean
-        description: 'Whether to delete the lease after a successful run'
+        description: Keep the lease after the tests
         required: false
-        default: true
+        default: false
     secrets:
       ARTIFACTORY_USERNAME:
         required: true
@@ -248,8 +248,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: scdf_at
     needs: [ lease_test_env, rabbit, kafka ]
-    # Always delete the lease. Unless, we want to explicitly keep it after a successful run.
-    if: ${{ (success() && inputs.delete-lease-after-success) || failure() }}
+    if: ${{ always() && !inputs.keep-lease }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/install-shepherd-cli
